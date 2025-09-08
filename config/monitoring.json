@@ -1,0 +1,57 @@
+{
+  "thresholds": {
+    "cpu": 80,
+    "memory": 85,
+    "diskSpace": 90,
+    "responseTime": 5000,
+    "errorRate": 5,
+    "agentFailures": 3,
+    "slackResponseTime": 2000,
+    "githubApiCalls": 4500
+  },
+  "collectInterval": 60000,
+  "retentionPeriod": 604800000,
+  "alerting": {
+    "enabled": true,
+    "channels": {
+      "slack": true,
+      "email": false,
+      "webhook": false
+    },
+    "escalation": {
+      "enabled": true,
+      "levels": [
+        { "time": 300000, "action": "notify_team" },
+        { "time": 900000, "action": "notify_admin" },
+        { "time": 1800000, "action": "create_incident" }
+      ]
+    }
+  },
+  "metrics": {
+    "system": {
+      "enabled": true,
+      "interval": 60000
+    },
+    "agents": {
+      "enabled": true,
+      "interval": 60000
+    },
+    "database": {
+      "enabled": true,
+      "interval": 120000
+    },
+    "slack": {
+      "enabled": true,
+      "interval": 60000
+    },
+    "github": {
+      "enabled": true,
+      "interval": 60000
+    }
+  },
+  "dashboards": {
+    "enabled": true,
+    "port": 3001,
+    "updateInterval": 30000
+  }
+}

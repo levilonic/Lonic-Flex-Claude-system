@@ -1,0 +1,200 @@
+version: '3.8'
+
+services:
+  # Main application
+  lonicflex:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_PATH=/app/database/agents.db
+      - LOG_LEVEL=info
+    volumes:
+      - ./database:/app/database
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+      - ./uploads:/app/uploads
+    depends_on:
+      - redis
+      - monitoring
+    networks:
+      - lonicflex-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - lonicflex-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Monitoring dashboard
+  monitoring:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    command: ["npm", "run", "demo-dashboard"]
+    depends_on:
+      - redis
+    networks:
+      - lonicflex-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx load balancer and reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - lonicflex
+      - monitoring
+    networks:
+      - lonicflex-network
+    restart: unless-stopped
+
+  # Database backup service
+  backup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - BACKUP_SCHEDULE=0 3 * * *  # Daily at 3 AM
+    volumes:
+      - ./database:/app/database
+      - ./backups:/app/backups
+    command: ["npm", "run", "demo-backup"]
+    networks:
+      - lonicflex-network
+    restart: unless-stopped
+
+  # Security scanner service
+  security:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - SECURITY_SCAN_SCHEDULE=0 2 * * *  # Daily at 2 AM
+    volumes:
+      - .:/app/scan-target
+      - ./security-reports:/app/security-reports
+    command: ["npm", "run", "demo-security-scanner"]
+    networks:
+      - lonicflex-network
+    restart: "no"  # Run as scheduled job
+
+  # Performance optimizer
+  performance:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - CLUSTERING_ENABLED=true
+    volumes:
+      - ./logs:/app/logs
+    command: ["npm", "run", "demo-performance"]
+    depends_on:
+      - redis
+    networks:
+      - lonicflex-network
+    restart: unless-stopped
+
+  # Log aggregation
+  loki:
+    image: grafana/loki:2.9.0
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki:/etc/loki
+      - loki-data:/tmp/loki
+    networks:
+      - lonicflex-network
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+
+  # Metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - lonicflex-network
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  # Grafana dashboards
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - lonicflex-network
+    restart: unless-stopped
+
+networks:
+  lonicflex-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  loki-data:
+  prometheus-data:
+  grafana-data:

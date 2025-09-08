@@ -1,0 +1,54 @@
+[
+  {
+    "archiveId": "archive_1757345755435_y5ykrt",
+    "timestamp": "2025-09-08T15:35:55.435Z",
+    "reason": "pre-cleanup",
+    "originalSize": 444398,
+    "processedSize": 65288,
+    "isCompressed": true,
+    "compressionRatio": 0.11,
+    "checksum": "225eb77c",
+    "contentType": "workflow_xml",
+    "tags": [
+      "workflow_context",
+      "simulation_step_1",
+      "simulation_step_2",
+      "simulation_step_3",
+      "simulation_step_4",
+      "simulation_step_5",
+      "simulation_step_6",
+      "simulation_step_7",
+      "simulation_step_8",
+      "simulation_step_9"
+    ],
+    "originalTokens": 111100,
+    "originalPercentage": 55.55,
+    "cleanupType": "standard"
+  },
+  {
+    "archiveId": "archive_1757345839338_q24qt",
+    "timestamp": "2025-09-08T15:37:19.338Z",
+    "reason": "pre-cleanup",
+    "originalSize": 1540075,
+    "processedSize": 226320,
+    "isCompressed": true,
+    "compressionRatio": 0.11,
+    "checksum": "-3abed00c",
+    "contentType": "workflow_xml",
+    "tags": [
+      "workflow_context",
+      "simulation_step_1",
+      "simulation_step_2",
+      "simulation_step_3",
+      "simulation_step_4",
+      "simulation_step_5",
+      "simulation_step_6",
+      "simulation_step_7",
+      "simulation_step_8",
+      "simulation_step_9"
+    ],
+    "originalTokens": 385019,
+    "originalPercentage": 192.5095,
+    "cleanupType": "standard"
+  }
+]

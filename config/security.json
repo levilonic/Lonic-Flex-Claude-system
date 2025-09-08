@@ -1,0 +1,103 @@
+{
+  "enabled": true,
+  "severity": "medium",
+  "scanTypes": ["dependency", "code", "configuration"],
+  "outputFormat": "json",
+  "reportPath": "./security-reports",
+  "scheduleScans": {
+    "enabled": true,
+    "frequency": "daily",
+    "time": "02:00"
+  },
+  "excludePatterns": [
+    "node_modules",
+    ".git",
+    "logs",
+    "temp",
+    "dist",
+    "build",
+    ".cache",
+    "coverage"
+  ],
+  "scanners": {
+    "dependency": {
+      "enabled": true,
+      "severity": ["moderate", "high", "critical"],
+      "autoFix": false,
+      "includeDevDependencies": true
+    },
+    "code": {
+      "enabled": true,
+      "rules": {
+        "hardcodedSecrets": true,
+        "sqlInjection": true,
+        "xss": true,
+        "pathTraversal": true,
+        "bufferOverflow": true,
+        "unsafeEval": true
+      },
+      "extensions": [".js", ".ts", ".jsx", ".tsx"]
+    },
+    "container": {
+      "enabled": false,
+      "severity": ["MEDIUM", "HIGH", "CRITICAL"],
+      "scanImages": ["node:18", "alpine:latest"],
+      "ignoreCVEs": []
+    },
+    "configuration": {
+      "enabled": true,
+      "checkFiles": [".env*", "*.config.js", "*.json", "*.yml", "*.yaml"],
+      "patterns": {
+        "hardcodedPassword": {
+          "severity": "critical",
+          "regex": "password\\s*=\\s*[\"'].*[\"']"
+        },
+        "hardcodedApiKey": {
+          "severity": "high",
+          "regex": "api[_-]?key\\s*=\\s*[\"'].*[\"']"
+        },
+        "hardcodedSecret": {
+          "severity": "high",
+          "regex": "secret\\s*=\\s*[\"'].*[\"']"
+        },
+        "hardcodedToken": {
+          "severity": "high",
+          "regex": "token\\s*=\\s*[\"'].*[\"']"
+        },
+        "databaseUrl": {
+          "severity": "medium",
+          "regex": "database.*url\\s*=\\s*[\"'].*[\"']"
+        }
+      }
+    }
+  },
+  "reporting": {
+    "formats": ["json", "html"],
+    "includeDetails": true,
+    "sendAlerts": true,
+    "alertThreshold": {
+      "critical": 1,
+      "high": 3,
+      "medium": 10
+    }
+  },
+  "integration": {
+    "slack": {
+      "enabled": true,
+      "channel": "#security-alerts",
+      "webhook": "${SLACK_SECURITY_WEBHOOK}"
+    },
+    "github": {
+      "enabled": true,
+      "createIssues": false,
+      "updatePRs": true
+    },
+    "webhook": {
+      "enabled": false,
+      "url": "${SECURITY_WEBHOOK_URL}",
+      "headers": {
+        "Authorization": "Bearer ${SECURITY_API_KEY}"
+      }
+    }
+  }
+}

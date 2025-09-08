@@ -1,0 +1,2376 @@
+{
+  "id": "alert_1757030427085",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.93817015836358,
+    "threshold": 85
+  },
+  "timestamp": 1757030427085,
+  "status": "active"
+}
+{
+  "id": "alert_1757030487086",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.25366009567799,
+    "threshold": 85
+  },
+  "timestamp": 1757030487086,
+  "status": "active"
+}
+{
+  "id": "alert_1757030487087",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757030487087,
+  "status": "active"
+}
+{
+  "id": "alert_1757030547096",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.70994772764764,
+    "threshold": 85
+  },
+  "timestamp": 1757030547096,
+  "status": "active"
+}
+{
+  "id": "alert_1757030607100",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 92.02724193747937,
+    "threshold": 85
+  },
+  "timestamp": 1757030607100,
+  "status": "active"
+}
+{
+  "id": "alert_1757030607100",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757030607100,
+  "status": "active"
+}
+{
+  "id": "alert_1757030667114",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 92.48327181623227,
+    "threshold": 85
+  },
+  "timestamp": 1757030667114,
+  "status": "active"
+}
+{
+  "id": "alert_1757030667115",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757030667115,
+  "status": "active"
+}
+{
+  "id": "alert_1757030727116",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 92.940268269548,
+    "threshold": 85
+  },
+  "timestamp": 1757030727116,
+  "status": "active"
+}
+{
+  "id": "alert_1757030787119",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 93.25749804107555,
+    "threshold": 85
+  },
+  "timestamp": 1757030787119,
+  "status": "active"
+}
+{
+  "id": "alert_1757030787120",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757030787120,
+  "status": "active"
+}
+{
+  "id": "alert_1757030847132",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.23277435252392,
+    "threshold": 85
+  },
+  "timestamp": 1757030847132,
+  "status": "active"
+}
+{
+  "id": "alert_1757030847133",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757030847133,
+  "status": "active"
+}
+{
+  "id": "alert_1757030907140",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.68951305262289,
+    "threshold": 85
+  },
+  "timestamp": 1757030907140,
+  "status": "active"
+}
+{
+  "id": "alert_1757030907141",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757030907141,
+  "status": "active"
+}
+{
+  "id": "alert_1757030967141",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.14715388898054,
+    "threshold": 85
+  },
+  "timestamp": 1757030967141,
+  "status": "active"
+}
+{
+  "id": "alert_1757030967142",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757030967142,
+  "status": "active"
+}
+{
+  "id": "alert_1757031027148",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.60344152095017,
+    "threshold": 85
+  },
+  "timestamp": 1757031027148,
+  "status": "active"
+}
+{
+  "id": "alert_1757031027149",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757031027149,
+  "status": "active"
+}
+{
+  "id": "alert_1757031087163",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.0605024125701,
+    "threshold": 85
+  },
+  "timestamp": 1757031087163,
+  "status": "active"
+}
+{
+  "id": "alert_1757031087164",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757031087164,
+  "status": "active"
+}
+{
+  "id": "alert_1757031147167",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.18589711227787,
+    "threshold": 85
+  },
+  "timestamp": 1757031147167,
+  "status": "active"
+}
+{
+  "id": "alert_1757031207177",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.49486318659127,
+    "threshold": 85
+  },
+  "timestamp": 1757031207177,
+  "status": "active"
+}
+{
+  "id": "alert_1757031267185",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.80382926090469,
+    "threshold": 85
+  },
+  "timestamp": 1757031267185,
+  "status": "active"
+}
+{
+  "id": "alert_1757031327192",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.11456229806139,
+    "threshold": 85
+  },
+  "timestamp": 1757031327192,
+  "status": "active"
+}
+{
+  "id": "alert_1757031387206",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.42397011308563,
+    "threshold": 85
+  },
+  "timestamp": 1757031387206,
+  "status": "active"
+}
+{
+  "id": "alert_1757031447217",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.73293618739902,
+    "threshold": 85
+  },
+  "timestamp": 1757031447217,
+  "status": "active"
+}
+{
+  "id": "alert_1757031447218",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757031447218,
+  "status": "active"
+}
+{
+  "id": "alert_1757031507219",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.18023021001615,
+    "threshold": 85
+  },
+  "timestamp": 1757031507219,
+  "status": "active"
+}
+{
+  "id": "alert_1757031507220",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757031507220,
+  "status": "active"
+}
+{
+  "id": "alert_1757031567227",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.62929119547658,
+    "threshold": 85
+  },
+  "timestamp": 1757031567227,
+  "status": "active"
+}
+{
+  "id": "alert_1757031567228",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757031567228,
+  "status": "active"
+}
+{
+  "id": "alert_1757031627232",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.07614347738287,
+    "threshold": 85
+  },
+  "timestamp": 1757031627232,
+  "status": "active"
+}
+{
+  "id": "alert_1757031687243",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.38536197495961,
+    "threshold": 85
+  },
+  "timestamp": 1757031687243,
+  "status": "active"
+}
+{
+  "id": "alert_1757031747245",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.70562399030695,
+    "threshold": 85
+  },
+  "timestamp": 1757031747245,
+  "status": "active"
+}
+{
+  "id": "alert_1757031747246",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757031747246,
+  "status": "active"
+}
+{
+  "id": "alert_1757031807255",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.25441740710824,
+    "threshold": 85
+  },
+  "timestamp": 1757031807255,
+  "status": "active"
+}
+{
+  "id": "alert_1757031867265",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.56338348142165,
+    "threshold": 85
+  },
+  "timestamp": 1757031867265,
+  "status": "active"
+}
+{
+  "id": "alert_1757031927280",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.87411651857835,
+    "threshold": 85
+  },
+  "timestamp": 1757031927280,
+  "status": "active"
+}
+{
+  "id": "alert_1757031987294",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.18308259289176,
+    "threshold": 85
+  },
+  "timestamp": 1757031987294,
+  "status": "active"
+}
+{
+  "id": "alert_1757032047304",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.49236419628433,
+    "threshold": 85
+  },
+  "timestamp": 1757032047304,
+  "status": "active"
+}
+{
+  "id": "alert_1757032107305",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.80139337641357,
+    "threshold": 85
+  },
+  "timestamp": 1757032107305,
+  "status": "active"
+}
+{
+  "id": "alert_1757032167308",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.11212641357028,
+    "threshold": 85
+  },
+  "timestamp": 1757032167308,
+  "status": "active"
+}
+{
+  "id": "alert_1757032227310",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.42109248788368,
+    "threshold": 85
+  },
+  "timestamp": 1757032227310,
+  "status": "active"
+}
+{
+  "id": "alert_1757032227310",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757032227310,
+  "status": "active"
+}
+{
+  "id": "alert_1757032287317",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.86813408723748,
+    "threshold": 85
+  },
+  "timestamp": 1757032287317,
+  "status": "active"
+}
+{
+  "id": "alert_1757032287317",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757032287317,
+  "status": "active"
+}
+{
+  "id": "alert_1757032347331",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.31694264943457,
+    "threshold": 85
+  },
+  "timestamp": 1757032347331,
+  "status": "active"
+}
+{
+  "id": "alert_1757032407332",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.62609804119548,
+    "threshold": 85
+  },
+  "timestamp": 1757032407332,
+  "status": "active"
+}
+{
+  "id": "alert_1757032467342",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.9350641155089,
+    "threshold": 85
+  },
+  "timestamp": 1757032467342,
+  "status": "active"
+}
+{
+  "id": "alert_1757032527350",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.24396708400646,
+    "threshold": 85
+  },
+  "timestamp": 1757032527350,
+  "status": "active"
+}
+{
+  "id": "alert_1757032587363",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.55470012116317,
+    "threshold": 85
+  },
+  "timestamp": 1757032587363,
+  "status": "active"
+}
+{
+  "id": "alert_1757032647376",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.86366619547658,
+    "threshold": 85
+  },
+  "timestamp": 1757032647376,
+  "status": "active"
+}
+{
+  "id": "alert_1757032707386",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.17263226978999,
+    "threshold": 85
+  },
+  "timestamp": 1757032707386,
+  "status": "active"
+}
+{
+  "id": "alert_1757032707386",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757032707386,
+  "status": "active"
+}
+{
+  "id": "alert_1757032767391",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.6213146203554,
+    "threshold": 85
+  },
+  "timestamp": 1757032767391,
+  "status": "active"
+}
+{
+  "id": "alert_1757032827404",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.93047001211632,
+    "threshold": 85
+  },
+  "timestamp": 1757032827404,
+  "status": "active"
+}
+{
+  "id": "alert_1757032887414",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757032887414,
+  "status": "active"
+}
+{
+  "id": "alert_1757033007429",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757033007429,
+  "status": "active"
+}
+{
+  "id": "alert_1757033067436",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.17461271367522,
+    "threshold": 85
+  },
+  "timestamp": 1757033067436,
+  "status": "active"
+}
+{
+  "id": "alert_1757033067437",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757033067437,
+  "status": "active"
+}
+{
+  "id": "alert_1757033127441",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.61284474912947,
+    "threshold": 85
+  },
+  "timestamp": 1757033127441,
+  "status": "active"
+}
+{
+  "id": "alert_1757033127441",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757033127441,
+  "status": "active"
+}
+{
+  "id": "alert_1757033187448",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.05256064023425,
+    "threshold": 85
+  },
+  "timestamp": 1757033187448,
+  "status": "active"
+}
+{
+  "id": "alert_1757033187449",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757033187449,
+  "status": "active"
+}
+{
+  "id": "alert_1757033247457",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.4903598844571,
+    "threshold": 85
+  },
+  "timestamp": 1757033247457,
+  "status": "active"
+}
+{
+  "id": "alert_1757033307468",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.7930046098449,
+    "threshold": 85
+  },
+  "timestamp": 1757033307468,
+  "status": "active"
+}
+{
+  "id": "alert_1757033367478",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.09564933523268,
+    "threshold": 85
+  },
+  "timestamp": 1757033367478,
+  "status": "active"
+}
+{
+  "id": "alert_1757033427492",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.40033436213992,
+    "threshold": 85
+  },
+  "timestamp": 1757033427492,
+  "status": "active"
+}
+{
+  "id": "alert_1757033427493",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757033427493,
+  "status": "active"
+}
+{
+  "id": "alert_1757033487500",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.83856639759418,
+    "threshold": 85
+  },
+  "timestamp": 1757033487500,
+  "status": "active"
+}
+{
+  "id": "alert_1757033547508",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.14362238841406,
+    "threshold": 85
+  },
+  "timestamp": 1757033547508,
+  "status": "active"
+}
+{
+  "id": "alert_1757033547509",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757033547509,
+  "status": "active"
+}
+{
+  "id": "alert_1757033607512",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.5832146248813,
+    "threshold": 85
+  },
+  "timestamp": 1757033607512,
+  "status": "active"
+}
+{
+  "id": "alert_1757033667526",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.88585935026907,
+    "threshold": 85
+  },
+  "timestamp": 1757033667526,
+  "status": "active"
+}
+{
+  "id": "alert_1757033727532",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.18856590297563,
+    "threshold": 85
+  },
+  "timestamp": 1757033727532,
+  "status": "active"
+}
+{
+  "id": "alert_1757033727533",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757033727533,
+  "status": "active"
+}
+{
+  "id": "alert_1757033787543",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.62859093067426,
+    "threshold": 85
+  },
+  "timestamp": 1757033787543,
+  "status": "active"
+}
+{
+  "id": "alert_1757033847551",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.9315447926559,
+    "threshold": 85
+  },
+  "timestamp": 1757033847551,
+  "status": "active"
+}
+{
+  "id": "alert_1757033907556",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.35376355254827,
+    "threshold": 85
+  },
+  "timestamp": 1757033907556,
+  "status": "active"
+}
+{
+  "id": "alert_1757033967562",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757033967562,
+  "status": "active"
+}
+{
+  "id": "alert_1757034087583",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.0793986427667,
+    "threshold": 85
+  },
+  "timestamp": 1757034087583,
+  "status": "active"
+}
+{
+  "id": "alert_1757034147586",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.38185788619816,
+    "threshold": 85
+  },
+  "timestamp": 1757034147586,
+  "status": "active"
+}
+{
+  "id": "alert_1757034207590",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.68456443890472,
+    "threshold": 85
+  },
+  "timestamp": 1757034207590,
+  "status": "active"
+}
+{
+  "id": "alert_1757034267593",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.98906398385566,
+    "threshold": 85
+  },
+  "timestamp": 1757034267593,
+  "status": "active"
+}
+{
+  "id": "alert_1757034267593",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757034267593,
+  "status": "active"
+}
+{
+  "id": "alert_1757034327601",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.43854859132637,
+    "threshold": 85
+  },
+  "timestamp": 1757034327601,
+  "status": "active"
+}
+{
+  "id": "alert_1757034387613",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.74125514403292,
+    "threshold": 85
+  },
+  "timestamp": 1757034387613,
+  "status": "active"
+}
+{
+  "id": "alert_1757034447621",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.04396169673947,
+    "threshold": 85
+  },
+  "timestamp": 1757034447621,
+  "status": "active"
+}
+{
+  "id": "alert_1757034447621",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757034447621,
+  "status": "active"
+}
+{
+  "id": "alert_1757034507634",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.48392489711934,
+    "threshold": 85
+  },
+  "timestamp": 1757034507634,
+  "status": "active"
+}
+{
+  "id": "alert_1757034507635",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757034507635,
+  "status": "active"
+}
+{
+  "id": "alert_1757034567637",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.9221569325736,
+    "threshold": 85
+  },
+  "timestamp": 1757034567637,
+  "status": "active"
+}
+{
+  "id": "alert_1757034567638",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757034567638,
+  "status": "active"
+}
+{
+  "id": "alert_1757034627645",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.36082175925925,
+    "threshold": 85
+  },
+  "timestamp": 1757034627645,
+  "status": "active"
+}
+{
+  "id": "alert_1757034627646",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757034627646,
+  "status": "active"
+}
+{
+  "id": "alert_1757034687654",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.80035216840773,
+    "threshold": 85
+  },
+  "timestamp": 1757034687654,
+  "status": "active"
+}
+{
+  "id": "alert_1757034687655",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757034687655,
+  "status": "active"
+}
+{
+  "id": "alert_1757034747655",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.23815141263059,
+    "threshold": 85
+  },
+  "timestamp": 1757034747655,
+  "status": "active"
+}
+{
+  "id": "alert_1757034807670",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.54085796533712,
+    "threshold": 85
+  },
+  "timestamp": 1757034807670,
+  "status": "active"
+}
+{
+  "id": "alert_1757034867678",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.8452956829693,
+    "threshold": 85
+  },
+  "timestamp": 1757034867678,
+  "status": "active"
+}
+{
+  "id": "alert_1757034927688",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.14794040835707,
+    "threshold": 85
+  },
+  "timestamp": 1757034927688,
+  "status": "active"
+}
+{
+  "id": "alert_1757034987696",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.4634452160494,
+    "threshold": 85
+  },
+  "timestamp": 1757034987696,
+  "status": "active"
+}
+{
+  "id": "alert_1757034987696",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757034987696,
+  "status": "active"
+}
+{
+  "id": "alert_1757035167726",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.09269151630264,
+    "threshold": 85
+  },
+  "timestamp": 1757035167726,
+  "status": "active"
+}
+{
+  "id": "alert_1757035227737",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.3951507597341,
+    "threshold": 85
+  },
+  "timestamp": 1757035227737,
+  "status": "active"
+}
+{
+  "id": "alert_1757035287751",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.69754817584678,
+    "threshold": 85
+  },
+  "timestamp": 1757035287751,
+  "status": "active"
+}
+{
+  "id": "alert_1757035287752",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757035287752,
+  "status": "active"
+}
+{
+  "id": "alert_1757035347757",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.13701675767648,
+    "threshold": 85
+  },
+  "timestamp": 1757035347757,
+  "status": "active"
+}
+{
+  "id": "alert_1757035407767",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.43910503719532,
+    "threshold": 85
+  },
+  "timestamp": 1757035407767,
+  "status": "active"
+}
+{
+  "id": "alert_1757035407767",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757035407767,
+  "status": "active"
+}
+{
+  "id": "alert_1757035467769",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.87671879946186,
+    "threshold": 85
+  },
+  "timestamp": 1757035467769,
+  "status": "active"
+}
+{
+  "id": "alert_1757035467770",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757035467770,
+  "status": "active"
+}
+{
+  "id": "alert_1757035527773",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.31618738129154,
+    "threshold": 85
+  },
+  "timestamp": 1757035527773,
+  "status": "active"
+}
+{
+  "id": "alert_1757035587786",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.61864662472301,
+    "threshold": 85
+  },
+  "timestamp": 1757035587786,
+  "status": "active"
+}
+{
+  "id": "alert_1757035647799",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.92110586815448,
+    "threshold": 85
+  },
+  "timestamp": 1757035647799,
+  "status": "active"
+}
+{
+  "id": "alert_1757035707806",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.22529627651156,
+    "threshold": 85
+  },
+  "timestamp": 1757035707806,
+  "status": "active"
+}
+{
+  "id": "alert_1757035707807",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757035707807,
+  "status": "active"
+}
+{
+  "id": "alert_1757035767814",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.67947976020892,
+    "threshold": 85
+  },
+  "timestamp": 1757035767814,
+  "status": "active"
+}
+{
+  "id": "alert_1757035767815",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757035767815,
+  "status": "active"
+}
+{
+  "id": "alert_1757035827818",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.11678438588162,
+    "threshold": 85
+  },
+  "timestamp": 1757035827818,
+  "status": "active"
+}
+{
+  "id": "alert_1757035827818",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757035827818,
+  "status": "active"
+}
+{
+  "id": "alert_1757035887818",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.55514007597341,
+    "threshold": 85
+  },
+  "timestamp": 1757035887818,
+  "status": "active"
+}
+{
+  "id": "alert_1757035887819",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757035887819,
+  "status": "active"
+}
+{
+  "id": "alert_1757035947820",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.99287749287748,
+    "threshold": 85
+  },
+  "timestamp": 1757035947820,
+  "status": "active"
+}
+{
+  "id": "alert_1757036007828",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.29533673630897,
+    "threshold": 85
+  },
+  "timestamp": 1757036007828,
+  "status": "active"
+}
+{
+  "id": "alert_1757036007829",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757036007829,
+  "status": "active"
+}
+{
+  "id": "alert_1757036067839",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.73455800886356,
+    "threshold": 85
+  },
+  "timestamp": 1757036067839,
+  "status": "active"
+}
+{
+  "id": "alert_1757036127839",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.09800866571699,
+    "threshold": 85
+  },
+  "timestamp": 1757036127839,
+  "status": "active"
+}
+{
+  "id": "alert_1757036187845",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.39997329059828,
+    "threshold": 85
+  },
+  "timestamp": 1757036187845,
+  "status": "active"
+}
+{
+  "id": "alert_1757036187846",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757036187846,
+  "status": "active"
+}
+{
+  "id": "alert_1757036247860",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.83752522554606,
+    "threshold": 85
+  },
+  "timestamp": 1757036247860,
+  "status": "active"
+}
+{
+  "id": "alert_1757036307863",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.14122101535297,
+    "threshold": 85
+  },
+  "timestamp": 1757036307863,
+  "status": "active"
+}
+{
+  "id": "alert_1757036367870",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.44318564023425,
+    "threshold": 85
+  },
+  "timestamp": 1757036367870,
+  "status": "active"
+}
+{
+  "id": "alert_1757036427884",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.74539757439062,
+    "threshold": 85
+  },
+  "timestamp": 1757036427884,
+  "status": "active"
+}
+{
+  "id": "alert_1757036487897",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.04736219927192,
+    "threshold": 85
+  },
+  "timestamp": 1757036487897,
+  "status": "active"
+}
+{
+  "id": "alert_1757036487897",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757036487897,
+  "status": "active"
+}
+{
+  "id": "alert_1757036547911",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.4857797166825,
+    "threshold": 85
+  },
+  "timestamp": 1757036547911,
+  "status": "active"
+}
+{
+  "id": "alert_1757036607920",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.78768251424502,
+    "threshold": 85
+  },
+  "timestamp": 1757036607920,
+  "status": "active"
+}
+{
+  "id": "alert_1757036667921",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.0896471391263,
+    "threshold": 85
+  },
+  "timestamp": 1757036667921,
+  "status": "active"
+}
+{
+  "id": "alert_1757036667922",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757036667922,
+  "status": "active"
+}
+{
+  "id": "alert_1757036727924",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.52800282921811,
+    "threshold": 85
+  },
+  "timestamp": 1757036727924,
+  "status": "active"
+}
+{
+  "id": "alert_1757036787934",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.83114217315607,
+    "threshold": 85
+  },
+  "timestamp": 1757036787934,
+  "status": "active"
+}
+{
+  "id": "alert_1757036787934",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757036787934,
+  "status": "active"
+}
+{
+  "id": "alert_1757036847946",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.26801400759734,
+    "threshold": 85
+  },
+  "timestamp": 1757036847946,
+  "status": "active"
+}
+{
+  "id": "alert_1757036907954",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.57152431544793,
+    "threshold": 85
+  },
+  "timestamp": 1757036907954,
+  "status": "active"
+}
+{
+  "id": "alert_1757036967966",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.87348894032921,
+    "threshold": 85
+  },
+  "timestamp": 1757036967966,
+  "status": "active"
+}
+{
+  "id": "alert_1757037027970",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.1754535652105,
+    "threshold": 85
+  },
+  "timestamp": 1757037027970,
+  "status": "active"
+}
+{
+  "id": "alert_1757037027971",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757037027971,
+  "status": "active"
+}
+{
+  "id": "alert_1757037087972",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.6125108816081,
+    "threshold": 85
+  },
+  "timestamp": 1757037087972,
+  "status": "active"
+}
+{
+  "id": "alert_1757037147980",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.91701042655905,
+    "threshold": 85
+  },
+  "timestamp": 1757037147980,
+  "status": "active"
+}
+{
+  "id": "alert_1757037147980",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757037147980,
+  "status": "active"
+}
+{
+  "id": "alert_1757037207993",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.25579198322254,
+    "threshold": 85
+  },
+  "timestamp": 1757037207993,
+  "status": "active"
+}
+{
+  "id": "alert_1757037207993",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757037207993,
+  "status": "active"
+}
+{
+  "id": "alert_1757037268001",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.6920455444761,
+    "threshold": 85
+  },
+  "timestamp": 1757037268001,
+  "status": "active"
+}
+{
+  "id": "alert_1757037328015",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.99567950696422,
+    "threshold": 85
+  },
+  "timestamp": 1757037328015,
+  "status": "active"
+}
+{
+  "id": "alert_1757037328016",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757037328016,
+  "status": "active"
+}
+{
+  "id": "alert_1757037388021",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.43236585944919,
+    "threshold": 85
+  },
+  "timestamp": 1757037388021,
+  "status": "active"
+}
+{
+  "id": "alert_1757037448036",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.7520130974992,
+    "threshold": 85
+  },
+  "timestamp": 1757037448036,
+  "status": "active"
+}
+{
+  "id": "alert_1757037448036",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757037448036,
+  "status": "active"
+}
+{
+  "id": "alert_1757037508049",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.19073975150364,
+    "threshold": 85
+  },
+  "timestamp": 1757037508049,
+  "status": "active"
+}
+{
+  "id": "alert_1757037508049",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757037508049,
+  "status": "active"
+}
+{
+  "id": "alert_1757037568050",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.6274261039886,
+    "threshold": 85
+  },
+  "timestamp": 1757037568050,
+  "status": "active"
+}
+{
+  "id": "alert_1757037568050",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757037568050,
+  "status": "active"
+}
+{
+  "id": "alert_1757037628065",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.06380331987971,
+    "threshold": 85
+  },
+  "timestamp": 1757037628065,
+  "status": "active"
+}
+{
+  "id": "alert_1757037628065",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757037628065,
+  "status": "active"
+}
+{
+  "id": "alert_1757037688074",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.5024063192466,
+    "threshold": 85
+  },
+  "timestamp": 1757037688074,
+  "status": "active"
+}
+{
+  "id": "alert_1757037748074",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.80430911680912,
+    "threshold": 85
+  },
+  "timestamp": 1757037748074,
+  "status": "active"
+}
+{
+  "id": "alert_1757037808082",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.10781942465971,
+    "threshold": 85
+  },
+  "timestamp": 1757037808082,
+  "status": "active"
+}
+{
+  "id": "alert_1757037868083",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.409784049541,
+    "threshold": 85
+  },
+  "timestamp": 1757037868083,
+  "status": "active"
+}
+{
+  "id": "alert_1757037868083",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757037868083,
+  "status": "active"
+}
+{
+  "id": "alert_1757037928090",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.84789243035772,
+    "threshold": 85
+  },
+  "timestamp": 1757037928090,
+  "status": "active"
+}
+{
+  "id": "alert_1757037928091",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757037928091,
+  "status": "active"
+}
+{
+  "id": "alert_1757037988094",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.28457878284267,
+    "threshold": 85
+  },
+  "timestamp": 1757037988094,
+  "status": "active"
+}
+{
+  "id": "alert_1757038048098",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.58679071699906,
+    "threshold": 85
+  },
+  "timestamp": 1757038048098,
+  "status": "active"
+}
+{
+  "id": "alert_1757038048099",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757038048099,
+  "status": "active"
+}
+{
+  "id": "alert_1757038108104",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.02576468027857,
+    "threshold": 85
+  },
+  "timestamp": 1757038108104,
+  "status": "active"
+}
+{
+  "id": "alert_1757038108105",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757038108105,
+  "status": "active"
+}
+{
+  "id": "alert_1757038168116",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.4704564339981,
+    "threshold": 85
+  },
+  "timestamp": 1757038168116,
+  "status": "active"
+}
+{
+  "id": "alert_1757038228122",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 85.77235923156063,
+    "threshold": 85
+  },
+  "timestamp": 1757038228122,
+  "status": "active"
+}
+{
+  "id": "alert_1757038228123",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757038228123,
+  "status": "active"
+}
+{
+  "id": "alert_1757038288127",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.21083857628996,
+    "threshold": 85
+  },
+  "timestamp": 1757038288127,
+  "status": "active"
+}
+{
+  "id": "alert_1757038288128",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757038288128,
+  "status": "active"
+}
+{
+  "id": "alert_1757038348140",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.64795772000633,
+    "threshold": 85
+  },
+  "timestamp": 1757038348140,
+  "status": "active"
+}
+{
+  "id": "alert_1757038408148",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 86.9501696541627,
+    "threshold": 85
+  },
+  "timestamp": 1757038408148,
+  "status": "active"
+}
+{
+  "id": "alert_1757038468154",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.25553478157644,
+    "threshold": 85
+  },
+  "timestamp": 1757038468154,
+  "status": "active"
+}
+{
+  "id": "alert_1757038468154",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757038468154,
+  "status": "active"
+}
+{
+  "id": "alert_1757038528165",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 87.69265392529282,
+    "threshold": 85
+  },
+  "timestamp": 1757038528165,
+  "status": "active"
+}
+{
+  "id": "alert_1757038528166",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757038528166,
+  "status": "active"
+}
+{
+  "id": "alert_1757038588177",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.12977306900918,
+    "threshold": 85
+  },
+  "timestamp": 1757038588177,
+  "status": "active"
+}
+{
+  "id": "alert_1757038588178",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757038588178,
+  "status": "active"
+}
+{
+  "id": "alert_1757038648189",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.56862337765115,
+    "threshold": 85
+  },
+  "timestamp": 1757038648189,
+  "status": "active"
+}
+{
+  "id": "alert_1757038708204",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 88.87058800253244,
+    "threshold": 85
+  },
+  "timestamp": 1757038708204,
+  "status": "active"
+}
+{
+  "id": "alert_1757038768213",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.17317090060146,
+    "threshold": 85
+  },
+  "timestamp": 1757038768213,
+  "status": "active"
+}
+{
+  "id": "alert_1757038768214",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757038768214,
+  "status": "active"
+}
+{
+  "id": "alert_1757038828216",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 89.61115562678063,
+    "threshold": 85
+  },
+  "timestamp": 1757038828216,
+  "status": "active"
+}
+{
+  "id": "alert_1757038828217",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757038828217,
+  "status": "active"
+}
+{
+  "id": "alert_1757038888218",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.0474091880342,
+    "threshold": 85
+  },
+  "timestamp": 1757038888218,
+  "status": "active"
+}
+{
+  "id": "alert_1757038948221",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.3493119855967,
+    "threshold": 85
+  },
+  "timestamp": 1757038948221,
+  "status": "active"
+}
+{
+  "id": "alert_1757039008225",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 90.65146209243431,
+    "threshold": 85
+  },
+  "timestamp": 1757039008225,
+  "status": "active"
+}
+{
+  "id": "alert_1757039008226",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757039008226,
+  "status": "active"
+}
+{
+  "id": "alert_1757039068239",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.09031240107629,
+    "threshold": 85
+  },
+  "timestamp": 1757039068239,
+  "status": "active"
+}
+{
+  "id": "alert_1757039068240",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 8,
+    "threshold": 5
+  },
+  "timestamp": 1757039068240,
+  "status": "active"
+}
+{
+  "id": "alert_1757039128254",
+  "type": "high_memory",
+  "message": "Memory usage exceeds threshold",
+  "data": {
+    "current": 91.52786433602405,
+    "threshold": 85
+  },
+  "timestamp": 1757039128254,
+  "status": "active"
+}
+{
+  "id": "alert_1757039128254",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757039128254,
+  "status": "active"
+}
+{
+  "id": "alert_1757039308266",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757039308266,
+  "status": "active"
+}
+{
+  "id": "alert_1757039368277",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 6,
+    "threshold": 5
+  },
+  "timestamp": 1757039368277,
+  "status": "active"
+}
+{
+  "id": "alert_1757039428283",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757039428283,
+  "status": "active"
+}
+{
+  "id": "alert_1757039488297",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757039488297,
+  "status": "active"
+}
+{
+  "id": "alert_1757039848339",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757039848339,
+  "status": "active"
+}
+{
+  "id": "alert_1757039908340",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757039908340,
+  "status": "active"
+}
+{
+  "id": "alert_1757039968348",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757039968348,
+  "status": "active"
+}
+{
+  "id": "alert_1757040028352",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757040028352,
+  "status": "active"
+}
+{
+  "id": "alert_1757040148355",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 10,
+    "threshold": 5
+  },
+  "timestamp": 1757040148355,
+  "status": "active"
+}
+{
+  "id": "alert_1757040208369",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 7,
+    "threshold": 5
+  },
+  "timestamp": 1757040208369,
+  "status": "active"
+}
+{
+  "id": "alert_1757040268377",
+  "type": "high_error_rate",
+  "message": "Agent error rate exceeds threshold",
+  "data": {
+    "current": 9,
+    "threshold": 5
+  },
+  "timestamp": 1757040268377,
+  "status": "active"
+}
