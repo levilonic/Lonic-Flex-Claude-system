@@ -116,7 +116,15 @@
       "Bash(npm run:*)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(docker:*)",
+      "Bash(where docker)",
+      "Bash(wsl:*)",
+      "Bash(powershell:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

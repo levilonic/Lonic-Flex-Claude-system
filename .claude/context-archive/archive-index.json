@@ -50,5 +50,31 @@
     "originalTokens": 385019,
     "originalPercentage": 192.5095,
     "cleanupType": "standard"
+  },
+  {
+    "archiveId": "archive_1757349555310_tiraon",
+    "timestamp": "2025-09-08T16:39:15.310Z",
+    "reason": "pre-cleanup",
+    "originalSize": 1540092,
+    "processedSize": 226428,
+    "isCompressed": true,
+    "compressionRatio": 0.11,
+    "checksum": "2fca8d93",
+    "contentType": "workflow_xml",
+    "tags": [
+      "workflow_context",
+      "simulation_step_1",
+      "simulation_step_2",
+      "simulation_step_3",
+      "simulation_step_4",
+      "simulation_step_5",
+      "simulation_step_6",
+      "simulation_step_7",
+      "simulation_step_8",
+      "simulation_step_9"
+    ],
+    "originalTokens": 385023,
+    "originalPercentage": 192.51149999999998,
+    "cleanupType": "standard"
   }
 ]

@@ -1,13 +1,13 @@
 <workflow_context>
 <test_start>
-    timestamp: "2025-09-08T15:37:19.368Z"
+    timestamp: "2025-09-08T16:39:15.338Z"
     {
   "message": "Starting integration test"
 }
 </test_start>
 
 <demo_action>
-    timestamp: "2025-09-08T15:37:19.490Z"
+    timestamp: "2025-09-08T16:39:15.471Z"
     {
   "action": "create_file",
   "file": "test.js"
@@ -15,7 +15,7 @@
 </demo_action>
 
 <demo_success>
-    timestamp: "2025-09-08T15:37:19.620Z"
+    timestamp: "2025-09-08T16:39:15.599Z"
     {
   "result": "File created successfully"
 }
