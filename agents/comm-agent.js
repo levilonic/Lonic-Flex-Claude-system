@@ -5,6 +5,7 @@
  */
 
 const { BaseAgent } = require('./base-agent');
+const { WebClient } = require('@slack/web-api');
 
 class CommunicationAgent extends BaseAgent {
     constructor(sessionId, config = {}) {
@@ -20,7 +21,8 @@ class CommunicationAgent extends BaseAgent {
                 token: config.slack_token || process.env.SLACK_BOT_TOKEN,
                 signingSecret: config.slack_signing_secret || process.env.SLACK_SIGNING_SECRET,
                 appToken: config.slack_app_token || process.env.SLACK_APP_TOKEN,
-                defaultChannel: config.default_channel || '#general',
+                defaultChannel: config.default_channel || '#all-lonixflex',
+                defaultChannelId: 'C09D4RUQ739', // all-lonixflex channel ID
                 ...config.slack
             },
             notifications: {
@@ -65,6 +67,10 @@ class CommunicationAgent extends BaseAgent {
         
         // Message templates
         this.messageTemplates = this.initializeMessageTemplates();
+        
+        // Initialize Slack Web API client
+        this.slackClient = this.commConfig.slack.token ? 
+            new WebClient(this.commConfig.slack.token) : null;
         
         // Initialize communication context
         this.contextManager.addAgentEvent(this.agentName, 'comm_config_loaded', {
@@ -642,10 +648,21 @@ class CommunicationAgent extends BaseAgent {
      */
     
     async initializeSlackConnection() {
-        // Mock Slack connection (in production, would use @slack/bolt-js)
-        console.log('Initializing Slack connection...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return true;
+        if (!this.slackClient) {
+            console.log('❌ No Slack token provided - Slack functionality disabled');
+            return false;
+        }
+        
+        try {
+            console.log('🔗 Initializing Slack connection...');
+            const authResult = await this.slackClient.auth.test();
+            console.log(`✅ Connected to Slack workspace: ${authResult.team}`);
+            console.log(`   Bot user: ${authResult.user} (${authResult.user_id})`);
+            return true;
+        } catch (error) {
+            console.error('❌ Failed to initialize Slack connection:', error.message);
+            return false;
+        }
     }
     
     getMessageTemplate(messageType, context) {
@@ -770,16 +787,50 @@ class CommunicationAgent extends BaseAgent {
     }
     
     async sendSlackMessage(message) {
-        // Mock Slack message sending (in production, would use Slack Web API)
-        console.log(`Sending message to ${message.channel}: ${message.text.substring(0, 100)}...`);
-        await new Promise(resolve => setTimeout(resolve, 500));
+        if (!this.slackClient) {
+            console.log(`🔇 Slack disabled - Would send to ${message.channel}: ${message.text.substring(0, 50)}...`);
+            return {
+                success: true,
+                messageId: `mock_msg_${Date.now()}`,
+                timestamp: Date.now(),
+                channel: message.channel,
+                mock: true
+            };
+        }
         
-        return {
-            success: true,
-            messageId: `msg_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-            timestamp: Date.now(),
-            channel: message.channel
-        };
+        try {
+            console.log(`📩 Sending Slack message to ${message.channel}: ${message.text.substring(0, 50)}...`);
+            
+            // Use channel ID if available, otherwise use channel name
+            const channelId = message.channel === this.commConfig.slack.defaultChannel ? 
+                this.commConfig.slack.defaultChannelId : message.channel;
+            
+            const result = await this.slackClient.chat.postMessage({
+                channel: channelId,
+                text: message.text,
+                mrkdwn: true
+            });
+            
+            console.log(`✅ Message sent successfully (ts: ${result.ts})`);
+            
+            return {
+                success: true,
+                messageId: result.ts,
+                timestamp: Date.now(),
+                channel: message.channel,
+                slackTs: result.ts
+            };
+            
+        } catch (error) {
+            console.error(`❌ Failed to send Slack message to ${message.channel}:`, error.message);
+            return {
+                success: false,
+                error: error.message,
+                messageId: null,
+                timestamp: Date.now(),
+                channel: message.channel
+            };
+        }
     }
     
     async createMessageThread(messageId, channel) {

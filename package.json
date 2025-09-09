@@ -64,7 +64,12 @@
     "demo-context-pruner": "node context-management/context-pruner.js",
     "demo-factor3-enhanced": "node factor3-context-manager.js",
     "compact-context": "node -e \"console.log('Emergency context compaction not yet implemented - use context-health for guidance')\"",
-    "start": "node claude-multi-agent-core.js"
+    "start": "node claude-multi-agent-core.js",
+    "slack": "node slack-service.js",
+    "slack-test": "node slack-service.js test",
+    "slack-workflow": "node slack-service.js workflow",
+    "slack-status": "node slack-service.js status",
+    "slack-channels": "node test-slack-channels.js"
   },
   "keywords": [
     "ai-agents",
