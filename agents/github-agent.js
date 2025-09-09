@@ -230,13 +230,41 @@ class GitHubAgent extends BaseAgent {
      * Determine what GitHub action to perform based on context
      */
     determineAction(context) {
-        // PR management
-        if (context.pull_request || context.pr_number) {
+        // Branch creation/management (prioritized for BranchAware operations)
+        if (context.create_branch || context.branch_action === 'create') {
+            return {
+                type: 'branch_creation',
+                params: {
+                    branch_name: context.branch_name || context.create_branch,
+                    base_branch: context.base_branch || 'main',
+                    branch_type: context.branch_type || 'feature'
+                }
+            };
+        }
+
+        // Branch operations (delete, protect, merge)
+        if (context.branch_operation) {
+            return {
+                type: 'branch_operation',
+                params: {
+                    branch_name: context.branch_name || context.branch,
+                    operation: context.branch_operation,
+                    target_branch: context.target_branch
+                }
+            };
+        }
+        
+        // PR management with enhanced operations
+        if (context.pull_request || context.pr_number || context.create_pr) {
             return {
                 type: 'pull_request_management',
                 params: {
-                    pr_number: context.pr_number || context.pull_request.number,
-                    action: context.pr_action || 'analyze'
+                    pr_number: context.pr_number || context.pull_request?.number,
+                    action: context.pr_action || (context.create_pr ? 'create' : 'analyze'),
+                    branch_name: context.branch_name,
+                    title: context.pr_title,
+                    body: context.pr_body,
+                    base: context.base_branch || 'main'
                 }
             };
         }
@@ -252,13 +280,13 @@ class GitHubAgent extends BaseAgent {
             };
         }
         
-        // Branch management
+        // Branch management (legacy support)
         if (context.branch || context.branch_name) {
             return {
                 type: 'branch_management',
                 params: {
                     branch_name: context.branch_name || context.branch,
-                    action: context.branch_action || 'list_tags'
+                    action: context.branch_action || 'status'
                 }
             };
         }
@@ -277,6 +305,12 @@ class GitHubAgent extends BaseAgent {
      */
     async executeAction(action, context) {
         switch (action.type) {
+            case 'branch_creation':
+                return await this.handleBranchCreation(action.params, context);
+                
+            case 'branch_operation':
+                return await this.handleBranchOperation(action.params, context);
+                
             case 'pull_request_management':
                 return await this.handlePullRequest(action.params, context);
                 
@@ -295,13 +329,263 @@ class GitHubAgent extends BaseAgent {
     }
 
     /**
+     * Handle branch creation with real GitHub API calls
+     */
+    async handleBranchCreation(params, context) {
+        const { branch_name, base_branch, branch_type } = params;
+        
+        try {
+            // Get base branch reference
+            const { data: baseRef } = await this.octokit.rest.git.getRef({
+                owner: this.githubConfig.owner,
+                repo: this.githubConfig.repo,
+                ref: `heads/${base_branch}`
+            });
+
+            // Create new branch
+            const { data: newRef } = await this.octokit.rest.git.createRef({
+                owner: this.githubConfig.owner,
+                repo: this.githubConfig.repo,
+                ref: `refs/heads/${branch_name}`,
+                sha: baseRef.object.sha
+            });
+
+            return {
+                branch_created: true,
+                branch_name,
+                base_branch,
+                branch_type,
+                sha: newRef.object.sha,
+                url: newRef.url,
+                ref: newRef.ref
+            };
+
+        } catch (error) {
+            if (error.status === 422 && error.message.includes('Reference already exists')) {
+                return {
+                    branch_created: false,
+                    branch_name,
+                    error: 'Branch already exists',
+                    existing: true
+                };
+            }
+            throw new Error(`Failed to create branch ${branch_name}: ${error.message}`);
+        }
+    }
+
+    /**
+     * Handle branch operations (delete, protect, merge)
+     */
+    async handleBranchOperation(params, context) {
+        const { branch_name, operation, target_branch } = params;
+
+        switch (operation) {
+            case 'delete':
+                return await this.deleteBranch(branch_name);
+                
+            case 'protect':
+                return await this.protectBranch(branch_name, context.protection_rules || {});
+                
+            case 'merge':
+                if (!target_branch) {
+                    throw new Error('Target branch required for merge operation');
+                }
+                return await this.mergeBranch(branch_name, target_branch, context);
+                
+            case 'status':
+                return await this.getBranchStatus(branch_name);
+                
+            default:
+                throw new Error(`Unknown branch operation: ${operation}`);
+        }
+    }
+
+    /**
+     * Delete branch using GitHub API
+     */
+    async deleteBranch(branchName) {
+        try {
+            await this.octokit.rest.git.deleteRef({
+                owner: this.githubConfig.owner,
+                repo: this.githubConfig.repo,
+                ref: `heads/${branchName}`
+            });
+
+            return {
+                branch_deleted: true,
+                branch_name: branchName
+            };
+
+        } catch (error) {
+            if (error.status === 404) {
+                return {
+                    branch_deleted: false,
+                    branch_name: branchName,
+                    error: 'Branch not found'
+                };
+            }
+            throw new Error(`Failed to delete branch ${branchName}: ${error.message}`);
+        }
+    }
+
+    /**
+     * Protect branch with rules
+     */
+    async protectBranch(branchName, rules = {}) {
+        const defaultRules = {
+            required_status_checks: null,
+            enforce_admins: false,
+            required_pull_request_reviews: {
+                required_approving_review_count: 1,
+                dismiss_stale_reviews: true,
+                require_code_owner_reviews: false
+            },
+            restrictions: null
+        };
+
+        const protectionRules = { ...defaultRules, ...rules };
+
+        try {
+            const { data: protection } = await this.octokit.rest.repos.updateBranchProtection({
+                owner: this.githubConfig.owner,
+                repo: this.githubConfig.repo,
+                branch: branchName,
+                ...protectionRules
+            });
+
+            return {
+                branch_protected: true,
+                branch_name: branchName,
+                protection_rules: protection
+            };
+
+        } catch (error) {
+            throw new Error(`Failed to protect branch ${branchName}: ${error.message}`);
+        }
+    }
+
+    /**
+     * Merge branch into target branch
+     */
+    async mergeBranch(sourceBranch, targetBranch, context) {
+        const commitMessage = context.merge_message || `Merge branch '${sourceBranch}' into '${targetBranch}'`;
+        
+        try {
+            const { data: merge } = await this.octokit.rest.repos.merge({
+                owner: this.githubConfig.owner,
+                repo: this.githubConfig.repo,
+                base: targetBranch,
+                head: sourceBranch,
+                commit_message: commitMessage
+            });
+
+            return {
+                merged: true,
+                source_branch: sourceBranch,
+                target_branch: targetBranch,
+                sha: merge.sha,
+                commit_message: commitMessage
+            };
+
+        } catch (error) {
+            if (error.status === 409) {
+                return {
+                    merged: false,
+                    source_branch: sourceBranch,
+                    target_branch: targetBranch,
+                    error: 'Merge conflict - manual resolution required'
+                };
+            }
+            throw new Error(`Failed to merge ${sourceBranch} into ${targetBranch}: ${error.message}`);
+        }
+    }
+
+    /**
+     * Get detailed branch status
+     */
+    async getBranchStatus(branchName) {
+        try {
+            const { data: branch } = await this.octokit.rest.repos.getBranch({
+                owner: this.githubConfig.owner,
+                repo: this.githubConfig.repo,
+                branch: branchName
+            });
+
+            // Get comparison with main branch
+            const { data: comparison } = await this.octokit.rest.repos.compareCommits({
+                owner: this.githubConfig.owner,
+                repo: this.githubConfig.repo,
+                base: 'main',
+                head: branchName
+            });
+
+            return {
+                branch_name: branchName,
+                exists: true,
+                sha: branch.commit.sha,
+                protected: branch.protected,
+                ahead_by: comparison.ahead_by,
+                behind_by: comparison.behind_by,
+                last_commit: {
+                    message: branch.commit.commit.message,
+                    author: branch.commit.commit.author.name,
+                    date: branch.commit.commit.author.date,
+                    sha: branch.commit.sha
+                }
+            };
+
+        } catch (error) {
+            if (error.status === 404) {
+                return {
+                    branch_name: branchName,
+                    exists: false,
+                    error: 'Branch not found'
+                };
+            }
+            throw error;
+        }
+    }
+
+    /**
      * Handle pull request operations
      */
     async handlePullRequest(params, context) {
-        const { pr_number, action } = params;
+        const { pr_number, action, branch_name, title, body, base } = params;
         
         switch (action) {
+            case 'create':
+                if (!branch_name) {
+                    throw new Error('Branch name required for PR creation');
+                }
+                
+                try {
+                    const { data: pr } = await this.octokit.rest.pulls.create({
+                        owner: this.githubConfig.owner,
+                        repo: this.githubConfig.repo,
+                        title: title || `Feature: ${branch_name}`,
+                        body: body || `Automated PR created from branch: ${branch_name}`,
+                        head: branch_name,
+                        base: base || 'main'
+                    });
+
+                    return {
+                        pr_created: true,
+                        pr_number: pr.number,
+                        pr_url: pr.html_url,
+                        title: pr.title,
+                        head: branch_name,
+                        base: base || 'main'
+                    };
+
+                } catch (error) {
+                    throw new Error(`Failed to create PR from ${branch_name}: ${error.message}`);
+                }
+                
             case 'analyze':
+                if (!pr_number) {
+                    throw new Error('PR number required for analysis');
+                }
+                
                 const { data: pr } = await this.octokit.rest.pulls.get({
                     owner: this.githubConfig.owner,
                     repo: this.githubConfig.repo,
@@ -316,35 +600,80 @@ class GitHubAgent extends BaseAgent {
                 
                 return {
                     pr_info: {
+                        number: pr.number,
                         title: pr.title,
                         state: pr.state,
                         user: pr.user.login,
                         created_at: pr.created_at,
+                        updated_at: pr.updated_at,
                         mergeable: pr.mergeable,
-                        mergeable_state: pr.mergeable_state
+                        mergeable_state: pr.mergeable_state,
+                        head_branch: pr.head.ref,
+                        base_branch: pr.base.ref
                     },
                     files_changed: files.data.length,
                     additions: pr.additions,
-                    deletions: pr.deletions
+                    deletions: pr.deletions,
+                    changed_files: files.data.map(file => ({
+                        filename: file.filename,
+                        status: file.status,
+                        additions: file.additions,
+                        deletions: file.deletions
+                    }))
                 };
                 
             case 'merge':
-                if (!context.merge_approved) {
-                    throw new Error('Merge not approved by human');
+                if (!pr_number) {
+                    throw new Error('PR number required for merge');
                 }
                 
-                const mergeResult = await this.octokit.rest.pulls.merge({
+                if (!context.merge_approved) {
+                    throw new Error('Merge not approved - human approval required');
+                }
+                
+                try {
+                    const mergeResult = await this.octokit.rest.pulls.merge({
+                        owner: this.githubConfig.owner,
+                        repo: this.githubConfig.repo,
+                        pull_number: pr_number,
+                        commit_title: context.merge_title || `Merge PR #${pr_number}`,
+                        merge_method: context.merge_method || 'squash'
+                    });
+                    
+                    return {
+                        merged: true,
+                        sha: mergeResult.data.sha,
+                        merge_method: context.merge_method || 'squash',
+                        message: mergeResult.data.message
+                    };
+
+                } catch (error) {
+                    if (error.status === 405) {
+                        return {
+                            merged: false,
+                            pr_number,
+                            error: 'PR not mergeable - check conflicts or status checks'
+                        };
+                    }
+                    throw new Error(`Failed to merge PR #${pr_number}: ${error.message}`);
+                }
+
+            case 'close':
+                if (!pr_number) {
+                    throw new Error('PR number required to close');
+                }
+
+                const { data: closedPR } = await this.octokit.rest.pulls.update({
                     owner: this.githubConfig.owner,
                     repo: this.githubConfig.repo,
                     pull_number: pr_number,
-                    commit_title: context.merge_title || `Merge PR #${pr_number}`,
-                    merge_method: context.merge_method || 'squash'
+                    state: 'closed'
                 });
-                
+
                 return {
-                    merged: true,
-                    sha: mergeResult.data.sha,
-                    merge_method: context.merge_method || 'squash'
+                    pr_closed: true,
+                    pr_number: closedPR.number,
+                    state: closedPR.state
                 };
                 
             default:
@@ -455,16 +784,46 @@ class GitHubAgent extends BaseAgent {
         
         // Type-specific validation
         switch (action.type) {
-            case 'repository_analysis':
-                if (!result.repository_info) {
-                    validation.issues.push('Missing repository info');
+            case 'branch_creation':
+                if (!result.branch_created && !result.existing) {
+                    validation.issues.push('Branch creation failed');
+                    validation.valid = false;
+                } else if (result.existing) {
+                    validation.warnings.push('Branch already exists');
+                }
+                break;
+                
+            case 'branch_operation':
+                if (action.params.operation === 'delete' && !result.branch_deleted) {
+                    if (result.error !== 'Branch not found') {
+                        validation.issues.push('Branch deletion failed');
+                        validation.valid = false;
+                    }
+                } else if (action.params.operation === 'merge' && !result.merged) {
+                    validation.issues.push('Branch merge failed or conflicts detected');
+                    validation.valid = false;
+                } else if (action.params.operation === 'protect' && !result.branch_protected) {
+                    validation.issues.push('Branch protection setup failed');
                     validation.valid = false;
                 }
                 break;
                 
             case 'pull_request_management':
-                if (action.params.action === 'merge' && !result.merged) {
+                if (action.params.action === 'create' && !result.pr_created) {
+                    validation.issues.push('PR creation failed');
+                    validation.valid = false;
+                } else if (action.params.action === 'merge' && !result.merged) {
                     validation.issues.push('PR merge failed');
+                    validation.valid = false;
+                } else if (action.params.action === 'close' && !result.pr_closed) {
+                    validation.issues.push('PR close failed');
+                    validation.valid = false;
+                }
+                break;
+                
+            case 'repository_analysis':
+                if (!result.repository_info) {
+                    validation.issues.push('Missing repository info');
                     validation.valid = false;
                 }
                 break;

@@ -145,10 +145,30 @@ class AuthManager {
      * Get GitHub configuration for agent
      */
     getGitHubConfig() {
+        // Auto-detect repository from git config if not explicitly set
+        let owner = process.env.GITHUB_OWNER;
+        let repo = process.env.GITHUB_REPO;
+        
+        if (!owner || !repo) {
+            try {
+                const { execSync } = require('child_process');
+                const remoteUrl = execSync('git config --get remote.origin.url', { encoding: 'utf8' }).trim();
+                
+                // Parse GitHub URL (handles both https and ssh formats)
+                const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^/.]+)/);
+                if (match) {
+                    owner = owner || match[1];
+                    repo = repo || match[2];
+                }
+            } catch (error) {
+                console.warn('⚠️  Could not auto-detect GitHub repository, using defaults');
+            }
+        }
+        
         return {
             token: this.getToken('github'),
-            owner: process.env.GITHUB_OWNER || 'anthropics',
-            repo: process.env.GITHUB_REPO || 'claude-code',
+            owner: owner || 'anthropics',
+            repo: repo || 'claude-code',
             baseUrl: process.env.GITHUB_API_URL || 'https://api.github.com'
         };
     }

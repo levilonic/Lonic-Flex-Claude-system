@@ -1,0 +1,291 @@
+{
+  "scanId": "scan_1757425388300_f6359150",
+  "timestamp": 1757425388300,
+  "results": {
+    "dependency": {
+      "error": "spawn npm ENOENT"
+    },
+    "code": {
+      "scanner": "ESLint Security",
+      "issues": [],
+      "error": "spawn npx ENOENT"
+    },
+    "configuration": {
+      "scanner": "Config Scanner",
+      "findings": [
+        {
+          "file": "agents\\security-agent.js",
+          "line": 749,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "apiKey = \"sk-1234567890abcdef\"..."
+        },
+        {
+          "file": "claude-testing-framework.js",
+          "line": 617,
+          "type": "hardcoded_secret",
+          "severity": "high",
+          "message": "Potential hardcoded secret found",
+          "snippet": "SECRET = 'test-signing-secret'..."
+        },
+        {
+          "file": "claude-testing-framework.js",
+          "line": 616,
+          "type": "hardcoded_token",
+          "severity": "high",
+          "message": "Potential hardcoded token found",
+          "snippet": "TOKEN = 'xoxb-test-token'..."
+        },
+        {
+          "file": "claude-testing-framework.js",
+          "line": 618,
+          "type": "hardcoded_token",
+          "severity": "high",
+          "message": "Potential hardcoded token found",
+          "snippet": "TOKEN = 'xapp-test-token'..."
+        },
+        {
+          "file": "tests\\e2e\\slack.e2e.test.js",
+          "line": 10,
+          "type": "hardcoded_secret",
+          "severity": "high",
+          "message": "Potential hardcoded secret found",
+          "snippet": "SECRET = 'test-signing-secret'..."
+        },
+        {
+          "file": "tests\\e2e\\slack.e2e.test.js",
+          "line": 9,
+          "type": "hardcoded_token",
+          "severity": "high",
+          "message": "Potential hardcoded token found",
+          "snippet": "TOKEN = 'xoxb-test-token'..."
+        },
+        {
+          "file": "tests\\e2e\\slack.e2e.test.js",
+          "line": 11,
+          "type": "hardcoded_token",
+          "severity": "high",
+          "message": "Potential hardcoded token found",
+          "snippet": "TOKEN = 'xapp-test-token'..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\anthropic_docs.json",
+          "line": 60,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\anthropic_summary_indexed_docs.json",
+          "line": 71,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 28568,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 28666,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 28674,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "api_key='your_api_key')\\n```\\n\\nIn TypeScript:\\n- ..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 28717,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 28768,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 28864,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 28966,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 28974,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\n   ```\\n\\n   After se..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 29869,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 29971,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 30022,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 30073,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 53744,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 53778,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 53815,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "api_key='your_api_key')\\n```\\n\\nIn TypeScript:\\n- ..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 53816,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 53854,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 53892,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 53929,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\n   ```\\n\\n   After se..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 53930,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 54804,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 54842,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 54880,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        },
+        {
+          "file": "anthropic-resources\\examples\\anthropic-cookbook\\skills\\retrieval_augmented_generation\\data\\end_to_end_results.json",
+          "line": 54918,
+          "type": "hardcoded_api_key",
+          "severity": "high",
+          "message": "Potential hardcoded api_key found",
+          "snippet": "API_KEY='your-api-key-here'\\nexport ANTHROPIC_API_..."
+        }
+      ],
+      "filesScanned": 292
+    }
+  },
+  "summary": {
+    "total": 33,
+    "critical": 0,
+    "high": 33,
+    "medium": 0,
+    "low": 0
+  }
+}

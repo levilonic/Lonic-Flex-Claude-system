@@ -48,6 +48,8 @@
     "verify-all": "node memory/status-verifier.js --all",
     "verify-task": "node memory/status-verifier.js --task",
     "verify-discrepancies": "node memory/status-verifier.js --discrepancies",
+    "test-multi-branch": "node test-multi-branch-operations.js",
+    "test-branch-aware": "set TEST_BRANCH_AWARE=true&& node claude-multi-agent-core.js",
     "context-health": "node context-health-check.js",
     "context-health-quick": "node context-health-check.js --quick",
     "context-monitor": "node context-management/context-window-monitor.js",

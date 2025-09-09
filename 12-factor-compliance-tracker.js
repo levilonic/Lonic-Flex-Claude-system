@@ -236,6 +236,19 @@ class TwelveFactorCompliance {
         return this.setupTrigger(source, eventType, handler);
     }
 
+    // Setup trigger implementation (placeholder for actual trigger setup)
+    setupTrigger(source, eventType, handler) {
+        // In a real implementation, this would set up event listeners
+        // For demo purposes, we'll just return a success indicator
+        return {
+            source,
+            eventType,
+            handler: handler.name,
+            active: true,
+            registered: new Date().toISOString()
+        };
+    }
+
     // Factor 12: Stateless Reducer (for state transitions)
     applyStateTransition(currentState, event, data = {}) {
         const newState = this.stateReducer(currentState, event, data);

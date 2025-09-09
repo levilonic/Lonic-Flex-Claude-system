@@ -124,7 +124,8 @@
       "Bash(where docker)",
       "Bash(wsl:*)",
       "Bash(powershell:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(git remote:*)"
     ],
     "deny": [],
     "ask": []
