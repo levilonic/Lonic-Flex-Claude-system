@@ -254,81 +254,15 @@ class SlackIntegration {
             this.activeWorkflows.set(sessionId, {
                 messageTs: startMessage.ts,
                 channelId: context.channelId,
-                status: 'running'
+                status: 'running',
+                type: workflowType,
+                startTime: Date.now(),
+                context: context,
+                options: { ...context, userId: context.userId, trigger: context.trigger }
             });
 
-            // Execute workflow with progress updates
-            const result = await this.agentCore.executeWorkflow({
-                github: async (context, updateProgress) => {
-                    await this.updateWorkflowProgress(sessionId, 'github', 25, 'Setting up repository...', client);
-                    await this.delay(1000);
-                    await this.updateWorkflowProgress(sessionId, 'github', 100, 'Repository setup complete', client);
-                    
-                    return {
-                        agent: 'github',
-                        actions: ['branch_created', 'pr_template_set'],
-                        repository: context.repository || 'default',
-                        status: 'success'
-                    };
-                },
-
-                security: async (context, updateProgress) => {
-                    await this.updateWorkflowProgress(sessionId, 'security', 30, 'Scanning dependencies...', client);
-                    await this.delay(1500);
-                    await this.updateWorkflowProgress(sessionId, 'security', 100, 'Security scan complete', client);
-                    
-                    return {
-                        agent: 'security',
-                        vulnerabilities_found: 0,
-                        dependencies_checked: Math.floor(Math.random() * 300) + 200,
-                        security_score: 'A+',
-                        status: 'success'
-                    };
-                },
-
-                code: async (context, updateProgress) => {
-                    await this.updateWorkflowProgress(sessionId, 'code', 20, 'Analyzing codebase...', client);
-                    await this.delay(800);
-                    await this.updateWorkflowProgress(sessionId, 'code', 60, 'Generating code...', client);
-                    await this.delay(1200);
-                    await this.updateWorkflowProgress(sessionId, 'code', 100, 'Code generation complete', client);
-                    
-                    return {
-                        agent: 'code',
-                        files_created: Math.floor(Math.random() * 20) + 5,
-                        tests_generated: Math.floor(Math.random() * 50) + 20,
-                        coverage: `${Math.floor(Math.random() * 15) + 85}%`,
-                        status: 'success'
-                    };
-                },
-
-                deploy: async (context, updateProgress) => {
-                    await this.updateWorkflowProgress(sessionId, 'deploy', 25, 'Building application...', client);
-                    await this.delay(2000);
-                    await this.updateWorkflowProgress(sessionId, 'deploy', 75, 'Deploying to staging...', client);
-                    await this.delay(1000);
-                    await this.updateWorkflowProgress(sessionId, 'deploy', 100, 'Deployment complete', client);
-                    
-                    return {
-                        agent: 'deploy',
-                        build_time: '2m 30s',
-                        tests_passed: '100%',
-                        deployment_url: 'https://staging.example.com',
-                        status: 'success'
-                    };
-                },
-
-                comm: async (context, updateProgress) => {
-                    await this.updateWorkflowProgress(sessionId, 'comm', 100, 'Notifications sent', client);
-                    
-                    return {
-                        agent: 'comm',
-                        notifications_sent: 3,
-                        channels_notified: ['#deployments', '#dev-team'],
-                        status: 'success'
-                    };
-                }
-            });
+            // Execute real multi-agent workflow with progress updates
+            const result = await this.agentCore.executeWorkflow();
 
             // Send completion message
             await this.sendWorkflowCompleted(sessionId, result, client);
@@ -562,6 +496,70 @@ class SlackIntegration {
 
         } catch (error) {
             this.logger.error('Failed to approve workflow', { error: error.message, sessionId });
+        }
+    }
+
+    /**
+     * Show workflow status for a user
+     */
+    async showWorkflowStatus(userId, respond) {
+        try {
+            const userWorkflows = Array.from(this.activeWorkflows.entries())
+                .filter(([sessionId, workflow]) => workflow.context?.userId === userId);
+
+            if (userWorkflows.length === 0) {
+                await respond({
+                    text: '📊 No active workflows found for your user account.'
+                });
+                return;
+            }
+
+            let statusMessage = '📊 *Your Active Workflows:*\n\n';
+            userWorkflows.forEach(([sessionId, workflow]) => {
+                statusMessage += `• **${workflow.type}** (${sessionId.substring(0, 8)}...)\n`;
+                statusMessage += `  Status: ${workflow.status}\n`;
+                statusMessage += `  Started: ${new Date(workflow.startTime).toLocaleTimeString()}\n\n`;
+            });
+
+            await respond({
+                text: statusMessage
+            });
+        } catch (error) {
+            console.error('Error showing workflow status:', error);
+            await respond({
+                text: `❌ Error retrieving workflow status: ${error.message}`
+            });
+        }
+    }
+
+    /**
+     * List all active workflows
+     */
+    async listActiveWorkflows(respond) {
+        try {
+            if (this.activeWorkflows.size === 0) {
+                await respond({
+                    text: '📊 No active workflows currently running.'
+                });
+                return;
+            }
+
+            let statusMessage = '📊 *All Active Workflows:*\n\n';
+            this.activeWorkflows.forEach((workflow, sessionId) => {
+                statusMessage += `• **${workflow.type}** (${sessionId.substring(0, 8)}...)\n`;
+                statusMessage += `  Status: ${workflow.status}\n`;
+                statusMessage += `  User: <@${workflow.options?.userId || 'unknown'}>\n`;
+                statusMessage += `  Started: ${new Date(workflow.startTime).toLocaleTimeString()}\n\n`;
+            });
+
+            await respond({
+                text: statusMessage
+            });
+        } catch (error) {
+            console.error('Error listing workflows:', error);
+            await respond({
+                text: `❌ Error listing workflows: ${error.message}`
+            });
         }
     }
 
