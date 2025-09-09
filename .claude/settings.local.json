@@ -125,7 +125,9 @@
       "Bash(wsl:*)",
       "Bash(powershell:*)",
       "Bash(dir:*)",
-      "Bash(git remote:*)"
+      "Bash(git remote:*)",
+      "Bash(find:*)",
+      "Bash(set)"
     ],
     "deny": [],
     "ask": []

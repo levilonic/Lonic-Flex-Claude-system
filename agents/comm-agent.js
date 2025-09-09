@@ -844,6 +844,80 @@ class CommunicationAgent extends BaseAgent {
             messageId
         };
     }
+
+    /**
+     * Simple message sending method for direct Slack integration
+     * Used by other services that need to send quick notifications
+     */
+    async sendMessage(text, channel = '#all-lonixflex') {
+        try {
+            // Ensure environment variables are loaded
+            require('dotenv').config();
+            
+            const { WebClient } = require('@slack/web-api');
+            const webClient = new WebClient(process.env.SLACK_BOT_TOKEN);
+            
+            const result = await webClient.chat.postMessage({
+                channel: channel,
+                text: text,
+                username: 'claude_multiagent_sys'
+            });
+            
+            console.log(`📩 Message sent to ${channel}: ${text.substring(0, 50)}...`);
+            return result;
+            
+        } catch (error) {
+            console.error(`❌ Failed to send Slack message to ${channel}: ${error.message}`);
+            throw error;
+        }
+    }
+
+    /**
+     * Branch-aware Slack notification methods for Multiplan Manager integration
+     */
+    async notifyBranchOperation(operation, branchName, repository, details = {}) {
+        const message = `
+🌿 **Branch Operation: ${operation.toUpperCase()}**
+
+**Branch**: \`${branchName}\`
+**Repository**: ${repository}
+**Details**: ${JSON.stringify(details, null, 2)}
+**Timestamp**: ${new Date().toISOString()}
+        `;
+        
+        return await this.sendMessage(message);
+    }
+
+    async notifyCrossBranchCoordination(coordinationType, branches, status, details = {}) {
+        const message = `
+🔄 **Cross-Branch Coordination: ${coordinationType.toUpperCase()}**
+
+**Branches**: ${branches.join(', ')}
+**Status**: ${status}
+**Details**: ${JSON.stringify(details, null, 2)}
+**Timestamp**: ${new Date().toISOString()}
+        `;
+        
+        return await this.sendMessage(message);
+    }
+
+    async notifyBranchAwareWorkflow(sessionId, workflowType, branches, agentResults = {}) {
+        const successCount = Object.values(agentResults).filter(r => r.success !== false).length;
+        const totalCount = Object.keys(agentResults).length;
+        
+        const message = `
+🤖 **Branch-Aware Workflow Complete**
+
+**Session**: ${sessionId}
+**Type**: ${workflowType}
+**Branches**: ${branches.join(', ')}
+**Success Rate**: ${successCount}/${totalCount}
+**Agent Results**: ${Object.keys(agentResults).join(', ')}
+**Timestamp**: ${new Date().toISOString()}
+        `;
+        
+        return await this.sendMessage(message);
+    }
     
     generateStatusUpdate(sentMessage, context) {
         return `🔄 Status Update: Communication completed at ${new Date().toLocaleTimeString()}`;
