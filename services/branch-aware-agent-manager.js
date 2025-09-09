@@ -27,6 +27,9 @@ class BranchAwareAgentManager {
         // Agent types that can be created per branch
         this.supportedAgentTypes = ['github', 'security', 'code', 'deploy', 'comm'];
         
+        // Communication agent for Slack notifications
+        this.commAgent = null;
+        
         this.initialized = false;
     }
 
@@ -61,6 +64,10 @@ class BranchAwareAgentManager {
 
         // Create branch tracking table if not exists
         await this.createBranchTrackingTable();
+
+        // Initialize communication agent for Slack notifications
+        this.commAgent = new CommunicationAgent(`branch-manager-${Date.now()}`);
+        await this.commAgent.initialize(this.dbManager);
 
         this.initialized = true;
     }
@@ -152,6 +159,18 @@ class BranchAwareAgentManager {
             });
 
             console.log(`✅ Branch ${branchName} created with ${agents.size} agents`);
+            
+            // Send Slack notification for branch creation
+            try {
+                await this.commAgent.notifyBranchOperation('created', branchName, repository, {
+                    owner,
+                    status: 'created',
+                    agents: Array.from(agents.keys()),
+                    sha: baseRef.object.sha
+                });
+            } catch (error) {
+                console.log(`📱 Slack notification failed: ${error.message}`);
+            }
             
             return {
                 branchName,
@@ -400,12 +419,27 @@ class BranchAwareAgentManager {
             }
         }
 
-        return {
+        const coordinationResult = {
             coordinationTask,
             branches,
             results: Object.fromEntries(branchResults),
             summary: this.generateCoordinationSummary(branchResults)
         };
+
+        // Send Slack notification for cross-branch coordination
+        try {
+            const successCount = Array.from(branchResults.values()).filter(r => !r.error).length;
+            const status = successCount === branches.length ? 'completed' : `${successCount}/${branches.length} successful`;
+            
+            await this.commAgent.notifyCrossBranchCoordination('sync', branches, status, {
+                conflicts: Array.from(branchResults.values()).filter(r => r.error).length,
+                resolved: successCount
+            });
+        } catch (error) {
+            console.log(`📱 Cross-branch coordination Slack notification failed: ${error.message}`);
+        }
+
+        return coordinationResult;
     }
 
     /**
