@@ -8,6 +8,7 @@ const { Factor3ContextManager } = require('../factor3-context-manager');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { TwelveFactorCompliance } = require('../12-factor-compliance-tracker');
 const { MemoryManager } = require('../memory/memory-manager');
+const DocumentationService = require('../services/documentation-service');
 
 class BaseAgent {
     constructor(agentName, sessionId, config = {}) {
@@ -35,6 +36,9 @@ class BaseAgent {
         
         // Memory system for learning and verification
         this.memoryManager = new MemoryManager();
+        
+        // Documentation intelligence service
+        this.docs = DocumentationService.getInstance();
         
         // Initialize context
         this.contextManager.addAgentEvent(agentName, 'initialized', {
@@ -160,14 +164,35 @@ class BaseAgent {
                 result: result
             });
             
+            // Record successful pattern for documentation learning
+            this.docs.recordSuccessPattern(this.agentName, stepName, {
+                success: true,
+                context: { step: stepName, index: currentIndex }
+            });
+            
             return result;
         } catch (error) {
+            // Get intelligent documentation suggestions for this error
+            const docSuggestions = await this.docs.getSuggestionsForError(error, {
+                agent: this.agentName,
+                step: stepName,
+                index: currentIndex
+            });
+            
+            // Enhanced error with documentation context
+            const enhancedError = new Error(error.message);
+            enhancedError.originalError = error;
+            enhancedError.documentationSuggestions = docSuggestions;
+            enhancedError.agentContext = { agent: this.agentName, step: stepName };
+            
             this.contextManager.addAgentEvent(this.agentName, 'step_failed', {
                 step: stepName,
                 index: currentIndex,
-                error: error.message
+                error: error.message,
+                documentation_suggestions: docSuggestions.map(d => d.heading)
             });
-            throw error;
+            
+            throw enhancedError;
         }
     }
 
@@ -304,6 +329,29 @@ class BaseAgent {
             },
             timestamp: Date.now()
         };
+    }
+
+    /**
+     * Documentation intelligence methods
+     */
+    async getDocumentation(query) {
+        return await this.docs.quickSearch(query, 3);
+    }
+    
+    getDocumentationSnippet(topic) {
+        return this.docs.getContextSnippet(topic);
+    }
+    
+    async getContextualSuggestions() {
+        return await this.docs.getSuggestionsForContext(this.agentName, this.currentStep, {
+            progress: this.progress,
+            executionSteps: this.executionSteps
+        });
+    }
+    
+    async getProactiveDocumentation() {
+        const completedSteps = this.executionSteps.slice(0, this.executionSteps.indexOf(this.currentStep));
+        return await this.docs.getProactiveDocumentation(this.agentName, this.currentStep, completedSteps);
     }
 
     /**

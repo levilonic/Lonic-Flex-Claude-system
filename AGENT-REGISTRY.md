@@ -6,7 +6,7 @@
 
 | Agent | Status | Test Command | Capabilities | Dependencies |
 |-------|--------|--------------|-------------|--------------|
-| BaseAgent | ✅ WORKING | `npm run demo-base-agent` | Core workflow, SQLite, memory | None |
+| BaseAgent | ✅ WORKING | `npm run demo-base-agent` | Core workflow, SQLite, memory, **documentation intelligence** | None |
 | DeployAgent | ❌ BROKEN | `npm run demo-deploy-agent` | Docker deployments, health checks | Docker Engine |
 | GitHubAgent | ✅ WORKING | `npm run demo-github-agent` | PR/issue management, API calls | GITHUB_TOKEN |
 | SecurityAgent | ⚠️ UNVERIFIED | `npm run demo-security-agent` | Vulnerability scanning | Unknown |
@@ -28,6 +28,9 @@
 - Context XML generation for handoffs
 - Progress tracking and callbacks
 - Error handling with rollback
+- **Documentation intelligence service** (sub-100ms searches)
+- **Context-aware error suggestions**
+- **Proactive documentation recommendations**
 
 **Dependencies**: None (self-contained)  
 **Integration Points**: All other agents extend this base

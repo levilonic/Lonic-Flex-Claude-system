@@ -85,6 +85,9 @@ class GitHubAgent extends BaseAgent {
         results.auth = await this.executeStep('authenticate_github', async () => {
             if (progressCallback) progressCallback(12, 'authenticating with GitHub...');
             
+            // Get contextual documentation for GitHub authentication
+            const authDocs = await this.getContextualSuggestions();
+            
             if (!this.githubConfig.token) {
                 throw new Error('GitHub token not provided');
             }
@@ -99,13 +102,16 @@ class GitHubAgent extends BaseAgent {
             
             await this.logEvent('github_authenticated', {
                 user: user.login,
-                user_id: user.id
+                user_id: user.id,
+                documentation_available: authDocs.length > 0,
+                doc_suggestions: authDocs.map(d => d.heading)
             });
             
             return {
                 authenticated: true,
                 user: user.login,
-                rate_limit: await this.getRateLimit()
+                rate_limit: await this.getRateLimit(),
+                documentation_context: authDocs
             };
         }, 0);
         

@@ -6,6 +6,7 @@ const { CodeAgent } = require('./agents/code-agent');
 const { DeployAgent } = require('./agents/deploy-agent');
 const { CommAgent } = require('./agents/comm-agent');
 const { SQLiteManager } = require('./database/sqlite-manager');
+const DocumentationService = require('./services/documentation-service');
 
 /**
  * Multi-Agent Core Coordination Engine
@@ -18,6 +19,7 @@ class MultiAgentCore {
         this.sessionState = null;
         this.contextHistory = [];
         this.dbManager = new SQLiteManager();
+        this.docs = DocumentationService.getInstance();
         this.isInitialized = false;
     }
 
@@ -147,16 +149,61 @@ class MultiAgentCore {
     /**
      * Update session context following Factor 3 (efficient XML format)
      */
-    updateSessionContext(agentName, context) {
+    async updateSessionContext(agentName, context) {
+        // Get documentation suggestions for next agent in workflow
+        const nextAgentSuggestions = await this.getNextAgentDocumentation(agentName, context);
+        
         const contextEntry = {
             timestamp: Date.now(),
             agent: agentName,
             context: context,
-            sessionPhase: this.sessionState.currentPhase
+            sessionPhase: this.sessionState.currentPhase,
+            documentation_context: nextAgentSuggestions
         };
         
         this.contextHistory.push(contextEntry);
         this.sessionState.currentPhase = agentName;
+        
+        // Share documentation context with the next agent if available
+        if (nextAgentSuggestions.length > 0) {
+            this.sessionState.shared_documentation = nextAgentSuggestions;
+        }
+    }
+
+    /**
+     * Get documentation suggestions for the next agent in workflow
+     */
+    async getNextAgentDocumentation(currentAgent, context) {
+        // Predict what the next agent might need based on current results
+        let nextAgentType = this.predictNextAgent(currentAgent, context);
+        
+        if (!nextAgentType) return [];
+        
+        try {
+            const suggestions = await this.docs.getSuggestionsForContext(nextAgentType, 'initialization', {
+                previousAgent: currentAgent,
+                handoffContext: context
+            });
+            
+            return suggestions;
+        } catch (error) {
+            console.error('Failed to get next agent documentation:', error.message);
+            return [];
+        }
+    }
+    
+    /**
+     * Predict next agent based on current workflow
+     */
+    predictNextAgent(currentAgent, context) {
+        const workflowMap = {
+            'github': 'security',
+            'security': 'code', 
+            'code': 'deploy',
+            'deploy': 'comm'
+        };
+        
+        return workflowMap[currentAgent] || null;
     }
 
     /**
