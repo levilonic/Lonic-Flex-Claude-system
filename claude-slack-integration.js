@@ -417,6 +417,61 @@ class SlackIntegration {
     }
 
     /**
+     * Send workflow failure message
+     */
+    async sendWorkflowFailed(sessionId, error, client) {
+        const workflow = this.activeWorkflows.get(sessionId);
+        if (!workflow) return;
+
+        const errorBlocks = [
+            {
+                type: 'header',
+                text: {
+                    type: 'plain_text',
+                    text: `❌ Workflow Failed`
+                }
+            },
+            {
+                type: 'section',
+                fields: [
+                    {
+                        type: 'mrkdwn',
+                        text: `*Session:* ${sessionId.substring(0, 20)}...`
+                    },
+                    {
+                        type: 'mrkdwn',
+                        text: `*Error:* ${error.message || 'Unknown error'}`
+                    }
+                ]
+            },
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `The workflow encountered an error and could not complete. You can try running the command again.`
+                }
+            }
+        ];
+
+        try {
+            await client.chat.update({
+                channel: workflow.channelId,
+                ts: workflow.messageTs,
+                blocks: errorBlocks
+            });
+        } catch (updateError) {
+            // If update fails, send a new message
+            await client.chat.postMessage({
+                channel: workflow.channelId,
+                text: `❌ Workflow ${sessionId.substring(0, 8)}... failed: ${error.message}`,
+                blocks: errorBlocks
+            });
+        }
+
+        this.activeWorkflows.delete(sessionId);
+    }
+
+    /**
      * Check if workflow requires approval
      */
     workflowRequiresApproval(workflowType) {
