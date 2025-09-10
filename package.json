@@ -78,7 +78,11 @@
     "demo-github-projects": "node services/github-projects-manager.js",
     "demo-issue-management": "node services/issue-management-service.js",
     "demo-milestone-integration": "node services/milestone-integration-service.js",
-    "demo-workflow-templates": "node services/workflow-template-service.js"
+    "demo-workflow-templates": "node services/workflow-template-service.js",
+    "test-base-agent": "node test-base-agent.js",
+    "test-integration": "node test-integration.js",
+    "test-phase7": "npm run test-base-agent && npm run test-integration",
+    "test-all-systems": "npm run test-phase7 && node test-universal-context.js && node test-phase3a-integration.js && node test-long-term-persistence.js"
   },
   "keywords": [
     "ai-agents",

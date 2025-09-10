@@ -24,31 +24,31 @@ class LongTermPersistence {
             healthCheckInterval: 24 * 60 * 60 * 1000 // Daily health checks
         };
         
-        // Archive levels for progressive compression
+        // Archive levels for progressive compression (optimized for data integrity)
         this.archiveLevels = {
             active: {
                 name: 'Active',
                 ageThreshold: 0,
-                compressionRatio: 0.7, // Session default
+                compressionRatio: 0.85, // Minimal compression to preserve integrity
                 description: 'Currently active contexts'
             },
             dormant: {
                 name: 'Dormant', 
                 ageThreshold: 7 * 24 * 60 * 60 * 1000, // 7 days
-                compressionRatio: 0.5,
+                compressionRatio: 0.75, // Light compression
                 description: 'Inactive for a week, light compression'
             },
             sleeping: {
                 name: 'Sleeping',
                 ageThreshold: 30 * 24 * 60 * 60 * 1000, // 30 days
-                compressionRatio: 0.3,
+                compressionRatio: 0.65, // Moderate compression
                 description: 'Inactive for a month, moderate compression'
             },
             deep_sleep: {
                 name: 'Deep Sleep',
                 ageThreshold: 90 * 24 * 60 * 60 * 1000, // 90 days
-                compressionRatio: 0.2,
-                description: 'Long-term archive, maximum compression'
+                compressionRatio: 0.5, // Maximum safe compression with integrity preservation
+                description: 'Long-term archive, balanced compression with integrity'
             }
         };
         
@@ -234,30 +234,43 @@ class LongTermPersistence {
      * Determine appropriate archive level based on context age
      */
     determineArchiveLevel(age) {
-        const levels = Object.values(this.archiveLevels).reverse(); // Check from oldest to newest
+        const days = age / (24 * 60 * 60 * 1000);
         
-        for (const level of levels) {
-            if (age >= level.ageThreshold) {
-                return level;
-            }
+        // Determine archive level based on age ranges
+        if (days >= 90) {
+            return this.archiveLevels.deep_sleep; // 90+ days
+        } else if (days >= 30) {
+            return this.archiveLevels.sleeping;   // 30-89 days
+        } else if (days >= 7) {
+            return this.archiveLevels.dormant;    // 7-29 days
+        } else {
+            return this.archiveLevels.active;     // 0-6 days
         }
-        
-        return this.archiveLevels.active;
     }
 
     /**
      * Apply progressive compression based on archive level
      */
     async applyProgressiveCompression(contextXml, targetCompression) {
-        if (targetCompression >= 0.7) {
-            // Light compression - just remove resolved errors
-            return await this.contextPruner.smartPrune(contextXml, 1 - targetCompression);
-        } else if (targetCompression >= 0.3) {
-            // Moderate compression - smart pruning with event consolidation
-            return await this.contextPruner.smartPrune(contextXml, 1 - targetCompression);
+        // Conservative compression strategy prioritizing data integrity
+        
+        if (targetCompression >= 0.8) {
+            // Minimal compression - preserve 95%+ integrity
+            const reductionTarget = Math.min(0.15, 1 - targetCompression); // Cap at 15% reduction
+            return await this.contextPruner.smartPrune(contextXml, reductionTarget);
+        } else if (targetCompression >= 0.65) {
+            // Light compression - preserve essential events
+            const reductionTarget = Math.min(0.25, 1 - targetCompression); // Cap at 25% reduction
+            return await this.contextPruner.smartPrune(contextXml, reductionTarget);
+        } else if (targetCompression >= 0.5) {
+            // Moderate compression - careful pruning with essential event preservation
+            const reductionTarget = Math.min(0.35, 1 - targetCompression); // Cap at 35% reduction
+            return await this.contextPruner.smartPrune(contextXml, reductionTarget);
         } else {
-            // Deep compression - aggressive pruning for long-term storage
-            return await this.contextPruner.emergencyPrune(contextXml, 1 - targetCompression);
+            // Deep compression - maximum safe compression while preserving critical data
+            const reductionTarget = Math.min(0.45, 1 - targetCompression); // Cap at 45% reduction
+            // Always use smart pruning to preserve essential events
+            return await this.contextPruner.smartPrune(contextXml, reductionTarget);
         }
     }
 

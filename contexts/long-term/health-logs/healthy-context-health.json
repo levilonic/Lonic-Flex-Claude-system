@@ -1,0 +1,290 @@
+[
+  {
+    "timestamp": "2025-09-10T13:55:58.538Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T14:13:23.011Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T14:13:50.050Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T14:13:55.996Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T14:14:36.414Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T14:21:24.009Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T14:27:25.179Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T14:27:59.753Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T14:28:36.616Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T14:46:49.310Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T15:08:59.754Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T15:09:20.613Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T15:11:39.390Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T15:11:45.229Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T15:12:45.366Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T15:33:37.785Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T17:31:34.819Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  },
+  {
+    "timestamp": "2025-09-10T17:55:26.757Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853589196873,
+    "scores": {
+      "freshness": 0.75,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
+  }
+]

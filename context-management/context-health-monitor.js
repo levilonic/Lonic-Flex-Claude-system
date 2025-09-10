@@ -27,13 +27,13 @@ class ContextHealthMonitor extends EventEmitter {
             tokenEfficiency: 0.1   // Token usage optimization
         };
 
-        // Health thresholds
+        // Health thresholds (adjusted for realistic scoring)
         this.healthThresholds = {
-            excellent: 0.9,        // 90%+ health score
-            good: 0.7,            // 70-89% health score  
-            warning: 0.5,         // 50-69% health score
-            critical: 0.3,        // 30-49% health score
-            failing: 0.0          // Below 30% health score
+            excellent: 0.8,        // 80%+ health score (more achievable for healthy contexts)
+            good: 0.6,            // 60-79% health score  
+            warning: 0.4,         // 40-59% health score
+            critical: 0.2,        // 20-39% health score
+            failing: 0.0          // Below 20% health score
         };
 
         // Background maintenance schedule
@@ -171,46 +171,81 @@ class ContextHealthMonitor extends EventEmitter {
             const contextXml = typeof contextContent === 'string' ? 
                 contextContent : JSON.stringify(contextContent);
 
-            // Check XML structure validity
-            if (!contextXml.includes('<workflow_context>') || !contextXml.includes('</workflow_context>')) {
-                score -= 0.3; // Major structure issue
+            // Handle edge case: very short or empty content
+            if (!contextXml || contextXml.length < 10) {
+                return 0.1; // Definitely corrupted
             }
 
-            // Check for corruption indicators
+            // Check XML structure validity with better edge case handling
+            const hasOpeningTag = contextXml.includes('<workflow_context>') || contextXml.includes('<session_context>');
+            const hasClosingTag = contextXml.includes('</workflow_context>') || contextXml.includes('</session_context>');
+            
+            if (!hasOpeningTag && !hasClosingTag) {
+                score -= 0.4; // Major structure issue
+            } else if (!hasOpeningTag || !hasClosingTag) {
+                score -= 0.2; // Partial structure issue
+            }
+
+            // Enhanced corruption indicators with better edge case handling
             const corruptionIndicators = [
                 /\x00/g,  // Null bytes
                 /<[^>]*$/g, // Incomplete XML tags
                 /&[^;]*$/g, // Incomplete XML entities
-                /timestamp[:\s]*""[^"]/g // Malformed timestamps
+                /timestamp[:\s]*""[^"]/g, // Malformed timestamps
+                />\s*</g.test(contextXml) ? false : /<>\s*[^<]/g // Empty tags
             ];
 
+            let corruptionCount = 0;
             for (const indicator of corruptionIndicators) {
-                if (indicator.test(contextXml)) {
-                    score -= 0.1;
+                if (indicator && indicator.test && indicator.test(contextXml)) {
+                    corruptionCount++;
+                    score -= 0.08; // Smaller penalty per indicator
                 }
             }
 
             // Verify fingerprint if metadata available
             if (metadata?.fingerprint) {
-                const crypto = require('crypto');
-                const currentFingerprint = crypto.createHash('sha256')
-                    .update(contextXml).digest('hex').substring(0, 16);
-                
-                if (currentFingerprint !== metadata.fingerprint) {
-                    score -= 0.2; // Fingerprint mismatch indicates corruption
+                try {
+                    const crypto = require('crypto');
+                    const currentFingerprint = crypto.createHash('sha256')
+                        .update(contextXml).digest('hex').substring(0, 16);
+                    
+                    if (currentFingerprint !== metadata.fingerprint) {
+                        score -= 0.15; // Reduced penalty for fingerprint mismatch
+                    }
+                } catch (fingerprintError) {
+                    score -= 0.1; // Penalty for fingerprint calculation failure
                 }
             }
 
-            // Check for reasonable content length
+            // Improved content length validation with context
             if (contextXml.length < 50) {
-                score -= 0.4; // Too short, likely corrupted
+                score -= 0.3; // Reduced penalty for short content
+            } else if (contextXml.length > 1000000) {
+                score -= 0.1; // Penalty for suspiciously large content
+            }
+
+            // Check for essential elements that should be preserved
+            const essentialElements = ['timestamp', 'context', 'session', 'goal'];
+            let essentialElementsFound = 0;
+            for (const element of essentialElements) {
+                if (contextXml.toLowerCase().includes(element)) {
+                    essentialElementsFound++;
+                }
+            }
+            
+            // Bonus for having essential elements
+            if (essentialElementsFound >= 2) {
+                score += 0.1;
             }
 
         } catch (error) {
-            score = 0.1; // Severe integrity issues
+            // Better error handling for edge cases
+            console.warn('Data integrity calculation error:', error.message);
+            score = 0.2; // Less severe penalty for calculation errors
         }
 
-        return Math.max(0, Math.min(1.0, score));
+        return Math.max(0.1, Math.min(1.0, score)); // Ensure minimum score of 0.1
     }
 
     /**

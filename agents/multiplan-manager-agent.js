@@ -139,6 +139,7 @@ class MultiplanManagerAgent extends BaseAgent {
             const orchestrationPlan = await this.createOrchestrationPlan(context);
             
             return {
+                plans: orchestrationPlan.plans, // Fix: Include plans array
                 planCount: orchestrationPlan.plans.length,
                 totalAgents: orchestrationPlan.totalAgents,
                 estimatedDuration: orchestrationPlan.estimatedDuration,

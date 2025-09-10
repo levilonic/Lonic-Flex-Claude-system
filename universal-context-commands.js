@@ -271,7 +271,7 @@ class UniversalContextCommands {
      */
     async resumeExistingContext(contextName) {
         // First check active contexts
-        const context = Factor3ContextManager.getContextById(contextName);
+        let context = Factor3ContextManager.getContextById(contextName);
         if (context) {
             // Generate context summary for resumption
             const summary = JSON.parse(context.generateContextSummary());
@@ -285,6 +285,28 @@ class UniversalContextCommands {
             });
 
             // Inject context for resumption (this would integrate with Claude Code)
+            const resumptionContext = await this.generateResumptionContext(context, summary);
+
+            return this.formatResumeResponse(contextName, context.contextScope, summary, resumptionContext);
+        }
+
+        // If not in active registry, try to load from disk
+        console.log('🔍 Context not in active registry, scanning disk...');
+        context = await this.loadContextFromDisk(contextName);
+        if (context) {
+            // Context loaded from disk, proceed with resumption
+            const summary = JSON.parse(context.generateContextSummary());
+            
+            // Log resumption from disk
+            context.addEvent('context_resumed_from_disk', {
+                context_id: contextName,
+                resumed_at: Date.now(),
+                loaded_from: 'disk',
+                events_preserved: summary.compressed_events,
+                compression_ratio: summary.compression_ratio
+            });
+
+            // Inject context for resumption
             const resumptionContext = await this.generateResumptionContext(context, summary);
 
             return this.formatResumeResponse(contextName, context.contextScope, summary, resumptionContext);
@@ -351,9 +373,14 @@ class UniversalContextCommands {
             }
         }
 
-        const context = Factor3ContextManager.getContextById(targetContextId);
+        let context = Factor3ContextManager.getContextById(targetContextId);
         if (!context) {
-            throw new Error(`Context '${targetContextId}' not found`);
+            // If not in active registry, try to load from disk
+            console.log('🔍 Context not in active registry, loading from disk...');
+            context = await this.loadContextFromDisk(targetContextId);
+            if (!context) {
+                throw new Error(`Context '${targetContextId}' not found`);
+            }
         }
 
         // Save context state
@@ -606,6 +633,76 @@ class UniversalContextCommands {
             context_stack: context.contextStack,
             summary: `Context: ${context.contextScope} '${context.contextId}' - ${context.currentTask || 'No current task'}`
         };
+    }
+
+    /**
+     * Load context from disk and register it in active registry
+     */
+    async loadContextFromDisk(contextName) {
+        const { Factor3ContextManager } = require('./factor3-context-manager');
+        
+        // Try both project and session scopes
+        const scopes = ['project', 'session'];
+        
+        for (const scopeType of scopes) {
+            try {
+                const contextPath = this.scopeManager.generateContextPath(contextName, scopeType);
+                const projectMdPath = path.join(contextPath, 'PROJECT.md');
+                
+                // Check if context exists on disk
+                try {
+                    await fs.access(projectMdPath);
+                } catch (error) {
+                    continue; // Try next scope
+                }
+                
+                // Read PROJECT.md to get context metadata
+                const projectMdContent = await fs.readFile(projectMdPath, 'utf-8');
+                
+                // Parse basic project info (this is a simple parser)
+                const visionMatch = projectMdContent.match(/## Project Vision\s*\n([^\n#]+)/);
+                const goalMatch = projectMdContent.match(/## Project Goal\s*\n([^\n#]+)/);
+                
+                const vision = visionMatch ? visionMatch[1].trim() : '';
+                const goal = goalMatch ? goalMatch[1].trim() : '';
+                
+                // Create new context manager instance with loaded data
+                const context = Factor3ContextManager.createContext({
+                    contextId: contextName,
+                    contextScope: scopeType
+                });
+                
+                // Initialize with loaded metadata
+                context.addImportantEvent('context_loaded_from_disk', {
+                    context_id: contextName,
+                    scope: scopeType,
+                    loaded_from: contextPath,
+                    vision: vision,
+                    goal: goal,
+                    loaded_at: Date.now()
+                }, 8);
+                
+                // Set current task based on goal if available
+                if (goal && goal !== 'Define project goal') {
+                    context.currentTask = goal;
+                }
+                
+                // Register in global registry
+                if (!global.LONICFLEX_CONTEXT_REGISTRY) {
+                    global.LONICFLEX_CONTEXT_REGISTRY = new Map();
+                }
+                global.LONICFLEX_CONTEXT_REGISTRY.set(contextName, context);
+                
+                console.log(`✅ Context '${contextName}' loaded from disk (${scopeType} scope)`);
+                return context;
+                
+            } catch (error) {
+                console.log(`⚠️ Could not load context '${contextName}' from ${scopeType} scope: ${error.message}`);
+                continue;
+            }
+        }
+        
+        return null; // Context not found on disk
     }
 
     /**

@@ -74,7 +74,7 @@ class ContextPruner {
      * Smart prune - gentle reduction with preservation of important context
      */
     async smartPrune(contextXml, targetReduction = 0.3) {
-        console.log(`🧠 Smart pruning: target ${(targetReduction * 100)}% reduction`);
+        console.log(`🧠 Smart pruning: target ${(targetReduction * 100).toFixed(0)}% reduction`);
         
         const originalTokens = await this.tokenCounter.countContextTokens(contextXml);
         console.log(`📊 Original context: ${originalTokens.total_tokens} tokens`);
@@ -82,19 +82,23 @@ class ContextPruner {
         const events = this.parseContextXml(contextXml);
         let prunedEvents = events;
         
-        // Apply strategies in order of safety
+        // Identify essential events that must be preserved
+        const essentialEvents = this.identifyEssentialEvents(prunedEvents);
+        console.log(`🔒 Protected ${essentialEvents.size} essential events from pruning`);
+        
+        // Apply strategies in order of safety, respecting essential events
         for (const strategy of this.strategies) {
             const beforeCount = prunedEvents.length;
             
             switch (strategy) {
                 case 'remove_resolved_errors':
-                    prunedEvents = this.removeResolvedErrors(prunedEvents);
+                    prunedEvents = this.removeResolvedErrors(prunedEvents, essentialEvents);
                     break;
                 case 'compact_old_events':
-                    prunedEvents = this.compactOldEvents(prunedEvents);
+                    prunedEvents = this.compactOldEvents(prunedEvents, essentialEvents);
                     break;
                 case 'summarize_repetitive_events':
-                    prunedEvents = this.summarizeRepetitiveEvents(prunedEvents);
+                    prunedEvents = this.summarizeRepetitiveEvents(prunedEvents, essentialEvents);
                     break;
                 case 'preserve_recent_context':
                     // This is handled in other strategies
@@ -121,8 +125,44 @@ class ContextPruner {
         const finalTokens = await this.tokenCounter.countContextTokens(finalXml);
         const reduction = 1 - (finalTokens.total_tokens / originalTokens.total_tokens);
         
+        // Enforce minimum viable context preservation
+        const minViableSize = Math.max(100, originalTokens.total_tokens * 0.05); // At least 5% or 100 tokens
+        
+        if (finalTokens.total_tokens < minViableSize) {
+            console.log(`🛡️ Context too small after pruning (${finalTokens.total_tokens} tokens), preserving more content`);
+            
+            // Use original XML with minimal reduction to preserve integrity
+            const minimalReduction = Math.min(0.2, targetReduction); // Cap at 20% reduction max
+            const conservativePruning = await this.applyMinimalPruning(contextXml, minimalReduction);
+            
+            console.log(`✅ Conservative pruning applied for data integrity preservation`);
+            return conservativePruning;
+        }
+        
         console.log(`✅ Smart pruning complete: ${(reduction * 100).toFixed(1)}% reduction`);
         return finalXml;
+    }
+
+    /**
+     * Apply minimal pruning to preserve data integrity
+     */
+    async applyMinimalPruning(contextXml, targetReduction) {
+        // For data integrity preservation, return original XML with minimal changes
+        // Only remove whitespace and basic cleanup to ensure structure preservation
+        
+        // Remove excessive whitespace but preserve structure
+        const cleaned = contextXml
+            .replace(/\s+/g, ' ')           // Normalize whitespace
+            .replace(/>\s+</g, '><')        // Remove whitespace between tags
+            .trim();
+        
+        // Always preserve the essential XML structure
+        if (!cleaned.includes('<workflow_context>') && !cleaned.includes('<session_context>')) {
+            // If no structure, wrap in basic context
+            return `<workflow_context>\n${cleaned}\n</workflow_context>`;
+        }
+        
+        return cleaned;
     }
 
     /**
@@ -181,11 +221,58 @@ class ContextPruner {
     }
 
     /**
+     * Identify essential events that must be preserved during pruning
+     */
+    identifyEssentialEvents(events) {
+        const essentialEvents = new Set();
+        
+        // Define essential event types and patterns
+        const essentialPatterns = [
+            'test_event',
+            'github_action', 
+            'session_start',
+            'session_end',
+            'deployment',
+            'critical_error',
+            'context_restoration',
+            'workflow_context',
+            'session_context'
+        ];
+        
+        for (let i = 0; i < events.length; i++) {
+            const event = events[i];
+            
+            // Check if event type or content matches essential patterns
+            const isEssential = essentialPatterns.some(pattern => 
+                event.type === pattern || 
+                event.content.toLowerCase().includes(pattern.toLowerCase()) ||
+                (event.fullMatch && event.fullMatch.toLowerCase().includes(pattern.toLowerCase()))
+            );
+            
+            if (isEssential) {
+                essentialEvents.add(i);
+            }
+            
+            // Always preserve the most recent events
+            if (i >= events.length - 3) {
+                essentialEvents.add(i);
+            }
+        }
+        
+        return essentialEvents;
+    }
+
+    /**
      * Remove resolved errors and completed tasks (Factor 3 principle)
      */
-    removeResolvedErrors(events) {
+    removeResolvedErrors(events, essentialEvents = new Set()) {
         const beforeCount = events.length;
-        const filtered = events.filter(event => {
+        const filtered = events.filter((event, index) => {
+            // Never remove essential events
+            if (essentialEvents.has(index)) {
+                return true;
+            }
+            
             // Keep recent events even if resolved
             if (event.age < 5 * 60 * 1000) return true; // 5 minutes
             
@@ -199,42 +286,63 @@ class ContextPruner {
     }
 
     /**
-     * Compact old events into summaries
+     * Compact old events into summaries (respecting essential events)
      */
-    compactOldEvents(events) {
+    compactOldEvents(events, essentialEvents = new Set()) {
         const now = Date.now();
         const cutoffTime = now - this.compactAge;
         
-        const recentEvents = events.filter(event => event.timestamp > cutoffTime);
-        const oldEvents = events.filter(event => event.timestamp <= cutoffTime);
+        const recentEvents = [];
+        const compactableOldEvents = [];
+        const essentialOldEvents = [];
         
-        if (oldEvents.length === 0) {
+        events.forEach((event, index) => {
+            if (event.timestamp > cutoffTime) {
+                recentEvents.push(event);
+            } else if (essentialEvents.has(index)) {
+                essentialOldEvents.push(event);
+            } else {
+                compactableOldEvents.push(event);
+            }
+        });
+        
+        if (compactableOldEvents.length === 0) {
             return events;
         }
         
-        // Create summary of old events
-        const summary = this.createEventSummary(oldEvents);
+        // Create summary of compactable old events only
+        const summary = this.createEventSummary(compactableOldEvents);
         const summaryEvent = {
             type: 'context_summary',
-            content: `Events compacted: ${oldEvents.length} events from ${new Date(oldEvents[0].timestamp).toISOString()} to ${new Date(oldEvents[oldEvents.length - 1].timestamp).toISOString()}\n${summary}`,
+            content: `Events compacted: ${compactableOldEvents.length} events from ${new Date(compactableOldEvents[0].timestamp).toISOString()} to ${new Date(compactableOldEvents[compactableOldEvents.length - 1].timestamp).toISOString()}\n${summary}`,
             fullMatch: `<context_summary>\n${summary}\n</context_summary>`,
             timestamp: new Date(cutoffTime),
             age: now - cutoffTime,
             resolved: false
         };
         
-        console.log(`📦 Compacted ${oldEvents.length} old events into summary`);
-        return [summaryEvent, ...recentEvents];
+        console.log(`📦 Compacted ${compactableOldEvents.length} old events into summary`);
+        // Return essential old events + summary + recent events
+        return [...essentialOldEvents, summaryEvent, ...recentEvents];
     }
 
     /**
-     * Summarize repetitive or similar events
+     * Summarize repetitive or similar events (respecting essential events)
      */
-    summarizeRepetitiveEvents(events) {
+    summarizeRepetitiveEvents(events, essentialEvents = new Set()) {
         const eventGroups = {};
         const uniqueEvents = [];
+        const preservedEvents = [];
         
-        for (const event of events) {
+        for (let i = 0; i < events.length; i++) {
+            const event = events[i];
+            
+            // Essential events are never consolidated
+            if (essentialEvents.has(i)) {
+                preservedEvents.push(event);
+                continue;
+            }
+            
             const key = this.getEventGroupKey(event);
             
             if (!eventGroups[key]) {
@@ -245,7 +353,7 @@ class ContextPruner {
             eventGroups[key].push(event);
         }
         
-        // Find groups with multiple similar events
+        // Find groups with multiple similar events (excluding essential events)
         const consolidated = [];
         
         for (const event of uniqueEvents) {
@@ -265,12 +373,13 @@ class ContextPruner {
             }
         }
         
-        const reduction = events.length - consolidated.length;
+        const reduction = events.length - (consolidated.length + preservedEvents.length);
         if (reduction > 0) {
             console.log(`🔄 Consolidated ${reduction} repetitive events`);
         }
         
-        return consolidated;
+        // Merge preserved essential events with consolidated events, maintaining relative order
+        return [...preservedEvents, ...consolidated].sort((a, b) => a.timestamp - b.timestamp);
     }
 
     /**
