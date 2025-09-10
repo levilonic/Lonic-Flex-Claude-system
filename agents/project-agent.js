@@ -40,7 +40,7 @@ class ProjectAgent extends BaseAgent {
             this.executionSteps = [];
 
             // Step 1: Validate action
-            await this.recordStep('validate_action', async () => {
+            await this.executeStep('validate_action', async () => {
                 if (!context.action || !this.supportedActions.includes(context.action)) {
                     throw new Error(`Unsupported action: ${context.action}`);
                 }
@@ -48,7 +48,7 @@ class ProjectAgent extends BaseAgent {
             });
 
             // Step 2: Initialize project directory
-            await this.recordStep('initialize_directories', async () => {
+            await this.executeStep('initialize_directories', async () => {
                 await this.ensureProjectDirectories();
                 return { directories_ready: true };
             });
@@ -85,7 +85,7 @@ class ProjectAgent extends BaseAgent {
             }
 
             // Step 8: Finalize and return result
-            await this.recordStep('finalize_result', async () => {
+            await this.executeStep('finalize_result', async () => {
                 this.result = {
                     action: context.action,
                     success: true,
@@ -149,7 +149,7 @@ class ProjectAgent extends BaseAgent {
      */
     async executeCreateProject(context) {
         // Step 3: Create project identity (noumena)
-        const projectIdentity = await this.recordStep('create_project_identity', async () => {
+        const projectIdentity = await this.executeStep('create_project_identity', async () => {
             const projectName = context.projectName || `project-${Date.now()}`;
             const projectDir = path.join(this.config.projectsDir, projectName);
             
@@ -168,7 +168,7 @@ class ProjectAgent extends BaseAgent {
         });
 
         // Step 4: Create project in database
-        const databaseEntry = await this.recordStep('create_database_entry', async () => {
+        const databaseEntry = await this.executeStep('create_database_entry', async () => {
             const projectId = await this.dbManager.createProject(
                 projectIdentity.project_name,
                 context.goal || 'New project',
@@ -192,7 +192,7 @@ class ProjectAgent extends BaseAgent {
      */
     async executeLoadProject(context) {
         // Step 3: Load project from database
-        const projectData = await this.recordStep('load_project_data', async () => {
+        const projectData = await this.executeStep('load_project_data', async () => {
             const project = await this.dbManager.getProject(context.projectName);
             if (!project) {
                 throw new Error(`Project not found: ${context.projectName}`);
@@ -201,7 +201,7 @@ class ProjectAgent extends BaseAgent {
         });
 
         // Step 4: Load project identity file
-        const projectIdentity = await this.recordStep('load_project_identity', async () => {
+        const projectIdentity = await this.executeStep('load_project_identity', async () => {
             const projectMdPath = path.join(projectData.project_dir, 'PROJECT.md');
             try {
                 const content = await fs.readFile(projectMdPath, 'utf8');
@@ -223,13 +223,13 @@ class ProjectAgent extends BaseAgent {
      */
     async executeSaveProjectState(context) {
         // Step 3: Get current session context
-        const sessionContext = await this.recordStep('get_session_context', async () => {
+        const sessionContext = await this.executeStep('get_session_context', async () => {
             const sessionData = await this.dbManager.getSession(this.sessionId);
             return sessionData;
         });
 
         // Step 4: Compress context for preservation
-        const compressedContext = await this.recordStep('compress_context', async () => {
+        const compressedContext = await this.executeStep('compress_context', async () => {
             // Use Factor 3 context manager for intelligent compression
             const contextSummary = this.contextManager.generateContextSummary();
             return {
@@ -240,7 +240,7 @@ class ProjectAgent extends BaseAgent {
         });
 
         // Step 5: Save to project sessions
-        const savedState = await this.recordStep('save_project_session', async () => {
+        const savedState = await this.executeStep('save_project_session', async () => {
             const saveResult = await this.dbManager.saveProjectSession(
                 context.projectId,
                 this.sessionId,
@@ -263,12 +263,12 @@ class ProjectAgent extends BaseAgent {
      */
     async executeListProjects(context) {
         // Step 3: Get projects from database
-        const projects = await this.recordStep('get_projects_list', async () => {
+        const projects = await this.executeStep('get_projects_list', async () => {
             return await this.dbManager.listProjects(context.limit || 10);
         });
 
         // Step 4: Format for display
-        const formattedProjects = await this.recordStep('format_projects', async () => {
+        const formattedProjects = await this.executeStep('format_projects', async () => {
             return projects.map(project => ({
                 name: project.name,
                 id: project.id,

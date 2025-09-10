@@ -438,6 +438,52 @@ class SQLiteManager {
     }
 
     /**
+     * Update agent with flexible data structure (used by ProjectAgent)
+     */
+    async updateAgent(agentId, updateData) {
+        const updates = { ...updateData };
+        
+        // Handle special fields
+        if (updates.result) {
+            updates.result_data = JSON.stringify(updates.result);
+            delete updates.result;
+        }
+        if (updates.error) {
+            updates.error_message = updates.error;
+            delete updates.error;
+        }
+        if (updates.completed_at) {
+            updates.completed_at = new Date(updates.completed_at).toISOString();
+        }
+        if (updates.failed_at) {
+            updates.completed_at = new Date(updates.failed_at).toISOString();
+            delete updates.failed_at;
+        }
+
+        // Auto-set timestamps based on status
+        if (updates.status === 'in_progress') {
+            updates.started_at = new Date().toISOString();
+        }
+        if (updates.status === 'completed' || updates.status === 'failed') {
+            updates.completed_at = new Date().toISOString();
+        }
+
+        const fields = [];
+        const values = [];
+
+        for (const [key, value] of Object.entries(updates)) {
+            fields.push(`${key} = ?`);
+            values.push(value);
+        }
+
+        fields.push('updated_at = CURRENT_TIMESTAMP');
+        values.push(agentId);
+
+        const sql = `UPDATE agents SET ${fields.join(', ')} WHERE id = ?`;
+        return await this.runSQL(sql, values);
+    }
+
+    /**
      * Get agents for session
      */
     async getSessionAgents(sessionId) {
@@ -613,7 +659,7 @@ class SQLiteManager {
         sql += ` ORDER BY last_active_at DESC LIMIT ?`;
         params.push(limit);
         
-        return await this.allSQL(sql, params);
+        return await this.getAllSQL(sql, params);
     }
 
     /**
@@ -721,7 +767,7 @@ class SQLiteManager {
         
         sql += ` ORDER BY importance DESC, created_at DESC`;
         
-        return await this.allSQL(sql, params);
+        return await this.getAllSQL(sql, params);
     }
 
     /**
@@ -735,7 +781,7 @@ class SQLiteManager {
                      ORDER BY ps.created_at DESC
                      LIMIT ?`;
         
-        return await this.allSQL(sql, [projectId, limit]);
+        return await this.getAllSQL(sql, [projectId, limit]);
     }
 
     /**

@@ -1,17 +1,55 @@
 /**
- * Factor 3: Own Your Context Window - Implementation
+ * Factor 3: Own Your Context Window - Universal Context System
  * Following 12-Factor Agents methodology to prevent auto-compact
- * Enhanced with real token counting and 40% threshold monitoring
+ * Enhanced with session/project scope management and universal context preservation
  */
 
 const { TokenCounter } = require('./context-management/token-counter');
 const { ContextWindowMonitor } = require('./context-management/context-window-monitor');
+
+/**
+ * Context Scope Types - Universal system for sessions and projects
+ */
+const CONTEXT_SCOPES = {
+    session: {
+        identity: null,           // No PROJECT.md needed
+        persistence: 'weeks',     // Temporary
+        scope: 'existing-system', // Works within current codebase
+        github: 'feature-branch', // Simple branch
+        slack: 'thread',         // Slack thread discussion
+        compression_ratio: 0.7   // More aggressive compression
+    },
+    
+    project: {
+        identity: 'PROJECT.md',   // Full noumena/phenomena
+        persistence: 'months',    // Long-term  
+        scope: 'isolated',        // Own worldview/goals
+        github: 'project-board',  // Full GitHub project
+        slack: 'channel',        // Dedicated channel
+        compression_ratio: 0.5   // Conservative compression
+    }
+};
 
 class Factor3ContextManager {
     constructor(options = {}) {
         this.events = [];
         this.currentContext = null;
         this.format = 'xml'; // Efficient custom format per Factor 3
+        
+        // Universal Context System
+        this.contextScope = options.contextScope || 'session';
+        this.contextId = options.contextId || `ctx_${Date.now()}`;
+        this.scopeConfig = CONTEXT_SCOPES[this.contextScope];
+        
+        // Context Stack for Tangent Handling  
+        this.contextStack = [];
+        this.currentTask = null;
+        
+        // Multi-Context Registry (shared across instances)
+        if (!global.LONICFLEX_CONTEXT_REGISTRY) {
+            global.LONICFLEX_CONTEXT_REGISTRY = new Map();
+        }
+        global.LONICFLEX_CONTEXT_REGISTRY.set(this.contextId, this);
         
         // Enhanced with real token counting
         this.tokenCounter = new TokenCounter(options.tokenCounter);
@@ -180,6 +218,146 @@ ${this.getCurrentContext()}
 ${instruction}`
             }
         ];
+    }
+
+    /**
+     * Universal context summary generation - works for sessions and projects
+     */
+    generateContextSummary() {
+        const compressionRatio = this.scopeConfig.compression_ratio;
+        const eventCount = Math.floor(this.events.length * (1 - compressionRatio));
+        const recentEvents = this.events.slice(-eventCount);
+        
+        const summary = {
+            context_id: this.contextId,
+            context_scope: this.contextScope,
+            scope_config: this.scopeConfig,
+            total_events: this.events.length,
+            compressed_events: recentEvents.length,
+            compression_ratio: compressionRatio,
+            recent_events: recentEvents.map(event => ({
+                type: event.type,
+                timestamp: event.timestamp,
+                summary: this.summarizeEvent(event),
+                importance: event.importance || 5
+            })),
+            context_stack: this.contextStack,
+            current_task: this.currentTask,
+            token_usage: this.tokenUsage,
+            context_health: this.currentContext?.prevents_autocompact ? 'healthy' : 'at_risk',
+            generated_at: Date.now()
+        };
+        
+        return JSON.stringify(summary, null, 2);
+    }
+
+    /**
+     * Push context for tangent handling (universal)
+     */
+    pushContext(tangentInfo) {
+        const contextFrame = {
+            task: this.currentTask,
+            timestamp: Date.now(),
+            events_count: this.events.length,
+            tangent_reason: tangentInfo.reason,
+            return_point: tangentInfo.returnPoint || 'Continue previous work'
+        };
+        
+        this.contextStack.push(contextFrame);
+        this.currentTask = tangentInfo.newTask;
+        
+        this.addEvent('context_push', {
+            from_task: contextFrame.task,
+            to_task: this.currentTask,
+            reason: tangentInfo.reason,
+            stack_depth: this.contextStack.length
+        });
+        
+        return contextFrame;
+    }
+
+    /**
+     * Pop context after tangent completion (universal) 
+     */
+    popContext(completionInfo) {
+        if (this.contextStack.length === 0) {
+            throw new Error('No context to pop - context stack is empty');
+        }
+        
+        const contextFrame = this.contextStack.pop();
+        const tangentTask = this.currentTask;
+        this.currentTask = contextFrame.task;
+        
+        this.addEvent('context_pop', {
+            completed_tangent: tangentTask,
+            returned_to: this.currentTask,
+            tangent_result: completionInfo.result,
+            new_assets: completionInfo.assets || [],
+            stack_depth: this.contextStack.length
+        });
+        
+        return contextFrame;
+    }
+
+    /**
+     * Get current context scope configuration
+     */
+    getScopeConfig() {
+        return {
+            scope: this.contextScope,
+            config: this.scopeConfig,
+            context_id: this.contextId,
+            stack_depth: this.contextStack.length,
+            current_task: this.currentTask
+        };
+    }
+
+    /**
+     * Upgrade context scope (session → project)
+     */
+    upgradeToProject(projectInfo) {
+        if (this.contextScope === 'project') {
+            throw new Error('Context is already a project');
+        }
+        
+        const oldScope = this.contextScope;
+        this.contextScope = 'project';
+        this.scopeConfig = CONTEXT_SCOPES.project;
+        
+        // Add upgrade event
+        this.addEvent('scope_upgrade', {
+            from_scope: oldScope,
+            to_scope: 'project',
+            project_info: projectInfo,
+            preserved_events: this.events.length,
+            upgrade_reason: projectInfo.reason
+        });
+        
+        return {
+            old_scope: oldScope,
+            new_scope: this.contextScope,
+            events_preserved: this.events.length,
+            context_id: this.contextId
+        };
+    }
+
+    /**
+     * Summarize an event for context preservation
+     */
+    summarizeEvent(event) {
+        const { type, data } = event;
+        switch (true) {
+            case type.includes('agent'):
+                return `Agent ${data.agent} performed ${data.action}`;
+            case type.includes('github'):
+                return `GitHub ${data.action} on ${data.repository}`;
+            case type.includes('slack'):
+                return `Slack message in ${data.channel}`;
+            case type.includes('database'):
+                return `Database operation: ${data.operation}`;
+            default:
+                return `Event type: ${type}`;
+        }
     }
 
     /**
@@ -378,9 +556,100 @@ ${instruction}`
         console.log('  - Automatic context pruning when approaching limits');
         console.log('  - Factor 3 XML format for auto-compact prevention');
     }
+
+    /**
+     * Static methods for multi-context management
+     */
+    static getAllActiveContexts() {
+        if (!global.LONICFLEX_CONTEXT_REGISTRY) {
+            return [];
+        }
+        
+        const contexts = [];
+        for (const [contextId, contextManager] of global.LONICFLEX_CONTEXT_REGISTRY) {
+            contexts.push({
+                id: contextId,
+                scope: contextManager.contextScope,
+                current_task: contextManager.currentTask,
+                events_count: contextManager.events.length,
+                stack_depth: contextManager.contextStack.length,
+                last_activity: contextManager.events.length > 0 ? 
+                    contextManager.events[contextManager.events.length - 1].timestamp : null
+            });
+        }
+        
+        return contexts;
+    }
+
+    static getContextById(contextId) {
+        if (!global.LONICFLEX_CONTEXT_REGISTRY) {
+            return null;
+        }
+        return global.LONICFLEX_CONTEXT_REGISTRY.get(contextId);
+    }
+
+    static createContext(options = {}) {
+        const contextId = options.contextId || `${options.contextScope || 'session'}_${Date.now()}`;
+        return new Factor3ContextManager({
+            ...options,
+            contextId
+        });
+    }
+
+    static removeContext(contextId) {
+        if (!global.LONICFLEX_CONTEXT_REGISTRY) {
+            return false;
+        }
+        return global.LONICFLEX_CONTEXT_REGISTRY.delete(contextId);
+    }
+
+    /**
+     * Add importance to events for better compression
+     */
+    addImportantEvent(eventType, data, importance = 8) {
+        return this.addEvent(eventType, {
+            ...data,
+            importance,
+            marked_important: true
+        });
+    }
+
+    /**
+     * Set current task for context tracking
+     */
+    setCurrentTask(taskDescription) {
+        const oldTask = this.currentTask;
+        this.currentTask = taskDescription;
+        
+        this.addEvent('task_change', {
+            from_task: oldTask,
+            to_task: taskDescription,
+            context_scope: this.contextScope
+        });
+        
+        return oldTask;
+    }
+
+    /**
+     * Get compression statistics
+     */
+    getCompressionStats() {
+        const totalEvents = this.events.length;
+        const compressionRatio = this.scopeConfig.compression_ratio;
+        const compressedEvents = Math.floor(totalEvents * (1 - compressionRatio));
+        
+        return {
+            total_events: totalEvents,
+            compressed_events: compressedEvents,
+            preserved_events: totalEvents - compressedEvents,
+            compression_ratio: compressionRatio,
+            scope: this.contextScope,
+            estimated_token_savings: Math.floor(totalEvents * compressionRatio * 50) // rough estimate
+        };
+    }
 }
 
-module.exports = { Factor3ContextManager };
+module.exports = { Factor3ContextManager, CONTEXT_SCOPES };
 
 // Run demo if called directly
 if (require.main === module) {
