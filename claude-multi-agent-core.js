@@ -5,6 +5,7 @@ const { SecurityAgent } = require('./agents/security-agent');
 const { CodeAgent } = require('./agents/code-agent');
 const { DeployAgent } = require('./agents/deploy-agent');
 const { CommAgent } = require('./agents/comm-agent');
+const { ProjectAgent } = require('./agents/project-agent');
 const { SQLiteManager } = require('./database/sqlite-manager');
 const DocumentationService = require('./services/documentation-service');
 const { BranchAwareAgentManager } = require('./services/branch-aware-agent-manager');
@@ -101,6 +102,9 @@ class MultiAgentCore {
                     break;
                 case 'comm':
                     agent = new CommAgent(sessionId, context);
+                    break;
+                case 'project':
+                    agent = new ProjectAgent(sessionId, context);
                     break;
                 default:
                     throw new Error(`Unknown agent type: ${agentName}`);

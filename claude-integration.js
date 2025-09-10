@@ -206,7 +206,8 @@ class ClaudeIntegration {
             bug_fix: ['github', 'security', 'deploy'],
             security_scan: ['security', 'github'],
             deployment: ['security', 'deploy', 'comm'],
-            code_review: ['security', 'github', 'comm']
+            code_review: ['security', 'github', 'comm'],
+            project_management: ['project']
         };
     }
 

@@ -180,6 +180,67 @@ class SQLiteManager {
                 occurrence_count INTEGER DEFAULT 1, -- How many times seen
                 last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`,
+
+            // Project Window System Tables - Configuration Schema (noumena)
+            `CREATE TABLE IF NOT EXISTS projects (
+                id TEXT PRIMARY KEY,
+                name TEXT UNIQUE NOT NULL,          -- Project name/identifier
+                goal TEXT NOT NULL,                 -- Project main goal
+                description TEXT,                   -- Project description  
+                vision TEXT,                        -- Long-term vision
+                context TEXT,                       -- Background context
+                status TEXT DEFAULT 'active',       -- 'active', 'paused', 'completed', 'archived'
+                project_dir TEXT,                   -- File system directory path
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                last_active_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`,
+
+            // Project Sessions - Links sessions to projects (operational schema)
+            `CREATE TABLE IF NOT EXISTS project_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id TEXT NOT NULL,
+                session_id TEXT NOT NULL,
+                session_purpose TEXT,               -- 'planning', 'execution', 'review'
+                status TEXT DEFAULT 'active',       -- 'active', 'paused', 'completed'
+                context_summary TEXT,               -- Compressed context for this session
+                preserved_context TEXT,             -- Full context preservation
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                completed_at DATETIME,
+                FOREIGN KEY (project_id) REFERENCES projects (id),
+                FOREIGN KEY (session_id) REFERENCES sessions (id),
+                UNIQUE(project_id, session_id)
+            )`,
+
+            // Project Context - Context schema (phenomena) 
+            `CREATE TABLE IF NOT EXISTS project_context (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id TEXT NOT NULL,
+                context_type TEXT NOT NULL,         -- 'chat', 'decision', 'milestone', 'note'
+                content TEXT NOT NULL,              -- The actual content
+                metadata TEXT,                      -- JSON metadata
+                importance INTEGER DEFAULT 1,      -- 1-10 importance for preservation
+                preserved BOOLEAN DEFAULT FALSE,    -- Whether to preserve long-term
+                session_id TEXT,                    -- Session where this was created
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (project_id) REFERENCES projects (id),
+                FOREIGN KEY (session_id) REFERENCES sessions (id)
+            )`,
+
+            // Project Dependencies - Long-term dependency tracking
+            `CREATE TABLE IF NOT EXISTS project_dependencies (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id TEXT NOT NULL,
+                dependency_type TEXT NOT NULL,      -- 'github_token', 'api_key', 'config'
+                dependency_key TEXT NOT NULL,       -- Key/name of dependency
+                encrypted_value TEXT,               -- Encrypted value if sensitive
+                expires_at DATETIME,                -- When this dependency expires
+                last_validated_at DATETIME,         -- Last time we checked it works
+                validation_status TEXT,             -- 'valid', 'expired', 'invalid'
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (project_id) REFERENCES projects (id)
             )`
         ];
 
@@ -204,7 +265,20 @@ class SQLiteManager {
             'CREATE INDEX IF NOT EXISTS idx_status_verifications_discrepancy ON status_verifications(discrepancy)',
             'CREATE INDEX IF NOT EXISTS idx_status_verifications_agent ON status_verifications(agent_name)',
             'CREATE INDEX IF NOT EXISTS idx_memory_patterns_type ON memory_patterns(pattern_type)',
-            'CREATE INDEX IF NOT EXISTS idx_memory_patterns_signature ON memory_patterns(context_signature)'
+            'CREATE INDEX IF NOT EXISTS idx_memory_patterns_signature ON memory_patterns(context_signature)',
+            
+            // Project Window System Indexes
+            'CREATE INDEX IF NOT EXISTS idx_projects_name ON projects(name)',
+            'CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status)',
+            'CREATE INDEX IF NOT EXISTS idx_projects_last_active ON projects(last_active_at)',
+            'CREATE INDEX IF NOT EXISTS idx_project_sessions_project ON project_sessions(project_id)',
+            'CREATE INDEX IF NOT EXISTS idx_project_sessions_session ON project_sessions(session_id)',
+            'CREATE INDEX IF NOT EXISTS idx_project_sessions_status ON project_sessions(status)',
+            'CREATE INDEX IF NOT EXISTS idx_project_context_project ON project_context(project_id)',
+            'CREATE INDEX IF NOT EXISTS idx_project_context_type ON project_context(context_type)',
+            'CREATE INDEX IF NOT EXISTS idx_project_context_preserved ON project_context(preserved)',
+            'CREATE INDEX IF NOT EXISTS idx_project_dependencies_project ON project_dependencies(project_id)',
+            'CREATE INDEX IF NOT EXISTS idx_project_dependencies_type ON project_dependencies(dependency_type)'
         ];
 
         for (const sql of indexes) {
@@ -489,6 +563,194 @@ class SQLiteManager {
         );
 
         return results;
+    }
+
+    // ==========================================
+    // PROJECT WINDOW SYSTEM METHODS
+    // ==========================================
+
+    /**
+     * Create a new project (noumena/configuration schema)
+     */
+    async createProject(name, goal, description = '', projectDir = null, vision = '', context = '') {
+        const projectId = `proj_${Date.now()}_${name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        
+        const sql = `INSERT INTO projects (id, name, goal, description, vision, context, project_dir) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        
+        await this.runSQL(sql, [projectId, name, goal, description, vision, context, projectDir]);
+        
+        this.contextManager.addEvent('project_created', {
+            project_id: projectId,
+            name,
+            goal,
+            created_at: Date.now()
+        });
+        
+        return projectId;
+    }
+
+    /**
+     * Get project by name or ID
+     */
+    async getProject(nameOrId) {
+        const sql = `SELECT * FROM projects WHERE name = ? OR id = ? ORDER BY created_at DESC LIMIT 1`;
+        return await this.getSQL(sql, [nameOrId, nameOrId]);
+    }
+
+    /**
+     * List all projects with optional status filter
+     */
+    async listProjects(limit = 10, status = null) {
+        let sql = `SELECT * FROM projects`;
+        const params = [];
+        
+        if (status) {
+            sql += ` WHERE status = ?`;
+            params.push(status);
+        }
+        
+        sql += ` ORDER BY last_active_at DESC LIMIT ?`;
+        params.push(limit);
+        
+        return await this.allSQL(sql, params);
+    }
+
+    /**
+     * Update project last active timestamp
+     */
+    async updateProjectActivity(projectId) {
+        const sql = `UPDATE projects SET last_active_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
+                     WHERE id = ?`;
+        await this.runSQL(sql, [projectId]);
+    }
+
+    /**
+     * Link a session to a project (operational schema)
+     */
+    async linkSessionToProject(projectId, sessionId, purpose = 'execution') {
+        const sql = `INSERT OR REPLACE INTO project_sessions 
+                     (project_id, session_id, session_purpose, status) 
+                     VALUES (?, ?, ?, 'active')`;
+        
+        await this.runSQL(sql, [projectId, sessionId, purpose]);
+        await this.updateProjectActivity(projectId);
+        
+        this.contextManager.addEvent('session_linked_to_project', {
+            project_id: projectId,
+            session_id: sessionId,
+            purpose
+        });
+        
+        return true;
+    }
+
+    /**
+     * Save project session with context preservation
+     */
+    async saveProjectSession(projectId, sessionId, contextData, status = 'saved') {
+        const sql = `UPDATE project_sessions 
+                     SET context_summary = ?, preserved_context = ?, status = ?, completed_at = CURRENT_TIMESTAMP
+                     WHERE project_id = ? AND session_id = ?`;
+        
+        await this.runSQL(sql, [
+            JSON.stringify(contextData.summary || {}),
+            JSON.stringify(contextData),
+            status,
+            projectId,
+            sessionId
+        ]);
+        
+        await this.updateProjectActivity(projectId);
+        
+        this.contextManager.addEvent('project_session_saved', {
+            project_id: projectId,
+            session_id: sessionId,
+            status
+        });
+        
+        return true;
+    }
+
+    /**
+     * Add context item to project (phenomena/context schema)
+     */
+    async addProjectContext(projectId, contextType, content, metadata = {}, importance = 1, sessionId = null) {
+        const sql = `INSERT INTO project_context 
+                     (project_id, context_type, content, metadata, importance, session_id, preserved) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        
+        // Auto-preserve high importance items
+        const preserved = importance >= 8;
+        
+        const result = await this.runSQL(sql, [
+            projectId,
+            contextType,
+            content,
+            JSON.stringify(metadata),
+            importance,
+            sessionId,
+            preserved
+        ]);
+        
+        this.contextManager.addEvent('project_context_added', {
+            project_id: projectId,
+            context_type: contextType,
+            importance,
+            preserved
+        });
+        
+        return result.lastID;
+    }
+
+    /**
+     * Get project context for session restoration
+     */
+    async getProjectContext(projectId, contextTypes = null, preservedOnly = false) {
+        let sql = `SELECT * FROM project_context WHERE project_id = ?`;
+        const params = [projectId];
+        
+        if (contextTypes && contextTypes.length > 0) {
+            sql += ` AND context_type IN (${contextTypes.map(() => '?').join(',')})`;
+            params.push(...contextTypes);
+        }
+        
+        if (preservedOnly) {
+            sql += ` AND preserved = 1`;
+        }
+        
+        sql += ` ORDER BY importance DESC, created_at DESC`;
+        
+        return await this.allSQL(sql, params);
+    }
+
+    /**
+     * Get project sessions for history
+     */
+    async getProjectSessions(projectId, limit = 10) {
+        const sql = `SELECT ps.*, s.workflow_type, s.status as session_status, s.started_at, s.completed_at
+                     FROM project_sessions ps
+                     LEFT JOIN sessions s ON ps.session_id = s.id
+                     WHERE ps.project_id = ?
+                     ORDER BY ps.created_at DESC
+                     LIMIT ?`;
+        
+        return await this.allSQL(sql, [projectId, limit]);
+    }
+
+    /**
+     * Update project status
+     */
+    async updateProjectStatus(projectId, status) {
+        const sql = `UPDATE projects SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+        await this.runSQL(sql, [status, projectId]);
+        
+        this.contextManager.addEvent('project_status_changed', {
+            project_id: projectId,
+            new_status: status
+        });
+        
+        return true;
     }
 
     /**
