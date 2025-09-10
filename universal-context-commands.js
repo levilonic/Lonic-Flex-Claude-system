@@ -9,6 +9,7 @@
 const { Factor3ContextManager, CONTEXT_SCOPES } = require('./factor3-context-manager');
 const { ContextScopeManager, SCOPE_TYPES } = require('./context-management/context-scope-manager');
 const { MultiAgentCore } = require('./claude-multi-agent-core');
+const { SimplifiedExternalCoordinator } = require('./external-integrations/simplified-external-coordinator');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -17,6 +18,23 @@ class UniversalContextCommands {
         this.baseDir = options.baseDir || process.cwd();
         this.scopeManager = new ContextScopeManager(options);
         this.multiAgentCore = null;
+        
+        // Phase 3A: External System Integration
+        this.externalCoordinator = null;
+        this.externalIntegrationConfig = options.externalIntegration || {
+            enableGitHub: true,
+            enableSlack: true,
+            parallelExecution: true,
+            github: {
+                autoCreateBranch: true,
+                autoCreatePR: false
+            },
+            slack: {
+                autoCreateChannel: false,
+                autoNotifyChannel: true,
+                richFormatting: true
+            }
+        };
         
         // Command registry
         this.commands = {
@@ -114,6 +132,13 @@ class UniversalContextCommands {
             await this.multiAgentCore.initialize();
         }
 
+        // Phase 3A: Initialize external system coordination
+        if (!this.externalCoordinator) {
+            console.log('🚀 Initializing external system integration...');
+            this.externalCoordinator = new SimplifiedExternalCoordinator(this.externalIntegrationConfig);
+            await this.externalCoordinator.initialize();
+        }
+
         // Create context
         const context = Factor3ContextManager.createContext({
             contextScope: scopeType,
@@ -127,6 +152,59 @@ class UniversalContextCommands {
         // Create PROJECT.md for projects
         if (scopeType === 'project') {
             await this.createProjectIdentity(contextName, flags);
+        }
+
+        // Phase 3A: Set up external systems (GitHub branches, Slack notifications)
+        const contextData = {
+            contextId: contextName,
+            contextType: scopeType,
+            task: initialTask,
+            metadata: {
+                description: flags.description || flags.goal,
+                requirements: flags.requirements,
+                complexity: flags.complexity,
+                duration: flags.duration,
+                vision: flags.vision,
+                createdBy: 'Universal-Context-System'
+            }
+        };
+
+        try {
+            console.log('🔧 Setting up external systems...');
+            const externalResult = await this.externalCoordinator.onContextCreated(contextData);
+            
+            // Log external system setup results
+            if (externalResult.github?.githubResources?.length > 0) {
+                console.log(`✅ GitHub resources created: ${externalResult.github.githubResources.length}`);
+                externalResult.github.githubResources.forEach(resource => {
+                    console.log(`   ${resource.type}: ${resource.name || resource.number} - ${resource.url}`);
+                });
+            }
+            
+            if (externalResult.slack?.notifications?.length > 0) {
+                console.log(`📢 Slack notifications sent: ${externalResult.slack.notifications.length}`);
+            }
+            
+            if (externalResult.summary.errors.length > 0) {
+                console.log(`⚠️ External system errors: ${externalResult.summary.errors.length}`);
+                externalResult.summary.errors.forEach(error => console.log(`   ${error}`));
+            }
+            
+            // Store external resources in context
+            context.addEvent('external_systems_setup', {
+                github: externalResult.github,
+                slack: externalResult.slack,
+                totalResources: externalResult.summary.totalResources,
+                errors: externalResult.summary.errors
+            });
+            
+        } catch (error) {
+            console.error('❌ External system setup failed:', error.message);
+            // Continue without external systems - not a blocking error
+            context.addEvent('external_systems_error', {
+                error: error.message,
+                timestamp: new Date().toISOString()
+            });
         }
 
         // Start multi-agent session if needed
