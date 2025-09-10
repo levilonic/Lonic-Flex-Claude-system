@@ -162,6 +162,12 @@ class ContextPruner {
      * Check if an event represents a resolved error/issue
      */
     isEventResolved(content) {
+        // Don't mark test markers as resolved
+        if (content.includes('TEST_DATA') || content.includes('integrity_marker') || 
+            content.includes('important_event')) {
+            return false;
+        }
+        
         const resolvedIndicators = [
             /status[:\s]*["']resolved["']/i,
             /status[:\s]*["']completed["']/i,

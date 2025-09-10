@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 
 /**
- * Universal Context Command System - Phase 2B
- * Unified interface for /start, /save, /resume commands
- * Works with both sessions and projects seamlessly
+ * Universal Context Command System - Phase 3B
+ * Unified interface for /start, /save, /resume commands with long-term persistence
+ * Works with sessions and projects seamlessly across 3+ month time gaps
  */
 
 const { Factor3ContextManager, CONTEXT_SCOPES } = require('./factor3-context-manager');
 const { ContextScopeManager, SCOPE_TYPES } = require('./context-management/context-scope-manager');
 const { MultiAgentCore } = require('./claude-multi-agent-core');
 const { SimplifiedExternalCoordinator } = require('./external-integrations/simplified-external-coordinator');
+const { LongTermPersistence } = require('./context-management/long-term-persistence');
+const { ContextHealthMonitor } = require('./context-management/context-health-monitor');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -36,7 +38,17 @@ class UniversalContextCommands {
             }
         };
         
-        // Command registry
+        // Phase 3B: Long-Term Persistence System (disabled by default)
+        this.longTermPersistence = null;
+        this.healthMonitor = null;
+        this.persistenceConfig = options.persistence || {
+            enableLongTerm: false, // Only enable when explicitly requested
+            enableHealthMonitoring: false,
+            autoArchive: false,
+            backgroundMaintenance: false
+        };
+        
+        // Enhanced command registry with Phase 3B commands
         this.commands = {
             start: this.startCommand.bind(this),
             save: this.saveCommand.bind(this),
@@ -44,7 +56,12 @@ class UniversalContextCommands {
             list: this.listCommand.bind(this),
             switch: this.switchCommand.bind(this),
             upgrade: this.upgradeCommand.bind(this),
-            status: this.statusCommand.bind(this)
+            status: this.statusCommand.bind(this),
+            // Phase 3B: New long-term persistence commands
+            archive: this.archiveCommand.bind(this),
+            restore: this.restoreCommand.bind(this),
+            health: this.healthCommand.bind(this),
+            cleanup: this.cleanupCommand.bind(this)
         };
     }
 
@@ -139,6 +156,27 @@ class UniversalContextCommands {
             await this.externalCoordinator.initialize();
         }
 
+        // Phase 3B: Initialize long-term persistence system
+        if (!this.longTermPersistence && this.persistenceConfig.enableLongTerm) {
+            console.log('📦 Initializing long-term persistence system...');
+            this.longTermPersistence = new LongTermPersistence({
+                archiveDir: path.join(this.baseDir, 'contexts', 'long-term')
+            });
+        }
+
+        // Phase 3B: Initialize health monitoring system
+        if (!this.healthMonitor && this.persistenceConfig.enableHealthMonitoring) {
+            console.log('🏥 Initializing context health monitoring...');
+            this.healthMonitor = new ContextHealthMonitor({
+                backgroundMaintenance: this.persistenceConfig.backgroundMaintenance,
+                persistence: { archiveDir: path.join(this.baseDir, 'contexts', 'long-term') }
+            });
+            
+            if (this.persistenceConfig.backgroundMaintenance) {
+                this.healthMonitor.startBackgroundMaintenance();
+            }
+        }
+
         // Create context
         const context = Factor3ContextManager.createContext({
             contextScope: scopeType,
@@ -229,29 +267,70 @@ class UniversalContextCommands {
     }
 
     /**
-     * Resume existing context
+     * Resume existing context with long-term persistence support
      */
     async resumeExistingContext(contextName) {
+        // First check active contexts
         const context = Factor3ContextManager.getContextById(contextName);
-        if (!context) {
-            throw new Error(`Context '${contextName}' not found`);
+        if (context) {
+            // Generate context summary for resumption
+            const summary = JSON.parse(context.generateContextSummary());
+            
+            // Log resumption
+            context.addEvent('context_resumed', {
+                context_id: contextName,
+                resumed_at: Date.now(),
+                events_preserved: summary.compressed_events,
+                compression_ratio: summary.compression_ratio
+            });
+
+            // Inject context for resumption (this would integrate with Claude Code)
+            const resumptionContext = await this.generateResumptionContext(context, summary);
+
+            return this.formatResumeResponse(contextName, context.contextScope, summary, resumptionContext);
         }
 
-        // Generate context summary for resumption
-        const summary = JSON.parse(context.generateContextSummary());
-        
-        // Log resumption
-        context.addEvent('context_resumed', {
-            context_id: contextName,
-            resumed_at: Date.now(),
-            events_preserved: summary.compressed_events,
-            compression_ratio: summary.compression_ratio
-        });
+        // Phase 3B: Check long-term archives if context not active
+        if (this.longTermPersistence) {
+            console.log('🔍 Context not active, checking long-term archives...');
+            
+            // Try both session and project scopes
+            for (const scope of ['session', 'project']) {
+                try {
+                    const restoreResult = await this.longTermPersistence.restoreContext(contextName, scope);
+                    
+                    if (restoreResult.success) {
+                        console.log(`✅ Context restored from long-term archive (${scope})`);
+                        console.log(`⚡ Time gap: ${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`);
+                        console.log(`🚀 Restore time: ${restoreResult.restoreTime}ms`);
+                        
+                        // Recreate active context from restored data
+                        const restoredContext = Factor3ContextManager.createContext({
+                            contextId: contextName,
+                            contextScope: scope
+                        });
+                        
+                        // Parse restored context and rebuild events
+                        await this.rebuildContextFromArchive(restoredContext, restoreResult.context);
+                        
+                        return {
+                            message: `🔄 Restored from archive: ${scope} ${contextName}`,
+                            context_id: contextName,
+                            scope: scope,
+                            time_gap: `${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`,
+                            restore_time: `${restoreResult.restoreTime}ms`,
+                            performance_met: restoreResult.performanceMet,
+                            restoration_summary: restoreResult.restorationSummary,
+                            recommendations: restoreResult.restorationSummary.recommendations
+                        };
+                    }
+                } catch (error) {
+                    // Continue trying other scopes
+                }
+            }
+        }
 
-        // Inject context for resumption (this would integrate with Claude Code)
-        const resumptionContext = await this.generateResumptionContext(context, summary);
-
-        return this.formatResumeResponse(contextName, context.contextScope, summary, resumptionContext);
+        throw new Error(`Context '${contextName}' not found in active contexts or long-term archives`);
     }
 
     /**
@@ -576,6 +655,208 @@ class UniversalContextCommands {
         };
     }
 
+    /**
+     * Phase 3B: /archive command - Manually archive context to long-term storage
+     */
+    async archiveCommand(parsedCmd) {
+        const { contextName, flags } = parsedCmd;
+
+        if (!contextName) {
+            throw new Error('Context name is required. Usage: /archive <context-name> [--force]');
+        }
+
+        const context = Factor3ContextManager.getContextById(contextName);
+        if (!context) {
+            throw new Error(`Context '${contextName}' not found`);
+        }
+
+        if (!this.longTermPersistence) {
+            throw new Error('Long-term persistence not enabled');
+        }
+
+        // Get context data for archival
+        const contextData = {
+            context: context.getCurrentContext(),
+            last_activity: Date.now(),
+            events_count: context.events.length,
+            stack_depth: context.contextStack.length,
+            current_task: context.currentTask,
+            scope: context.contextScope
+        };
+
+        const archiveResult = await this.longTermPersistence.archiveContext(
+            contextName, 
+            contextData, 
+            context.contextScope
+        );
+
+        if (archiveResult.success && !flags['keep-active']) {
+            // Remove from active contexts after successful archive
+            Factor3ContextManager.removeContext(contextName);
+        }
+
+        return {
+            message: `📦 Archived ${context.contextScope}: ${contextName}`,
+            archive_level: archiveResult.archiveLevel,
+            compression_ratio: `${(archiveResult.compressionRatio * 100).toFixed(1)}%`,
+            archive_time: `${archiveResult.archiveTime}ms`,
+            paths: archiveResult.paths,
+            active_removed: !flags['keep-active']
+        };
+    }
+
+    /**
+     * Phase 3B: /restore command - Restore context from long-term storage
+     */
+    async restoreCommand(parsedCmd) {
+        const { contextName, flags } = parsedCmd;
+
+        if (!contextName) {
+            throw new Error('Context name is required. Usage: /restore <context-name> [--scope=session|project]');
+        }
+
+        if (!this.longTermPersistence) {
+            throw new Error('Long-term persistence not enabled');
+        }
+
+        const scope = flags.scope || 'session';
+        
+        try {
+            const restoreResult = await this.longTermPersistence.restoreContext(contextName, scope);
+
+            // Recreate active context
+            const restoredContext = Factor3ContextManager.createContext({
+                contextId: contextName,
+                contextScope: scope
+            });
+
+            await this.rebuildContextFromArchive(restoredContext, restoreResult.context);
+
+            return {
+                message: `🔄 Restored ${scope}: ${contextName}`,
+                time_gap: `${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`,
+                restore_time: `${restoreResult.restoreTime}ms`,
+                performance_met: restoreResult.performanceMet,
+                restoration_summary: restoreResult.restorationSummary
+            };
+
+        } catch (error) {
+            throw new Error(`Failed to restore context: ${error.message}`);
+        }
+    }
+
+    /**
+     * Phase 3B: /health command - Check context health and get recommendations
+     */
+    async healthCommand(parsedCmd) {
+        const { contextName, flags } = parsedCmd;
+
+        if (!this.healthMonitor) {
+            throw new Error('Health monitoring not enabled');
+        }
+
+        if (!contextName) {
+            // Return system health summary
+            const healthSummary = await this.healthMonitor.getHealthSummary();
+            return {
+                message: '🏥 System Health Summary',
+                ...healthSummary,
+                background_maintenance: this.healthMonitor.maintenanceInterval !== null
+            };
+        }
+
+        // Check specific context health
+        const context = Factor3ContextManager.getContextById(contextName);
+        if (!context) {
+            throw new Error(`Context '${contextName}' not found`);
+        }
+
+        const contextData = {
+            context: context.getCurrentContext(),
+            last_activity: Date.now(),
+            events_count: context.events.length,
+            stack_depth: context.contextStack.length,
+            current_task: context.currentTask
+        };
+
+        const healthMetrics = await this.healthMonitor.calculateHealthScore(contextName, contextData);
+
+        if (flags.maintenance) {
+            const maintenanceResult = await this.healthMonitor.performMaintenance(contextName, contextData);
+            healthMetrics.maintenance = maintenanceResult;
+        }
+
+        return {
+            message: `🏥 Health check for ${contextName}`,
+            ...healthMetrics,
+            maintenance_available: !flags.maintenance
+        };
+    }
+
+    /**
+     * Phase 3B: /cleanup command - Clean up old archives and maintenance
+     */
+    async cleanupCommand(parsedCmd) {
+        const { flags } = parsedCmd;
+
+        if (!this.longTermPersistence) {
+            throw new Error('Long-term persistence not enabled');
+        }
+
+        const retentionDays = flags['retention-days'] || 365;
+        
+        // Clean up expired contexts
+        const cleanupResult = await this.longTermPersistence.cleanupExpiredContexts(retentionDays);
+        
+        // Get updated statistics
+        const stats = await this.longTermPersistence.getArchiveStatistics();
+
+        return {
+            message: '🗑️ Archive cleanup completed',
+            cleaned: cleanupResult.count,
+            freed_bytes: cleanupResult.freedBytes,
+            errors: cleanupResult.errors,
+            current_stats: stats,
+            retention_days: retentionDays
+        };
+    }
+
+    /**
+     * Helper: Rebuild context from archived XML
+     */
+    async rebuildContextFromArchive(context, archivedXml) {
+        // Parse archived XML and rebuild events
+        const eventRegex = /<([^>]+)>(.*?)<\/\1>/gs;
+        let match;
+        
+        while ((match = eventRegex.exec(archivedXml)) !== null) {
+            const [fullMatch, tagName, content] = match;
+            
+            if (tagName === 'workflow_context' || tagName === 'context_restoration') continue;
+            
+            // Extract timestamp if present
+            const timestampMatch = content.match(/timestamp[:\s]*["']([^"']+)["']/);
+            
+            const eventData = {
+                type: tagName,
+                content: content.trim(),
+                restored_from_archive: true
+            };
+            
+            if (timestampMatch) {
+                eventData.original_timestamp = timestampMatch[1];
+            }
+            
+            await context.addEvent(`restored_${tagName}`, eventData);
+        }
+        
+        // Add restoration event
+        await context.addEvent('context_restored_from_archive', {
+            restored_at: Date.now(),
+            original_xml_length: archivedXml.length
+        });
+    }
+
     formatSaveResponse(contextName, scopeType, saveResult, flags) {
         const response = {
             message: `💾 Saved ${scopeType}: ${contextName}`,
@@ -620,20 +901,43 @@ class UniversalContextCommands {
     getUsageHelp() {
         return {
             commands: {
+                // Core Universal Context Commands
                 start: '/start <name> [--session|--project] [--goal="..."] [--vision="..."]',
                 save: '/save [<name>] [--status="..."] [--important] [--pause]',
                 resume: '/resume [<name>]',
                 list: '/list [--detailed]',
                 switch: '/switch <name>',
                 upgrade: '/upgrade <name> --to-project --goal="..." [--vision="..."]',
-                status: '/status'
+                status: '/status',
+                
+                // Phase 3B: Long-Term Persistence Commands
+                archive: '/archive <name> [--keep-active]',
+                restore: '/restore <name> [--scope=session|project]',
+                health: '/health [<name>] [--maintenance]',
+                cleanup: '/cleanup [--retention-days=365]'
             },
             examples: [
+                // Core examples
                 '/start fix-auth-bug --session',
                 '/start new-auth-system --project --goal="Build secure authentication"',
                 '/save fix-auth-bug --status="Fixed JWT expiration"',
-                '/upgrade fix-auth-bug --to-project --goal="Complete auth redesign"'
-            ]
+                '/upgrade fix-auth-bug --to-project --goal="Complete auth redesign"',
+                
+                // Phase 3B examples
+                '/archive old-project --keep-active',
+                '/restore auth-system --scope=project',
+                '/health auth-system --maintenance',
+                '/cleanup --retention-days=180'
+            ],
+            phase3b_info: {
+                description: 'Phase 3B adds long-term persistence for 3+ month context survival',
+                features: [
+                    '📦 Progressive archival with compression levels',
+                    '🚀 Sub-second restore performance (<1000ms)',
+                    '🏥 Health monitoring with proactive maintenance',
+                    '🗑️ Automatic cleanup and retention management'
+                ]
+            }
         };
     }
 }

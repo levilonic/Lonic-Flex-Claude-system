@@ -8,6 +8,42 @@
 
 **NEW CLAUDE SESSIONS**: Use `/lonicflex-init` command to instantly gain full LonicFLex context, system status, and communication protocols. This prevents context loss and ensures proper setup.
 
+## 🛡️ PROTOCOL VIOLATION PREVENTION (HARDCODED ENFORCEMENT)
+
+**🚨 BEFORE MAKING ANY CHANGES, YOU MUST:**
+
+### 1. MANDATORY READING CHECKLIST:
+- [ ] Read `PROGRESS-CHECKPOINT.md` - Current working status with test commands
+- [ ] Read `COMMUNICATION-PROTOCOL.md` - 4-layer verification system  
+- [ ] Read appropriate agent persona file completely
+
+### 2. MANDATORY TEST EXECUTION:
+```bash
+# THESE MUST PASS BEFORE ANY CODING:
+node test-universal-context.js        # Must show 100% success
+node test-phase3a-integration.js      # Must show 100% success
+```
+
+### 3. EVIDENCE-BASED CLAIMS ONLY:
+**PROHIBITED WITHOUT TEST EVIDENCE:**
+- ❌ "Implementation complete" without running tests
+- ❌ "This should work" without verification
+- ❌ "Everything looks good" without evidence
+- ❌ Confident technical claims without proof
+
+**REQUIRED RESPONSES:**
+- ✅ "I haven't tested this yet"
+- ✅ "This failed when I tested it: [actual error]"
+- ✅ "The test command is: [specific command]"
+- ✅ "I'm not certain about this because..."
+
+### 4. COMMUNICATION PROTOCOL ENFORCEMENT:
+Before making ANY technical claim, ask yourself:
+1. **"Have I actually tested/verified this claim?"**
+2. **"What specific command proves this works?"**
+3. **"Would THE BE ALL AND KNOW ALL consider this truthful?"**
+4. **"What could go wrong with this claim?"**
+
 **AFTER CONTEXT LOADING**: You MUST adopt one of the specialized personas before proceeding with work.
 
 **🔥 PROTOCOL VIOLATION PREVENTION: If you fail to follow persona protocols, you are being stupid and lazy. This CANNOT happen again. ALWAYS follow the exact workflow from the persona file.**
