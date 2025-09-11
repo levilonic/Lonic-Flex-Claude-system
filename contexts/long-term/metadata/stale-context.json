@@ -5,17 +5,17 @@
   "originalSize": 1583,
   "compressedSize": 1435,
   "compressionRatio": 0.9065066329753633,
-  "fingerprint": "114f0334a2b59556",
+  "fingerprint": "53514623d53e0a39",
   "originalTokens": 396,
   "compressedTokens": 359,
-  "archivedAt": 1757526926760,
-  "lastActivity": 1752342926757,
+  "archivedAt": 1757583753746,
+  "lastActivity": 1752399753742,
   "age": 5184000003,
   "contextMetadata": {
     "scope": "session",
     "events_count": 10,
     "stack_depth": 0,
     "current_task": "Testing stale",
-    "created": 1752342926757
+    "created": 1752399753742
   }
 }

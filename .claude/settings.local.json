@@ -127,7 +127,15 @@
       "Bash(dir:*)",
       "Bash(git remote:*)",
       "Bash(find:*)",
-      "Bash(set)"
+      "Bash(set)",
+      "Read(//c/Users/Levi/.claude/plugins/**)",
+      "Read(//c/Users/Levi/.claude/**)",
+      "Bash(npm search:*)",
+      "Bash(ccstatusline --help)",
+      "Bash(where ccstatusline)",
+      "Bash(del \"C:\\Users\\Levi\\.claude\\statusline-script.sh\")",
+      "Bash(ccstatusline)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []

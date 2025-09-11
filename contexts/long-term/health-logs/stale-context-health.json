@@ -304,5 +304,22 @@
       "Context is stale - consider archiving or refreshing",
       "Irregular usage pattern - context may benefit from restructuring"
     ]
+  },
+  {
+    "timestamp": "2025-09-11T09:42:33.744Z",
+    "contextId": "stale-context",
+    "healthLevel": "warning",
+    "overallScore": 0.5122864357760191,
+    "scores": {
+      "freshness": 0.05499999996527778,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578643578643579
+    },
+    "recommendations": [
+      "Context is stale - consider archiving or refreshing",
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
   }
 ]

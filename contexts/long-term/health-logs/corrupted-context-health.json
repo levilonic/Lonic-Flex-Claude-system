@@ -322,5 +322,23 @@
       "Data integrity issues detected - manual review recommended",
       "Irregular usage pattern - context may benefit from restructuring"
     ]
+  },
+  {
+    "timestamp": "2025-09-11T09:42:33.747Z",
+    "contextId": "corrupted-context",
+    "healthLevel": "warning",
+    "overallScore": 0.4850621114993099,
+    "scores": {
+      "freshness": 0.4478260859500805,
+      "usagePattern": 0.1,
+      "dataIntegrity": 0.5,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8571428571428572
+    },
+    "recommendations": [
+      "Context is stale - consider archiving or refreshing",
+      "Data integrity issues detected - manual review recommended",
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
   }
 ]
