@@ -135,7 +135,8 @@
       "Bash(where ccstatusline)",
       "Bash(del \"C:\\Users\\Levi\\.claude\\statusline-script.sh\")",
       "Bash(ccstatusline)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
