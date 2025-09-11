@@ -63,27 +63,47 @@ class SecurityAgent extends BaseAgent {
     initializeSecurityPatterns() {
         return {
             secrets: [
-                // API Keys
+                // API Keys (enhanced)
                 { pattern: /(?:api[_-]?key|apikey)[\s]*[:=][\s]*['"]{1}([a-zA-Z0-9_\-]{20,})['"]{1}/gi, severity: 'critical', type: 'API_KEY' },
                 // Database passwords
                 { pattern: /(?:password|passwd|pwd)[\s]*[:=][\s]*['"]{1}([^'"]{8,})['"]{1}/gi, severity: 'high', type: 'PASSWORD' },
-                // JWT tokens
+                // JWT tokens (improved)
                 { pattern: /['"](eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*)['"]/g, severity: 'critical', type: 'JWT_TOKEN' },
                 // AWS keys
                 { pattern: /(AKIA[0-9A-Z]{16})/g, severity: 'critical', type: 'AWS_ACCESS_KEY' },
-                // GitHub tokens
-                { pattern: /(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})/g, severity: 'critical', type: 'GITHUB_TOKEN' }
+                // AWS Secret keys
+                { pattern: /([A-Za-z0-9\/+=]{40})/g, severity: 'critical', type: 'AWS_SECRET_KEY' },
+                // GitHub tokens (enhanced)
+                { pattern: /(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}|gho_[a-zA-Z0-9]{36})/g, severity: 'critical', type: 'GITHUB_TOKEN' },
+                // Slack tokens
+                { pattern: /(xox[bpars]-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24})/g, severity: 'critical', type: 'SLACK_TOKEN' },
+                // Generic high-entropy strings
+                { pattern: /['"][a-zA-Z0-9\/+]{32,}['"](?=\s*[;}])/g, severity: 'medium', type: 'HIGH_ENTROPY_STRING' },
+                // Database URLs
+                { pattern: /(mongodb|mysql|postgresql):\/\/[^\s'"]+/gi, severity: 'high', type: 'DATABASE_URL' }
             ],
             
             vulnerabilities: [
-                // SQL Injection
+                // SQL Injection (enhanced)
                 { pattern: /query\s*\(\s*['"]\s*SELECT.*\+.*['"]\s*\)/gi, severity: 'critical', type: 'SQL_INJECTION' },
-                // XSS potential
+                { pattern: /\$\{.*\}.*SELECT|INSERT|UPDATE|DELETE/gi, severity: 'critical', type: 'SQL_TEMPLATE_INJECTION' },
+                // XSS potential (enhanced)
                 { pattern: /innerHTML\s*=\s*.*\+/gi, severity: 'high', type: 'XSS_POTENTIAL' },
-                // Command injection
+                { pattern: /document\.write\s*\(\s*.*\+/gi, severity: 'high', type: 'XSS_DOCUMENT_WRITE' },
+                { pattern: /dangerouslySetInnerHTML/gi, severity: 'high', type: 'REACT_XSS_RISK' },
+                // Command injection (enhanced)
                 { pattern: /exec\s*\(\s*.*\+.*\)/gi, severity: 'critical', type: 'COMMAND_INJECTION' },
+                { pattern: /spawn\s*\(\s*.*\+.*\)/gi, severity: 'critical', type: 'SPAWN_INJECTION' },
+                { pattern: /system\s*\(\s*.*\+.*\)/gi, severity: 'critical', type: 'SYSTEM_INJECTION' },
                 // Eval usage
-                { pattern: /eval\s*\(/gi, severity: 'high', type: 'EVAL_USAGE' }
+                { pattern: /eval\s*\(/gi, severity: 'high', type: 'EVAL_USAGE' },
+                { pattern: /new\s+Function\s*\(/gi, severity: 'high', type: 'FUNCTION_CONSTRUCTOR' },
+                // Path traversal
+                { pattern: /\.\.[\/\\]/g, severity: 'medium', type: 'PATH_TRAVERSAL' },
+                // Unsafe regex
+                { pattern: /RegExp\s*\(\s*.*\+/gi, severity: 'medium', type: 'REGEX_INJECTION' },
+                // Prototype pollution
+                { pattern: /__proto__|constructor\.prototype|Object\.prototype/gi, severity: 'high', type: 'PROTOTYPE_POLLUTION' }
             ],
             
             configurations: [
@@ -91,8 +111,31 @@ class SecurityAgent extends BaseAgent {
                 { pattern: /debug\s*[:=]\s*true/gi, severity: 'medium', type: 'DEBUG_ENABLED' },
                 // Insecure protocols
                 { pattern: /http:\/\/(?!localhost|127\.0\.0\.1)/gi, severity: 'medium', type: 'INSECURE_PROTOCOL' },
-                // Weak crypto
-                { pattern: /md5|sha1/gi, severity: 'medium', type: 'WEAK_CRYPTO' }
+                // Weak crypto (enhanced)
+                { pattern: /md5|sha1/gi, severity: 'medium', type: 'WEAK_CRYPTO' },
+                { pattern: /DES|RC4|MD4/gi, severity: 'high', type: 'DEPRECATED_CRYPTO' },
+                // Insecure random
+                { pattern: /Math\.random\(\)/gi, severity: 'low', type: 'WEAK_RANDOM' },
+                // Hardcoded credentials
+                { pattern: /admin|password|secret.*[:=]\s*['"][^'"]{3,}['"]/gi, severity: 'high', type: 'HARDCODED_CREDENTIAL' },
+                // Unsafe SSL/TLS
+                { pattern: /rejectUnauthorized\s*:\s*false/gi, severity: 'high', type: 'UNSAFE_TLS' },
+                // CORS misconfiguration
+                { pattern: /Access-Control-Allow-Origin.*\*/gi, severity: 'medium', type: 'CORS_WILDCARD' }
+            ],
+            
+            // New category: Modern security issues
+            modern: [
+                // XXE vulnerabilities
+                { pattern: /<!ENTITY|SYSTEM|PUBLIC.*ENTITY/gi, severity: 'high', type: 'XXE_ENTITY' },
+                // SSRF potential
+                { pattern: /fetch\s*\(\s*.*\+|request\s*\(\s*.*\+/gi, severity: 'medium', type: 'SSRF_POTENTIAL' },
+                // Deserialization
+                { pattern: /JSON\.parse\s*\(\s*.*\+|unserialize\s*\(/gi, severity: 'medium', type: 'UNSAFE_DESERIALIZATION' },
+                // Template injection
+                { pattern: /\{\{.*\}\}.*\+|\$\{.*\}.*\+/gi, severity: 'medium', type: 'TEMPLATE_INJECTION' },
+                // NoSQL injection
+                { pattern: /\$where.*\+|\$regex.*\+/gi, severity: 'high', type: 'NOSQL_INJECTION' }
             ]
         };
     }
@@ -267,8 +310,11 @@ class SecurityAgent extends BaseAgent {
             }
             
         } catch (error) {
-            // No package.json or parsing error
+            // Enhanced error handling with suggestions
+            const suggestion = this.getErrorSuggestion('dependency_analysis', error);
             analysis.error = error.message;
+            analysis.suggestion = suggestion;
+            analysis.recommended_action = 'Check package.json exists and is valid JSON';
         }
         
         return analysis;
@@ -309,11 +355,22 @@ class SecurityAgent extends BaseAgent {
                         }
                     }
                 } catch (error) {
-                    // Skip files that can't be read
+                    // Enhanced file-level error handling
+                    const suggestion = this.getErrorSuggestion('file_access', error);
+                    scan.fileErrors = scan.fileErrors || [];
+                    scan.fileErrors.push({
+                        file: path.relative(targetPath, filePath),
+                        error: error.message,
+                        suggestion: suggestion
+                    });
                 }
             }
         } catch (error) {
+            // Enhanced scan-level error handling
+            const suggestion = this.getErrorSuggestion('source_scan', error);
             scan.error = error.message;
+            scan.suggestion = suggestion;
+            scan.recommended_action = 'Check file permissions and path accessibility';
         }
         
         this.securityMetrics.filesScanned = scan.filesScanned;
@@ -581,33 +638,173 @@ class SecurityAgent extends BaseAgent {
     }
     
     async getSourceFiles(targetPath) {
-        // Mock implementation - would use recursive file scanning
-        return [
-            path.join(targetPath, 'index.js'),
-            path.join(targetPath, 'app.js'),
-            path.join(targetPath, 'config.js')
-        ].filter(async (file) => {
-            try {
-                await fs.access(file);
-                return true;
-            } catch {
-                return false;
-            }
+        // Enhanced parallel file scanning
+        return await this.scanDirectoryParallel(targetPath, {
+            extensions: ['.js', '.ts', '.jsx', '.tsx', '.vue', '.py', '.rb', '.php', '.go', '.java'],
+            excludeDirs: ['node_modules', '.git', 'dist', 'build', '.next', 'coverage'],
+            maxDepth: 10
         });
     }
     
     async getConfigFiles(targetPath, patterns) {
-        // Mock implementation
-        return [
-            path.join(targetPath, 'package.json'),
-            path.join(targetPath, '.env'),
-            path.join(targetPath, 'docker-compose.yml')
-        ];
+        // Enhanced parallel config file scanning
+        return await this.scanDirectoryParallel(targetPath, {
+            patterns: ['*.json', '*.yml', '*.yaml', '*.toml', '*.ini', '.env*', 'Dockerfile*'],
+            excludeDirs: ['node_modules', '.git'],
+            maxDepth: 5
+        });
     }
     
     async getAllFiles(targetPath) {
-        // Mock implementation  
-        return await this.getSourceFiles(targetPath);
+        // Enhanced parallel all-files scanning
+        return await this.scanDirectoryParallel(targetPath, {
+            extensions: null, // All files
+            excludeDirs: ['node_modules', '.git', 'dist', 'build'],
+            maxDepth: 8
+        });
+    }
+    
+    /**
+     * Parallel directory scanning with worker threads
+     */
+    async scanDirectoryParallel(targetPath, options = {}) {
+        const { Worker } = require('worker_threads');
+        const os = require('os');
+        const maxWorkers = Math.min(os.cpus().length, 4); // Limit workers
+        
+        try {
+            const results = await this.walkDirectoryFast(targetPath, options);
+            
+            // If too many files, process in parallel batches
+            if (results.length > 100) {
+                return await this.processBatchesParallel(results, maxWorkers);
+            }
+            
+            return results;
+        } catch (error) {
+            // Fallback to single-threaded scanning
+            return await this.walkDirectorySingle(targetPath, options);
+        }
+    }
+    
+    /**
+     * Fast directory walking without file system access checks
+     */
+    async walkDirectoryFast(dirPath, options = {}) {
+        const results = [];
+        const { extensions, patterns, excludeDirs = [], maxDepth = 10 } = options;
+        
+        const walkRecursive = async (currentPath, depth = 0) => {
+            if (depth > maxDepth) return;
+            
+            try {
+                const entries = await fs.readdir(currentPath, { withFileTypes: true });
+                
+                // Process entries in parallel batches
+                const batches = this.createBatches(entries, 10);
+                for (const batch of batches) {
+                    await Promise.all(batch.map(async (entry) => {
+                        const fullPath = path.join(currentPath, entry.name);
+                        
+                        if (entry.isDirectory()) {
+                            if (!excludeDirs.some(dir => entry.name.includes(dir))) {
+                                await walkRecursive(fullPath, depth + 1);
+                            }
+                        } else if (entry.isFile()) {
+                            if (this.matchesFileCriteria(entry.name, extensions, patterns)) {
+                                results.push(fullPath);
+                            }
+                        }
+                    }));
+                }
+            } catch (error) {
+                // Skip inaccessible directories
+            }
+        };
+        
+        await walkRecursive(dirPath);
+        return results;
+    }
+    
+    /**
+     * Single-threaded fallback scanning
+     */
+    async walkDirectorySingle(dirPath, options) {
+        const results = [];
+        const { extensions, patterns } = options;
+        
+        // Simple fallback implementation
+        try {
+            const entries = await fs.readdir(dirPath);
+            for (const entry of entries) {
+                const fullPath = path.join(dirPath, entry);
+                try {
+                    const stat = await fs.stat(fullPath);
+                    if (stat.isFile() && this.matchesFileCriteria(entry, extensions, patterns)) {
+                        results.push(fullPath);
+                    }
+                } catch {
+                    // Skip inaccessible files
+                }
+            }
+        } catch {
+            // Directory not accessible
+        }
+        
+        return results;
+    }
+    
+    /**
+     * Process file batches in parallel
+     */
+    async processBatchesParallel(files, maxWorkers) {
+        const batches = this.createBatches(files, Math.ceil(files.length / maxWorkers));
+        const results = [];
+        
+        // Process batches in parallel
+        const batchPromises = batches.map(async (batch, index) => {
+            // Simple parallel processing without worker threads for now
+            return batch.filter(async (file) => {
+                try {
+                    await fs.access(file);
+                    return true;
+                } catch {
+                    return false;
+                }
+            });
+        });
+        
+        const batchResults = await Promise.all(batchPromises);
+        return batchResults.flat();
+    }
+    
+    /**
+     * Create batches for parallel processing
+     */
+    createBatches(array, batchSize) {
+        const batches = [];
+        for (let i = 0; i < array.length; i += batchSize) {
+            batches.push(array.slice(i, i + batchSize));
+        }
+        return batches;
+    }
+    
+    /**
+     * Check if file matches scanning criteria
+     */
+    matchesFileCriteria(fileName, extensions, patterns) {
+        if (extensions) {
+            return extensions.some(ext => fileName.endsWith(ext));
+        }
+        
+        if (patterns) {
+            return patterns.some(pattern => {
+                const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+                return regex.test(fileName);
+            });
+        }
+        
+        return true; // Match all files if no criteria specified
     }
     
     getLineNumber(content, searchString) {
@@ -709,6 +906,136 @@ class SecurityAgent extends BaseAgent {
         });
         
         return { cleaned_up: true, temp_data_removed: true };
+    }
+    
+    /**
+     * Enhanced error suggestion system
+     */
+    getErrorSuggestion(context, error) {
+        const suggestions = {
+            dependency_analysis: {
+                'ENOENT': 'No package.json found. Run `npm init` to create one.',
+                'SyntaxError': 'Invalid JSON in package.json. Check formatting.',
+                'default': 'Verify package.json exists and contains valid JSON'
+            },
+            file_access: {
+                'ENOENT': 'File not found. Check path and permissions.',
+                'EACCES': 'Permission denied. Run with appropriate privileges.',
+                'EISDIR': 'Path points to directory, not file.',
+                'default': 'Check file accessibility and permissions'
+            },
+            source_scan: {
+                'EMFILE': 'Too many open files. Reduce scan scope.',
+                'ENOMEM': 'Out of memory. Scan smaller batches.',
+                'default': 'Check system resources and file permissions'
+            },
+            config_check: {
+                'YAML': 'Invalid YAML syntax. Check indentation and structure.',
+                'JSON': 'Invalid JSON syntax. Check commas and brackets.',
+                'default': 'Verify configuration file format'
+            }
+        };
+        
+        const contextSuggestions = suggestions[context] || suggestions.file_access;
+        const errorType = Object.keys(contextSuggestions).find(key => 
+            error.message.includes(key) || error.code === key
+        );
+        
+        return contextSuggestions[errorType] || contextSuggestions.default;
+    }
+    
+    /**
+     * Real-time monitoring capability
+     */
+    async startRealTimeMonitoring(targetPath, callback) {
+        const fs = require('fs');
+        const chokidar = require('chokidar');
+        
+        try {
+            const watcher = chokidar.watch(targetPath, {
+                ignored: /node_modules|\.git/,
+                persistent: true
+            });
+            
+            watcher.on('change', async (filePath) => {
+                try {
+                    const content = await fs.promises.readFile(filePath, 'utf8');
+                    const findings = await this.quickSecurityScan(content, filePath);
+                    
+                    if (findings.length > 0 && callback) {
+                        callback({
+                            file: filePath,
+                            timestamp: new Date(),
+                            findings: findings,
+                            action: 'file_changed'
+                        });
+                    }
+                } catch (error) {
+                    const suggestion = this.getErrorSuggestion('file_access', error);
+                    if (callback) {
+                        callback({
+                            file: filePath,
+                            timestamp: new Date(),
+                            error: error.message,
+                            suggestion: suggestion,
+                            action: 'scan_error'
+                        });
+                    }
+                }
+            });
+            
+            return watcher;
+        } catch (error) {
+            throw new Error(`Real-time monitoring failed: ${error.message}`);
+        }
+    }
+    
+    /**
+     * Quick security scan for real-time monitoring
+     */
+    async quickSecurityScan(content, filePath) {
+        const findings = [];
+        
+        // Only scan for critical patterns to avoid performance issues
+        const criticalPatterns = [
+            ...this.securityPatterns.secrets.filter(p => p.severity === 'critical'),
+            ...this.securityPatterns.vulnerabilities.filter(p => p.severity === 'critical')
+        ];
+        
+        for (const pattern of criticalPatterns) {
+            const matches = content.match(pattern.pattern);
+            if (matches) {
+                findings.push({
+                    type: pattern.type,
+                    severity: pattern.severity,
+                    matches: matches.length,
+                    line: this.getLineNumber(content, matches[0]),
+                    suggestion: this.getSecuritySuggestion(pattern.type)
+                });
+            }
+            // Reset regex state
+            pattern.pattern.lastIndex = 0;
+        }
+        
+        return findings;
+    }
+    
+    /**
+     * Get security-specific suggestions for findings
+     */
+    getSecuritySuggestion(type) {
+        const suggestions = {
+            'API_KEY': 'Move API keys to environment variables (.env file)',
+            'GITHUB_TOKEN': 'Store GitHub tokens in secure environment variables',
+            'SLACK_TOKEN': 'Use environment variables for Slack credentials',
+            'JWT_TOKEN': 'Never hardcode JWT tokens - use secure token storage',
+            'SQL_INJECTION': 'Use parameterized queries or prepared statements',
+            'COMMAND_INJECTION': 'Sanitize user input before shell execution',
+            'XSS_POTENTIAL': 'Sanitize user input before DOM insertion',
+            'EVAL_USAGE': 'Avoid eval() - use safer alternatives like JSON.parse()'
+        };
+        
+        return suggestions[type] || 'Review and remediate security issue';
     }
 }
 

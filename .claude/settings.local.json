@@ -136,7 +136,8 @@
       "Bash(del \"C:\\Users\\Levi\\.claude\\statusline-script.sh\")",
       "Bash(ccstatusline)",
       "Bash(echo:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git check-ignore:*)"
     ],
     "deny": [],
     "ask": []
