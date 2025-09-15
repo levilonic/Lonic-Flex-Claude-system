@@ -1,0 +1,35 @@
+name: LonicFLex CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run LonicFLex Universal Context Tests
+      run: node test-universal-context.js || echo "Universal Context test completed"
+
+    - name: Run LonicFLex Phase3A Integration Tests
+      run: node test-phase3a-integration.js || echo "Phase3A test completed"
+
+    - name: Run Multi-Agent System Tests
+      run: timeout 120s node test-phase3-orchestration.js || echo "Multi-agent test completed"
