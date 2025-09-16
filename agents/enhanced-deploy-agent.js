@@ -30,7 +30,7 @@ class EnhancedDeployAgent extends BaseAgent {
             healthCheckTimeout: config.healthCheckTimeout || 120000,
             rollbackEnabled: config.rollbackEnabled !== false,
             // Demo mode - skip actual Docker operations
-            demoMode: config.demoMode !== false,
+            demoMode: config.demoMode === true,
             ...config.deploy
         };
 

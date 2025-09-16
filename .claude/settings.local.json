@@ -139,7 +139,8 @@
       "Bash(grep:*)",
       "Bash(git check-ignore:*)",
       "Bash(cat:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

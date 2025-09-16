@@ -29,8 +29,8 @@ class DeployAgent extends BaseAgent {
             buildTimeout: config.buildTimeout || 600000,
             healthCheckTimeout: config.healthCheckTimeout || 120000,
             rollbackEnabled: config.rollbackEnabled !== false,
-            // Demo mode - skip actual Docker operations
-            demoMode: config.demoMode !== false,
+            // Production mode - perform actual Docker operations
+            demoMode: config.demoMode === true,
             ...config.deploy
         };
         

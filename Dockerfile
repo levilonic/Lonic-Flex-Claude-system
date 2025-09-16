@@ -13,8 +13,8 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy source code
 COPY . .
 
-# Remove dev dependencies and unnecessary files
-RUN rm -rf tests/ docs/ .git/ .github/ *.md
+# Remove dev dependencies and unnecessary files (keep docs for anthropic-docs-manager)
+RUN rm -rf tests/ .git/ .github/ *.md
 
 # Production image
 FROM node:20-alpine AS production
