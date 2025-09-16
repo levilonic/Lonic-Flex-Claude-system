@@ -72,13 +72,28 @@ class CommunicationAgent extends BaseAgent {
         this.slackClient = this.commConfig.slack.token ? 
             new WebClient(this.commConfig.slack.token) : null;
         
-        // Initialize communication context
-        this.contextManager.addAgentEvent(this.agentName, 'comm_config_loaded', {
-            slack_configured: !!this.commConfig.slack.token,
-            default_channel: this.commConfig.slack.defaultChannel,
-            notification_channels: this.commConfig.notifications.channels.length,
-            templates_loaded: Object.keys(this.messageTemplates).length
-        });
+        // Communication context will be logged in initialize() method
+        // Cannot use contextManager here as it's not initialized until initialize() is called
+    }
+
+    /**
+     * Initialize agent with context manager and log communication config
+     */
+    async initialize(workflowId = null) {
+        // Call parent initialize method first
+        await super.initialize(workflowId);
+
+        // Log communication configuration once context manager is available
+        if (this.contextManager) {
+            await this.contextManager.addAgentEvent(this.agentName, 'comm_config_loaded', {
+                slack_configured: !!this.commConfig.slack.token,
+                default_channel: this.commConfig.slack.defaultChannel,
+                notification_channels: this.commConfig.notifications.channels.length,
+                templates_loaded: Object.keys(this.messageTemplates).length
+            });
+        }
+
+        return this;
     }
 
     /**

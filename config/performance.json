@@ -1,0 +1,88 @@
+{
+  "enabled": true,
+  "clustering": {
+    "enabled": true,
+    "workers": 0,
+    "respawnDelay": 5000,
+    "gracefulShutdownTimeout": 30000
+  },
+  "caching": {
+    "enabled": true,
+    "ttl": 300000,
+    "maxSize": 1000,
+    "strategies": {
+      "lru": true,
+      "redis": false
+    },
+    "compression": true
+  },
+  "pooling": {
+    "enabled": true,
+    "database": {
+      "maxConnections": 10,
+      "minConnections": 2,
+      "idleTimeout": 30000,
+      "acquireTimeout": 60000
+    },
+    "http": {
+      "maxSockets": 50,
+      "keepAlive": true,
+      "timeout": 30000
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "interval": 10000,
+    "thresholds": {
+      "cpu": 80,
+      "memory": 85,
+      "responseTime": 5000,
+      "errorRate": 5
+    },
+    "gc": {
+      "enabled": true,
+      "forceThreshold": 90,
+      "monitoringInterval": 60000
+    }
+  },
+  "compression": {
+    "enabled": true,
+    "level": 6,
+    "threshold": 1024,
+    "types": ["text/plain", "application/json", "text/html", "text/css", "application/javascript"]
+  },
+  "optimization": {
+    "eventLoop": {
+      "maxBlockTime": 100,
+      "checkInterval": 5000
+    },
+    "memory": {
+      "autoGc": true,
+      "heapDumpOnOOM": false,
+      "maxOldSpaceSize": 4096
+    },
+    "assets": {
+      "minification": true,
+      "imageOptimization": true,
+      "bundling": true
+    }
+  },
+  "loadBalancing": {
+    "strategy": "round_robin",
+    "healthCheck": {
+      "enabled": true,
+      "interval": 30000,
+      "timeout": 5000,
+      "path": "/health"
+    },
+    "stickySession": false
+  },
+  "rateLimit": {
+    "enabled": true,
+    "windowMs": 900000,
+    "max": 100,
+    "message": "Too many requests",
+    "standardHeaders": true,
+    "legacyHeaders": false
+  }
+}

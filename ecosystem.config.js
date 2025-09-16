@@ -12,7 +12,7 @@ module.exports = {
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '2G',
+      max_memory_restart: '1G', // Phase 3: Reduced from 2G for better resource management
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
@@ -41,9 +41,13 @@ module.exports = {
       wait_ready: true,
       listen_timeout: 3000,
       
-      // Health monitoring
+      // Phase 3: Enhanced Health monitoring
       health_check_grace_period: 3000,
-      health_check_fatal_exceptions: true
+      health_check_fatal_exceptions: true,
+      health_check_http: 'http://localhost:3000/health',
+
+      // Node.js optimization flags
+      node_args: ['--max-old-space-size=1024', '--optimize-for-size']
     },
     
     // Web dashboard for monitoring (optional)

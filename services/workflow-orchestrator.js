@@ -75,22 +75,22 @@ class WorkflowOrchestrator extends EventEmitter {
         }
 
         try {
-            // Initialize agent pool manager
-            this.poolManager = new AgentPoolManager(this.serviceContainer, {
-                maxConcurrentAgents: this.config.maxConcurrentWorkflows * 4, // Assume avg 4 agents per workflow
-                enableMetrics: this.config.enableMetrics
-            });
+            // Skip AgentPoolManager initialization due to circular dependency issues
+            // TODO: Refactor AgentPoolManager to eliminate circular dependency
+            console.log('⚠️ Skipping AgentPoolManager initialization (circular dependency detected)');
+            console.log('   WorkflowOrchestrator operating without pool manager');
+            this.poolManager = null;
 
-            await this.poolManager.initialize();
+            // Listen to pool manager events (if available)
+            if (this.poolManager) {
+                this.poolManager.on('agentAcquired', (data) => {
+                    this.emit('agentAcquired', data);
+                });
 
-            // Listen to pool manager events
-            this.poolManager.on('agentAcquired', (data) => {
-                this.emit('agentAcquired', data);
-            });
-
-            this.poolManager.on('agentReturned', (data) => {
-                this.emit('agentReturned', data);
-            });
+                this.poolManager.on('agentReturned', (data) => {
+                    this.emit('agentReturned', data);
+                });
+            }
 
             // Register default workflow templates
             this.registerDefaultTemplates();

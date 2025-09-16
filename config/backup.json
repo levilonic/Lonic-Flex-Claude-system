@@ -1,0 +1,118 @@
+{
+  "enabled": true,
+  "backupPath": "./backups",
+  "schedule": {
+    "enabled": true,
+    "frequency": "daily",
+    "time": "03:00",
+    "retention": 30
+  },
+  "compression": true,
+  "encryption": false,
+  "targets": [
+    "database",
+    "configuration", 
+    "logs"
+  ],
+  "excludePatterns": [
+    "node_modules",
+    ".git",
+    "temp",
+    ".cache",
+    "dist",
+    "build",
+    "coverage"
+  ],
+  "strategies": {
+    "full": {
+      "frequency": "weekly",
+      "retention": 4
+    },
+    "incremental": {
+      "frequency": "daily", 
+      "retention": 7,
+      "basedOn": "full"
+    },
+    "differential": {
+      "frequency": "hourly",
+      "retention": 24,
+      "basedOn": "full"
+    }
+  },
+  "storage": {
+    "local": {
+      "enabled": true,
+      "path": "./backups"
+    },
+    "s3": {
+      "enabled": false,
+      "bucket": "${AWS_BACKUP_BUCKET}",
+      "region": "${AWS_REGION}",
+      "accessKeyId": "${AWS_ACCESS_KEY_ID}",
+      "secretAccessKey": "${AWS_SECRET_ACCESS_KEY}"
+    },
+    "azure": {
+      "enabled": false,
+      "containerName": "${AZURE_BACKUP_CONTAINER}",
+      "connectionString": "${AZURE_STORAGE_CONNECTION_STRING}"
+    }
+  },
+  "notification": {
+    "enabled": true,
+    "onSuccess": false,
+    "onFailure": true,
+    "channels": {
+      "slack": {
+        "enabled": true,
+        "webhook": "${SLACK_BACKUP_WEBHOOK}",
+        "channel": "#operations"
+      },
+      "email": {
+        "enabled": false,
+        "smtp": {
+          "host": "${SMTP_HOST}",
+          "port": 587,
+          "secure": false,
+          "auth": {
+            "user": "${SMTP_USER}",
+            "pass": "${SMTP_PASS}"
+          }
+        },
+        "from": "backups@lonicflex.dev",
+        "to": ["admin@lonicflex.dev"]
+      }
+    }
+  },
+  "validation": {
+    "enabled": true,
+    "checksums": true,
+    "testRestore": false,
+    "integrity": {
+      "database": true,
+      "configuration": true
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics": {
+      "backupSize": true,
+      "backupDuration": true,
+      "backupSuccess": true,
+      "storageUsage": true
+    },
+    "alerts": {
+      "backupFailure": {
+        "enabled": true,
+        "threshold": 1
+      },
+      "storageSpace": {
+        "enabled": true,
+        "threshold": 90
+      },
+      "backupAge": {
+        "enabled": true,
+        "threshold": 48
+      }
+    }
+  }
+}

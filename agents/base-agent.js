@@ -4,12 +4,7 @@
  * Base class for all specialized agents in the multi-agent system
  */
 
-const { Factor3ContextManager } = require('../factor3-context-manager');
-const { GlobalContextManager } = require('../context-management/global-context-manager');
-const { SQLiteManager } = require('../database/sqlite-manager');
-const { TwelveFactorCompliance } = require('../12-factor-compliance-tracker');
-const { MemoryManager } = require('../memory/memory-manager');
-const DocumentationService = require('../services/documentation-service');
+const { getGlobalServiceContainer } = require('../services/service-container');
 
 class BaseAgent {
     constructor(agentName, sessionId, config = {}) {
@@ -17,16 +12,10 @@ class BaseAgent {
         this.sessionId = sessionId;
         this.agentId = `${sessionId}_${agentName}`;
         this.config = { maxSteps: 8, timeout: 30000, ...config };
-        
-        // Factor 3: Own Your Context Window - Use shared context for multi-agent workflows
-        this.globalContextManager = new GlobalContextManager();
-        this.contextManager = this.globalContextManager.getSharedContext(this.agentId, {
-            contextScope: config.contextScope || 'session'
-        });
-        
-        // Factor 5: Unify Execution State  
-        this.dbManager = null;
-        
+
+        // Get shared services from ServiceContainer (dependency injection)
+        this.serviceContainer = getGlobalServiceContainer();
+
         // Factor 12: Stateless Reducer
         this.state = 'idle';
         this.progress = 0;
@@ -34,43 +23,80 @@ class BaseAgent {
         this.executionSteps = [];
         this.result = null;
         this.error = null;
-        
-        // 12-Factor compliance tracker
-        this.compliance = new TwelveFactorCompliance();
-        
-        // Memory system for learning and verification
-        this.memoryManager = new MemoryManager();
-        
-        // Documentation intelligence service
-        this.docs = DocumentationService.getInstance();
-        
-        // Initialize context
-        this.contextManager.addAgentEvent(agentName, 'initialized', {
-            agent_id: this.agentId,
-            session_id: sessionId,
-            config: this.config
-        });
+
+        // Will be set during initialize() - agent gets its own context partition
+        this.contextManager = null;
     }
 
     /**
-     * Initialize agent with database connection
+     * Initialize agent with ServiceContainer (lightweight dependency injection)
      */
-    async initialize(dbManager) {
-        this.dbManager = dbManager;
+    async initialize(workflowId = null) {
+        // Ensure ServiceContainer is initialized
+        if (!this.serviceContainer.initialized) {
+            await this.serviceContainer.initialize();
+        }
+
+        // Get database service from container
+        const dbManager = this.serviceContainer.getDatabaseService();
+
         this.state = this.applyStateTransition(this.state, 'initialize');
-        
+
+        // Create isolated context partition for this agent's workflow
+        const workflowKey = workflowId || `workflow_${this.agentId}`;
+        let partition;
+
+        try {
+            // Try to get existing partition first
+            partition = this.serviceContainer.getWorkflowPartition(workflowKey);
+        } catch (error) {
+            // Create new partition if it doesn't exist
+            partition = await this.serviceContainer.createWorkflowPartition(workflowKey);
+        }
+
+        // Register this agent with its partition (gets isolated context manager)
+        this.contextManager = partition.registerAgent(this.agentId, {
+            agentName: this.agentName,
+            sessionId: this.sessionId,
+            contextScope: this.config.contextScope || 'session'
+        });
+
+        // Graceful degradation if context manager is not available
+        if (!this.contextManager) {
+            console.log(`⚠️ Context manager not available for agent ${this.agentName} - operating in degraded mode`);
+            // Create a minimal mock context manager to prevent errors
+            this.contextManager = {
+                addAgentEvent: async () => { console.log('📝 Context event skipped (degraded mode)'); },
+                addEvent: async () => { console.log('📝 Context event skipped (degraded mode)'); },
+                getContext: () => ({ degraded: true })
+            };
+        }
+
         // Create agent record in database (Factor 5)
-        await this.dbManager.createAgent(
+        // Serialize config safely to avoid circular references
+        const safeConfig = {
+            maxSteps: this.config.maxSteps,
+            timeout: this.config.timeout,
+            contextScope: this.config.contextScope
+            // Only include serializable config properties
+        };
+
+        await dbManager.createAgent(
             this.agentId,
             this.sessionId,
             this.agentName,
-            { config: this.config, initialized_at: Date.now() }
+            { config: safeConfig, workflowId: workflowKey, initialized_at: Date.now() }
         );
 
-        this.contextManager.addAgentEvent(this.agentName, 'database_connected', {
-            agent_id: this.agentId
+        // Log initialization event in isolated context
+        await this.contextManager.addAgentEvent(this.agentName, 'agent_initialized', {
+            agent_id: this.agentId,
+            session_id: this.sessionId,
+            workflow_id: workflowKey,
+            services_from_container: true
         });
 
+        console.log(`✅ ${this.agentName} initialized with ServiceContainer dependency injection`);
         return this;
     }
 
@@ -96,8 +122,9 @@ class BaseAgent {
             await this.updateProgress(100, 'completed', 'completed');
             await this.logEvent('execution_completed', { result: this.result });
             
-            // Record successful execution pattern in memory
-            await this.memoryManager.recordPattern(
+            // Record successful execution pattern in memory (using service from container)
+            const memoryService = this.serviceContainer.getMemoryService();
+            await memoryService.recordPattern(
                 'success',
                 { agent: this.agentName, steps: this.executionSteps.length },
                 'workflow_execution',
@@ -111,17 +138,19 @@ class BaseAgent {
             this.error = error;
             this.state = this.applyStateTransition(this.state, 'error');
             
-            // Factor 9: Compact Errors
-            const compactError = this.compliance.handleError(error, { 
-                agent: this.agentName, 
-                step: this.currentStep 
+            // Factor 9: Compact Errors (using service from container)
+            const complianceService = this.serviceContainer.getComplianceService();
+            const compactError = complianceService.handleError(error, {
+                agent: this.agentName,
+                step: this.currentStep
             });
-            
+
             await this.updateProgress(this.progress, `error: ${compactError.message}`, 'failed');
             await this.logEvent('execution_failed', { error: compactError });
-            
-            // Record failure pattern and lesson in memory
-            await this.memoryManager.recordLesson(
+
+            // Record failure pattern and lesson in memory (using service from container)
+            const memoryService = this.serviceContainer.getMemoryService();
+            await memoryService.recordLesson(
                 'mistake',
                 this.agentName,
                 `Agent execution failed: ${compactError.message}`,
@@ -168,16 +197,18 @@ class BaseAgent {
                 result: result
             });
             
-            // Record successful pattern for documentation learning
-            this.docs.recordSuccessPattern(this.agentName, stepName, {
+            // Record successful pattern for documentation learning (using service from container)
+            const docsService = this.serviceContainer.getDocumentationService();
+            docsService.recordSuccessPattern(this.agentName, stepName, {
                 success: true,
                 context: { step: stepName, index: currentIndex }
             });
             
             return result;
         } catch (error) {
-            // Get intelligent documentation suggestions for this error
-            const docSuggestions = await this.docs.getSuggestionsForError(error, {
+            // Get intelligent documentation suggestions for this error (using service from container)
+            const docsService = this.serviceContainer.getDocumentationService();
+            const docSuggestions = await docsService.getSuggestionsForError(error, {
                 agent: this.agentName,
                 step: stepName,
                 index: currentIndex
@@ -208,10 +239,9 @@ class BaseAgent {
         if (step) this.currentStep = step;
         if (status) this.state = status;
         
-        // Update database (Factor 5: Unify Execution State)
-        if (this.dbManager) {
-            await this.dbManager.updateAgentProgress(this.agentId, progress, step, status);
-        }
+        // Update database (Factor 5: Unify Execution State) - using service from container
+        const dbManager = this.serviceContainer.getDatabaseService();
+        await dbManager.updateAgentProgress(this.agentId, progress, step, status);
         
         // Add to context (Factor 3)
         this.contextManager.addAgentEvent(this.agentName, 'progress_update', {
@@ -226,10 +256,9 @@ class BaseAgent {
      * Log event to database and context
      */
     async logEvent(eventType, eventData) {
-        // Database logging (Factor 5)
-        if (this.dbManager) {
-            await this.dbManager.logEvent(this.sessionId, this.agentId, eventType, eventData);
-        }
+        // Database logging (Factor 5) - using service from container
+        const dbManager = this.serviceContainer.getDatabaseService();
+        await dbManager.logEvent(this.sessionId, this.agentId, eventType, eventData);
         
         // Context logging (Factor 3)
         this.contextManager.addAgentEvent(this.agentName, eventType, eventData);
@@ -239,11 +268,8 @@ class BaseAgent {
      * Acquire resource lock (prevent race conditions)
      */
     async acquireResourceLock(resourceName, ttlSeconds = 300) {
-        if (!this.dbManager) {
-            throw new Error('Database manager not initialized');
-        }
-        
-        const acquired = await this.dbManager.acquireLock(resourceName, this.agentId, this.sessionId, ttlSeconds);
+        const dbManager = this.serviceContainer.getDatabaseService();
+        const acquired = await dbManager.acquireLock(resourceName, this.agentId, this.sessionId, ttlSeconds);
         
         if (acquired) {
             await this.logEvent('resource_locked', { resource: resourceName, ttl: ttlSeconds });
@@ -258,9 +284,8 @@ class BaseAgent {
      * Release resource lock
      */
     async releaseResourceLock(resourceName) {
-        if (!this.dbManager) return false;
-        
-        const released = await this.dbManager.releaseLock(resourceName);
+        const dbManager = this.serviceContainer.getDatabaseService();
+        const released = await dbManager.releaseLock(resourceName);
         await this.logEvent('resource_released', { resource: resourceName });
         
         return released;
@@ -282,9 +307,10 @@ class BaseAgent {
      * Validate agent follows Factor 10 (Small, Focused Agents)
      */
     validateAgent() {
-        this.compliance.validateAgentScope(
-            this.agentName, 
-            this.executionSteps.length, 
+        const complianceService = this.serviceContainer.getComplianceService();
+        complianceService.validateAgentScope(
+            this.agentName,
+            this.executionSteps.length,
             this.config.maxSteps
         );
     }
@@ -293,7 +319,8 @@ class BaseAgent {
      * Apply state transition (Factor 12: Stateless Reducer)
      */
     applyStateTransition(currentState, event, data = {}) {
-        return this.compliance.applyStateTransition(currentState, event, {
+        const complianceService = this.serviceContainer.getComplianceService();
+        return complianceService.applyStateTransition(currentState, event, {
             ...data,
             agent: this.agentName,
             timestamp: Date.now()
@@ -543,23 +570,27 @@ class AgentFactory {
     }
 }
 
-// Base Agent execution function
+// Base Agent execution function (updated for ServiceContainer architecture)
 async function runBaseAgent() {
-    console.log('🤖 Base Agent - Real Execution Mode\n');
-    
-    const dbManager = new SQLiteManager(':memory:');
-    
+    console.log('🤖 Base Agent - ServiceContainer Architecture Demo\n');
+
+    const { initializeGlobalServiceContainer } = require('../services/service-container');
+
     try {
-        // Initialize database
-        await dbManager.initialize();
-        
-        // Create session
+        // Initialize ServiceContainer (replaces manual database setup)
+        console.log('🔧 Initializing ServiceContainer...');
+        const serviceContainer = await initializeGlobalServiceContainer();
+
+        // Create session in the database service
         const sessionId = 'base_agent_' + Date.now();
+        const dbManager = serviceContainer.getDatabaseService();
         await dbManager.createSession(sessionId, 'base_work_workflow');
-        
-        // Create and initialize agent
+
+        console.log('✅ ServiceContainer initialized with shared services');
+
+        // Create and initialize agent with ServiceContainer
         const agent = AgentFactory.createAgent('base_work', sessionId);
-        await agent.initialize(dbManager);
+        await agent.initialize(`workflow_${sessionId}`);
         
         console.log(`✅ Created agent: ${agent.agentName} (${agent.agentId})`);
         console.log(`   Execution steps: ${agent.executionSteps.length} (Factor 10 compliant: ≤8)`);
@@ -589,25 +620,35 @@ async function runBaseAgent() {
         const handoffContext = agent.generateHandoffContext();
         console.log(`\n🔄 Handoff Context Generated (${Object.keys(handoffContext).length} fields)`);
         
-        // Cleanup
+        // Cleanup (ServiceContainer handles resource management)
         await agent.cleanup();
         console.log('\n🧹 Agent cleanup completed');
-        
+
         // Show database stats
         const stats = await dbManager.getStats();
         console.log(`\n📊 Database Stats:`, stats);
-        
+
+        // Show ServiceContainer health
+        const health = await serviceContainer.getSystemHealth();
+        console.log(`\n🏥 ServiceContainer Health:`);
+        console.log(`   Status: ${health.status}`);
+        console.log(`   Services: ${health.services}`);
+        console.log(`   Active Partitions: ${health.activePartitions}`);
+
         console.log('\n✅ Base Agent execution completed successfully!');
+        console.log('   ✓ ServiceContainer Architecture: Lightweight agents with shared services');
         console.log('   ✓ Factor 10: Small, Focused Agents (6 steps ≤ 8 max)');
-        console.log('   ✓ Factor 3: Own Your Context Window (XML format)');
+        console.log('   ✓ Factor 3: Own Your Context Window (Isolated partitions)');
         console.log('   ✓ Factor 5: Unify Execution State (SQLite persistence)');
         console.log('   ✓ Factor 12: Stateless Reducer (state transitions)');
-        
+
     } catch (error) {
         console.error('❌ Execution failed:', error.message);
+        console.error('   ServiceContainer architecture may need adjustment');
         throw error;
     } finally {
-        await dbManager.close();
+        // ServiceContainer handles cleanup automatically
+        console.log('🔧 ServiceContainer manages all resource cleanup');
     }
 }
 

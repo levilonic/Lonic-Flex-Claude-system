@@ -60,14 +60,9 @@ class CodeAgent extends BaseAgent {
         
         // Code templates and patterns
         this.codeTemplates = this.initializeCodeTemplates();
-        
-        // Initialize code context
-        this.contextManager.addAgentEvent(this.agentName, 'code_config_loaded', {
-            language: this.codeConfig.language,
-            framework: this.codeConfig.framework,
-            test_framework: this.codeConfig.testFramework,
-            templates_loaded: Object.keys(this.codeTemplates).length
-        });
+
+        // Context will be initialized after agent initialization (ServiceContainer pattern)
+        this.initialized = false;
     }
 
     /**
@@ -160,6 +155,27 @@ export class {name} {
     {methods}`
             }
         };
+    }
+
+    /**
+     * Initialize CodeAgent with ServiceContainer (override BaseAgent initialize)
+     */
+    async initialize(workflowId = null) {
+        // Call parent initialization first (ServiceContainer setup)
+        await super.initialize(workflowId);
+
+        // Now we can safely use contextManager for CodeAgent-specific initialization
+        await this.contextManager.addAgentEvent(this.agentName, 'code_config_loaded', {
+            language: this.codeConfig.language,
+            framework: this.codeConfig.framework,
+            test_framework: this.codeConfig.testFramework,
+            templates_loaded: Object.keys(this.codeTemplates).length,
+            service_container: 'injected'
+        });
+
+        this.initialized = true;
+        console.log(`✅ CodeAgent initialized with ServiceContainer dependency injection`);
+        return this;
     }
 
     /**
@@ -1253,28 +1269,32 @@ app.listen(PORT, () => {
  * Demo function for Code Agent
  */
 async function demoCodeAgent() {
-    console.log('💻 Code Agent Demo - Factor 10 Specialized Agent\n');
-    
-    const { SQLiteManager } = require('../database/sqlite-manager');
-    const dbManager = new SQLiteManager(':memory:');
-    
+    console.log('💻 Code Agent Demo - ServiceContainer Architecture\n');
+
+    const { initializeGlobalServiceContainer } = require('../services/service-container');
+
     try {
-        // Initialize database
-        await dbManager.initialize();
-        
+        // Initialize ServiceContainer
+        console.log('🔧 Initializing ServiceContainer...');
+        const serviceContainer = await initializeGlobalServiceContainer();
+
         // Create demo session
         const sessionId = 'code_agent_demo_' + Date.now();
+        const dbManager = serviceContainer.getDatabaseService();
         await dbManager.createSession(sessionId, 'code_generation_workflow');
-        
-        // Create code agent
+
+        console.log('✅ ServiceContainer initialized');
+
+        // Create code agent with ServiceContainer architecture
         const agent = new CodeAgent(sessionId, {
             language: 'javascript',
             framework: 'express',
             testFramework: 'jest',
             outputDir: './generated-demo'
         });
-        
-        await agent.initialize(dbManager);
+
+        // Initialize with ServiceContainer (no dbManager parameter)
+        await agent.initialize(`workflow_${sessionId}`);
         
         console.log(`✅ Created Code agent: ${agent.agentName}`);
         console.log(`   Steps: ${agent.executionSteps.length} (Factor 10 compliant)`);
@@ -1330,19 +1350,25 @@ async function demoCodeAgent() {
         console.log(`   Execution steps defined: ${status.executionSteps.length}`);
         
         console.log('\n✅ Code Agent demo completed successfully!');
+        console.log('   ✓ ServiceContainer Architecture: Lightweight agents with shared services');
         console.log('   ✓ Factor 10: 8 execution steps (≤8 max)');
         console.log('   ✓ Extends BaseAgent with code generation functionality');
         console.log('   ✓ Supports multiple languages and frameworks');
         console.log('   ✓ Generates complete applications with tests');
         console.log('   ✓ Includes quality checks and documentation');
-        
+
         console.log('\n📝 Note: Full code generation creates actual files in output directory');
         console.log('   Configure outputDir for actual file creation');
-        
+
+        // Show ServiceContainer health
+        const health = await serviceContainer.getSystemHealth();
+        console.log(`\n🏥 ServiceContainer Health: ${health.status} (${health.activePartitions} partitions)`);
+
     } catch (error) {
         console.error('❌ Demo failed:', error.message);
+        console.error('   ServiceContainer architecture may need adjustment');
     } finally {
-        await dbManager.close();
+        console.log('🔧 ServiceContainer manages all resource cleanup');
     }
 }
 

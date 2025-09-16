@@ -1,0 +1,298 @@
+{
+  "version": "1.0.0",
+  "description": "Role-based access control for Slack integration",
+  "
+": "development",
+  
+  "roles": {
+    "admin": {
+      "description": "Full system access and configuration",
+      "permissions": ["*"],
+      "restrictions": [],
+      "commands": ["*"],
+      "channels": ["*"],
+      "emergency_override": true
+    },
+    "developer": {
+      "description": "Development and deployment operations",
+      "permissions": [
+        "agent.start",
+        "agent.stop",
+        "agent.status",
+        "workflow.trigger",
+        "deployment.deploy",
+        "deployment.rollback",
+        "security.scan",
+        "config.view",
+        "logs.view"
+      ],
+      "restrictions": [
+        "!config.modify",
+        "!user.manage",
+        "!secrets.view"
+      ],
+      "commands": [
+        "/claude-dev",
+        "/deploy",
+        "/security-scan",
+        "/agent-status",
+        "/workflow-status",
+        "/logs"
+      ],
+      "channels": ["#dev-team", "#deployments", "#alerts"],
+      "emergency_override": false
+    },
+    "reviewer": {
+      "description": "Code review and quality assurance",
+      "permissions": [
+        "agent.status",
+        "workflow.view",
+        "security.scan",
+        "security.view",
+        "logs.view",
+        "metrics.view"
+      ],
+      "restrictions": [
+        "!agent.start",
+        "!agent.stop",
+        "!deployment.*",
+        "!config.*",
+        "!secrets.*"
+      ],
+      "commands": [
+        "/security-scan",
+        "/agent-status", 
+        "/workflow-status",
+        "/metrics"
+      ],
+      "channels": ["#dev-team", "#security"],
+      "emergency_override": false
+    },
+    "readonly": {
+      "description": "Read-only access for monitoring and status",
+      "permissions": [
+        "status.view",
+        "metrics.view",
+        "logs.view"
+      ],
+      "restrictions": [
+        "!agent.*",
+        "!workflow.*", 
+        "!deployment.*",
+        "!config.*",
+        "!secrets.*"
+      ],
+      "commands": [
+        "/status",
+        "/metrics"
+      ],
+      "channels": ["#general", "#status"],
+      "emergency_override": false
+    }
+  },
+
+  "users": {
+    "U123456789": {
+      "name": "admin_user",
+      "role": "admin",
+      "timezone": "America/New_York",
+      "notifications": {
+        "deployment": true,
+        "security_alerts": true,
+        "system_failures": true,
+        "approval_requests": true
+      }
+    },
+    "U987654321": {
+      "name": "dev_user",
+      "role": "developer", 
+      "timezone": "America/Los_Angeles",
+      "notifications": {
+        "deployment": true,
+        "security_alerts": true,
+        "system_failures": false,
+        "approval_requests": false
+      }
+    },
+    "U555666777": {
+      "name": "reviewer_user",
+      "role": "reviewer",
+      "timezone": "Europe/London",
+      "notifications": {
+        "deployment": false,
+        "security_alerts": true,
+        "system_failures": false,
+        "approval_requests": false
+      }
+    }
+  },
+
+  "channels": {
+    "#dev-team": {
+      "roles_allowed": ["admin", "developer", "reviewer"],
+      "commands_enabled": true,
+      "bot_mentions": true,
+      "notifications": ["deployment", "security_alerts", "workflow_status"]
+    },
+    "#deployments": {
+      "roles_allowed": ["admin", "developer"],
+      "commands_enabled": true,
+      "bot_mentions": true,
+      "notifications": ["deployment", "system_failures"]
+    },
+    "#alerts": {
+      "roles_allowed": ["admin", "developer"],
+      "commands_enabled": false,
+      "bot_mentions": false,
+      "notifications": ["security_alerts", "system_failures"]
+    },
+    "#security": {
+      "roles_allowed": ["admin", "reviewer"],
+      "commands_enabled": true,
+      "bot_mentions": true,
+      "notifications": ["security_alerts"]
+    },
+    "#general": {
+      "roles_allowed": ["admin", "developer", "reviewer", "readonly"],
+      "commands_enabled": false,
+      "bot_mentions": true,
+      "notifications": ["system_status"]
+    }
+  },
+
+  "commands": {
+    "/claude-dev": {
+      "description": "Development workflow operations",
+      "roles_required": ["admin", "developer"],
+      "parameters": ["start", "stop", "status", "logs"],
+      "approval_required": false,
+      "rate_limit": 10
+    },
+    "/claude-admin": {
+      "description": "Administrative functions",
+      "roles_required": ["admin"],
+      "parameters": ["config", "users", "roles", "system"],
+      "approval_required": true,
+      "rate_limit": 5
+    },
+    "/deploy": {
+      "description": "Deployment operations",
+      "roles_required": ["admin", "developer"], 
+      "parameters": ["staging", "production", "rollback"],
+      "approval_required": true,
+      "rate_limit": 3
+    },
+    "/security-scan": {
+      "description": "Security scanning operations",
+      "roles_required": ["admin", "developer", "reviewer"],
+      "parameters": ["full", "quick", "dependencies"],
+      "approval_required": false,
+      "rate_limit": 5
+    },
+    "/status": {
+      "description": "System status information",
+      "roles_required": ["admin", "developer", "reviewer", "readonly"],
+      "parameters": ["agents", "workflows", "system", "health"],
+      "approval_required": false,
+      "rate_limit": 20
+    }
+  },
+
+  "approval_workflows": {
+    "production_deployment": {
+      "required_approvers": 2,
+      "approver_roles": ["admin"],
+      "timeout": 3600000,
+      "auto_approve_conditions": {
+        "emergency": false,
+        "security_patch": true,
+        "rollback": true
+      }
+    },
+    "config_changes": {
+      "required_approvers": 1,
+      "approver_roles": ["admin"],
+      "timeout": 1800000,
+      "auto_approve_conditions": {
+        "emergency": false
+      }
+    },
+    "user_management": {
+      "required_approvers": 1,
+      "approver_roles": ["admin"],
+      "timeout": 7200000,
+      "auto_approve_conditions": {}
+    }
+  },
+
+  "rate_limits": {
+    "global": {
+      "requests_per_minute": 100,
+      "burst_limit": 150
+    },
+    "per_user": {
+      "admin": {
+        "requests_per_minute": 50,
+        "burst_limit": 75
+      },
+      "developer": {
+        "requests_per_minute": 30,
+        "burst_limit": 45
+      },
+      "reviewer": {
+        "requests_per_minute": 20,
+        "burst_limit": 30
+      },
+      "readonly": {
+        "requests_per_minute": 10,
+        "burst_limit": 15
+      }
+    }
+  },
+
+  "security": {
+    "require_authentication": true,
+    "session_timeout": 3600000,
+    "max_failed_attempts": 3,
+    "lockout_duration": 900000,
+    "audit_logging": true,
+    "sensitive_command_logging": true
+  },
+
+  "notifications": {
+    "deployment": {
+      "channels": ["#deployments", "#dev-team"],
+      "roles": ["admin", "developer"],
+      "timezone_aware": true
+    },
+    "security_alerts": {
+      "channels": ["#alerts", "#security", "#dev-team"],
+      "roles": ["admin", "developer", "reviewer"],
+      "timezone_aware": false,
+      "immediate": true
+    },
+    "system_failures": {
+      "channels": ["#alerts", "#deployments"],
+      "roles": ["admin", "developer"],
+      "timezone_aware": false,
+      "immediate": true
+    },
+    "approval_requests": {
+      "channels": ["#deployments"],
+      "roles": ["admin"],
+      "timezone_aware": true,
+      "escalation_timeout": 1800000
+    }
+  },
+
+  "timezone_support": {
+    "enabled": true,
+    "default_timezone": "UTC",
+    "business_hours": {
+      "start": "09:00",
+      "end": "17:00",
+      "days": ["Mon", "Tue", "Wed", "Thu", "Fri"]
+    },
+    "emergency_override": true
+  }
+}

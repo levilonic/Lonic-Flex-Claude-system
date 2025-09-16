@@ -1,0 +1,157 @@
+{
+  "environment": "development",
+  "version": "1.0.0-dev",
+  
+  "claude_multi_agent": {
+    "max_concurrent_sessions": 5,
+    "session_timeout": 600000,
+    "context_window_threshold": 0.7,
+    "factor_3_xml_enabled": true
+  },
+
+  "agents": {
+    "github": {
+      "enabled": true,
+      "timeout": 60000,
+      "config": {
+        "rate_limit": 1000,
+        "cache_ttl": 300
+      },
+      "docker": {
+        "memory": "128MB",
+        "cpu_shares": 256
+      }
+    },
+    "security": {
+      "enabled": true,
+      "timeout": 90000,
+      "config": {
+        "severity_threshold": "low",
+        "scan_depth": "quick"
+      },
+      "docker": {
+        "memory": "256MB",
+        "cpu_shares": 512
+      }
+    },
+    "code": {
+      "enabled": true,
+      "timeout": 120000,
+      "config": {
+        "quality_threshold": 70,
+        "test_coverage_minimum": 50
+      },
+      "docker": {
+        "memory": "512MB",
+        "cpu_shares": 1024
+      }
+    },
+    "deploy": {
+      "enabled": false,
+      "timeout": 300000,
+      "config": {
+        "default_strategy": "recreate",
+        "health_check_timeout": 30000,
+        "rollback_on_failure": false
+      }
+    },
+    "communication": {
+      "enabled": true,
+      "timeout": 15000,
+      "config": {
+        "notification_channels": ["#dev-test"]
+      }
+    }
+  },
+
+  "workflows": {
+    "feature_development": {
+      "enabled": true,
+      "agents": ["github", "security", "code"],
+      "timeout": 300000,
+      "approval_required": false
+    },
+    "bug_fix": {
+      "enabled": true,
+      "agents": ["github", "code"],
+      "timeout": 180000,
+      "approval_required": false
+    },
+    "security_scan": {
+      "enabled": true,
+      "agents": ["security"],
+      "timeout": 90000,
+      "approval_required": false
+    },
+    "deployment": {
+      "enabled": false
+    },
+    "code_review": {
+      "enabled": true,
+      "agents": ["security", "github"],
+      "timeout": 120000,
+      "approval_required": false
+    }
+  },
+
+  "integrations": {
+    "slack": {
+      "enabled": true,
+      "webhook_port": 3000,
+      "socket_mode": true
+    },
+    "github": {
+      "enabled": true,
+      "webhook_port": 3001,
+      "supported_events": [
+        "pull_request",
+        "push",
+        "issues"
+      ]
+    },
+    "docker": {
+      "enabled": true,
+      "network_name": "claude-agents-dev",
+      "deployment_strategies": ["recreate"]
+    }
+  },
+
+  "database": {
+    "file": "claude-agents-dev.db",
+    "backup_interval": 7200,
+    "cleanup_days": 3
+  },
+
+  "logging": {
+    "level": "debug",
+    "outputs": [
+      {
+        "type": "console"
+      },
+      {
+        "type": "file",
+        "filename": "claude-agents-dev.log",
+        "max_size": "50MB",
+        "max_files": 2
+      }
+    ]
+  },
+
+  "monitoring": {
+    "health_check_interval": 60000,
+    "metrics_enabled": false,
+    "alerts": {
+      "agent_failure_threshold": 5,
+      "workflow_timeout_alert": false,
+      "resource_usage_threshold": 0.9
+    }
+  },
+
+  "security": {
+    "webhook_signature_verification": false,
+    "api_rate_limiting": false,
+    "max_requests_per_minute": 1000,
+    "cors_enabled": true,
+    "https_only": false
+  }
+}

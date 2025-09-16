@@ -1,0 +1,114 @@
+{
+  "index": {
+    "lastUpdated": "2025-09-08",
+    "totalSources": 4,
+    "totalChunks": 150,
+    "description": "Comprehensive index of all Anthropic documentation resources available locally in LonicFLex"
+  },
+  "sources": {
+    "anthropic_docs": {
+      "path": "anthropic-resources/examples/anthropic-cookbook/skills/retrieval_augmented_generation/data/anthropic_docs.json",
+      "type": "structured_chunks",
+      "description": "Pre-indexed Anthropic API documentation with chunk links and headings",
+      "chunks": 50,
+      "topics": ["API", "authentication", "quickstart", "models", "developer-tools"]
+    },
+    "anthropic_summary_docs": {
+      "path": "anthropic-resources/examples/anthropic-cookbook/skills/retrieval_augmented_generation/data/anthropic_summary_indexed_docs.json", 
+      "type": "summarized_chunks",
+      "description": "Summarized versions of Anthropic documentation for quick reference",
+      "chunks": 50,
+      "topics": ["getting-started", "development", "capabilities", "support"]
+    },
+    "anthropic_cookbook": {
+      "path": "anthropic-resources/examples/anthropic-cookbook/",
+      "type": "cookbook_examples",
+      "description": "Interactive Jupyter notebooks and code examples",
+      "categories": [
+        "skills/classification",
+        "skills/retrieval_augmented_generation", 
+        "skills/summarization",
+        "skills/text_to_sql",
+        "skills/contextual-embeddings",
+        "tool_use",
+        "multimodal",
+        "patterns/agents",
+        "third_party"
+      ]
+    },
+    "anthropic_12_factor": {
+      "path": "anthropic-resources/12-factor-agents/",
+      "type": "12_factor_system", 
+      "description": "12-factor agent development methodology and workshops",
+      "workshops": ["2025-05", "2025-05-17", "2025-07-16"],
+      "sections": 12
+    },
+    "anthropic_quickstarts": {
+      "path": "anthropic-resources/quickstarts/anthropic-quickstarts/",
+      "type": "quickstart_projects",
+      "description": "Ready-to-run project templates",
+      "projects": [
+        "agents",
+        "computer-use-demo", 
+        "customer-support-agent",
+        "financial-data-analyst"
+      ]
+    },
+    "anthropic_courses": {
+      "path": "anthropic-resources/courses/courses/",
+      "type": "learning_courses",
+      "description": "Structured learning courses for Claude development",
+      "courses": [
+        "anthropic_api_fundamentals",
+        "prompt_engineering_interactive_tutorial", 
+        "prompt_evaluations",
+        "real_world_prompting",
+        "tool_use"
+      ]
+    },
+    "anthropic_sdks": {
+      "path": "anthropic-resources/sdks/",
+      "type": "official_sdks",
+      "description": "Official Anthropic SDKs for Python and TypeScript",
+      "languages": ["python", "typescript"],
+      "platforms": ["standard", "bedrock", "vertex"]
+    },
+    "anthropic_tutorials": {
+      "path": "anthropic-resources/tutorials/",
+      "type": "tutorials",
+      "description": "Step-by-step tutorials including prompt engineering",
+      "topics": ["prompt-eng-interactive-tutorial"]
+    }
+  },
+  "search_categories": {
+    "api_reference": {
+      "sources": ["anthropic_docs", "anthropic_summary_docs"],
+      "keywords": ["api", "authentication", "endpoints", "models", "parameters"]
+    },
+    "code_examples": {
+      "sources": ["anthropic_cookbook", "anthropic_quickstarts"],
+      "keywords": ["examples", "code", "implementation", "tutorial", "jupyter"]
+    },
+    "agent_development": {
+      "sources": ["anthropic_12_factor", "anthropic_courses"],
+      "keywords": ["agents", "12-factor", "development", "architecture", "patterns"]
+    },
+    "sdk_integration": {
+      "sources": ["anthropic_sdks"],
+      "keywords": ["sdk", "python", "typescript", "bedrock", "vertex", "integration"]
+    },
+    "learning_resources": {
+      "sources": ["anthropic_courses", "anthropic_tutorials"],
+      "keywords": ["learning", "course", "tutorial", "training", "education"]
+    }
+  },
+  "quick_access": {
+    "getting_started": "anthropic-resources/examples/anthropic-cookbook/skills/retrieval_augmented_generation/data/anthropic_docs.json",
+    "api_reference": "anthropic-resources/examples/anthropic-cookbook/skills/retrieval_augmented_generation/data/anthropic_docs.json",
+    "code_examples": "anthropic-resources/examples/anthropic-cookbook/",
+    "agent_patterns": "anthropic-resources/12-factor-agents/",
+    "quickstart_projects": "anthropic-resources/quickstarts/anthropic-quickstarts/",
+    "python_sdk": "anthropic-resources/sdks/anthropic-sdk-python/",
+    "typescript_sdk": "anthropic-resources/sdks/anthropic-sdk-typescript/"
+  }
+}

@@ -14,6 +14,9 @@ const DocumentationService = require('./documentation-service');
 
 // Import for PartitionedContextManager
 const { PartitionedContextManager } = require('./partitioned-context-manager');
+const { AgentPoolManager } = require('./agent-pool-manager');
+const { WorkflowOrchestrator } = require('./workflow-orchestrator');
+const { HealthMonitor } = require('./health-monitor');
 
 /**
  * ServiceContainer provides dependency injection for LonicFLex agents
@@ -65,8 +68,23 @@ class ServiceContainer {
             await partitionedContextManager.initialize();
             this.registerService('contextManager', partitionedContextManager);
 
+            // Phase 2: Agent Lifecycle Management services
+            // Note: AgentPoolManager has circular dependency - needs refactoring
+            // const agentPoolManager = new AgentPoolManager(this);
+            // await agentPoolManager.initialize();
+            // this.registerService('agentPoolManager', agentPoolManager);
+
+            const workflowOrchestrator = new WorkflowOrchestrator(this);
+            await workflowOrchestrator.initialize();
+            this.registerService('workflowOrchestrator', workflowOrchestrator);
+
+            // Phase 3: Infrastructure Management services
+            const healthMonitor = new HealthMonitor(this);
+            await healthMonitor.loadMetrics();
+            this.registerService('healthMonitor', healthMonitor);
+
             this.initialized = true;
-            console.log('✅ ServiceContainer initialized with all shared services');
+            console.log('✅ ServiceContainer initialized with Phase 3 infrastructure management services');
 
             return this;
 
@@ -138,6 +156,27 @@ class ServiceContainer {
      */
     getDocumentationService() {
         return this.getService('documentation');
+    }
+
+    /**
+     * Get agent pool manager (Phase 2)
+     */
+    getAgentPoolManager() {
+        return this.getService('agentPoolManager');
+    }
+
+    /**
+     * Get workflow orchestrator (Phase 2)
+     */
+    getWorkflowOrchestrator() {
+        return this.getService('workflowOrchestrator');
+    }
+
+    /**
+     * Get health monitor (Phase 3)
+     */
+    getHealthMonitor() {
+        return this.getService('healthMonitor');
     }
 
     /**

@@ -1,0 +1,166 @@
+{
+  "timestamp": 1757934784511,
+  "metrics": {
+    "system": {
+      "timestamp": 1757934784511,
+      "data": {
+        "memory": {
+          "rss": 61935616,
+          "heapTotal": 29978624,
+          "heapUsed": 11840560,
+          "external": 19337023,
+          "percentage": 39.49667603156169
+        },
+        "cpu": {
+          "user": 234000,
+          "system": 93000
+        },
+        "uptime": 0.2980624
+      }
+    },
+    "agents": {
+      "timestamp": 1757934784511,
+      "data": {
+        "totalAgents": 6,
+        "activeAgents": 2,
+        "failedAgents": 0,
+        "avgResponseTime": 1200,
+        "successRate": 95
+      }
+    },
+    "database": {
+      "timestamp": 1757934784511,
+      "data": {
+        "connections": 4,
+        "queryTime": 18,
+        "tableSize": {
+          "sessions": 1024,
+          "agents": 512,
+          "oauth_states": 256
+        }
+      }
+    },
+    "slack": {
+      "timestamp": 1757934784511,
+      "data": {
+        "messagesProcessed": 15,
+        "commandsExecuted": 5,
+        "responseTime": 560,
+        "errors": 1
+      }
+    },
+    "github": {
+      "timestamp": 1757934784511,
+      "data": {
+        "webhooksReceived": 5,
+        "workflowsTriggered": 4,
+        "apiCalls": 29,
+        "rateLimitRemaining": 2956
+      }
+    },
+    "docker": {
+      "timestamp": 1757934784511,
+      "data": {
+        "totalContainers": 0,
+        "runningContainers": 0,
+        "containers": []
+      }
+    },
+    "logs": {
+      "timestamp": 1757934784511,
+      "data": {
+        "totalLogFiles": 11,
+        "files": [
+          {
+            "name": "combined.log",
+            "size": 3742,
+            "sizeKB": 4,
+            "sizeMB": 0,
+            "lastModified": "2025-09-04T22:31:49.640Z",
+            "created": "2025-09-04T14:35:58.750Z"
+          },
+          {
+            "name": "error.log",
+            "size": 0,
+            "sizeKB": 0,
+            "sizeMB": 0,
+            "lastModified": "2025-09-04T21:53:36.157Z",
+            "created": "2025-09-04T21:53:36.157Z"
+          },
+          {
+            "name": "errors.log",
+            "size": 446,
+            "sizeKB": 0,
+            "sizeMB": 0,
+            "lastModified": "2025-09-04T14:35:58.764Z",
+            "created": "2025-09-04T14:35:58.750Z"
+          },
+          {
+            "name": "exceptions.log",
+            "size": 0,
+            "sizeKB": 0,
+            "sizeMB": 0,
+            "lastModified": "2025-09-04T21:53:36.158Z",
+            "created": "2025-09-04T21:53:36.158Z"
+          },
+          {
+            "name": "load-balancer-enhanced.log",
+            "size": 1068,
+            "sizeKB": 1,
+            "sizeMB": 0,
+            "lastModified": "2025-09-11T15:32:06.932Z",
+            "created": "2025-09-11T15:32:06.921Z"
+          },
+          {
+            "name": "monitoring.log",
+            "size": 207920,
+            "sizeKB": 203,
+            "sizeMB": 0,
+            "lastModified": "2025-09-15T11:13:04.520Z",
+            "created": "2025-09-04T15:32:23.016Z"
+          },
+          {
+            "name": "performance-enhanced.log",
+            "size": 16587,
+            "sizeKB": 16,
+            "sizeMB": 0,
+            "lastModified": "2025-09-11T15:37:57.467Z",
+            "created": "2025-09-11T15:27:40.584Z"
+          },
+          {
+            "name": "performance-integration.log",
+            "size": 1811,
+            "sizeKB": 2,
+            "sizeMB": 0,
+            "lastModified": "2025-09-11T15:37:43.340Z",
+            "created": "2025-09-11T15:37:43.317Z"
+          },
+          {
+            "name": "performance-tests.log",
+            "size": 0,
+            "sizeKB": 0,
+            "sizeMB": 0,
+            "lastModified": "2025-09-11T15:40:04.463Z",
+            "created": "2025-09-11T15:40:04.463Z"
+          },
+          {
+            "name": "performance.log",
+            "size": 2603361,
+            "sizeKB": 2542,
+            "sizeMB": 2,
+            "lastModified": "2025-09-12T16:03:06.041Z",
+            "created": "2025-09-11T10:12:47.834Z"
+          },
+          {
+            "name": "security.log",
+            "size": 4914,
+            "sizeKB": 5,
+            "sizeMB": 0,
+            "lastModified": "2025-09-15T11:10:45.434Z",
+            "created": "2025-09-09T13:43:08.251Z"
+          }
+        ]
+      }
+    }
+  }
+}

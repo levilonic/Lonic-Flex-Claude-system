@@ -1,0 +1,256 @@
+{
+  "version": "1.0.0",
+  "environment": "development",
+  "claude_multi_agent": {
+    "max_concurrent_sessions": 10,
+    "session_timeout": 300000,
+    "context_window_threshold": 0.8,
+    "factor_3_xml_enabled": true
+  },
+  "agents": {
+    "github": {
+      "enabled": true,
+      "max_instances": 3,
+      "timeout": 120000,
+      "config": {
+        "github_token": "${GITHUB_TOKEN}",
+        "webhook_secret": "${GITHUB_WEBHOOK_SECRET}",
+        "rate_limit": 5000,
+        "cache_ttl": 3600
+      },
+      "docker": {
+        "image": "claude-agent-github:latest",
+        "memory": "256MB",
+        "cpu_shares": 512,
+        "ports": [3001]
+      }
+    },
+    "security": {
+      "enabled": true,
+      "max_instances": 2,
+      "timeout": 180000,
+      "config": {
+        "severity_threshold": "medium",
+        "scan_depth": "full",
+        "vulnerability_db_url": "${VULN_DB_URL}",
+        "enable_cve_lookup": true
+      },
+      "docker": {
+        "image": "claude-agent-security:latest",
+        "memory": "512MB",
+        "cpu_shares": 1024,
+        "ports": [3002]
+      }
+    },
+    "code": {
+      "enabled": true,
+      "max_instances": 4,
+      "timeout": 240000,
+      "config": {
+        "languages": ["javascript", "python", "typescript", "go"],
+        "frameworks": ["express", "fastapi", "gin", "react"],
+        "quality_threshold": 80,
+        "test_coverage_minimum": 75
+      },
+      "docker": {
+        "image": "claude-agent-code:latest",
+        "memory": "1GB",
+        "cpu_shares": 2048,
+        "ports": [3003]
+      }
+    },
+    "deploy": {
+      "enabled": true,
+      "max_instances": 2,
+      "timeout": 600000,
+      "config": {
+        "strategies": ["blue-green", "rolling", "canary"],
+        "default_strategy": "rolling",
+        "health_check_timeout": 60000,
+        "rollback_on_failure": true
+      },
+      "docker": {
+        "image": "claude-agent-deploy:latest",
+        "memory": "256MB",
+        "cpu_shares": 512,
+        "ports": [3004]
+      }
+    },
+    "communication": {
+      "enabled": true,
+      "max_instances": 1,
+      "timeout": 30000,
+      "config": {
+        "slack_token": "${SLACK_BOT_TOKEN}",
+        "slack_signing_secret": "${SLACK_SIGNING_SECRET}",
+        "slack_app_token": "${SLACK_APP_TOKEN}",
+        "notification_channels": ["#deployments", "#alerts", "#dev-team"]
+      },
+      "docker": {
+        "image": "claude-agent-comm:latest",
+        "memory": "128MB",
+        "cpu_shares": 256,
+        "ports": [3005]
+      }
+    }
+  },
+  "workflows": {
+    "feature_development": {
+      "enabled": true,
+      "agents": ["github", "security", "code", "deploy"],
+      "parallel": false,
+      "timeout": 900000,
+      "approval_required": false
+    },
+    "bug_fix": {
+      "enabled": true,
+      "agents": ["github", "security", "deploy"],
+      "parallel": false,
+      "timeout": 300000,
+      "approval_required": false
+    },
+    "security_scan": {
+      "enabled": true,
+      "agents": ["security", "github"],
+      "parallel": false,
+      "timeout": 180000,
+      "approval_required": true
+    },
+    "deployment": {
+      "enabled": true,
+      "agents": ["security", "deploy", "communication"],
+      "parallel": false,
+      "timeout": 600000,
+      "approval_required": true
+    },
+    "code_review": {
+      "enabled": true,
+      "agents": ["security", "github", "communication"],
+      "parallel": false,
+      "timeout": 240000,
+      "approval_required": false
+    }
+  },
+  "integrations": {
+    "slack": {
+      "enabled": true,
+      "webhook_port": 3000,
+      "socket_mode": true,
+      "oauth_scopes": [
+        "app_mentions:read",
+        "chat:write",
+        "commands",
+        "reactions:read",
+        "workflow.steps:execute"
+      ]
+    },
+    "github": {
+      "enabled": true,
+      "webhook_port": 3001,
+      "webhook_path": "/webhook/github",
+      "supported_events": [
+        "pull_request",
+        "push",
+        "release",
+        "issues",
+        "security_advisory"
+      ]
+    },
+    "docker": {
+      "enabled": true,
+      "network_name": "claude-agents",
+      "registry": "${DOCKER_REGISTRY}",
+      "volume_prefix": "claude-agent",
+      "deployment_strategies": ["blue-green", "rolling", "canary", "recreate"]
+    }
+  },
+  "database": {
+    "type": "sqlite",
+    "file": "claude-agents.db",
+    "wal_mode": true,
+    "backup_interval": 3600,
+    "cleanup_days": 7
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "outputs": [
+      {
+        "type": "console"
+      },
+      {
+        "type": "file",
+        "filename": "claude-agents.log",
+        "max_size": "100MB",
+        "max_files": 5
+      }
+    ]
+  },
+  "monitoring": {
+    "health_check_interval": 30000,
+    "metrics_enabled": true,
+    "prometheus_port": 9090,
+    "alerts": {
+      "agent_failure_threshold": 3,
+      "workflow_timeout_alert": true,
+      "resource_usage_threshold": 0.8
+    }
+  },
+  "security": {
+    "webhook_signature_verification": true,
+    "api_rate_limiting": true,
+    "max_requests_per_minute": 100,
+    "cors_enabled": false,
+    "https_only": false
+  },
+  "factor_compliance": {
+    "factor_1_codebase": {
+      "single_codebase": true,
+      "multiple_deploys": true
+    },
+    "factor_2_dependencies": {
+      "explicit_dependencies": true,
+      "isolation": true
+    },
+    "factor_3_config": {
+      "xml_context_format": true,
+      "environment_separation": true
+    },
+    "factor_4_backing_services": {
+      "attached_resources": true,
+      "service_discovery": true
+    },
+    "factor_5_build_release_run": {
+      "strict_separation": true,
+      "immutable_releases": true
+    },
+    "factor_6_processes": {
+      "stateless_execution": true,
+      "isolated_containers": true
+    },
+    "factor_7_port_binding": {
+      "self_contained_service": true,
+      "export_via_port": true
+    },
+    "factor_8_concurrency": {
+      "horizontal_scaling": true,
+      "process_model": true
+    },
+    "factor_9_disposability": {
+      "fast_startup": true,
+      "graceful_shutdown": true
+    },
+    "factor_10_dev_prod_parity": {
+      "environment_parity": true,
+      "time_gap_minimal": true
+    },
+    "factor_11_logs": {
+      "event_streams": true,
+      "structured_logging": true
+    },
+    "factor_12_admin_processes": {
+      "one_off_processes": true,
+      "same_environment": true
+    }
+  }
+}

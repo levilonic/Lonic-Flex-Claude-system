@@ -55,31 +55,33 @@ class GitHubAgent extends BaseAgent {
     /**
      * Initialize GitHub agent with authentication
      */
-    async initialize(dbManager) {
+    async initialize(workflowId = null) {
         // Initialize parent first
-        await super.initialize(dbManager);
-        
+        await super.initialize(workflowId);
+
         // Initialize authentication
         this.authManager = getAuthManager();
         await this.authManager.initialize();
-        
+
         // Get GitHub configuration from auth manager
         try {
             const githubConfig = this.authManager.getGitHubConfig();
             this.githubConfig = { ...this.githubConfig, ...githubConfig };
-            
+
             console.log(`✅ GitHub Agent authenticated for ${this.githubConfig.owner}/${this.githubConfig.repo}`);
         } catch (error) {
             console.error(`❌ GitHub Agent authentication failed: ${error.message}`);
             // Don't throw here - let the execute method handle it gracefully
         }
 
-        // Initialize GitHub context
-        this.contextManager.addAgentEvent(this.agentName, 'github_config_loaded', {
-            has_token: !!this.githubConfig.token,
-            owner: this.githubConfig.owner,
-            repo: this.githubConfig.repo
-        });
+        // Log GitHub configuration once context manager is available
+        if (this.contextManager) {
+            await this.contextManager.addAgentEvent(this.agentName, 'github_config_loaded', {
+                has_token: !!this.githubConfig.token,
+                owner: this.githubConfig.owner,
+                repo: this.githubConfig.repo
+            });
+        }
 
         return this;
     }

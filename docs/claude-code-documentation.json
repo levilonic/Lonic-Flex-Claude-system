@@ -1,0 +1,126 @@
+{
+  "claude_code": {
+    "overview": {
+      "description": "Terminal-based AI coding assistant developed by Anthropic",
+      "purpose": "Helps developers turn ideas into code faster",
+      "installation": "npm install -g @anthropic-ai/claude-code",
+      "requirements": ["Node.js 18+", "Claude.ai or Anthropic Console account"],
+      "start_command": "claude"
+    },
+    "capabilities": {
+      "feature_development": {
+        "description": "Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.",
+        "use_cases": ["Build features from descriptions", "Implement complex workflows", "Create new components"]
+      },
+      "debugging": {
+        "description": "Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.",
+        "use_cases": ["Fix runtime errors", "Resolve logic issues", "Debug test failures"]
+      },
+      "codebase_navigation": {
+        "description": "Can answer questions about project structure and find up-to-date information",
+        "features": ["Project structure analysis", "External source integration via MCP", "Code understanding"]
+      },
+      "automation": {
+        "description": "Automate tedious development tasks",
+        "tasks": ["Fix lint issues", "Resolve merge conflicts", "Write release notes", "CI/CD workflows"]
+      }
+    },
+    "memory_system": {
+      "hierarchy": {
+        "enterprise_policy": {
+          "level": 1,
+          "location": "OS-specific system directories",
+          "scope": "Organization-wide",
+          "purpose": "Company standards and policies"
+        },
+        "project_memory": {
+          "level": 2, 
+          "location": "./CLAUDE.md",
+          "scope": "Team-shared",
+          "purpose": "Project instructions and workflows"
+        },
+        "user_memory": {
+          "level": 3,
+          "location": "~/.claude/CLAUDE.md", 
+          "scope": "Personal across projects",
+          "purpose": "Personal preferences and shortcuts"
+        },
+        "project_local_memory": {
+          "level": 4,
+          "location": "deprecated",
+          "scope": "Project-specific personal",
+          "status": "deprecated"
+        }
+      },
+      "features": {
+        "auto_loading": "Memory files automatically loaded on Claude Code launch",
+        "precedence": "Higher-level memories take precedence",
+        "imports": "Support @path/to/import syntax for modular configuration", 
+        "discovery": "Recursive memory discovery up directory tree"
+      },
+      "commands": {
+        "quick_add": "Use # to quickly add a memory",
+        "edit": "Use /memory command to edit memory files",
+        "init": "Use /init to bootstrap project memory file"
+      },
+      "best_practices": [
+        "Be specific in memory instructions",
+        "Use structured markdown",
+        "Organize under descriptive headings", 
+        "Periodically review and update"
+      ]
+    },
+    "hooks_system": {
+      "description": "Configurable scripts triggered at various operation points",
+      "configuration": "Defined in settings files like ~/.claude/settings.json",
+      "events": {
+        "PreToolUse": "Runs before a tool is used",
+        "PostToolUse": "Runs after a tool completes", 
+        "UserPromptSubmit": "Runs when user submits a prompt",
+        "SessionStart": "Runs when new session begins",
+        "SessionEnd": "Runs when session terminates"
+      },
+      "capabilities": [
+        "Validate tool usage",
+        "Add context to conversations",
+        "Block specific actions", 
+        "Perform custom logging or processing"
+      ],
+      "security_warning": "Hooks execute shell commands, review carefully to prevent system risks"
+    },
+    "deployment_options": [
+      "Anthropic API",
+      "AWS", 
+      "Google Cloud Platform",
+      "Amazon Bedrock",
+      "Google Vertex AI"
+    ],
+    "unique_features": [
+      "Works directly in terminal",
+      "Can edit files, run commands, create commits",
+      "Composable and scriptable",
+      "Enterprise-ready with security and compliance"
+    ],
+    "common_commands": {
+      "start": "claude",
+      "help": "/help",
+      "memory": "/memory", 
+      "init": "/init",
+      "settings": "/settings"
+    }
+  },
+  "integration_points": {
+    "lonicflex_compatibility": {
+      "memory_system": "Can be integrated with LonicFLex project memory",
+      "hooks": "Compatible with LonicFLex agent workflows",
+      "documentation": "Can use LonicFLex documentation manager",
+      "automation": "Can automate LonicFLex development tasks"
+    }
+  },
+  "documentation_sources": [
+    "https://docs.anthropic.com/en/docs/claude-code/overview",
+    "https://docs.anthropic.com/en/docs/claude-code/memory", 
+    "https://docs.anthropic.com/en/docs/claude-code/hooks"
+  ],
+  "last_updated": "2025-09-08"
+}

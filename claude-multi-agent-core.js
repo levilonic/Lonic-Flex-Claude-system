@@ -115,8 +115,8 @@ class MultiAgentCore {
                     throw new Error(`Unknown agent type: ${agentName}`);
             }
             
-            // Initialize agent with database
-            await agent.initialize(this.dbManager);
+            // Initialize agent with proper workflowId (not database object)
+            await agent.initialize(`${sessionId}_${agentName}_workflow`);
             this.activeAgents.set(agentName, agent);
             
             console.log(`✅ Created real agent instance: ${agentName}`);
