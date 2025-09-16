@@ -350,5 +350,21 @@
     "recommendations": [
       "Irregular usage pattern - context may benefit from restructuring"
     ]
+  },
+  {
+    "timestamp": "2025-09-16T11:15:39.211Z",
+    "contextId": "healthy-context",
+    "healthLevel": "good",
+    "overallScore": 0.7207853587460762,
+    "scores": {
+      "freshness": 0.7499999994212964,
+      "usagePattern": 0.2,
+      "dataIntegrity": 1,
+      "compressionHealth": 0.8,
+      "tokenEfficiency": 0.8578535891968728
+    },
+    "recommendations": [
+      "Irregular usage pattern - context may benefit from restructuring"
+    ]
   }
 ]
