@@ -48,13 +48,24 @@ class SecurityAgent extends BaseAgent {
         
         // Security patterns for vulnerability detection
         this.securityPatterns = this.initializeSecurityPatterns();
-        
-        // Initialize security context
-        this.contextManager.addAgentEvent(this.agentName, 'security_config_loaded', {
-            scan_depth: this.securityConfig.scanDepth,
-            severity_threshold: this.securityConfig.severityThreshold,
-            patterns_loaded: Object.keys(this.securityPatterns).length
-        });
+    }
+
+    /**
+     * Initialize SecurityAgent with context logging
+     */
+    async initialize(workflowId = null) {
+        await super.initialize(workflowId);
+
+        // Now we can safely use contextManager for SecurityAgent-specific initialization
+        if (this.contextManager && this.contextManager.addAgentEvent) {
+            await this.contextManager.addAgentEvent(this.agentName, 'security_config_loaded', {
+                scan_depth: this.securityConfig.scanDepth,
+                severity_threshold: this.securityConfig.severityThreshold,
+                patterns_loaded: Object.keys(this.securityPatterns).length
+            });
+        }
+
+        return this;
     }
 
     /**

@@ -64,14 +64,6 @@ class DeployAgent extends BaseAgent {
         
         // Deployment strategies
         this.deploymentStrategies = this.initializeDeploymentStrategies();
-        
-        // Initialize deployment context
-        this.contextManager.addAgentEvent(this.agentName, 'deploy_config_loaded', {
-            environment: this.deployConfig.environment,
-            strategy: this.deployConfig.strategy,
-            platform: this.deployConfig.platform,
-            rollback_enabled: this.deployConfig.rollbackEnabled
-        });
     }
 
     /**
@@ -80,6 +72,17 @@ class DeployAgent extends BaseAgent {
     async initialize(dbManager) {
         await super.initialize(dbManager);
         await this.dockerManager.initialize();
+
+        // Now we can safely use contextManager for DeployAgent-specific initialization
+        if (this.contextManager && this.contextManager.addAgentEvent) {
+            await this.contextManager.addAgentEvent(this.agentName, 'deploy_config_loaded', {
+                environment: this.deployConfig.environment,
+                strategy: this.deployConfig.strategy,
+                platform: this.deployConfig.platform,
+                rollback_enabled: this.deployConfig.rollbackEnabled
+            });
+        }
+
         return this;
     }
 

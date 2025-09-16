@@ -61,14 +61,22 @@ class BaseAgent {
             contextScope: this.config.contextScope || 'session'
         });
 
-        // Graceful degradation if context manager is not available
+        // Enhanced graceful degradation if context manager is not available
         if (!this.contextManager) {
             console.log(`⚠️ Context manager not available for agent ${this.agentName} - operating in degraded mode`);
-            // Create a minimal mock context manager to prevent errors
+            // Create a comprehensive mock context manager to prevent errors
             this.contextManager = {
-                addAgentEvent: async () => { console.log('📝 Context event skipped (degraded mode)'); },
-                addEvent: async () => { console.log('📝 Context event skipped (degraded mode)'); },
-                getContext: () => ({ degraded: true })
+                addAgentEvent: async (agentName, eventType, eventData) => {
+                    console.log(`📝 Context event skipped (degraded mode): ${agentName}.${eventType}`);
+                    return Promise.resolve();
+                },
+                addEvent: async (eventType, eventData) => {
+                    console.log(`📝 Context event skipped (degraded mode): ${eventType}`);
+                    return Promise.resolve();
+                },
+                getContext: () => ({ degraded: true, agent: this.agentName }),
+                getContextSummary: () => ({ degraded: true, events: 0 }),
+                getCurrentContext: () => `<context degraded="true" agent="${this.agentName}" />`
             };
         }
 
@@ -88,13 +96,15 @@ class BaseAgent {
             { config: safeConfig, workflowId: workflowKey, initialized_at: Date.now() }
         );
 
-        // Log initialization event in isolated context
-        await this.contextManager.addAgentEvent(this.agentName, 'agent_initialized', {
-            agent_id: this.agentId,
-            session_id: this.sessionId,
-            workflow_id: workflowKey,
-            services_from_container: true
-        });
+        // Log initialization event in isolated context (with null check)
+        if (this.contextManager && this.contextManager.addAgentEvent) {
+            await this.contextManager.addAgentEvent(this.agentName, 'agent_initialized', {
+                agent_id: this.agentId,
+                session_id: this.sessionId,
+                workflow_id: workflowKey,
+                services_from_container: true
+            });
+        }
 
         console.log(`✅ ${this.agentName} initialized with ServiceContainer dependency injection`);
         return this;
@@ -182,20 +192,26 @@ class BaseAgent {
         
         await this.updateProgress(this.progress, stepName);
         
-        this.contextManager.addAgentEvent(this.agentName, 'step_started', {
-            step: stepName,
-            index: currentIndex,
-            progress: this.progress
-        });
+        // Safe context logging with null check
+        if (this.contextManager && this.contextManager.addAgentEvent) {
+            this.contextManager.addAgentEvent(this.agentName, 'step_started', {
+                step: stepName,
+                index: currentIndex,
+                progress: this.progress
+            });
+        }
         
         try {
             const result = await stepFunction();
             
-            this.contextManager.addAgentEvent(this.agentName, 'step_completed', {
-                step: stepName,
-                index: currentIndex,
-                result: result
-            });
+            // Safe context logging with null check
+            if (this.contextManager && this.contextManager.addAgentEvent) {
+                this.contextManager.addAgentEvent(this.agentName, 'step_completed', {
+                    step: stepName,
+                    index: currentIndex,
+                    result: result
+                });
+            }
             
             // Record successful pattern for documentation learning (using service from container)
             const docsService = this.serviceContainer.getDocumentationService();
@@ -220,12 +236,15 @@ class BaseAgent {
             enhancedError.documentationSuggestions = docSuggestions;
             enhancedError.agentContext = { agent: this.agentName, step: stepName };
             
-            this.contextManager.addAgentEvent(this.agentName, 'step_failed', {
-                step: stepName,
-                index: currentIndex,
-                error: error.message,
-                documentation_suggestions: docSuggestions.map(d => d.heading)
-            });
+            // Safe context logging with null check
+            if (this.contextManager && this.contextManager.addAgentEvent) {
+                this.contextManager.addAgentEvent(this.agentName, 'step_failed', {
+                    step: stepName,
+                    index: currentIndex,
+                    error: error.message,
+                    documentation_suggestions: docSuggestions.map(d => d.heading)
+                });
+            }
             
             throw enhancedError;
         }
@@ -243,13 +262,15 @@ class BaseAgent {
         const dbManager = this.serviceContainer.getDatabaseService();
         await dbManager.updateAgentProgress(this.agentId, progress, step, status);
         
-        // Add to context (Factor 3)
-        this.contextManager.addAgentEvent(this.agentName, 'progress_update', {
-            progress,
-            step,
-            status,
-            timestamp: Date.now()
-        });
+        // Add to context (Factor 3) with null check
+        if (this.contextManager && this.contextManager.addAgentEvent) {
+            this.contextManager.addAgentEvent(this.agentName, 'progress_update', {
+                progress,
+                step,
+                status,
+                timestamp: Date.now()
+            });
+        }
     }
 
     /**
@@ -260,8 +281,10 @@ class BaseAgent {
         const dbManager = this.serviceContainer.getDatabaseService();
         await dbManager.logEvent(this.sessionId, this.agentId, eventType, eventData);
         
-        // Context logging (Factor 3)
-        this.contextManager.addAgentEvent(this.agentName, eventType, eventData);
+        // Context logging (Factor 3) with null check
+        if (this.contextManager && this.contextManager.addAgentEvent) {
+            this.contextManager.addAgentEvent(this.agentName, eventType, eventData);
+        }
     }
 
     /**
@@ -341,7 +364,9 @@ class BaseAgent {
             executionSteps: this.executionSteps,
             result: this.result,
             error: this.error,
-            context: this.contextManager.getContextSummary()
+            context: this.contextManager && this.contextManager.getContextSummary
+                ? this.contextManager.getContextSummary()
+                : { degraded: true, events: 0 }
         };
     }
 
@@ -352,7 +377,9 @@ class BaseAgent {
         return {
             from_agent: this.agentName,
             result: this.result,
-            context_xml: this.contextManager.getCurrentContext(),
+            context_xml: this.contextManager && this.contextManager.getCurrentContext
+                ? this.contextManager.getCurrentContext()
+                : `<context degraded="true" agent="${this.agentName}" />`,
             execution_summary: {
                 steps_completed: this.executionSteps.length,
                 final_state: this.state,
@@ -404,9 +431,12 @@ class BaseAgent {
             });
         }
         
-        this.contextManager.addAgentEvent(this.agentName, 'cleaned_up', {
-            final_state: this.state
-        });
+        // Safe context logging with null check
+        if (this.contextManager && this.contextManager.addAgentEvent) {
+            this.contextManager.addAgentEvent(this.agentName, 'cleaned_up', {
+                final_state: this.state
+            });
+        }
     }
 
     /**
@@ -424,11 +454,14 @@ class BaseAgent {
             stack_trace: error.stack
         });
         
-        this.contextManager.addAgentEvent(this.agentName, 'execution_failed', {
-            error: error.message,
-            failed_step: this.executionSteps[currentStep] || 'unknown',
-            steps_completed: currentStep
-        });
+        // Safe context logging with null check
+        if (this.contextManager && this.contextManager.addAgentEvent) {
+            this.contextManager.addAgentEvent(this.agentName, 'execution_failed', {
+                error: error.message,
+                failed_step: this.executionSteps[currentStep] || 'unknown',
+                steps_completed: currentStep
+            });
+        }
         
         // Update progress to indicate failure
         await this.updateProgress(0, `Failed at step: ${this.executionSteps[currentStep] || 'unknown'}`, 'failed');
