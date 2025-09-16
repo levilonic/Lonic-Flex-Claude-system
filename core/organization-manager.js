@@ -16,6 +16,8 @@ require('dotenv').config();
 const { BaseAgent } = require('../agents/base-agent');
 const { SimplifiedExternalCoordinator } = require('../external-integrations/simplified-external-coordinator');
 const { Factor3ContextManager } = require('../factor3-context-manager');
+const { initializeGlobalServiceContainer } = require('../services/service-container');
+const { RealNaturalLanguageProcessor } = require('./real-nl-processor-fixed');
 const path = require('path');
 
 class OrganizationManager extends BaseAgent {
@@ -54,8 +56,11 @@ class OrganizationManager extends BaseAgent {
             }
         });
 
-        // Initialize context manager (may be null in some contexts)
-        this.initializeContextManager(config);
+        // Context manager will be initialized in the async initialize() method
+        this.contextManager = null;
+
+        // Real natural language processor (replaces stub implementations)
+        this.realNLProcessor = new RealNaturalLanguageProcessor();
 
         // Autonomous organization state
         this.activeProjects = new Map();
@@ -72,10 +77,18 @@ class OrganizationManager extends BaseAgent {
     /**
      * Initialize context manager with the real LonicFLex Factor3 system
      */
-    initializeContextManager(config) {
+    async initialize() {
+        // First, initialize the global ServiceContainer for all agents
+        console.log("🔧 Initializing ServiceContainer for autonomous organization...");
+        await initializeGlobalServiceContainer();
+        console.log("✅ ServiceContainer initialized - agents can now execute properly");
+
+        // Then initialize the BaseAgent (which depends on ServiceContainer)
+        await super.initialize();
+
         // Use the real Factor3ContextManager from LonicFLex
         this.contextManager = new Factor3ContextManager();
-        console.log("✅ Using real Factor3ContextManager - production ready");
+        console.log("✅ OrganizationManager initialized - production ready");
     }
 
     /**
@@ -146,70 +159,44 @@ class OrganizationManager extends BaseAgent {
 
     /**
      * Parse natural language input into structured requirements
-     * Integrates with existing context management for state preservation
+     * REAL AI-powered analysis replacing stub implementations
      */
     async parseNaturalLanguage(input, context = {}) {
         this.updateProgress(15, 'Processing natural language requirements');
 
-        const requirements = {
-            originalInput: input,
-            parsedAt: new Date().toISOString(),
-            sessionId: this.sessionId,
-
-            // Basic requirement extraction
-            projectType: this.nlProcessor.extractProjectType(input),
-            features: this.nlProcessor.extractFeatures(input),
-            constraints: this.nlProcessor.extractConstraints(input),
-            complexity: this.nlProcessor.assessComplexity(input),
-            timeline: this.nlProcessor.estimateTimeline(input),
-
-            // Technical requirements
-            technologies: this.nlProcessor.extractTechnologies(input),
-            platforms: this.nlProcessor.extractPlatforms(input),
-            integrations: this.nlProcessor.extractIntegrations(input),
-
-            // Business requirements
-            businessGoals: this.nlProcessor.extractBusinessGoals(input),
-            userStories: this.nlProcessor.extractUserStories(input),
-            success_criteria: this.nlProcessor.extractSuccessCriteria(input),
-
-            // Context from previous interactions
-            contextualHistory: context.history || [],
-            relatedProjects: context.relatedProjects || []
-        };
+        // Use the REAL natural language processor instead of stubs
+        const requirements = await this.realNLProcessor.analyzeRequirements(input);
 
         return requirements;
     }
 
     /**
      * Decompose project into manageable components
-     * Uses DART-LLM style dependency-aware decomposition
+     * REAL AI-powered project decomposition using intelligent analysis
      */
     async decomposeProject(requirements, context = {}) {
         this.projectCounter++;
         const projectId = `autonomous-project-${this.projectCounter}-${Date.now()}`;
 
+        // Use the REAL NL processor for intelligent project decomposition
+        const decomposition = await this.realNLProcessor.decomposeProject(requirements);
+
         const project = {
             id: projectId,
-            name: this.projectDecomposer.generateProjectName(requirements),
-            description: requirements.originalInput,
+            name: `${decomposition.projectType.charAt(0).toUpperCase() + decomposition.projectType.slice(1)}_${Date.now().toString().slice(-4)}`,
+            description: requirements.input,
+
+            // Real AI-generated project structure
             requirements: requirements,
+            phases: decomposition.phases,
+            components: decomposition.components,
+            dependencies: decomposition.dependencies,
+            fileStructure: decomposition.fileStructure,
+            timeline: decomposition.timeline,
 
-            // Project structure decomposition
-            components: await this.projectDecomposer.decomposeComponents(requirements),
-            dependencies: await this.projectDecomposer.analyzeDependencies(requirements),
-            timeline: await this.projectDecomposer.createTimeline(requirements),
-
-            // Resource estimation
-            complexity: requirements.complexity,
-            estimatedDuration: requirements.timeline,
-            resourceNeeds: await this.projectDecomposer.estimateResources(requirements),
-
-            // Quality gates
-            qualityGates: await this.projectDecomposer.defineQualityGates(requirements),
-            successCriteria: requirements.success_criteria,
-
-            // Metadata
+            // Enhanced metadata
+            complexity: decomposition.complexity,
+            projectType: decomposition.projectType,
             createdAt: new Date().toISOString(),
             status: 'planning',
             priority: context.priority || 'medium'
@@ -562,31 +549,39 @@ class OrganizationManager extends BaseAgent {
             }
         };
 
+        // Create unique agent ID per phase and agent type
+        const uniqueAgentId = `${project.id}-${phase.phase}-${agentType}-${Date.now()}`;
+
         switch (agentType) {
             case 'github':
                 const { GitHubAgent } = require('../agents/github-agent');
-                const githubAgent = new GitHubAgent(`${project.id}-github`, agentConfig);
+                const githubAgent = new GitHubAgent(uniqueAgentId, agentConfig);
+                await githubAgent.initialize(); // Initialize agent before execution
                 return await this.executeGitHubTasks(githubAgent, project, phase);
 
             case 'security':
                 const { SecurityAgent } = require('../agents/security-agent');
-                const securityAgent = new SecurityAgent(`${project.id}-security`, agentConfig);
+                const securityAgent = new SecurityAgent(uniqueAgentId, agentConfig);
+                await securityAgent.initialize(); // Initialize agent before execution
                 return await this.executeSecurityTasks(securityAgent, project, phase);
 
             case 'deploy':
                 const { DeployAgent } = require('../agents/deploy-agent');
-                const deployAgent = new DeployAgent(`${project.id}-deploy`, agentConfig);
+                const deployAgent = new DeployAgent(uniqueAgentId, agentConfig);
+                await deployAgent.initialize(); // Initialize agent before execution
                 return await this.executeDeployTasks(deployAgent, project, phase);
 
             case 'code':
                 const { CodeAgent } = require('../agents/code-agent');
-                const codeAgent = new CodeAgent(`${project.id}-code`, agentConfig);
+                const codeAgent = new CodeAgent(uniqueAgentId, agentConfig);
+                await codeAgent.initialize(); // Initialize agent before execution
                 return await this.executeCodeTasks(codeAgent, project, phase);
 
             default:
                 // Generic agent execution
                 const { BaseAgent } = require('../agents/base-agent');
-                const baseAgent = new BaseAgent(agentType, `${project.id}-${agentType}`, agentConfig);
+                const baseAgent = new BaseAgent(agentType, uniqueAgentId, agentConfig);
+                await baseAgent.initialize(); // Initialize agent before execution
                 return await this.executeGenericTasks(baseAgent, project, phase);
         }
     }

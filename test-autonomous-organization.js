@@ -59,12 +59,14 @@ class AutonomousOrganizationTester {
         // Initialize natural language engine
         this.nlEngine = new NaturalLanguageExecutionEngine();
 
-        // Initialize organization manager
-        this.orgManager = new OrganizationManager('test-org-session', {
+        // Initialize organization manager with unique session ID
+        const uniqueSessionId = `test-org-session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        this.orgManager = new OrganizationManager(uniqueSessionId, {
             testMode: true,
             github: { autoCreateBranch: false }, // Disable external systems for testing
             slack: { autoNotify: false }
         });
+        await this.orgManager.initialize(); // Initialize the organization manager
 
         console.log('✅ Test environment setup complete');
     }
@@ -350,6 +352,7 @@ class AutonomousOrganizationTester {
                 github: { autoCreateBranch: false },
                 slack: { autoNotify: false }
             });
+            await orgManager.initialize(); // Initialize the organization manager
 
             // Run the full autonomous organization workflow
             const context = {
