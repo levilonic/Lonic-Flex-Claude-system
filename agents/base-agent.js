@@ -106,6 +106,9 @@ class BaseAgent {
             });
         }
 
+        // Initialize service dependencies from ServiceContainer
+        this.docs = this.serviceContainer.getDocumentationService();
+
         console.log(`✅ ${this.agentName} initialized with ServiceContainer dependency injection`);
         return this;
     }
@@ -393,23 +396,35 @@ class BaseAgent {
      * Documentation intelligence methods
      */
     async getDocumentation(query) {
-        return await this.docs.quickSearch(query, 3);
+        if (this.docs && this.docs.quickSearch) {
+            return await this.docs.quickSearch(query, 3);
+        }
+        return [];
     }
     
     getDocumentationSnippet(topic) {
-        return this.docs.getContextSnippet(topic);
+        if (this.docs && this.docs.getContextSnippet) {
+            return this.docs.getContextSnippet(topic);
+        }
+        return null;
     }
     
     async getContextualSuggestions() {
-        return await this.docs.getSuggestionsForContext(this.agentName, this.currentStep, {
-            progress: this.progress,
-            executionSteps: this.executionSteps
-        });
+        if (this.docs && this.docs.getSuggestionsForContext) {
+            return await this.docs.getSuggestionsForContext(this.agentName, this.currentStep, {
+                progress: this.progress,
+                executionSteps: this.executionSteps
+            });
+        }
+        return [];
     }
     
     async getProactiveDocumentation() {
-        const completedSteps = this.executionSteps.slice(0, this.executionSteps.indexOf(this.currentStep));
-        return await this.docs.getProactiveDocumentation(this.agentName, this.currentStep, completedSteps);
+        if (this.docs && this.docs.getProactiveDocumentation) {
+            const completedSteps = this.executionSteps.slice(0, this.executionSteps.indexOf(this.currentStep));
+            return await this.docs.getProactiveDocumentation(this.agentName, this.currentStep, completedSteps);
+        }
+        return [];
     }
 
     /**
