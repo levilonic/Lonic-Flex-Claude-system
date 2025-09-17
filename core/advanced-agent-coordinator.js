@@ -77,10 +77,10 @@ class AdvancedAgentCoordinator extends EventEmitter {
             };
 
             // Initialize pattern-specific coordination
-            if (optimalPattern.includes('hierarchical')) {
+            if (optimalPattern === 'hierarchical' || optimalPattern === 'hybrid') {
                 await this.hierarchicalCoordinator.initializeHierarchy(coordinationState, team);
             }
-            if (optimalPattern.includes('distributed')) {
+            if (optimalPattern === 'distributed' || optimalPattern === 'hybrid') {
                 await this.distributedCoordinator.initializeDistribution(coordinationState, team);
             }
 
@@ -89,6 +89,18 @@ class AdvancedAgentCoordinator extends EventEmitter {
 
             // Initialize handoff protocols
             await this.handoffManager.initializeHandoffProtocols(coordinationState, executionPlan);
+
+            // Register all team members as agents
+            team.members.forEach(member => {
+                coordinationState.agents.set(member.sessionId || member.agentType, {
+                    agent: member,
+                    role: member.role || 'team_member',
+                    status: 'active',
+                    addedAt: new Date(),
+                    taskAssignments: [],
+                    performanceScore: 1.0
+                });
+            });
 
             // Register coordination
             this.activeCoordinations.set(project.id, coordinationState);
@@ -159,6 +171,9 @@ class AdvancedAgentCoordinator extends EventEmitter {
                 await this.handleRealTimeCoordinationUpdates(coordinationState, coordinationResult);
             }
 
+            // Update coordination result with actual pattern used
+            coordinationResult.pattern = coordinationState.pattern;
+
             this.emit('executionCoordinated', {
                 projectId: projectId,
                 tasksCoordinated: tasks.length,
@@ -188,14 +203,17 @@ class AdvancedAgentCoordinator extends EventEmitter {
             console.log(`➕ Adding agent ${agent.agentId} to coordination with role: ${role}`);
 
             // Register agent in coordination state
-            coordinationState.agents.set(agent.agentId, {
+            const agentData = {
                 agent: agent,
                 role: role,
                 status: 'joining',
                 addedAt: new Date(),
                 taskAssignments: [],
                 performanceScore: 1.0
-            });
+            };
+            // Use consistent key format: sessionId || agentId for compatibility
+            const agentKey = agent.sessionId || agent.agentId || agent.agentType;
+            coordinationState.agents.set(agentKey, agentData);
 
             // Update coordination pattern if needed
             const newPattern = await this.reassessCoordinationPattern(coordinationState);
@@ -204,10 +222,10 @@ class AdvancedAgentCoordinator extends EventEmitter {
             }
 
             // Integrate agent into existing workflows
-            if (coordinationState.pattern.includes('hierarchical')) {
+            if (coordinationState.pattern === 'hierarchical' || coordinationState.pattern === 'hybrid') {
                 await this.hierarchicalCoordinator.integrateNewAgent(coordinationState, agent, role);
             }
-            if (coordinationState.pattern.includes('distributed')) {
+            if (coordinationState.pattern === 'distributed' || coordinationState.pattern === 'hybrid') {
                 await this.distributedCoordinator.integrateNewAgent(coordinationState, agent, role);
             }
 
@@ -335,6 +353,11 @@ class AdvancedAgentCoordinator extends EventEmitter {
             agentTypes: team.members.map(m => m.agentType),
             dependencies: project.dependencies?.length || 0
         };
+
+        // Override with coordination mode if explicitly set
+        if (this.coordinationMode !== 'hybrid') {
+            return this.coordinationMode;
+        }
 
         return this.decisionMatrix.selectOptimalPattern(factors);
     }
@@ -710,12 +733,14 @@ class AdvancedAgentCoordinator extends EventEmitter {
 
     async reallocateConflictingResources(coordinationState, resolution) {
         // Resource reallocation logic
-        console.log(`💾 Reallocating conflicting resources: ${resolution.resources.join(', ')}`);
+        const resources = resolution.resources || ['unspecified'];
+        console.log(`💾 Reallocating conflicting resources: ${resources.join(', ')}`);
     }
 
     async adjustTaskPriorities(coordinationState, resolution) {
         // Priority adjustment logic
-        console.log(`⚡ Adjusting task priorities: ${resolution.adjustments.length} changes`);
+        const adjustments = resolution.adjustments || [];
+        console.log(`⚡ Adjusting task priorities: ${adjustments.length} changes`);
     }
 }
 
@@ -1593,6 +1618,12 @@ class AdvancedHandoffManager {
     createHandoffProtocols(executionPlan, coordinationState) {
         const protocols = [];
 
+        // Handle case where executionPlan might not have expected structure
+        if (!executionPlan || !executionPlan.executionOrder || !executionPlan.tasks) {
+            console.log('⚠️ ExecutionPlan incomplete - creating default handoff protocols');
+            return this.createDefaultHandoffProtocols(coordinationState);
+        }
+
         // Create protocols based on execution order and dependencies
         for (let i = 0; i < executionPlan.executionOrder.length - 1; i++) {
             const currentTaskId = executionPlan.executionOrder[i];
@@ -1616,6 +1647,32 @@ class AdvancedHandoffManager {
         }
 
         return protocols;
+    }
+
+    createDefaultHandoffProtocols(coordinationState) {
+        // Create basic handoff protocols based on common agent interactions
+        return [
+            {
+                id: 'protocol-github-code',
+                fromTaskId: 'repository_setup',
+                toTaskId: 'code_implementation',
+                fromAgentType: 'github',
+                toAgentType: 'code',
+                dataRequirements: { executionResults: true, contextData: true },
+                validationChecks: ['data_integrity', 'context_preservation'],
+                timeout: 30000
+            },
+            {
+                id: 'protocol-code-security',
+                fromTaskId: 'code_implementation',
+                toTaskId: 'security_scan',
+                fromAgentType: 'code',
+                toAgentType: 'security',
+                dataRequirements: { executionResults: true, artifactReferences: true },
+                validationChecks: ['artifact_availability', 'dependency_satisfaction'],
+                timeout: 45000
+            }
+        ];
     }
 
     async executeHandoffProtocol(handoffState) {
@@ -2115,6 +2172,7 @@ class ConflictResolutionEngine {
             strategy: strategy.name,
             success: true,
             actions: ['resources_reallocated'],
+            resources: conflict.resources || ['unspecified'],
             message: 'Resources reallocated to resolve conflict'
         };
     }
@@ -2124,6 +2182,7 @@ class ConflictResolutionEngine {
             strategy: strategy.name,
             success: true,
             actions: ['priorities_adjusted'],
+            adjustments: conflict.adjustments || [{ task: 'unspecified', change: 'priority_increased' }],
             message: 'Task priorities adjusted to resolve conflict'
         };
     }
