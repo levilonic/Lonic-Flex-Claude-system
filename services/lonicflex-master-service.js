@@ -21,7 +21,7 @@ require('dotenv').config();
 class LonicFlexMasterService {
     constructor(config = {}) {
         this.config = {
-            port: config.port || process.env.PORT || 3000,
+            port: config.port || process.env.PORT || 3007,
             serviceName: 'lonicflex-master',
             runIdPrefix: 'R',
             branchPrefix: 'run/',

@@ -21,7 +21,7 @@ require('dotenv').config();
 class LonicFlexWebhookService {
     constructor(config = {}) {
         this.config = {
-            port: config.port || process.env.PORT || 3001,
+            port: config.port || process.env.PORT || 3008,
             serviceName: 'lonicflex-webhooks',
             githubWebhookSecret: config.githubWebhookSecret || process.env.GITHUB_WEBHOOK_SECRET,
             slackSigningSecret: config.slackSigningSecret || process.env.SLACK_SIGNING_SECRET,
@@ -528,38 +528,102 @@ class LonicFlexWebhookService {
     }
 
     /**
-     * Verify GitHub webhook signature
+     * Verify GitHub webhook signature with timing-safe comparison
      */
     verifyGitHubSignature(req) {
         if (!this.config.githubWebhookSecret) {
-            this.logger.warn('GitHub webhook secret not configured, skipping verification');
-            return true; // Allow for development
+            this.logger.warn('GitHub webhook secret not configured, skipping verification for development');
+            return process.env.NODE_ENV !== 'production'; // Only allow in non-production
         }
 
         const signature = req.headers['x-hub-signature-256'];
         if (!signature) {
+            this.logger.error('GitHub webhook signature missing');
             return false;
         }
 
-        const expectedSignature = crypto
-            .createHmac('sha256', this.config.githubWebhookSecret)
-            .update(req.body)
-            .digest('hex');
+        try {
+            const expectedSignature = crypto
+                .createHmac('sha256', this.config.githubWebhookSecret)
+                .update(req.body)
+                .digest('hex');
 
-        return signature === `sha256=${expectedSignature}`;
+            const providedSignature = signature.replace('sha256=', '');
+
+            // Use timing-safe comparison to prevent timing attacks
+            const isValid = crypto.timingSafeEqual(
+                Buffer.from(expectedSignature, 'hex'),
+                Buffer.from(providedSignature, 'hex')
+            );
+
+            if (!isValid) {
+                this.logger.error('GitHub webhook signature verification failed');
+            }
+
+            return isValid;
+
+        } catch (error) {
+            this.logger.error('GitHub webhook signature verification error', { error: error.message });
+            return false;
+        }
     }
 
     /**
-     * Verify Slack webhook signature
+     * Verify Slack webhook signature with timestamp validation
      */
     verifySlackSignature(req) {
         if (!this.config.slackSigningSecret) {
-            this.logger.warn('Slack signing secret not configured, skipping verification');
-            return true; // Allow for development
+            this.logger.warn('Slack signing secret not configured, skipping verification for development');
+            return process.env.NODE_ENV !== 'production'; // Only allow in non-production
         }
 
-        // Slack signature verification implementation
-        return true; // Simplified for now
+        const signature = req.headers['x-slack-signature'];
+        const timestamp = req.headers['x-slack-request-timestamp'];
+
+        if (!signature || !timestamp) {
+            this.logger.error('Slack webhook signature or timestamp missing');
+            return false;
+        }
+
+        try {
+            // Verify timestamp to prevent replay attacks (within 5 minutes)
+            const currentTimestamp = Math.floor(Date.now() / 1000);
+            const requestTimestamp = parseInt(timestamp);
+
+            if (Math.abs(currentTimestamp - requestTimestamp) > 300) {
+                this.logger.error('Slack webhook timestamp too old', {
+                    current: currentTimestamp,
+                    request: requestTimestamp
+                });
+                return false;
+            }
+
+            // Create Slack signature format: v0:timestamp:body
+            const signingBaseString = `v0:${timestamp}:${req.body}`;
+
+            const expectedSignature = crypto
+                .createHmac('sha256', this.config.slackSigningSecret)
+                .update(signingBaseString)
+                .digest('hex');
+
+            const providedSignature = signature.replace('v0=', '');
+
+            // Use timing-safe comparison
+            const isValid = crypto.timingSafeEqual(
+                Buffer.from(expectedSignature, 'hex'),
+                Buffer.from(providedSignature, 'hex')
+            );
+
+            if (!isValid) {
+                this.logger.error('Slack webhook signature verification failed');
+            }
+
+            return isValid;
+
+        } catch (error) {
+            this.logger.error('Slack webhook signature verification error', { error: error.message });
+            return false;
+        }
     }
 
     /**
@@ -567,10 +631,12 @@ class LonicFlexWebhookService {
      */
     async callService(serviceName, endpoint, data) {
         const serviceUrls = {
-            'master': 'http://localhost:3000',
+            'master': 'http://localhost:3007',
             'github': 'http://localhost:3002',
             'agents': 'http://localhost:3003',
-            'workflows': 'http://localhost:3004'
+            'workflows': 'http://localhost:3004',
+            'health': 'http://localhost:3005',
+            'slack': 'http://localhost:3006'
         };
 
         const baseUrl = serviceUrls[serviceName];
@@ -578,15 +644,148 @@ class LonicFlexWebhookService {
             throw new Error(`Unknown service: ${serviceName}`);
         }
 
-        // For now, return mock responses
-        this.logger.info('Service call (mock)', { serviceName, endpoint, data });
+        // Make real HTTP call to service
+        this.logger.info('Making service call', { serviceName, endpoint, url: `${baseUrl}${endpoint}` });
 
-        return {
-            success: true,
-            service: serviceName,
-            endpoint,
-            timestamp: new Date().toISOString()
+        try {
+            // Use built-in Node.js modules
+            const https = require('https');
+            const http = require('http');
+            const url = require('url');
+
+            const urlParsed = new URL(`${baseUrl}${endpoint}`);
+            const client = urlParsed.protocol === 'https:' ? https : http;
+
+            const requestOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                timeout: 10000
+            };
+
+            return new Promise((resolve, reject) => {
+                const req = client.request(urlParsed, requestOptions, (res) => {
+                    let body = '';
+
+                    res.on('data', (chunk) => {
+                        body += chunk;
+                    });
+
+                    res.on('end', () => {
+                        try {
+                            if (res.statusCode >= 400) {
+                                reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                                return;
+                            }
+
+                            const result = JSON.parse(body);
+                            this.logger.info('Service call successful', { serviceName, endpoint, status: res.statusCode });
+                            resolve(result);
+                        } catch (parseError) {
+                            reject(new Error(`Failed to parse response: ${parseError.message}`));
+                        }
+                    });
+                });
+
+                req.on('error', (error) => {
+                    reject(error);
+                });
+
+                req.on('timeout', () => {
+                    req.destroy();
+                    reject(new Error('Request timeout'));
+                });
+
+                // Send the data
+                req.write(JSON.stringify(data));
+                req.end();
+            });
+
+        } catch (error) {
+            this.logger.error('Service call failed', { serviceName, endpoint, error: error.message });
+            throw new Error(`Service call to ${serviceName}${endpoint} failed: ${error.message}`);
+        }
+    }
+
+    /**
+     * Trigger webhook chain for manual or automated workflows
+     */
+    async triggerWebhookChain(data) {
+        const { type, command, repository } = data;
+
+        this.logger.info('Triggering webhook chain', { type, command, repository });
+
+        // Generate a run ID for this chain
+        const runId = `WH-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+
+        // Create webhook chain state
+        const chainState = {
+            runId,
+            type: type || 'manual',
+            command: command || 'default',
+            repository: repository || 'unknown',
+            status: 'running',
+            currentStep: 'intake',
+            steps: ['intake', 'processing', 'execution', 'completion'],
+            progress: 0,
+            created: new Date().toISOString(),
+            updated: new Date().toISOString()
         };
+
+        // Store chain state
+        this.activeWebhookChains.set(runId, chainState);
+        this.stats.activeChains = this.activeWebhookChains.size;
+
+        try {
+            // Call master service to initiate workflow
+            const workflowData = {
+                type: 'webhook_chain',
+                runId,
+                command: command || 'health-check',
+                source: 'webhook',
+                context: data
+            };
+
+            const result = await this.callService('master', '/lx/run', workflowData);
+
+            // Update chain state
+            chainState.status = 'coordinated';
+            chainState.progress = 25;
+            chainState.updated = new Date().toISOString();
+            chainState.masterRunId = result.runId;
+
+            this.logger.info('Webhook chain initiated', { runId, masterRunId: result.runId });
+
+            return {
+                success: true,
+                runId,
+                masterRunId: result.runId,
+                status: 'initiated',
+                estimatedDuration: 300000
+            };
+
+        } catch (error) {
+            // Update chain state to failed
+            chainState.status = 'failed';
+            chainState.error = error.message;
+            chainState.updated = new Date().toISOString();
+
+            // Move to history
+            this.activeWebhookChains.delete(runId);
+            this.webhookHistory.set(runId, chainState);
+            this.stats.activeChains = this.activeWebhookChains.size;
+            this.stats.failedChains++;
+
+            this.logger.error('Webhook chain failed', { runId, error: error.message });
+
+            return {
+                success: false,
+                runId,
+                error: error.message,
+                status: 'failed'
+            };
+        }
     }
 
     /**
