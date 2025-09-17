@@ -107,7 +107,8 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         LONICFLEX_MODE: 'slack',
-        SERVICE_NAME: 'lonicflex-slack'
+        SERVICE_NAME: 'lonicflex-slack',
+        PORT: 3006
       },
 
       min_uptime: '10s',

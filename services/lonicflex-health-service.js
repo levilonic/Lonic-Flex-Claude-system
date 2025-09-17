@@ -63,7 +63,7 @@ class LonicFlexHealthService {
         // Service state
         this.isInitialized = false;
         this.isMonitoring = false;
-        self.startTime = new Date();
+        this.startTime = new Date();
         this.stats = {
             totalChecks: 0,
             healthyServices: 0,
