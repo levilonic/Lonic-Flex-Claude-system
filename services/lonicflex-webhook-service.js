@@ -595,7 +595,6 @@ class LonicFlexWebhookService {
     async initialize() {
         try {
             await this.db.initialize();
-            await this.contextManager.initialize();
 
             this.isInitialized = true;
             this.logger.info('LonicFLex Webhook Service initialized');

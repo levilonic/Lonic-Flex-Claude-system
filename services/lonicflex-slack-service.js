@@ -245,9 +245,14 @@ class LonicFlexSlackService {
         });
 
         // Socket mode connection events
-        this.slackApp.receiver.on('slack_event', (event) => {
-            this.logger.debug('Slack event received', { type: event.type });
-        });
+        // Note: receiver.on may not be available in all Slack App configurations
+        try {
+            this.slackApp.receiver.on('slack_event', (event) => {
+                this.logger.debug('Slack event received', { type: event.type });
+            });
+        } catch (error) {
+            this.logger.warn('Slack receiver events not available', { error: error.message });
+        }
     }
 
     async handleLonicFlexMention(message, say) {

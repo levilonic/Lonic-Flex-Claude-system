@@ -459,7 +459,6 @@ ${runState.brief || 'No brief provided'}
     async initialize() {
         try {
             await this.db.initialize();
-            await this.contextManager.initialize();
 
             this.isInitialized = true;
             this.logger.info('LonicFLex Master Service initialized', {
