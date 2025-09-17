@@ -18,7 +18,7 @@ module.exports = {
         NODE_ENV: 'production',
         LONICFLEX_MODE: 'master',
         SERVICE_NAME: 'lonicflex-master',
-        PORT: 3000
+        PORT: 3007
       },
 
       // Service configuration
@@ -33,7 +33,7 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
 
       // Health monitoring
-      health_check_http: 'http://localhost:3000/health',
+      health_check_http: 'http://localhost:3007/health',
       node_args: ['--max-old-space-size=512', '--optimize-for-size']
     },
 
@@ -50,7 +50,7 @@ module.exports = {
         NODE_ENV: 'production',
         LONICFLEX_MODE: 'webhooks',
         SERVICE_NAME: 'lonicflex-webhooks',
-        PORT: 3001
+        PORT: 3008
       },
 
       min_uptime: '10s',
@@ -62,7 +62,7 @@ module.exports = {
       error_file: './logs/lonicflex-webhooks-error.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
 
-      health_check_http: 'http://localhost:3001/health',
+      health_check_http: 'http://localhost:3008/health',
       node_args: ['--max-old-space-size=512', '--optimize-for-size']
     },
 

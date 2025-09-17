@@ -23,7 +23,7 @@ require('dotenv').config();
 class LonicFlexSlackService {
     constructor(config = {}) {
         this.config = {
-            port: config.port || process.env.SLACK_SERVICE_PORT || 3003,
+            port: config.port || process.env.SLACK_SERVICE_PORT || 3006,
             serviceName: 'lonicflex-slack',
             defaultChannel: config.defaultChannel || '#all-lonicflex',
             botUserOAuthToken: config.botToken || process.env.SLACK_BOT_TOKEN,
