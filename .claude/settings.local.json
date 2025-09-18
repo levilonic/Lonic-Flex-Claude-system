@@ -141,7 +141,11 @@
       "Bash(cat:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(mkdir:*)",
-      "Bash(openssl req:*)"
+      "Bash(openssl req:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(pm2 logs:*)",
+      "Bash(pm2 stop:*)"
     ],
     "deny": [],
     "ask": []

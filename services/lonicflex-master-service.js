@@ -218,8 +218,12 @@ class LonicFlexMasterService {
             // Step 1: Create GitHub branch
             await this.createGitHubBranch(runState);
 
-            // Step 2: Create draft PR
-            await this.createDraftPR(runState);
+            // Step 2: Create draft PR (only for commands that generate commits)
+            if (this.shouldCreatePR(command)) {
+                await this.createDraftPR(runState);
+            } else {
+                this.logger.info('Skipping PR creation for non-commit command', { runId, command });
+            }
 
             // Step 3: Trigger workflow pipeline
             await this.triggerWorkflowPipeline(runState);
@@ -286,7 +290,9 @@ class LonicFlexMasterService {
             const response = await this.callService('github', '/branches/create', {
                 branchName: runState.branchName,
                 runId: runState.runId,
-                baseBranch: 'main'
+                baseBranch: 'main',
+                createInitialCommit: true,
+                command: runState.command
             });
 
             runState.steps[runState.steps.length - 1].status = 'completed';
@@ -362,12 +368,15 @@ class LonicFlexMasterService {
         });
 
         try {
-            const response = await this.callService('workflows', '/workflow/trigger', {
-                runId: runState.runId,
-                command: runState.command,
-                parameters: runState.parameters,
-                branchName: runState.branchName,
-                prNumber: runState.prNumber
+            const response = await this.callService('workflows', '/execute', {
+                templateId: runState.command,  // Map command to template ID
+                context: {
+                    runId: runState.runId,
+                    parameters: runState.parameters,
+                    branchName: runState.branchName,
+                    prNumber: runState.prNumber
+                },
+                runId: runState.runId
             });
 
             runState.steps[runState.steps.length - 1].status = 'completed';
@@ -423,6 +432,44 @@ ${runState.brief || 'No brief provided'}
         };
 
         return estimates[command] || estimates.default;
+    }
+
+    /**
+     * Determine if a command should create a PR (commands that generate commits)
+     */
+    shouldCreatePR(command) {
+        const commitGeneratingCommands = [
+            'deployment',
+            'feature',
+            'bugfix',
+            'refactor',
+            'operator-crawl',
+            'code-review-with-fixes',
+            'security-fixes',
+            'update-dependencies'
+        ];
+
+        const nonCommitCommands = [
+            'health-check',
+            'status',
+            'validate',
+            'test',
+            'scan',
+            'security-scan'
+        ];
+
+        // If explicitly a non-commit command, return false
+        if (nonCommitCommands.includes(command)) {
+            return false;
+        }
+
+        // If explicitly a commit-generating command, return true
+        if (commitGeneratingCommands.includes(command)) {
+            return true;
+        }
+
+        // Default: assume it might generate commits for unknown commands
+        return true;
     }
 
     /**

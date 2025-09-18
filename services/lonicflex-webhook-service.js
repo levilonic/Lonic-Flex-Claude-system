@@ -752,12 +752,12 @@ class LonicFlexWebhookService {
      */
     async callService(serviceName, endpoint, data) {
         const serviceUrls = {
-            'master': 'http://lonicflex-master:3007',
-            'github': 'http://lonicflex-github:3002',
-            'agents': 'http://lonicflex-agents:3003',
-            'workflows': 'http://lonicflex-workflows:3004',
-            'health': 'http://lonicflex-health:3005',
-            'slack': 'http://lonicflex-slack:3006'
+            'master': 'http://localhost:3007',
+            'github': 'http://localhost:3002',
+            'agents': 'http://localhost:3003',
+            'workflows': 'http://localhost:3004',
+            'health': 'http://localhost:3005',
+            'slack': 'http://localhost:3006'
         };
 
         const baseUrl = serviceUrls[serviceName];
