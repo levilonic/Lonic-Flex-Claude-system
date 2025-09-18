@@ -153,7 +153,11 @@
       "Bash(pm2 start:*)",
       "Bash(netstat:*)",
       "Bash(tasklist:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(cmd //c taskkill:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"=== Port $port ===\")",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

@@ -322,6 +322,17 @@ class LonicFlexIntegrationHubService {
             });
         });
 
+        // Standard LonicFLex service coordination endpoint
+        this.app.post('/coordinate', async (req, res) => {
+            try {
+                const result = await this.coordinateWithServices(req.body);
+                res.json(result);
+            } catch (error) {
+                this.logger.error('Service coordination failed', { error: error.message });
+                res.status(500).json({ error: error.message });
+            }
+        });
+
         // Error handling middleware
         this.app.use((error, req, res, next) => {
             this.logger.error('Unhandled error', { error: error.message, stack: error.stack });
@@ -641,6 +652,73 @@ class LonicFlexIntegrationHubService {
             } catch (error) {
                 serviceInfo.healthy = false;
             }
+        }
+    }
+
+    async coordinateWithServices({ event, ...data }) {
+        try {
+            this.logger.info('Integration Hub coordinating with services', { event, data });
+
+            switch (event) {
+                case 'cross_system_workflow':
+                    return await this.executeWorkflow({
+                        workflowType: data.workflowType,
+                        systems: data.systems,
+                        data: data.data,
+                        metadata: data.metadata
+                    });
+
+                case 'route_event':
+                    return await this.processEvent({
+                        eventId: `coord-${Date.now()}`,
+                        sourceSystem: data.sourceSystem || 'integration-hub',
+                        targetSystems: data.targetSystems,
+                        event: data.eventType,
+                        data: data.data,
+                        priority: data.priority || 'normal',
+                        timestamp: new Date(),
+                        status: 'pending',
+                        results: []
+                    });
+
+                case 'register_integration':
+                    return await this.registerIntegration(data.systemId, data.config);
+
+                case 'check_integration_health':
+                    if (data.systemId) {
+                        await this.checkIntegrationHealth(data.systemId);
+                        const integration = this.integrations.get(data.systemId);
+                        return {
+                            success: true,
+                            systemId: data.systemId,
+                            healthy: integration?.healthy || false,
+                            lastCheck: integration?.lastHealthCheck
+                        };
+                    }
+                    return { success: false, error: 'systemId required' };
+
+                case 'get_integrations_status':
+                    const integrations = Array.from(this.integrations.values());
+                    return {
+                        success: true,
+                        integrations: integrations.map(int => ({
+                            systemId: int.systemId,
+                            name: int.name,
+                            type: int.type,
+                            healthy: int.healthy,
+                            lastHealthCheck: int.lastHealthCheck
+                        })),
+                        totalIntegrations: integrations.length
+                    };
+
+                default:
+                    this.logger.warn('Unknown coordination event', { event });
+                    return { success: false, error: `Unknown event: ${event}` };
+            }
+
+        } catch (error) {
+            this.logger.error('Service coordination failed', { error: error.message, event });
+            return { success: false, error: error.message };
         }
     }
 

@@ -372,7 +372,12 @@ module.exports = {
         NODE_ENV: 'production',
         LONICFLEX_MODE: 'jira-integration',
         SERVICE_NAME: 'lonicflex-jira',
-        PORT: 3021
+        PORT: 3021,
+        // Demo mode configuration
+        JIRA_URL: 'https://demo-domain.atlassian.net',
+        JIRA_EMAIL: 'demo@example.com',
+        JIRA_API_TOKEN: 'demo_token_for_testing',
+        JIRA_DEMO_MODE: 'true'
       },
 
       min_uptime: '10s',
@@ -417,6 +422,35 @@ module.exports = {
       node_args: ['--max-old-space-size=512', '--optimize-for-size']
     },
 
+    // Linear Integration Service
+    {
+      name: 'lonicflex-linear',
+      script: 'services/lonicflex-linear-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'linear-integration',
+        SERVICE_NAME: 'lonicflex-linear',
+        PORT: 3023
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-linear.log',
+      out_file: './logs/lonicflex-linear-out.log',
+      error_file: './logs/lonicflex-linear-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3023/health',
+      node_args: ['--max-old-space-size=512', '--optimize-for-size']
+    },
+
     // Jenkins CI/CD Integration Service
     {
       name: 'lonicflex-jenkins',
@@ -443,6 +477,64 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
 
       health_check_http: 'http://localhost:3024/health',
+      node_args: ['--max-old-space-size=512', '--optimize-for-size']
+    },
+
+    // GitLab Integration Service
+    {
+      name: 'lonicflex-gitlab',
+      script: 'services/lonicflex-gitlab-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'gitlab-integration',
+        SERVICE_NAME: 'lonicflex-gitlab',
+        PORT: 3025
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-gitlab.log',
+      out_file: './logs/lonicflex-gitlab-out.log',
+      error_file: './logs/lonicflex-gitlab-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3025/health',
+      node_args: ['--max-old-space-size=512', '--optimize-for-size']
+    },
+
+    // DataDog Monitoring Integration Service
+    {
+      name: 'lonicflex-datadog',
+      script: 'services/lonicflex-datadog-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'datadog-integration',
+        SERVICE_NAME: 'lonicflex-datadog',
+        PORT: 3026
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-datadog.log',
+      out_file: './logs/lonicflex-datadog-out.log',
+      error_file: './logs/lonicflex-datadog-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3026/health',
       node_args: ['--max-old-space-size=512', '--optimize-for-size']
     }
   ],
