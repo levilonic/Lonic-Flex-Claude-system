@@ -625,7 +625,7 @@ class ConditionalWorkflowEngine extends EventEmitter {
      */
     async initializeServiceIntegrations() {
         // Integration initialization would happen here
-        // For now, we'll mock the integration services
+        // Real service health checks for integration services
         this.logger.info('Service integrations initialized', {
             slack: this.config.enableSlackIntegration,
             github: this.config.enableGitHubIntegration,
@@ -634,37 +634,85 @@ class ConditionalWorkflowEngine extends EventEmitter {
     }
 
     /**
-     * Mock GitHub issue creation (would integrate with actual GitHub service)
+     * Real GitHub issue creation via LonicFLex GitHub service
      */
     async createGitHubIssue(issueData) {
-        // Mock implementation - would integrate with actual GitHub service
-        return {
-            success: true,
-            issueNumber: Math.floor(Math.random() * 1000) + 1,
-            issueUrl: `https://github.com/repo/issues/${Math.floor(Math.random() * 1000) + 1}`
-        };
+        try {
+            const response = await axios.post('http://localhost:3002/issues/create', {
+                title: issueData.title,
+                body: issueData.body,
+                labels: issueData.labels || ['conditional-workflow']
+            }, { timeout: 10000 });
+
+            this.logger.info('GitHub issue created via service', {
+                issueNumber: response.data.number,
+                url: response.data.html_url
+            });
+
+            return {
+                success: true,
+                issueNumber: response.data.number,
+                issueUrl: response.data.html_url
+            };
+        } catch (error) {
+            this.logger.error('GitHub issue creation failed', { error: error.message });
+            return { success: false, error: error.message };
+        }
     }
 
     /**
-     * Mock Slack notification (would integrate with actual Slack service)
+     * Real Slack notification via LonicFLex Slack service
      */
     async sendSlackNotification(notificationData) {
-        // Mock implementation - would integrate with actual Slack service
-        return {
-            success: true,
-            timestamp: Date.now().toString()
-        };
+        try {
+            const response = await axios.post('http://localhost:3006/notifications/send', {
+                channel: notificationData.channel || '#general',
+                message: notificationData.message,
+                blocks: notificationData.blocks
+            }, { timeout: 10000 });
+
+            this.logger.info('Slack notification sent via service', {
+                channel: notificationData.channel,
+                timestamp: response.data.ts
+            });
+
+            return {
+                success: true,
+                timestamp: response.data.ts
+            };
+        } catch (error) {
+            this.logger.error('Slack notification failed', { error: error.message });
+            return { success: false, error: error.message };
+        }
     }
 
     /**
-     * Mock Slack approval request (would integrate with actual Slack service)
+     * Real Slack approval request via LonicFLex Slack service
      */
     async sendSlackApprovalRequest(approvalData) {
-        // Mock implementation - would integrate with actual Slack service
-        return {
-            success: true,
-            timestamp: Date.now().toString()
-        };
+        try {
+            const response = await axios.post('http://localhost:3006/approvals/request', {
+                channel: approvalData.channel || '#approvals',
+                message: approvalData.message,
+                approvalId: approvalData.approvalId,
+                timeout: approvalData.timeout || 3600000,
+                approvers: approvalData.approvers
+            }, { timeout: 10000 });
+
+            this.logger.info('Slack approval request sent via service', {
+                approvalId: approvalData.approvalId,
+                timestamp: response.data.ts
+            });
+
+            return {
+                success: true,
+                timestamp: response.data.ts,
+                approvalId: approvalData.approvalId
+            };
+        } catch (error) {
+            this.logger.error('Slack approval request failed', { error: error.message });
+            return { success: false, error: error.message };
+        }
     }
 
     /**

@@ -324,6 +324,126 @@ module.exports = {
 
       health_check_http: 'http://localhost:3012/health',
       node_args: ['--max-old-space-size=512', '--optimize-for-size']
+    },
+
+    // ==========================================
+    // WINDOW 2: CROSS-SYSTEM INTEGRATION HUB SERVICES
+    // ==========================================
+
+    // Central Integration Hub Service
+    {
+      name: 'lonicflex-integration-hub',
+      script: 'services/lonicflex-integration-hub-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'integration-hub',
+        SERVICE_NAME: 'lonicflex-integration-hub',
+        PORT: 3020
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-integration-hub.log',
+      out_file: './logs/lonicflex-integration-hub-out.log',
+      error_file: './logs/lonicflex-integration-hub-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3020/health',
+      node_args: ['--max-old-space-size=1024', '--optimize-for-size']
+    },
+
+    // Jira Integration Service
+    {
+      name: 'lonicflex-jira',
+      script: 'services/lonicflex-jira-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'jira-integration',
+        SERVICE_NAME: 'lonicflex-jira',
+        PORT: 3021
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-jira.log',
+      out_file: './logs/lonicflex-jira-out.log',
+      error_file: './logs/lonicflex-jira-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3021/health',
+      node_args: ['--max-old-space-size=512', '--optimize-for-size']
+    },
+
+    // ServiceNow Integration Service
+    {
+      name: 'lonicflex-servicenow',
+      script: 'services/lonicflex-servicenow-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'servicenow-integration',
+        SERVICE_NAME: 'lonicflex-servicenow',
+        PORT: 3022
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-servicenow.log',
+      out_file: './logs/lonicflex-servicenow-out.log',
+      error_file: './logs/lonicflex-servicenow-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3022/health',
+      node_args: ['--max-old-space-size=512', '--optimize-for-size']
+    },
+
+    // Jenkins CI/CD Integration Service
+    {
+      name: 'lonicflex-jenkins',
+      script: 'services/lonicflex-jenkins-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'jenkins-integration',
+        SERVICE_NAME: 'lonicflex-jenkins',
+        PORT: 3024
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-jenkins.log',
+      out_file: './logs/lonicflex-jenkins-out.log',
+      error_file: './logs/lonicflex-jenkins-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3024/health',
+      node_args: ['--max-old-space-size=512', '--optimize-for-size']
     }
   ],
   
