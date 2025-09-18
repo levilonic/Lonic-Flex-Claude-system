@@ -222,15 +222,106 @@ module.exports = {
         PORT: 3001,
         DASHBOARD_MODE: true
       },
-      
+
       // Logging
       log_file: './logs/dashboard-combined.log',
       out_file: './logs/dashboard-out.log',
       error_file: './logs/dashboard-error.log',
-      
+
       // Only start if dashboard server exists
       ignore_watch: ['node_modules', 'logs', 'database'],
       max_memory_restart: '500M'
+    },
+
+    // ==========================================
+    // WINDOW 1: ENTERPRISE MULTI-WORKFLOW STATE MANAGEMENT SERVICES
+    // ==========================================
+
+    // Enhanced Multi-Workflow State Manager
+    {
+      name: 'lonicflex-multi-workflow-state',
+      script: 'services/multi-workflow-state-manager.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'multi-workflow-state',
+        SERVICE_NAME: 'lonicflex-multi-workflow-state',
+        PORT: 3010
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-multi-workflow-state.log',
+      out_file: './logs/lonicflex-multi-workflow-state-out.log',
+      error_file: './logs/lonicflex-multi-workflow-state-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3010/health',
+      node_args: ['--max-old-space-size=1024', '--optimize-for-size']
+    },
+
+    // Conditional Workflow Logic Engine
+    {
+      name: 'lonicflex-conditional-workflow',
+      script: 'services/conditional-workflow-engine.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'conditional-workflow',
+        SERVICE_NAME: 'lonicflex-conditional-workflow',
+        PORT: 3011
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-conditional-workflow.log',
+      out_file: './logs/lonicflex-conditional-workflow-out.log',
+      error_file: './logs/lonicflex-conditional-workflow-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3011/health',
+      node_args: ['--max-old-space-size=512', '--optimize-for-size']
+    },
+
+    // Enhanced Approval Gates Coordinator
+    {
+      name: 'lonicflex-approval-gates',
+      script: 'services/enhanced-approval-gates.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'approval-gates',
+        SERVICE_NAME: 'lonicflex-approval-gates',
+        PORT: 3012
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-approval-gates.log',
+      out_file: './logs/lonicflex-approval-gates-out.log',
+      error_file: './logs/lonicflex-approval-gates-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3012/health',
+      node_args: ['--max-old-space-size=512', '--optimize-for-size']
     }
   ],
   

@@ -83,6 +83,12 @@
     "test-integration": "node test-integration.js",
     "test-phase7": "npm run test-base-agent && npm run test-integration",
     "test-all-systems": "npm run test-phase7 && node test-universal-context.js && node test-phase3a-integration.js && node test-long-term-persistence.js",
+
+    "install-github-app": "node install-github-app.js",
+    "github-app-status": "node install-github-app.js --status",
+    "github-app-test": "node install-github-app.js --test",
+    "test-window1": "node test-window1-enterprise-features.js",
+    "test-window1-github": "node test-window1-enterprise-features.js --github-integration",
     "service:start": "pm2 start ecosystem.config.js",
     "service:stop": "pm2 stop ecosystem.config.js",
     "service:restart": "pm2 restart ecosystem.config.js",

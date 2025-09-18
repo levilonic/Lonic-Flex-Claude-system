@@ -338,6 +338,113 @@ class SQLiteManager {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (session_id) REFERENCES sessions (id)
+            )`,
+
+            // ==========================================
+            // WINDOW 1: MULTI-WORKFLOW STATE MANAGEMENT ENHANCEMENT
+            // ==========================================
+
+            // Multi-workflow session linking - Enterprise workflow orchestration
+            `CREATE TABLE IF NOT EXISTS multi_workflow_session_links (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                primary_workflow_id TEXT NOT NULL,     -- Main workflow session
+                linked_workflow_id TEXT NOT NULL,      -- Related workflow session
+                link_type TEXT NOT NULL,               -- 'dependency', 'parallel', 'sequential', 'conditional'
+                relationship_data TEXT,                -- JSON data about the relationship
+                status TEXT DEFAULT 'active',          -- 'active', 'paused', 'completed', 'broken'
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                resolved_at DATETIME,
+                FOREIGN KEY (primary_workflow_id) REFERENCES multi_workflow_sessions (id),
+                FOREIGN KEY (linked_workflow_id) REFERENCES multi_workflow_sessions (id)
+            )`,
+
+            // Cross-interaction context preservation - Persistent Claude API state
+            `CREATE TABLE IF NOT EXISTS cross_interaction_context (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workflow_id TEXT NOT NULL,
+                context_key TEXT NOT NULL,             -- 'claude_conversation', 'github_context', 'decision_history'
+                context_data TEXT NOT NULL,            -- JSON compressed context data
+                context_version INTEGER DEFAULT 1,     -- Version for context evolution
+                importance_score INTEGER DEFAULT 5,    -- 1-10 importance for retention
+                expires_at DATETIME,                   -- Auto-expiry for low importance context
+                compressed_size INTEGER,               -- Size after compression
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                last_accessed DATETIME DEFAULT CURRENT_TIMESTAMP,
+                access_count INTEGER DEFAULT 0,       -- Usage tracking for importance scoring
+                FOREIGN KEY (workflow_id) REFERENCES multi_workflow_sessions (id),
+                UNIQUE(workflow_id, context_key)
+            )`,
+
+            // Workflow state snapshots enhanced - Enterprise state persistence
+            `CREATE TABLE IF NOT EXISTS enterprise_workflow_snapshots (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workflow_id TEXT NOT NULL,
+                snapshot_type TEXT DEFAULT 'regular',  -- 'creation', 'milestone', 'error', 'resume', 'completion'
+                state_data TEXT NOT NULL,              -- Compressed workflow state
+                state_hash TEXT NOT NULL,              -- SHA256 hash for integrity verification
+                previous_snapshot_id INTEGER,          -- Chain of snapshots for rollback
+                metadata TEXT,                         -- JSON metadata (trigger, performance metrics)
+                compression_ratio REAL DEFAULT 1.0,   -- Compression effectiveness
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                valid_until DATETIME,                 -- Snapshot expiration
+                FOREIGN KEY (workflow_id) REFERENCES multi_workflow_sessions (id),
+                FOREIGN KEY (previous_snapshot_id) REFERENCES enterprise_workflow_snapshots (id)
+            )`,
+
+            // Conditional workflow rules enhanced - Enterprise logic engine
+            `CREATE TABLE IF NOT EXISTS enterprise_conditional_rules (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workflow_id TEXT NOT NULL,
+                rule_name TEXT NOT NULL,
+                condition_expression TEXT NOT NULL,    -- Enhanced expression language
+                action_type TEXT NOT NULL,             -- 'create_issue', 'send_notification', 'trigger_workflow', 'request_approval'
+                action_configuration TEXT,             -- JSON action configuration
+                priority INTEGER DEFAULT 1,           -- Rule execution priority
+                enabled BOOLEAN DEFAULT TRUE,
+                success_rate REAL DEFAULT 0.0,        -- Historical success rate
+                execution_count INTEGER DEFAULT 0,     -- How many times executed
+                last_triggered DATETIME,
+                performance_metrics TEXT,              -- JSON performance data
+                created_by TEXT,                       -- User who created the rule
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (workflow_id) REFERENCES multi_workflow_sessions (id)
+            )`,
+
+            // Approval gates enhanced - Enterprise approval workflows
+            `CREATE TABLE IF NOT EXISTS enterprise_approval_gates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workflow_id TEXT NOT NULL,
+                gate_name TEXT NOT NULL,
+                approval_type TEXT NOT NULL,           -- 'manager', 'security', 'budget', 'compliance'
+                required_approvers TEXT,               -- JSON array of required approvers
+                current_approvals TEXT,                -- JSON array of current approvals
+                gate_configuration TEXT,               -- JSON gate configuration
+                status TEXT DEFAULT 'pending',         -- 'pending', 'approved', 'rejected', 'expired', 'escalated'
+                timeout_hours INTEGER DEFAULT 24,     -- Approval timeout
+                escalation_rules TEXT,                 -- JSON escalation configuration
+                slack_thread_ts TEXT,                  -- Slack thread for approval discussion
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                expires_at DATETIME,                   -- Auto-reject after this time
+                resolved_at DATETIME,
+                resolved_by TEXT,                      -- Who approved/rejected
+                resolution_reason TEXT,                -- Reason for approval/rejection
+                FOREIGN KEY (workflow_id) REFERENCES multi_workflow_sessions (id)
+            )`,
+
+            // Cross-system integration state - Multi-system workflow coordination
+            `CREATE TABLE IF NOT EXISTS cross_system_integration_state (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workflow_id TEXT NOT NULL,
+                system_type TEXT NOT NULL,             -- 'github', 'slack', 'jira', 'servicenow', 'jenkins'
+                system_identifier TEXT NOT NULL,       -- PR number, Slack thread, Jira ticket, etc.
+                integration_data TEXT,                 -- JSON integration-specific data
+                sync_status TEXT DEFAULT 'active',     -- 'active', 'paused', 'error', 'completed'
+                last_sync_at DATETIME,                 -- Last successful sync
+                sync_error TEXT,                       -- Last sync error if any
+                retry_count INTEGER DEFAULT 0,        -- Retry attempts for failed syncs
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (workflow_id) REFERENCES multi_workflow_sessions (id)
             )`
         ];
 
@@ -375,7 +482,30 @@ class SQLiteManager {
             'CREATE INDEX IF NOT EXISTS idx_project_context_type ON project_context(context_type)',
             'CREATE INDEX IF NOT EXISTS idx_project_context_preserved ON project_context(preserved)',
             'CREATE INDEX IF NOT EXISTS idx_project_dependencies_project ON project_dependencies(project_id)',
-            'CREATE INDEX IF NOT EXISTS idx_project_dependencies_type ON project_dependencies(dependency_type)'
+            'CREATE INDEX IF NOT EXISTS idx_project_dependencies_type ON project_dependencies(dependency_type)',
+
+            // Window 1: Multi-Workflow State Management Indexes
+            'CREATE INDEX IF NOT EXISTS idx_multi_workflow_links_primary ON multi_workflow_session_links(primary_workflow_id)',
+            'CREATE INDEX IF NOT EXISTS idx_multi_workflow_links_linked ON multi_workflow_session_links(linked_workflow_id)',
+            'CREATE INDEX IF NOT EXISTS idx_multi_workflow_links_type ON multi_workflow_session_links(link_type)',
+            'CREATE INDEX IF NOT EXISTS idx_multi_workflow_links_status ON multi_workflow_session_links(status)',
+            'CREATE INDEX IF NOT EXISTS idx_cross_interaction_context_workflow ON cross_interaction_context(workflow_id)',
+            'CREATE INDEX IF NOT EXISTS idx_cross_interaction_context_key ON cross_interaction_context(context_key)',
+            'CREATE INDEX IF NOT EXISTS idx_cross_interaction_context_importance ON cross_interaction_context(importance_score)',
+            'CREATE INDEX IF NOT EXISTS idx_cross_interaction_context_expires ON cross_interaction_context(expires_at)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_snapshots_workflow ON enterprise_workflow_snapshots(workflow_id)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_snapshots_type ON enterprise_workflow_snapshots(snapshot_type)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_snapshots_created ON enterprise_workflow_snapshots(created_at)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_snapshots_valid ON enterprise_workflow_snapshots(valid_until)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_rules_workflow ON enterprise_conditional_rules(workflow_id)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_rules_enabled ON enterprise_conditional_rules(enabled)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_rules_priority ON enterprise_conditional_rules(priority)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_approval_gates_workflow ON enterprise_approval_gates(workflow_id)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_approval_gates_status ON enterprise_approval_gates(status)',
+            'CREATE INDEX IF NOT EXISTS idx_enterprise_approval_gates_expires ON enterprise_approval_gates(expires_at)',
+            'CREATE INDEX IF NOT EXISTS idx_cross_system_workflow ON cross_system_integration_state(workflow_id)',
+            'CREATE INDEX IF NOT EXISTS idx_cross_system_type ON cross_system_integration_state(system_type)',
+            'CREATE INDEX IF NOT EXISTS idx_cross_system_status ON cross_system_integration_state(sync_status)'
         ];
 
         for (const sql of indexes) {
@@ -1203,6 +1333,363 @@ class SQLiteManager {
                 overallSuccess: executionResults?.executionSuccessRate || 0
             }
         };
+    }
+
+    // ==========================================
+    // WINDOW 1: MULTI-WORKFLOW STATE MANAGEMENT METHODS
+    // ==========================================
+
+    /**
+     * Create multi-workflow session link
+     */
+    async createMultiWorkflowLink(primaryWorkflowId, linkedWorkflowId, linkType, relationshipData = {}) {
+        const sql = `INSERT INTO multi_workflow_session_links
+                    (primary_workflow_id, linked_workflow_id, link_type, relationship_data)
+                    VALUES (?, ?, ?, ?)`;
+
+        const result = await this.runSQL(sql, [
+            primaryWorkflowId,
+            linkedWorkflowId,
+            linkType,
+            JSON.stringify(relationshipData)
+        ]);
+
+        return result.lastID;
+    }
+
+    /**
+     * Get workflow links for a workflow
+     */
+    async getWorkflowLinks(workflowId) {
+        const sql = `SELECT * FROM multi_workflow_session_links
+                    WHERE primary_workflow_id = ? OR linked_workflow_id = ?
+                    ORDER BY created_at DESC`;
+
+        const rows = await this.getAllSQL(sql, [workflowId, workflowId]);
+
+        return rows.map(row => ({
+            ...row,
+            relationship_data: row.relationship_data ? JSON.parse(row.relationship_data) : {}
+        }));
+    }
+
+    /**
+     * Store cross-interaction context
+     */
+    async storeCrossInteractionContext(workflowId, contextKey, contextData, importanceScore = 5, expiresAt = null) {
+        const sql = `INSERT OR REPLACE INTO cross_interaction_context
+                    (workflow_id, context_key, context_data, importance_score, expires_at, compressed_size, access_count, last_accessed)
+                    VALUES (?, ?, ?, ?, ?, ?, COALESCE((SELECT access_count FROM cross_interaction_context WHERE workflow_id = ? AND context_key = ?), 0) + 1, CURRENT_TIMESTAMP)`;
+
+        const contextJson = JSON.stringify(contextData);
+        const compressedSize = Buffer.byteLength(contextJson, 'utf8');
+
+        return await this.runSQL(sql, [
+            workflowId,
+            contextKey,
+            contextJson,
+            importanceScore,
+            expiresAt,
+            compressedSize,
+            workflowId,
+            contextKey
+        ]);
+    }
+
+    /**
+     * Load cross-interaction context
+     */
+    async loadCrossInteractionContext(workflowId, contextKey = null) {
+        let sql, params;
+
+        if (contextKey) {
+            sql = `SELECT * FROM cross_interaction_context
+                   WHERE workflow_id = ? AND context_key = ?
+                   AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)`;
+            params = [workflowId, contextKey];
+        } else {
+            sql = `SELECT * FROM cross_interaction_context
+                   WHERE workflow_id = ?
+                   AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
+                   ORDER BY importance_score DESC, last_accessed DESC`;
+            params = [workflowId];
+        }
+
+        const rows = await this.getAllSQL(sql, params);
+
+        return rows.map(row => ({
+            ...row,
+            context_data: JSON.parse(row.context_data)
+        }));
+    }
+
+    /**
+     * Create enterprise workflow snapshot
+     */
+    async createEnterpriseWorkflowSnapshot(workflowId, snapshotType, stateData, metadata = {}) {
+        const crypto = require('crypto');
+        const stateJson = JSON.stringify(stateData);
+        const stateHash = crypto.createHash('sha256').update(stateJson).digest('hex');
+
+        // Get previous snapshot for chaining
+        const previousSnapshot = await this.getSQL(
+            'SELECT id FROM enterprise_workflow_snapshots WHERE workflow_id = ? ORDER BY created_at DESC LIMIT 1',
+            [workflowId]
+        );
+
+        const sql = `INSERT INTO enterprise_workflow_snapshots
+                    (workflow_id, snapshot_type, state_data, state_hash, previous_snapshot_id, metadata, compression_ratio, valid_until)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now', '+30 days'))`;
+
+        const result = await this.runSQL(sql, [
+            workflowId,
+            snapshotType,
+            stateJson,
+            stateHash,
+            previousSnapshot?.id || null,
+            JSON.stringify(metadata),
+            1.0 // TODO: Implement actual compression
+        ]);
+
+        return result.lastID;
+    }
+
+    /**
+     * Load latest enterprise workflow snapshot
+     */
+    async loadLatestEnterpriseWorkflowSnapshot(workflowId) {
+        const sql = `SELECT * FROM enterprise_workflow_snapshots
+                    WHERE workflow_id = ? AND valid_until > CURRENT_TIMESTAMP
+                    ORDER BY created_at DESC LIMIT 1`;
+
+        const row = await this.getSQL(sql, [workflowId]);
+
+        if (!row) return null;
+
+        return {
+            ...row,
+            state_data: JSON.parse(row.state_data),
+            metadata: row.metadata ? JSON.parse(row.metadata) : {}
+        };
+    }
+
+    /**
+     * Create enterprise conditional rule
+     */
+    async createEnterpriseConditionalRule(workflowId, ruleData) {
+        const {
+            ruleName,
+            conditionExpression,
+            actionType,
+            actionConfiguration = {},
+            priority = 1,
+            createdBy = 'system'
+        } = ruleData;
+
+        const sql = `INSERT INTO enterprise_conditional_rules
+                    (workflow_id, rule_name, condition_expression, action_type, action_configuration, priority, created_by)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+        const result = await this.runSQL(sql, [
+            workflowId,
+            ruleName,
+            conditionExpression,
+            actionType,
+            JSON.stringify(actionConfiguration),
+            priority,
+            createdBy
+        ]);
+
+        return result.lastID;
+    }
+
+    /**
+     * Get enterprise conditional rules for workflow
+     */
+    async getEnterpriseConditionalRules(workflowId, enabledOnly = true) {
+        let sql = `SELECT * FROM enterprise_conditional_rules WHERE workflow_id = ?`;
+        const params = [workflowId];
+
+        if (enabledOnly) {
+            sql += ` AND enabled = TRUE`;
+        }
+
+        sql += ` ORDER BY priority ASC, created_at ASC`;
+
+        const rows = await this.getAllSQL(sql, params);
+
+        return rows.map(row => ({
+            ...row,
+            action_configuration: row.action_configuration ? JSON.parse(row.action_configuration) : {},
+            performance_metrics: row.performance_metrics ? JSON.parse(row.performance_metrics) : {}
+        }));
+    }
+
+    /**
+     * Update conditional rule execution metrics
+     */
+    async updateConditionalRuleMetrics(ruleId, success, executionTime) {
+        const sql = `UPDATE enterprise_conditional_rules
+                    SET execution_count = execution_count + 1,
+                        success_rate = CASE
+                            WHEN execution_count = 0 THEN ?
+                            ELSE ((success_rate * execution_count) + ?) / (execution_count + 1)
+                        END,
+                        last_triggered = CURRENT_TIMESTAMP,
+                        performance_metrics = json_set(
+                            COALESCE(performance_metrics, '{}'),
+                            '$.lastExecutionTime', ?,
+                            '$.lastSuccess', ?
+                        )
+                    WHERE id = ?`;
+
+        const successRate = success ? 1.0 : 0.0;
+
+        return await this.runSQL(sql, [successRate, successRate, executionTime, success, ruleId]);
+    }
+
+    /**
+     * Create enterprise approval gate
+     */
+    async createEnterpriseApprovalGate(workflowId, gateData) {
+        const {
+            gateName,
+            approvalType,
+            requiredApprovers = [],
+            gateConfiguration = {},
+            timeoutHours = 24,
+            escalationRules = {}
+        } = gateData;
+
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + timeoutHours);
+
+        const sql = `INSERT INTO enterprise_approval_gates
+                    (workflow_id, gate_name, approval_type, required_approvers, gate_configuration, timeout_hours, escalation_rules, expires_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        const result = await this.runSQL(sql, [
+            workflowId,
+            gateName,
+            approvalType,
+            JSON.stringify(requiredApprovers),
+            JSON.stringify(gateConfiguration),
+            timeoutHours,
+            JSON.stringify(escalationRules),
+            expiresAt.toISOString()
+        ]);
+
+        return result.lastID;
+    }
+
+    /**
+     * Update approval gate status
+     */
+    async updateApprovalGateStatus(gateId, status, resolvedBy = null, resolutionReason = null, slackThreadTs = null) {
+        const sql = `UPDATE enterprise_approval_gates
+                    SET status = ?, resolved_by = ?, resolution_reason = ?, slack_thread_ts = ?, resolved_at = CURRENT_TIMESTAMP
+                    WHERE id = ?`;
+
+        return await this.runSQL(sql, [status, resolvedBy, resolutionReason, slackThreadTs, gateId]);
+    }
+
+    /**
+     * Add approval to gate
+     */
+    async addApprovalToGate(gateId, approverIdentifier, approval) {
+        // Load current approvals
+        const gate = await this.getSQL('SELECT current_approvals FROM enterprise_approval_gates WHERE id = ?', [gateId]);
+
+        if (!gate) {
+            throw new Error(`Approval gate not found: ${gateId}`);
+        }
+
+        const currentApprovals = gate.current_approvals ? JSON.parse(gate.current_approvals) : [];
+
+        // Add new approval
+        currentApprovals.push({
+            approver: approverIdentifier,
+            approval,
+            timestamp: new Date().toISOString()
+        });
+
+        // Update gate
+        const sql = `UPDATE enterprise_approval_gates
+                    SET current_approvals = ?
+                    WHERE id = ?`;
+
+        return await this.runSQL(sql, [JSON.stringify(currentApprovals), gateId]);
+    }
+
+    /**
+     * Get pending approval gates for workflow
+     */
+    async getPendingApprovalGates(workflowId) {
+        const sql = `SELECT * FROM enterprise_approval_gates
+                    WHERE workflow_id = ? AND status = 'pending' AND expires_at > CURRENT_TIMESTAMP
+                    ORDER BY created_at ASC`;
+
+        const rows = await this.getAllSQL(sql, [workflowId]);
+
+        return rows.map(row => ({
+            ...row,
+            required_approvers: row.required_approvers ? JSON.parse(row.required_approvers) : [],
+            current_approvals: row.current_approvals ? JSON.parse(row.current_approvals) : [],
+            gate_configuration: row.gate_configuration ? JSON.parse(row.gate_configuration) : {},
+            escalation_rules: row.escalation_rules ? JSON.parse(row.escalation_rules) : {}
+        }));
+    }
+
+    /**
+     * Create cross-system integration state
+     */
+    async createCrossSystemIntegrationState(workflowId, systemType, systemIdentifier, integrationData = {}) {
+        const sql = `INSERT INTO cross_system_integration_state
+                    (workflow_id, system_type, system_identifier, integration_data, last_sync_at)
+                    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`;
+
+        const result = await this.runSQL(sql, [
+            workflowId,
+            systemType,
+            systemIdentifier,
+            JSON.stringify(integrationData)
+        ]);
+
+        return result.lastID;
+    }
+
+    /**
+     * Update cross-system integration sync status
+     */
+    async updateCrossSystemIntegrationState(integrationId, syncStatus, syncError = null) {
+        const sql = `UPDATE cross_system_integration_state
+                    SET sync_status = ?, last_sync_at = CURRENT_TIMESTAMP, sync_error = ?,
+                        retry_count = CASE WHEN ? = 'error' THEN retry_count + 1 ELSE 0 END
+                    WHERE id = ?`;
+
+        return await this.runSQL(sql, [syncStatus, syncError, syncStatus, integrationId]);
+    }
+
+    /**
+     * Get cross-system integrations for workflow
+     */
+    async getCrossSystemIntegrations(workflowId, systemType = null) {
+        let sql = `SELECT * FROM cross_system_integration_state WHERE workflow_id = ?`;
+        const params = [workflowId];
+
+        if (systemType) {
+            sql += ` AND system_type = ?`;
+            params.push(systemType);
+        }
+
+        sql += ` ORDER BY created_at DESC`;
+
+        const rows = await this.getAllSQL(sql, params);
+
+        return rows.map(row => ({
+            ...row,
+            integration_data: row.integration_data ? JSON.parse(row.integration_data) : {}
+        }));
     }
 
     /**
