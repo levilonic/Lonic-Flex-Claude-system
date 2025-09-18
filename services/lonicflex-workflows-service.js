@@ -558,43 +558,241 @@ class LonicFlexWorkflowsService {
         }
     }
 
-    async executeServiceStep({ service, step, agent, context, timeout }) {
-        // Simulate service coordination
-        // In a real implementation, this would make HTTP calls to other services
-
+    async executeServiceStep({ service, step, agent, context, timeout = 30000 }) {
+        // Real service coordination with HTTP calls
         this.logger.info('Executing service step', { service, step, agent });
 
-        // Return mock result based on service type
-        switch (service) {
-            case 'github':
-                return { success: true, service: 'github', action: step, result: 'GitHub operation completed' };
+        // Service port mapping
+        const servicePorts = {
+            'master': 3007,
+            'webhooks': 3008,
+            'github': 3002,
+            'slack': 3006,
+            'agents': 3003,
+            'workflows': 3004,
+            'health': 3005
+        };
 
-            case 'agents':
-                return { success: true, service: 'agents', agent, action: step, result: `${agent} agent executed successfully` };
+        const servicePort = servicePorts[service];
+        if (!servicePort) {
+            this.logger.warn('Unknown service', { service });
+            return { success: false, service, error: `Unknown service: ${service}` };
+        }
 
-            case 'slack':
-                return { success: true, service: 'slack', action: step, result: 'Slack notification sent' };
+        const serviceUrl = `http://localhost:${servicePort}`;
 
-            case 'health':
-                return { success: true, service: 'health', action: step, result: 'Health check completed' };
+        try {
+            // Check service health first
+            const healthResponse = await this.makeServiceCall(serviceUrl, '/health', 'GET', null, 5000);
+            if (!healthResponse.success) {
+                return {
+                    success: false,
+                    service,
+                    error: `Service ${service} is unhealthy: ${healthResponse.error}`
+                };
+            }
 
-            default:
-                return { success: true, service, action: step, result: 'Step completed' };
+            // Execute service-specific actions
+            let result;
+            switch (service) {
+                case 'github':
+                    result = await this.executeGitHubStep(serviceUrl, step, context, timeout);
+                    break;
+
+                case 'agents':
+                    result = await this.executeAgentStep(serviceUrl, step, agent, context, timeout);
+                    break;
+
+                case 'slack':
+                    result = await this.executeSlackStep(serviceUrl, step, context, timeout);
+                    break;
+
+                case 'health':
+                    result = await this.executeHealthStep(serviceUrl, step, context, timeout);
+                    break;
+
+                case 'master':
+                    result = await this.executeMasterStep(serviceUrl, step, context, timeout);
+                    break;
+
+                case 'webhooks':
+                    result = await this.executeWebhookStep(serviceUrl, step, context, timeout);
+                    break;
+
+                default:
+                    result = await this.executeGenericStep(serviceUrl, step, context, timeout);
+                    break;
+            }
+
+            this.logger.info('Service step completed', { service, step, success: result.success });
+            return { success: true, service, action: step, result: result.data || result.message };
+
+        } catch (error) {
+            this.logger.error('Service step failed', { service, step, error: error.message });
+            return {
+                success: false,
+                service,
+                action: step,
+                error: error.message
+            };
         }
     }
 
-    async notifyService(serviceName, eventType, data) {
+    // Real HTTP service call utility
+    async makeServiceCall(baseUrl, endpoint, method = 'GET', data = null, timeout = 10000) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
         try {
+            const config = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'LonicFLex-Workflows/1.0'
+                },
+                signal: controller.signal
+            };
+
+            if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+                config.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(`${baseUrl}${endpoint}`, config);
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const responseData = await response.json();
+            return { success: true, data: responseData, status: response.status };
+
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                throw new Error(`Request timeout after ${timeout}ms`);
+            }
+            throw error;
+        }
+    }
+
+    // Service-specific step execution methods
+    async executeGitHubStep(serviceUrl, step, context, timeout) {
+        const endpoint = '/api/execute';
+        const payload = {
+            action: step,
+            context: context,
+            timestamp: new Date().toISOString()
+        };
+        return await this.makeServiceCall(serviceUrl, endpoint, 'POST', payload, timeout);
+    }
+
+    async executeAgentStep(serviceUrl, step, agent, context, timeout) {
+        const endpoint = '/api/agents/execute';
+        const payload = {
+            agent: agent,
+            action: step,
+            context: context,
+            timestamp: new Date().toISOString()
+        };
+        return await this.makeServiceCall(serviceUrl, endpoint, 'POST', payload, timeout);
+    }
+
+    async executeSlackStep(serviceUrl, step, context, timeout) {
+        const endpoint = '/api/slack/notify';
+        const payload = {
+            action: step,
+            message: context.message || 'Workflow step notification',
+            context: context,
+            timestamp: new Date().toISOString()
+        };
+        return await this.makeServiceCall(serviceUrl, endpoint, 'POST', payload, timeout);
+    }
+
+    async executeHealthStep(serviceUrl, step, context, timeout) {
+        const endpoint = '/api/health/check';
+        const payload = {
+            check: step,
+            context: context,
+            timestamp: new Date().toISOString()
+        };
+        return await this.makeServiceCall(serviceUrl, endpoint, 'POST', payload, timeout);
+    }
+
+    async executeMasterStep(serviceUrl, step, context, timeout) {
+        const endpoint = '/api/command';
+        const payload = {
+            command: step,
+            context: context,
+            timestamp: new Date().toISOString()
+        };
+        return await this.makeServiceCall(serviceUrl, endpoint, 'POST', payload, timeout);
+    }
+
+    async executeWebhookStep(serviceUrl, step, context, timeout) {
+        const endpoint = '/api/webhook/trigger';
+        const payload = {
+            event: step,
+            context: context,
+            timestamp: new Date().toISOString()
+        };
+        return await this.makeServiceCall(serviceUrl, endpoint, 'POST', payload, timeout);
+    }
+
+    async executeGenericStep(serviceUrl, step, context, timeout) {
+        const endpoint = '/api/execute';
+        const payload = {
+            action: step,
+            context: context,
+            timestamp: new Date().toISOString()
+        };
+        return await this.makeServiceCall(serviceUrl, endpoint, 'POST', payload, timeout);
+    }
+
+    async notifyService(serviceName, eventType, data) {
+        const servicePorts = {
+            'master': 3007,
+            'webhooks': 3008,
+            'github': 3002,
+            'slack': 3006,
+            'agents': 3003,
+            'workflows': 3004,
+            'health': 3005
+        };
+
+        const servicePort = servicePorts[serviceName];
+        if (!servicePort) {
+            this.logger.warn('Cannot notify unknown service', { service: serviceName });
+            return { success: false, error: `Unknown service: ${serviceName}` };
+        }
+
+        try {
+            const serviceUrl = `http://localhost:${servicePort}`;
+            const endpoint = '/api/notifications';
+            const payload = {
+                eventType,
+                data,
+                source: this.config.serviceName,
+                timestamp: new Date().toISOString()
+            };
+
+            const result = await this.makeServiceCall(serviceUrl, endpoint, 'POST', payload, 10000);
+
             this.logger.info('Service notification sent', {
                 service: serviceName,
                 eventType,
-                data
+                success: result.success
             });
+
+            return result;
+
         } catch (error) {
             this.logger.warn('Service notification failed', {
                 service: serviceName,
+                eventType,
                 error: error.message
             });
+            return { success: false, error: error.message };
         }
     }
 

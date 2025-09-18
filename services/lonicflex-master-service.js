@@ -477,12 +477,12 @@ ${runState.brief || 'No brief provided'}
      */
     async callService(serviceName, endpoint, data) {
         const serviceUrls = {
-            'github': 'http://lonicflex-github:3002',
-            'slack': 'http://lonicflex-slack:3006',
-            'webhooks': 'http://lonicflex-webhooks:3008',
-            'agents': 'http://lonicflex-agents:3003',
-            'workflows': 'http://lonicflex-workflows:3004',
-            'health': 'http://lonicflex-health:3005'
+            'github': 'http://localhost:3002',
+            'slack': 'http://localhost:3006',
+            'webhooks': 'http://localhost:3008',
+            'agents': 'http://localhost:3003',
+            'workflows': 'http://localhost:3004',
+            'health': 'http://localhost:3005'
         };
 
         const baseUrl = serviceUrls[serviceName];
