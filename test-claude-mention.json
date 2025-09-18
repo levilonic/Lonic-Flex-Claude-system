@@ -1,0 +1,22 @@
+{
+  "action": "created",
+  "issue": {
+    "number": 123,
+    "title": "Test @claude integration",
+    "body": "Testing the webhook integration",
+    "user": {
+      "login": "testuser"
+    }
+  },
+  "comment": {
+    "id": 456,
+    "body": "@claude run health-check",
+    "user": {
+      "login": "testuser"
+    }
+  },
+  "repository": {
+    "full_name": "levilonic/Lonic-Flex-Claude-system",
+    "name": "Lonic-Flex-Claude-system"
+  }
+}

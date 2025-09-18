@@ -221,36 +221,36 @@ services:
           memory: 512M
           cpus: '0.5'
 
-  # Optional: Dashboard Service - Port 3001
-  lonicflex-dashboard:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - DASHBOARD_MODE=true
-    volumes:
-      - ./logs:/app/logs
-    command: ["node", "monitoring/dashboard-server.js"]
-    networks:
-      - lonicflex-network
-    restart: unless-stopped
-    depends_on:
-      - lonicflex-health
-      - lonicflex-master
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 500M
-          cpus: '0.5'
+  # Optional: Dashboard Service - Port 3001 (Disabled - file doesn't exist)
+  # lonicflex-dashboard:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3001:3001"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=3001
+  #     - DASHBOARD_MODE=true
+  #   volumes:
+  #     - ./logs:/app/logs
+  #   command: ["node", "monitoring/dashboard-server.js"]
+  #   networks:
+  #     - lonicflex-network
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - lonicflex-health
+  #     - lonicflex-master
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 500M
+  #         cpus: '0.5'
 
   # Nginx reverse proxy for external access
   nginx:

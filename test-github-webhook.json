@@ -1,0 +1,22 @@
+{
+  "action": "created",
+  "issue": {
+    "number": 2,
+    "title": "test",
+    "body": "@claude Can you help me with this? test",
+    "user": {
+      "login": "levilonic"
+    }
+  },
+  "comment": {
+    "id": 789,
+    "body": "@claude run health-check",
+    "user": {
+      "login": "levilonic"
+    }
+  },
+  "repository": {
+    "full_name": "levilonic/Lonic-Flex-Claude-system",
+    "name": "Lonic-Flex-Claude-system"
+  }
+}

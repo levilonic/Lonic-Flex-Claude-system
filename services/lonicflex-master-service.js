@@ -283,7 +283,7 @@ class LonicFlexMasterService {
 
         try {
             // Call GitHub service to create branch
-            const response = await this.callService('github', '/branch/create', {
+            const response = await this.callService('github', '/branches/create', {
                 branchName: runState.branchName,
                 runId: runState.runId,
                 baseBranch: 'main'
@@ -292,9 +292,11 @@ class LonicFlexMasterService {
             runState.steps[runState.steps.length - 1].status = 'completed';
             runState.steps[runState.steps.length - 1].completed = new Date();
             runState.branchUrl = response.branchUrl;
+            runState.branchName = response.branchName; // Update with actual branch name from GitHub
 
             this.logger.info('GitHub branch created successfully', {
                 runId: runState.runId,
+                branchName: response.branchName,
                 branchUrl: response.branchUrl
             });
 
@@ -321,8 +323,8 @@ class LonicFlexMasterService {
             const prTitle = `${runState.runId} ${runState.command}`;
             const prBody = this.generatePRBody(runState);
 
-            const response = await this.callService('github', '/pr/create', {
-                branchName: runState.branchName,
+            const response = await this.callService('github', '/prs/create', {
+                head: runState.branchName,
                 title: prTitle,
                 body: prBody,
                 draft: true,
@@ -428,12 +430,12 @@ ${runState.brief || 'No brief provided'}
      */
     async callService(serviceName, endpoint, data) {
         const serviceUrls = {
-            'github': 'http://localhost:3002',
-            'slack': 'http://localhost:3100',  // Slack doesn't need HTTP endpoint
-            'webhooks': 'http://localhost:3001',
-            'agents': 'http://localhost:3003',
-            'workflows': 'http://localhost:3004',
-            'health': 'http://localhost:3005'
+            'github': 'http://lonicflex-github:3002',
+            'slack': 'http://lonicflex-slack:3006',
+            'webhooks': 'http://lonicflex-webhooks:3008',
+            'agents': 'http://lonicflex-agents:3003',
+            'workflows': 'http://lonicflex-workflows:3004',
+            'health': 'http://lonicflex-health:3005'
         };
 
         const baseUrl = serviceUrls[serviceName];
@@ -441,16 +443,68 @@ ${runState.brief || 'No brief provided'}
             throw new Error(`Unknown service: ${serviceName}`);
         }
 
-        // For now, return mock responses - will be implemented when services are ready
-        this.logger.info('Service call (mock)', { serviceName, endpoint, data });
+        // Make real HTTP call to service
+        this.logger.info('Making service call', { serviceName, endpoint, url: `${baseUrl}${endpoint}` });
 
-        return {
-            success: true,
-            branchUrl: `https://github.com/user/repo/tree/${data.branchName}`,
-            prUrl: `https://github.com/user/repo/pull/123`,
-            prNumber: 123,
-            workflowId: `workflow-${Date.now()}`
-        };
+        try {
+            // Use built-in Node.js modules
+            const https = require('https');
+            const http = require('http');
+            const url = require('url');
+
+            const urlParsed = new URL(`${baseUrl}${endpoint}`);
+            const client = urlParsed.protocol === 'https:' ? https : http;
+
+            const requestOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                timeout: 10000
+            };
+
+            return new Promise((resolve, reject) => {
+                const req = client.request(urlParsed, requestOptions, (res) => {
+                    let body = '';
+
+                    res.on('data', (chunk) => {
+                        body += chunk;
+                    });
+
+                    res.on('end', () => {
+                        try {
+                            if (res.statusCode >= 400) {
+                                reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                                return;
+                            }
+
+                            const result = JSON.parse(body);
+                            this.logger.info('Service call successful', { serviceName, endpoint, status: res.statusCode });
+                            resolve(result);
+                        } catch (parseError) {
+                            reject(new Error(`Failed to parse response: ${parseError.message}`));
+                        }
+                    });
+                });
+
+                req.on('error', (error) => {
+                    reject(error);
+                });
+
+                req.on('timeout', () => {
+                    req.destroy();
+                    reject(new Error('Request timeout'));
+                });
+
+                // Send the data
+                req.write(JSON.stringify(data));
+                req.end();
+            });
+
+        } catch (error) {
+            this.logger.error('Service call failed', { serviceName, endpoint, error: error.message });
+            throw new Error(`Service call to ${serviceName}${endpoint} failed: ${error.message}`);
+        }
     }
 
     /**

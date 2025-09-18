@@ -1,32 +1,32 @@
 ---
-description: Regular shutdown with comprehensive intelligence capture and system learning
+description: Session finalization with permanent memory, git cleanup, and next-session preparation
 allowed-tools: Read(C:\Users\Levi\Desktop\LonicFLex\**), Write(C:\Users\Levi\Desktop\LonicFLex\**), Bash(*), Edit(*)
 
 ---
 
-# Regular Shutdown - Full Intelligence Capture
+# Session Shutdown - Finalization & Permanent Memory
 
-**SCENARIO**: Normal end of session with time to properly capture insights and learnings using Universal Context System.
+**SCENARIO**: End of session finalization - run AFTER `/project-save` to complete session properly with git finalization, permanent memory update, and system cleanup.
 
-**YOUR JOB**: Create comprehensive intelligence capture integrating with Factor3ContextManager and Universal Context preservation patterns for autonomous execution system development.
+**YOUR JOB**: Finalize the session with permanent audit trail, comprehensive git operations, system cleanup, and optimal next-session preparation. This complements `/project-save` rather than duplicating it.
 
-## 📊 Full Intelligence Protocol
-**🚨 ALL STEPS ARE EQUALLY CRITICAL AND MANDATORY**
+## 🎯 Shutdown Protocol - Complementary to Project Save
+**🚨 RUN AFTER /project-save - DO NOT DUPLICATE ITS FUNCTIONALITY**
 
-Every step in this protocol is essential for comprehensive intelligence capture and future session optimization. No step can be skipped or abbreviated.
+This command provides unique finalization value that `/project-save` doesn't handle.
 
-### Step 1: Comprehensive Session Analysis
-**Deep analysis of this session** (enhanced for autonomous execution systems):
-- What we accomplished vs what we planned (include breakthrough achievements)
-- Problem-solving approaches that worked/failed (coordination patterns, integration methods)
-- System discoveries and reality checks (Advanced Agent Coordinator capabilities, test results)
-- User communication preferences observed ("in order, use your brain" systematic approach)
-- Technical insights and architectural learnings (multi-pattern coordination, lifecycle management)
-- Decision-making patterns and rationale (autonomous execution design choices)
-- **Breakthrough Documentation**: World's first achievements and their significance
+### Step 1: Permanent Session Memory Update (CRITICAL)
+**🚨 MANDATORY**: Update `PERMANENT-SESSION-LOG.md` for every session without exception.
 
-### Step 2: Create Full Session Record
-**Create**: `memory/session-[DATE]-comprehensive.md`
+**CRITICAL REQUIREMENT**: This permanent audit trail MUST be updated for session continuity.
+
+**Process**:
+1. **Always Read First**: `PERMANENT-SESSION-LOG.md` to understand format
+2. **Add Session Entry at TOP**: New session goes before existing entries
+3. **Use Complete Template**: All sections must be filled with specific details
+4. **Commit to Git**: Permanent log updates must be committed
+
+**Add to TOP of**: `PERMANENT-SESSION-LOG.md`
 
 ```markdown
 # Session [DATE]: Comprehensive Intelligence Capture
