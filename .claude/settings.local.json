@@ -146,7 +146,14 @@
       "Bash(git checkout:*)",
       "Bash(pm2 logs:*)",
       "Bash(pm2 stop:*)",
-      "Bash(pm2 kill:*)"
+      "Bash(pm2 kill:*)",
+      "Bash(pm2 restart:*)",
+      "Bash(pm2 delete:*)",
+      "Bash(pm2 status:*)",
+      "Bash(pm2 start:*)",
+      "Bash(netstat:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

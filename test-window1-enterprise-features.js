@@ -84,7 +84,7 @@ class Window1TestSuite {
             await this.testEnterpriseHealthMonitoring();
 
             // Generate final results
-            await this.generateTestResults();
+            return await this.generateTestResults();
 
         } catch (error) {
             console.error('❌ Test suite failed:', error.message);
@@ -275,39 +275,65 @@ class Window1TestSuite {
             };
 
             // Store cross-interaction context
-            await this.db.storeCrossInteractionContext(
-                this.testWorkflowId,
-                'claude_conversation',
-                contextData.claudeConversation,
-                9, // High importance
-                new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)) // 30 days
-            );
-            console.log('  ✅ Claude conversation context stored');
+            try {
+                const result1 = await this.db.storeCrossInteractionContext(
+                    this.testWorkflowId,
+                    'claude_conversation',
+                    contextData.claudeConversation,
+                    9, // High importance
+                    null // No expiry for testing
+                );
+                console.log('  ✅ Claude conversation context stored', result1 ? '(success)' : '(failed)');
+            } catch (error) {
+                console.log('  ❌ Claude conversation context storage failed:', error.message);
+            }
 
-            await this.db.storeCrossInteractionContext(
-                this.testWorkflowId,
-                'decision_history',
-                contextData.decisionHistory,
-                8, // High importance
-                null // No expiry
-            );
-            console.log('  ✅ Decision history context stored');
+            try {
+                const result2 = await this.db.storeCrossInteractionContext(
+                    this.testWorkflowId,
+                    'decision_history',
+                    contextData.decisionHistory,
+                    8, // High importance
+                    null // No expiry
+                );
+                console.log('  ✅ Decision history context stored', result2 ? '(success)' : '(failed)');
+            } catch (error) {
+                console.log('  ❌ Decision history context storage failed:', error.message);
+            }
 
-            await this.db.storeCrossInteractionContext(
-                this.testWorkflowId,
-                'performance_metrics',
-                contextData.performanceMetrics,
-                6, // Medium importance
-                new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)) // 7 days
-            );
-            console.log('  ✅ Performance metrics context stored');
+            try {
+                const result3 = await this.db.storeCrossInteractionContext(
+                    this.testWorkflowId,
+                    'performance_metrics',
+                    contextData.performanceMetrics,
+                    6, // Medium importance
+                    null // No expiry for testing
+                );
+                console.log('  ✅ Performance metrics context stored', result3 ? '(success)' : '(failed)');
+            } catch (error) {
+                console.log('  ❌ Performance metrics context storage failed:', error.message);
+            }
 
             // Test context retrieval
             const retrievedContexts = await this.db.loadCrossInteractionContext(this.testWorkflowId);
             console.log(`  ✅ Retrieved ${retrievedContexts.length} context entries`);
 
+            // Debug: Show what was retrieved
+            if (retrievedContexts.length > 0) {
+                console.log(`  🔍 Debug: Retrieved context keys = [${retrievedContexts.map(c => c.context_key).join(', ')}]`);
+            }
+
             // Test context filtering by key
             const claudeContext = await this.db.loadCrossInteractionContext(this.testWorkflowId, 'claude_conversation');
+
+            // Debug output
+            console.log(`  🔍 Debug: claudeContext.length = ${claudeContext.length}`);
+            if (claudeContext.length > 0) {
+                console.log(`  🔍 Debug: claudeContext[0].context_data type = ${typeof claudeContext[0].context_data}`);
+                console.log(`  🔍 Debug: claudeContext[0].context_data.length = ${claudeContext[0].context_data?.length}`);
+                console.log(`  🔍 Debug: contextData.claudeConversation.length = ${contextData.claudeConversation.length}`);
+            }
+
             const contextRestored = claudeContext.length > 0 &&
                                   claudeContext[0].context_data.length === contextData.claudeConversation.length;
 

@@ -11,6 +11,7 @@
  * - Integration with all LonicFLex services
  */
 
+const express = require('express');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { MultiWorkflowStateManager } = require('./multi-workflow-state-manager');
 const { ClaudeAnalysisService } = require('./claude-analysis-service');
@@ -42,6 +43,25 @@ class ConditionalWorkflowEngine extends EventEmitter {
             ...config
         };
 
+        // Initialize logger first
+        this.logger = winston.createLogger({
+            format: winston.format.combine(
+                winston.format.timestamp(),
+                winston.format.json()
+            ),
+            transports: [
+                new winston.transports.Console(),
+                new winston.transports.File({
+                    filename: `./logs/${this.config.serviceName}.log`
+                })
+            ]
+        });
+
+        // Initialize Express app
+        this.app = express();
+        this.setupMiddleware();
+        this.setupRoutes();
+
         // Initialize core components
         this.db = new SQLiteManager();
         this.workflowStateManager = new MultiWorkflowStateManager();
@@ -59,19 +79,8 @@ class ConditionalWorkflowEngine extends EventEmitter {
         // Rule expression evaluator
         this.expressionEvaluator = new ExpressionEvaluator();
 
-        // Initialize logger
-        this.logger = winston.createLogger({
-            format: winston.format.combine(
-                winston.format.timestamp(),
-                winston.format.json()
-            ),
-            transports: [
-                new winston.transports.Console(),
-                new winston.transports.File({
-                    filename: `./logs/${this.config.serviceName}.log`
-                })
-            ]
-        });
+        // Service state
+        this.startTime = new Date();
 
         this.stats = {
             totalRulesEvaluated: 0,
@@ -679,6 +688,130 @@ class ConditionalWorkflowEngine extends EventEmitter {
             }
         };
     }
+
+    setupMiddleware() {
+        this.app.use(express.json({ limit: '10mb' }));
+        this.app.use(express.urlencoded({ extended: true }));
+
+        // Request logging
+        this.app.use((req, res, next) => {
+            this.logger.info('Conditional Workflow API request received', {
+                method: req.method,
+                url: req.url,
+                userAgent: req.get('User-Agent')
+            });
+            next();
+        });
+    }
+
+    /**
+     * Create a new conditional rule
+     */
+    async createRule(ruleData) {
+        try {
+            const { name, condition, action, workflowId, priority = 5, enabled = true } = ruleData;
+
+            if (!name || !condition || !action) {
+                throw new Error('Missing required fields: name, condition, action');
+            }
+
+            // Store rule in database
+            const result = await this.db.createEnterpriseConditionalRule(workflowId || 'global', {
+                ruleName: name,
+                conditionExpression: condition,
+                actionType: action,
+                priority,
+                createdBy: 'api'
+            });
+
+            this.logger.info('Conditional rule created', {
+                ruleId: result.id,
+                name,
+                workflowId: workflowId || 'global'
+            });
+
+            return result.id;
+
+        } catch (error) {
+            this.logger.error('Failed to create conditional rule', {
+                error: error.message,
+                ruleData
+            });
+            throw error;
+        }
+    }
+
+    setupRoutes() {
+        // Health check endpoint
+        this.app.get('/health', (req, res) => {
+            res.json({
+                status: 'healthy',
+                service: this.config.serviceName,
+                uptime: Date.now() - this.startTime.getTime(),
+                stats: this.stats,
+                activeEvaluations: this.activeEvaluations.size,
+                pendingRules: this.ruleExecutionQueue.length
+            });
+        });
+
+        // Create conditional rule
+        this.app.post('/rule/create', async (req, res) => {
+            try {
+                const ruleId = await this.createRule(req.body);
+                res.json({ success: true, ruleId });
+            } catch (error) {
+                res.status(400).json({ success: false, error: error.message });
+            }
+        });
+
+        // Evaluate rule
+        this.app.post('/rule/:ruleId/evaluate', async (req, res) => {
+            try {
+                const { ruleId } = req.params;
+                const result = await this.evaluateRule(ruleId, req.body.context);
+                res.json({ success: true, result });
+            } catch (error) {
+                res.status(400).json({ success: false, error: error.message });
+            }
+        });
+
+        // Get rule status
+        this.app.get('/rule/:ruleId/status', async (req, res) => {
+            try {
+                const { ruleId } = req.params;
+                const status = await this.getRuleStatus(ruleId);
+                res.json({ success: true, status });
+            } catch (error) {
+                res.status(400).json({ success: false, error: error.message });
+            }
+        });
+    }
+
+    /**
+     * Start the HTTP server
+     */
+    async start() {
+        try {
+            await this.initialize();
+
+            this.app.listen(this.config.port, () => {
+                this.logger.info('Conditional Workflow Engine service started', {
+                    port: this.config.port,
+                    serviceName: this.config.serviceName
+                });
+            });
+        } catch (error) {
+            this.logger.error('Failed to start Conditional Workflow Engine service', {
+                error: error.message
+            });
+            process.exit(1);
+        }
+    }
+
+    async initialize() {
+        await this.db.initialize();
+        this.logger.info('Conditional Workflow Engine initialized');
+    }
 }
 
 /**
@@ -746,3 +879,9 @@ class ExpressionEvaluator {
 }
 
 module.exports = { ConditionalWorkflowEngine };
+
+// Start service if run directly
+if (require.main === module) {
+    const service = new ConditionalWorkflowEngine();
+    service.start().catch(console.error);
+}

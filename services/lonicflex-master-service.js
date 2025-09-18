@@ -162,6 +162,47 @@ class LonicFlexMasterService {
                 nodeVersion: process.version
             });
         });
+
+        // Workflow completion notifications endpoint
+        this.app.post('/api/notifications', (req, res) => {
+            try {
+                const { eventType, data } = req.body;
+
+                this.logger.info('Workflow notification received', {
+                    eventType,
+                    workflowId: data?.workflowId
+                });
+
+                if (eventType === 'workflow_completed' && data?.workflowId) {
+                    // Mark the run as completed
+                    if (this.activeRuns.has(data.workflowId)) {
+                        const run = this.activeRuns.get(data.workflowId);
+                        run.status = 'completed';
+                        run.completedAt = new Date();
+                        run.result = data.results;
+
+                        // Move to history
+                        this.runHistory.set(data.workflowId, run);
+                        this.activeRuns.delete(data.workflowId);
+
+                        // Update stats
+                        this.stats.completedRuns++;
+                        this.stats.activeRuns = this.activeRuns.size;
+
+                        this.logger.info('Run marked as completed', {
+                            runId: data.workflowId,
+                            duration: data.duration
+                        });
+                    }
+                }
+
+                res.json({ success: true, message: 'Notification processed' });
+
+            } catch (error) {
+                this.logger.error('Failed to process notification', { error: error.message });
+                res.status(500).json({ success: false, error: error.message });
+            }
+        });
     }
 
     /**

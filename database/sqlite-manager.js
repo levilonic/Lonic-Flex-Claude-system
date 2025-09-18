@@ -445,6 +445,39 @@ class SQLiteManager {
                 retry_count INTEGER DEFAULT 0,        -- Retry attempts for failed syncs
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (workflow_id) REFERENCES multi_workflow_sessions (id)
+            )`,
+
+            // Window 1: Multi-Workflow State Management Table
+            `CREATE TABLE IF NOT EXISTS workflow_state (
+                workflow_id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                owner TEXT NOT NULL,
+                status TEXT DEFAULT 'active',
+                context TEXT DEFAULT '{}',
+                metadata TEXT DEFAULT '{}',
+                completion_percentage REAL DEFAULT 0.0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`,
+
+            // Window 1: Enhanced Approval Gates Table
+            `CREATE TABLE IF NOT EXISTS approval_gates (
+                gate_id TEXT PRIMARY KEY,
+                type TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                requester TEXT NOT NULL,
+                workflow_id TEXT,
+                status TEXT DEFAULT 'pending',
+                priority TEXT DEFAULT 'medium',
+                timeout_hours INTEGER DEFAULT 24,
+                processed_at DATETIME,
+                processed_by TEXT,
+                comments TEXT,
+                metadata TEXT DEFAULT '{}',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )`
         ];
 

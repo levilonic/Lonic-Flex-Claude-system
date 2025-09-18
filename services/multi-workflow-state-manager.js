@@ -11,6 +11,7 @@
  * - Integration with existing Claude services
  */
 
+const express = require('express');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../factor3-context-manager');
 const { ClaudeAnalysisService } = require('./claude-analysis-service');
@@ -40,6 +41,11 @@ class MultiWorkflowStateManager {
 
             ...config
         };
+
+        // Initialize Express app
+        this.app = express();
+        this.setupMiddleware();
+        this.setupRoutes();
 
         // Initialize core components
         this.db = new SQLiteManager();
@@ -81,6 +87,72 @@ class MultiWorkflowStateManager {
             stateSnapshots: 0,
             claudeInteractions: 0
         };
+
+        // Service state
+        this.startTime = new Date();
+    }
+
+    setupMiddleware() {
+        this.app.use(express.json({ limit: '10mb' }));
+        this.app.use(express.urlencoded({ extended: true }));
+
+        // Request logging
+        this.app.use((req, res, next) => {
+            this.logger.info('Multi-Workflow State API request received', {
+                method: req.method,
+                url: req.url,
+                userAgent: req.get('User-Agent')
+            });
+            next();
+        });
+    }
+
+    setupRoutes() {
+        // Health check endpoint
+        this.app.get('/health', (req, res) => {
+            res.json({
+                status: 'healthy',
+                service: this.config.serviceName,
+                uptime: Date.now() - this.startTime.getTime(),
+                stats: {
+                    ...this.stats,
+                    activeWorkflows: this.activeWorkflows.size
+                },
+                activeWorkflows: this.activeWorkflows.size,
+                workflowSessions: this.workflowSessions.size
+            });
+        });
+
+        // Workflow state management endpoints
+        this.app.post('/workflow/create', async (req, res) => {
+            try {
+                const result = await this.createEnterpriseWorkflow(req.body);
+                res.json(result);
+            } catch (error) {
+                this.logger.error('Failed to create workflow', { error: error.message });
+                res.status(500).json({ success: false, error: error.message });
+            }
+        });
+
+        this.app.get('/workflow/:workflowId/state', async (req, res) => {
+            try {
+                const state = await this.getWorkflowState(req.params.workflowId);
+                res.json(state);
+            } catch (error) {
+                this.logger.error('Failed to get workflow state', { error: error.message });
+                res.status(500).json({ success: false, error: error.message });
+            }
+        });
+
+        this.app.post('/workflow/:workflowId/snapshot', async (req, res) => {
+            try {
+                const result = await this.createEnterpriseSnapshot(req.params.workflowId, req.body);
+                res.json(result);
+            } catch (error) {
+                this.logger.error('Failed to create snapshot', { error: error.message });
+                res.status(500).json({ success: false, error: error.message });
+            }
+        });
     }
 
     /**
@@ -201,6 +273,141 @@ class MultiWorkflowStateManager {
 
         } catch (error) {
             this.logger.error('Failed to cleanup expired contexts', { error: error.message });
+        }
+    }
+
+    /**
+     * Create enterprise workflow with state persistence
+     */
+    async createEnterpriseWorkflow(workflowData) {
+        try {
+            const workflowId = `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            const workflow = {
+                id: workflowId,
+                name: workflowData.name || 'Unnamed Workflow',
+                type: workflowData.type || 'default',
+                owner: workflowData.owner || 'system',
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                steps: workflowData.steps || [],
+                context: workflowData.context || {},
+                completionPercentage: 0,
+                claudeInteractions: [],
+                metadata: workflowData.metadata || {}
+            };
+
+            // Store in active workflows map
+            this.activeWorkflows.set(workflowId, workflow);
+
+            // Persist to database
+            await this.db.runSQL(
+                `INSERT INTO workflow_state (
+                    workflow_id, name, type, owner, status, context, metadata, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    workflowId,
+                    workflow.name,
+                    workflow.type,
+                    workflow.owner,
+                    workflow.status,
+                    JSON.stringify(workflow.context),
+                    JSON.stringify(workflow.metadata),
+                    workflow.createdAt,
+                    workflow.updatedAt
+                ]
+            );
+
+            // Update stats
+            this.stats.totalWorkflows++;
+            this.stats.activeWorkflows++;
+
+            this.logger.info('Enterprise workflow created', {
+                workflowId,
+                name: workflow.name,
+                type: workflow.type,
+                owner: workflow.owner
+            });
+
+            return {
+                success: true,
+                workflowId,
+                workflow: {
+                    id: workflowId,
+                    name: workflow.name,
+                    type: workflow.type,
+                    status: workflow.status,
+                    createdAt: workflow.createdAt
+                }
+            };
+
+        } catch (error) {
+            this.logger.error('Failed to create enterprise workflow', {
+                error: error.message,
+                workflowData
+            });
+            throw error;
+        }
+    }
+
+    /**
+     * Get workflow state by ID
+     */
+    async getWorkflowState(workflowId) {
+        try {
+            // Try to get from active workflows first
+            let workflow = this.activeWorkflows.get(workflowId);
+
+            if (workflow) {
+                return {
+                    success: true,
+                    workflowId,
+                    state: workflow,
+                    source: 'active'
+                };
+            }
+
+            // If not in active workflows, try database
+            const result = await this.db.runSQL(
+                'SELECT * FROM workflow_state WHERE workflow_id = ?',
+                [workflowId]
+            );
+
+            if (result.rows && result.rows.length > 0) {
+                const row = result.rows[0];
+                workflow = {
+                    id: row.workflow_id,
+                    name: row.name,
+                    type: row.type,
+                    owner: row.owner,
+                    status: row.status,
+                    context: JSON.parse(row.context || '{}'),
+                    metadata: JSON.parse(row.metadata || '{}'),
+                    createdAt: row.created_at,
+                    updatedAt: row.updated_at
+                };
+
+                return {
+                    success: true,
+                    workflowId,
+                    state: workflow,
+                    source: 'database'
+                };
+            }
+
+            return {
+                success: false,
+                error: 'Workflow not found',
+                workflowId
+            };
+
+        } catch (error) {
+            this.logger.error('Failed to get workflow state', {
+                workflowId,
+                error: error.message
+            });
+            throw error;
         }
     }
 
@@ -791,7 +998,10 @@ class MultiWorkflowStateManager {
             status: 'healthy',
             service: this.config.serviceName,
             uptime: process.uptime(),
-            stats: this.stats,
+            stats: {
+                ...this.stats,
+                activeWorkflows: this.activeWorkflows.size
+            },
             activeWorkflows: this.activeWorkflows.size,
             config: {
                 maxActiveWorkflows: this.config.maxActiveWorkflows,
@@ -1283,6 +1493,33 @@ class MultiWorkflowStateManager {
             });
         }
     }
+
+    /**
+     * Start the HTTP server
+     */
+    async start() {
+        try {
+            await this.initialize();
+
+            this.app.listen(this.config.port, () => {
+                this.logger.info('Multi-Workflow State Manager service started', {
+                    port: this.config.port,
+                    serviceName: this.config.serviceName
+                });
+            });
+        } catch (error) {
+            this.logger.error('Failed to start Multi-Workflow State Manager service', {
+                error: error.message
+            });
+            process.exit(1);
+        }
+    }
 }
 
 module.exports = { MultiWorkflowStateManager };
+
+// Start service if run directly
+if (require.main === module) {
+    const service = new MultiWorkflowStateManager();
+    service.start().catch(console.error);
+}

@@ -210,7 +210,8 @@ module.exports = {
       node_args: ['--max-old-space-size=256', '--optimize-for-size']
     },
     
-    // Web dashboard for monitoring (optional)
+    // Web dashboard for monitoring (optional - DISABLED: monitoring/dashboard-server.js doesn't exist)
+    /*
     {
       name: 'lonicflex-dashboard',
       script: './monitoring/dashboard-server.js',
@@ -232,6 +233,7 @@ module.exports = {
       ignore_watch: ['node_modules', 'logs', 'database'],
       max_memory_restart: '500M'
     },
+    */
 
     // ==========================================
     // WINDOW 1: ENTERPRISE MULTI-WORKFLOW STATE MANAGEMENT SERVICES
