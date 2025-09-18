@@ -21,7 +21,7 @@ require('dotenv').config();
 class LonicFlexMasterService {
     constructor(config = {}) {
         this.config = {
-            port: config.port || process.env.PORT || 3007,
+            port: config.port || process.env.PORT || process.env.MASTER_SERVICE_PORT || 3007,
             serviceName: 'lonicflex-master',
             runIdPrefix: 'R',
             branchPrefix: 'run/',
@@ -253,7 +253,21 @@ class LonicFlexMasterService {
             this.runHistory.set(runId, runState);
             this.activeRuns.delete(runId);
 
-            throw error;
+            this.logger.error('Run failed', {
+                runId,
+                error: error.message,
+                command: runState.command,
+                mode: runState.mode
+            });
+
+            // Return failure result instead of throwing
+            return {
+                success: false,
+                runId,
+                error: error.message,
+                status: 'failed',
+                message: `Run ${runId} failed: ${error.message}`
+            };
         }
     }
 

@@ -21,7 +21,7 @@ require('dotenv').config();
 class LonicFlexHealthService {
     constructor(config = {}) {
         this.config = {
-            port: config.port || process.env.HEALTH_SERVICE_PORT || 3005,
+            port: config.port || process.env.PORT || process.env.HEALTH_SERVICE_PORT || 3005,
             serviceName: 'lonicflex-health',
             checkInterval: config.checkInterval || 60000, // 1 minute
             alertThreshold: config.alertThreshold || 3, // 3 failed checks trigger alert

@@ -582,13 +582,20 @@ class LonicFlexWorkflowsService {
         const serviceUrl = `http://localhost:${servicePort}`;
 
         try {
-            // Check service health first
-            const healthResponse = await this.makeServiceCall(serviceUrl, '/health', 'GET', null, 5000);
+            // Check service health first with shorter timeout
+            const healthResponse = await this.makeServiceCall(serviceUrl, '/health', 'GET', null, 3000);
             if (!healthResponse.success) {
+                this.logger.warn('Service unavailable', {
+                    service,
+                    serviceUrl,
+                    error: healthResponse.error
+                });
                 return {
                     success: false,
                     service,
-                    error: `Service ${service} is unhealthy: ${healthResponse.error}`
+                    action: step,
+                    error: `Service ${service} unavailable: ${healthResponse.error}`,
+                    serviceUrl
                 };
             }
 

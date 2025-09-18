@@ -145,7 +145,8 @@
       "Bash(git branch:*)",
       "Bash(git checkout:*)",
       "Bash(pm2 logs:*)",
-      "Bash(pm2 stop:*)"
+      "Bash(pm2 stop:*)",
+      "Bash(pm2 kill:*)"
     ],
     "deny": [],
     "ask": []
