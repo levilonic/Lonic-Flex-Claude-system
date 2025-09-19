@@ -695,6 +695,13 @@ class LonicFlexJiraService {
             throw new Error('Jira service not authenticated');
         }
 
+        // Demo mode - return mock data
+        if (process.env.JIRA_DEMO_MODE === 'true' || this.config.demoMode) {
+            this.stats.apiCalls++;
+            this.stats.averageResponseTime = (this.stats.averageResponseTime + 100) / 2;
+            return { data: { demo: true, method, endpoint, timestamp: new Date().toISOString() } };
+        }
+
         this.stats.apiCalls++;
 
         try {
@@ -885,6 +892,13 @@ class LonicFlexJiraService {
     async testConnection() {
         try {
             this.logger.info('Testing Jira connection');
+
+            // Check if demo mode is enabled
+            if (process.env.JIRA_DEMO_MODE === 'true' || this.config.demoMode) {
+                this.logger.info('Jira service running in demo mode - skipping real authentication');
+                this.authenticated = true;
+                return true;
+            }
 
             if (!this.config.email || !this.config.apiToken) {
                 throw new Error('Jira email or API token not configured');

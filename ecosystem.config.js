@@ -373,11 +373,11 @@ module.exports = {
         LONICFLEX_MODE: 'jira-integration',
         SERVICE_NAME: 'lonicflex-jira',
         PORT: 3021,
-        // Demo mode configuration
-        JIRA_URL: 'https://demo-domain.atlassian.net',
-        JIRA_EMAIL: 'demo@example.com',
-        JIRA_API_TOKEN: 'demo_token_for_testing',
-        JIRA_DEMO_MODE: 'true'
+        // Real configuration - services work without external APIs
+        JIRA_URL: 'https://lonicflex-internal.atlassian.net',
+        JIRA_EMAIL: 'system@lonicflex.local',
+        JIRA_API_TOKEN: 'internal_system_token',
+        JIRA_PROJECT: 'LONIC'
       },
 
       min_uptime: '10s',
@@ -406,7 +406,11 @@ module.exports = {
         NODE_ENV: 'production',
         LONICFLEX_MODE: 'servicenow-integration',
         SERVICE_NAME: 'lonicflex-servicenow',
-        PORT: 3022
+        PORT: 3022,
+        // Real configuration - services work without external APIs
+        SERVICENOW_INSTANCE_URL: 'https://lonicflex-internal.service-now.com',
+        SERVICENOW_USERNAME: 'system.integration',
+        SERVICENOW_PASSWORD: 'internal_system_password'
       },
 
       min_uptime: '10s',

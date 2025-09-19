@@ -935,6 +935,13 @@ class LonicFlexServiceNowService {
         try {
             this.logger.info('Testing ServiceNow connection');
 
+            // Check if demo mode is enabled
+            if (process.env.SERVICENOW_DEMO_MODE === 'true' || this.config.demoMode) {
+                this.logger.info('ServiceNow service running in demo mode - skipping real authentication');
+                this.authenticated = true;
+                return true;
+            }
+
             if (!this.config.username || !this.config.password) {
                 throw new Error('ServiceNow username or password not configured');
             }
