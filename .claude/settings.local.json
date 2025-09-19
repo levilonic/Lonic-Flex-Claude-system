@@ -169,7 +169,10 @@
       "Bash(awk:*)",
       "Bash(do echo -n \"Port $port: \")",
       "Bash(do echo:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(xargs -I {} git push origin --delete {})",
+      "Bash(git for-each-ref:*)",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": []
