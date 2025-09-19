@@ -407,10 +407,10 @@ module.exports = {
         LONICFLEX_MODE: 'servicenow-integration',
         SERVICE_NAME: 'lonicflex-servicenow',
         PORT: 3022,
-        // Real configuration - services work without external APIs
-        SERVICENOW_INSTANCE_URL: 'https://lonicflex-internal.service-now.com',
-        SERVICENOW_USERNAME: 'system.integration',
-        SERVICENOW_PASSWORD: 'internal_system_password'
+        // Real ServiceNow API configuration
+        SERVICENOW_INSTANCE_URL: 'https://dev212076.service-now.com',
+        SERVICENOW_USERNAME: 'admin',
+        SERVICENOW_PASSWORD: 'w*K6aS^atOI8'
       },
 
       min_uptime: '10s',

@@ -157,7 +157,10 @@
       "Bash(cmd //c taskkill:*)",
       "Bash(for:*)",
       "Bash(do echo \"=== Port $port ===\")",
-      "Bash(done)"
+      "Bash(done)",
+      "WebFetch(domain:developer.servicenow.com)",
+      "WebFetch(domain:docs.servicenow.com)",
+      "WebFetch(domain:www.servicenow.com)"
     ],
     "deny": [],
     "ask": []

@@ -946,8 +946,20 @@ class LonicFlexServiceNowService {
                 throw new Error('ServiceNow username or password not configured');
             }
 
-            // Test connection by making a simple API call
-            await this.makeServiceNowRequest('GET', '/api/now/table/sys_user?sysparm_limit=1');
+            // Test connection by making a direct API call (bypass authenticated check)
+            const testResponse = await axios({
+                method: 'GET',
+                url: `${this.config.instanceUrl}/api/now/table/sys_user?sysparm_limit=1`,
+                auth: {
+                    username: this.config.username,
+                    password: this.config.password
+                },
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                timeout: this.config.requestTimeout
+            });
 
             this.authenticated = true;
 
