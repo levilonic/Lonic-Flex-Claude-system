@@ -200,7 +200,7 @@ class ServiceContainer {
         const partition = await contextManager.createPartition(workflowId, config);
         this.workflowPartitions.set(workflowId, partition);
 
-        console.log(`🔧 Created isolated partition for workflow: ${workflowId}`);
+        console.log(`🔧 Created isolated partition for workflow: ${typeof workflowId === 'object' ? '[object]' : workflowId}`);
         return partition;
     }
 

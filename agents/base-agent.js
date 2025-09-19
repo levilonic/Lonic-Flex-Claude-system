@@ -553,7 +553,12 @@ class BaseWorkAgent extends BaseAgent {
                 context_summary: results.processing,
                 timestamp: Date.now()
             };
-            const outputSize = JSON.stringify(output).length;
+            let outputSize;
+            try {
+                outputSize = JSON.stringify(output).length;
+            } catch (error) {
+                outputSize = '[circular_reference]'.length;
+            }
             return { ...output, output_size: `${outputSize}B` };
         }, 3);
         
@@ -655,7 +660,12 @@ async function runBaseAgent() {
         });
         
         console.log('\n✅ Agent execution completed!');
-        console.log(`   Result:`, JSON.stringify(result, null, 2));
+        try {
+            console.log(`   Result:`, JSON.stringify(result, null, 2));
+        } catch (error) {
+            console.log(`   Result: [Object with circular references - cannot serialize]`);
+            console.log(`   Result type: ${typeof result}, keys: ${Object.keys(result || {}).join(', ')}`);
+        }
         
         // Show final status
         const status = agent.getStatus();

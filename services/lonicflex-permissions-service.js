@@ -181,17 +181,18 @@ class LonicFlexPermissionsService {
         // Response time tracking
         this.app.use((req, res, next) => {
             const originalSend = res.send;
+            const self = this; // Capture service instance
             res.send = function(body) {
                 const responseTime = Date.now() - req.startTime;
 
                 // Update average response time
-                this.stats.avgResponseTime = (this.stats.avgResponseTime + responseTime) / 2;
+                self.stats.avgResponseTime = (self.stats.avgResponseTime + responseTime) / 2;
 
                 res.set('X-Response-Time', `${responseTime}ms`);
                 res.set('X-Request-Id', req.requestId);
 
-                originalSend.call(this, body);
-            }.bind(this);
+                originalSend.call(this, body); // 'this' is the res object
+            };
             next();
         });
 
@@ -231,7 +232,7 @@ class LonicFlexPermissionsService {
                 uptime: Date.now() - this.startTime.getTime(),
                 stats: this.stats,
                 cache: {
-                    size: this.permissionCache.length,
+                    size: this.permissionCache.size || 0,
                     maxSize: this.config.cacheSize,
                     hitRate: this.stats.cacheHits / (this.stats.cacheHits + this.stats.cacheMisses) || 0
                 },
@@ -863,7 +864,7 @@ class LonicFlexPermissionsService {
             uptime,
             stats: this.stats,
             cache: {
-                size: this.permissionCache.length,
+                size: this.permissionCache.size || 0,
                 maxSize: this.config.cacheSize,
                 hitRate: this.stats.cacheHits / (this.stats.cacheHits + this.stats.cacheMisses) || 0
             },

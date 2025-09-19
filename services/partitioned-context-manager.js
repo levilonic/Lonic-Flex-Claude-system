@@ -34,7 +34,7 @@ class ContextPartition {
         this.lastActivity = Date.now();
         this.status = 'active';
 
-        console.log(`🔧 Created isolated partition: ${workflowId}`);
+        console.log(`🔧 Created isolated partition: ${typeof workflowId === 'object' ? '[object]' : workflowId}`);
     }
 
     /**
