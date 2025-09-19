@@ -134,6 +134,21 @@ class LonicFlexJenkinsService {
             });
         });
 
+        // Service status endpoint
+        this.app.get('/status', (req, res) => {
+            res.json({
+                service: this.config.serviceName,
+                status: 'operational',
+                uptime: Date.now() - this.startTime.getTime(),
+                stats: this.stats,
+                authenticated: this.authenticated,
+                jenkinsVersion: this.jenkinsVersion,
+                jobs: this.jobs.size,
+                activeBuilds: this.activeBuilds.size,
+                lastHealthCheck: new Date().toISOString()
+            });
+        });
+
         // Create Jenkins job
         this.app.post('/jobs/create', async (req, res) => {
             try {

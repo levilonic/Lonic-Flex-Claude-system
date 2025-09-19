@@ -48,8 +48,8 @@ class GovernanceSchemaManager extends SQLiteManager {
         try {
             this.logger.info('Initializing Window 3 Governance Database Schema...');
 
-            // Initialize base database first
-            await this.initialize();
+            // Initialize base database connection first
+            await super.initialize();
 
             // Create governance tables
             await this.createGovernanceTables();

@@ -141,6 +141,22 @@ class LonicFlexLinearService {
             });
         });
 
+        // Service status endpoint
+        this.app.get('/status', (req, res) => {
+            res.json({
+                service: this.config.serviceName,
+                status: 'operational',
+                uptime: Date.now() - this.startTime.getTime(),
+                stats: this.stats,
+                authenticated: this.authenticated,
+                rateLimitRemaining: this.rateLimitRemaining,
+                teams: this.teams.size,
+                projects: this.projects.size,
+                issues: this.issues.size,
+                lastHealthCheck: new Date().toISOString()
+            });
+        });
+
         // Create Linear issue
         this.app.post('/issues/create', async (req, res) => {
             try {

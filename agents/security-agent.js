@@ -1133,13 +1133,13 @@ class SecurityAgent extends BaseAgent {
  */
 async function demoSecurityAgent() {
     console.log('🔒 Security Agent Demo - Factor 10 Specialized Agent\n');
-    
-    const { SQLiteManager } = require('../database/sqlite-manager');
-    const dbManager = new SQLiteManager(':memory:');
-    
+
+    // Initialize ServiceContainer for proper dependency injection
+    const { initializeGlobalServiceContainer } = require('../services/service-container');
+    const serviceContainer = await initializeGlobalServiceContainer();
+    const dbManager = serviceContainer.getDatabaseService();
+
     try {
-        // Initialize database
-        await dbManager.initialize();
         
         // Create demo session
         const sessionId = 'security_agent_demo_' + Date.now();
@@ -1201,7 +1201,8 @@ async function demoSecurityAgent() {
     } catch (error) {
         console.error('❌ Demo failed:', error.message);
     } finally {
-        await dbManager.close();
+        // Cleanup ServiceContainer resources
+        await serviceContainer.shutdown();
     }
 }
 

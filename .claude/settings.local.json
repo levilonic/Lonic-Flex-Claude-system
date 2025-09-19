@@ -165,7 +165,11 @@
       "Bash(pm2 describe:*)",
       "Bash(pm2 list:*)",
       "Bash(sqlite3:*)",
-      "Bash(do echo \"Testing port $port:\")"
+      "Bash(do echo \"Testing port $port:\")",
+      "Bash(awk:*)",
+      "Bash(do echo -n \"Port $port: \")",
+      "Bash(do echo:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

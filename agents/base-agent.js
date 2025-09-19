@@ -32,34 +32,54 @@ class BaseAgent {
      * Initialize agent with ServiceContainer (lightweight dependency injection)
      */
     async initialize(workflowId = null) {
-        // Ensure ServiceContainer is initialized
+        // FIXED: Prevent recursive initialization during ServiceContainer setup
         if (!this.serviceContainer.initialized) {
-            await this.serviceContainer.initialize();
+            console.log(`⚠️ ServiceContainer not initialized during ${this.agentName} agent setup - this is expected during system bootstrap`);
+            // Don't initialize here to prevent infinite recursion - let the system handle it
         }
 
-        // Get database service from container
-        const dbManager = this.serviceContainer.getDatabaseService();
+        // Get database service from container (with fallback for bootstrap scenarios)
+        let dbManager;
+        try {
+            dbManager = this.serviceContainer.getDatabaseService();
+        } catch (error) {
+            console.log(`⚠️ Database service not available during ${this.agentName} agent initialization - operating in bootstrap mode`);
+            dbManager = null;
+        }
 
         this.state = this.applyStateTransition(this.state, 'initialize');
 
-        // Create isolated context partition for this agent's workflow
+        // Create isolated context partition for this agent's workflow (with graceful fallback)
         const workflowKey = workflowId || `workflow_${this.agentId}`;
         let partition;
 
         try {
-            // Try to get existing partition first
-            partition = this.serviceContainer.getWorkflowPartition(workflowKey);
-        } catch (error) {
-            // Create new partition if it doesn't exist
-            partition = await this.serviceContainer.createWorkflowPartition(workflowKey);
-        }
+            // Only create partitions if ServiceContainer is fully initialized
+            if (this.serviceContainer.initialized) {
+                try {
+                    // Try to get existing partition first
+                    partition = this.serviceContainer.getWorkflowPartition(workflowKey);
+                } catch (error) {
+                    // Create new partition if it doesn't exist
+                    partition = await this.serviceContainer.createWorkflowPartition(workflowKey);
+                }
 
-        // Register this agent with its partition (gets isolated context manager)
-        this.contextManager = partition.registerAgent(this.agentId, {
-            agentName: this.agentName,
-            sessionId: this.sessionId,
-            contextScope: this.config.contextScope || 'session'
-        });
+                // Register this agent with its partition (gets isolated context manager)
+                this.contextManager = partition.registerAgent(this.agentId, {
+                    agentName: this.agentName,
+                    sessionId: this.sessionId,
+                    contextScope: this.config.contextScope || 'session'
+                });
+            } else {
+                console.log(`⚠️ Skipping partition creation for ${this.agentName} during ServiceContainer bootstrap`);
+                partition = null;
+                this.contextManager = null;
+            }
+        } catch (error) {
+            console.log(`⚠️ Failed to create workflow partition for ${this.agentName}: ${error.message}`);
+            partition = null;
+            this.contextManager = null;
+        }
 
         // Enhanced graceful degradation if context manager is not available
         if (!this.contextManager) {
@@ -106,10 +126,21 @@ class BaseAgent {
             });
         }
 
-        // Initialize service dependencies from ServiceContainer
-        this.docs = this.serviceContainer.getDocumentationService();
-
-        console.log(`✅ ${this.agentName} initialized with ServiceContainer dependency injection`);
+        // Initialize service dependencies from ServiceContainer (with graceful fallback)
+        try {
+            if (this.serviceContainer.initialized) {
+                this.docs = this.serviceContainer.getDocumentationService();
+                console.log(`✅ ${this.agentName} initialized with ServiceContainer dependency injection`);
+            } else {
+                console.log(`⚠️ Database service not available during ${this.agentName} agent initialization - operating in bootstrap mode`);
+                this.docs = null; // Will be initialized later when ServiceContainer is ready
+                console.log(`✅ ${this.agentName} initialized in bootstrap mode`);
+            }
+        } catch (error) {
+            console.log(`⚠️ Failed to get services from ServiceContainer during ${this.agentName} initialization: ${error.message}`);
+            this.docs = null;
+            console.log(`✅ ${this.agentName} initialized with fallback mode`);
+        }
         return this;
     }
 

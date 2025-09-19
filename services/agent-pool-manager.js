@@ -72,11 +72,10 @@ class AgentPoolManager extends EventEmitter {
             this.startCleanupTimer();
             this.startHealthCheckTimer();
 
-            // Initialize default pools for common agent types
-            const defaultAgentTypes = ['github', 'security', 'code', 'deploy', 'comm'];
-            for (const agentType of defaultAgentTypes) {
-                await this.initializePool(agentType);
-            }
+            // Skip pre-initialization of pools during ServiceContainer bootstrap
+            // Pools will be created on-demand to prevent circular initialization issues
+            console.log('⚠️ Skipping pre-initialization of agent pools to prevent circular dependency during bootstrap');
+            console.log('   Pools will be created on-demand when agents are requested');
 
             this.isInitialized = true;
             this.emit('initialized', { pools: this.pools.size });

@@ -140,6 +140,22 @@ class LonicFlexServiceNowService {
             });
         });
 
+        // Service status endpoint
+        this.app.get('/status', (req, res) => {
+            res.json({
+                service: this.config.serviceName,
+                status: 'operational',
+                uptime: Date.now() - this.startTime.getTime(),
+                stats: this.stats,
+                authenticated: this.authenticated,
+                instanceUrl: this.config.instanceUrl,
+                incidentsActive: this.incidents.size,
+                changesActive: this.changeRequests.size,
+                requestsActive: this.serviceRequests.size,
+                lastHealthCheck: new Date().toISOString()
+            });
+        });
+
         // Create incident
         this.app.post('/incidents/create', async (req, res) => {
             try {

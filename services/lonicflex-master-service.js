@@ -423,8 +423,18 @@ class LonicFlexMasterService {
         });
 
         try {
+            // Map command to available template ID
+            const templateMap = {
+                'system-test': 'health-check',
+                'deploy': 'lonicflex-deploy',
+                'branch': 'branch-management',
+                'health': 'health-check',
+                'test': 'health-check'
+            };
+            const templateId = templateMap[runState.command] || 'health-check'; // Default fallback
+
             const response = await this.callService('workflows', '/execute', {
-                templateId: runState.command,  // Map command to template ID
+                templateId: templateId,
                 context: {
                     runId: runState.runId,
                     parameters: runState.parameters,

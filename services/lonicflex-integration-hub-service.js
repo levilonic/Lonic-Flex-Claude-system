@@ -118,6 +118,19 @@ class LonicFlexIntegrationHubService {
             });
         });
 
+        // Service status endpoint
+        this.app.get('/status', (req, res) => {
+            res.json({
+                service: this.config.serviceName,
+                status: 'operational',
+                uptime: Date.now() - this.startTime.getTime(),
+                stats: this.stats,
+                activeWorkflows: this.activeWorkflows.size,
+                registeredIntegrations: this.integrations.size,
+                lastHealthCheck: new Date().toISOString()
+            });
+        });
+
         // Register external integration
         this.app.post('/integrations/register', async (req, res) => {
             try {

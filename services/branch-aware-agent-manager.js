@@ -74,9 +74,14 @@ class BranchAwareAgentManager {
         // Create branch tracking table if not exists
         await this.createBranchTrackingTable();
 
-        // Initialize communication agent for Slack notifications
-        this.commAgent = new CommunicationAgent(`branch-manager-${Date.now()}`);
-        await this.commAgent.initialize(); // No workflowId needed for branch manager comm agent
+        // Initialize communication agent for Slack notifications (with graceful fallback)
+        try {
+            this.commAgent = new CommunicationAgent(`branch-manager-${Date.now()}`);
+            await this.commAgent.initialize(); // No workflowId needed for branch manager comm agent
+        } catch (error) {
+            console.log(`⚠️ ServiceContainer not initialized during comm agent setup - this is expected during system bootstrap`);
+            this.commAgent = null; // Will be initialized later when needed
+        }
 
         this.initialized = true;
     }

@@ -8,7 +8,8 @@
  */
 
 const { EventEmitter } = require('events');
-const { AgentPoolManager } = require('./agent-pool-manager');
+// REMOVED: Direct import that causes circular dependency
+// const { AgentPoolManager } = require('./agent-pool-manager');
 
 /**
  * Workflow Orchestrator - Central coordination system for multi-agent workflows
@@ -75,11 +76,15 @@ class WorkflowOrchestrator extends EventEmitter {
         }
 
         try {
-            // Skip AgentPoolManager initialization due to circular dependency issues
-            // TODO: Refactor AgentPoolManager to eliminate circular dependency
-            console.log('⚠️ Skipping AgentPoolManager initialization (circular dependency detected)');
-            console.log('   WorkflowOrchestrator operating without pool manager');
-            this.poolManager = null;
+            // Get AgentPoolManager from ServiceContainer (should be available now)
+            try {
+                // Use internal getter to bypass initialization check during bootstrap
+                this.poolManager = this.serviceContainer._getServiceInternal('agentPoolManager');
+                console.log('✅ AgentPoolManager connected to WorkflowOrchestrator');
+            } catch (error) {
+                console.log(`⚠️ AgentPoolManager not available: ${error.message}, WorkflowOrchestrator operating without pool manager`);
+                this.poolManager = null;
+            }
 
             // Listen to pool manager events (if available)
             if (this.poolManager) {
@@ -211,6 +216,9 @@ class WorkflowOrchestrator extends EventEmitter {
      * Get agent from pool (used by WorkflowExecution)
      */
     async getAgent(agentType, sessionId, workflowId, config = {}) {
+        if (!this.poolManager) {
+            throw new Error('AgentPoolManager not available - cannot allocate agents');
+        }
         return this.poolManager.getAgent(agentType, sessionId, workflowId, config);
     }
 
@@ -218,6 +226,10 @@ class WorkflowOrchestrator extends EventEmitter {
      * Return agent to pool (used by WorkflowExecution)
      */
     async returnAgent(agentId) {
+        if (!this.poolManager) {
+            console.warn('⚠️ AgentPoolManager not available - cannot return agent');
+            return false;
+        }
         return this.poolManager.returnAgent(agentId);
     }
 

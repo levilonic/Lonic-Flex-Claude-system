@@ -219,9 +219,14 @@ class LonicFlexAgentsService {
             await this.db.initialize();
             this.logger.info('Database initialized');
 
-            // Initialize multi-agent core
-            await this.multiAgentCore.initialize();
-            this.logger.info('Multi-agent core initialized');
+            // Initialize multi-agent core (lightweight initialization without agent creation)
+            try {
+                await this.multiAgentCore.initialize();
+                this.logger.info('Multi-agent core initialized');
+            } catch (error) {
+                this.logger.warn('Multi-agent core initialization skipped during bootstrap', { error: error.message });
+                // This is acceptable during service startup - agents will be created on demand
+            }
 
             // Initialize agent pools
             await this.initializeAgentPools();

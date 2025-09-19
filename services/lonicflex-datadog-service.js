@@ -160,6 +160,22 @@ class LonicFlexDataDogService {
             });
         });
 
+        // Service status endpoint
+        this.app.get('/status', (req, res) => {
+            res.json({
+                service: this.config.serviceName,
+                status: 'operational',
+                uptime: Date.now() - this.startTime.getTime(),
+                stats: this.stats,
+                authenticated: this.authenticated,
+                metrics: this.metrics.size,
+                dashboards: this.dashboards.size,
+                monitors: this.monitors.size,
+                rateLimitRemaining: this.rateLimitRemaining,
+                lastHealthCheck: new Date().toISOString()
+            });
+        });
+
         // Submit metrics to DataDog
         this.app.post('/metrics/submit', async (req, res) => {
             try {

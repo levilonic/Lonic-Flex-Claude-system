@@ -119,6 +119,31 @@ class LonicFlexJiraService {
             });
         });
 
+        // Service status endpoint
+        this.app.get('/status', (req, res) => {
+            res.json({
+                service: this.config.serviceName,
+                status: 'operational',
+                uptime: Date.now() - this.startTime.getTime(),
+                stats: this.stats,
+                authenticated: this.authenticated,
+                jiraUrl: this.config.jiraUrl,
+                projectsLoaded: this.projects.size,
+                lastHealthCheck: new Date().toISOString()
+            });
+        });
+
+        // List all projects
+        this.app.get('/projects', (req, res) => {
+            const projectsArray = Array.from(this.projects.values());
+            res.json({
+                success: true,
+                projects: projectsArray,
+                total: projectsArray.length,
+                defaultProject: this.config.defaultProject
+            });
+        });
+
         // Create Jira issue
         this.app.post('/issues/create', async (req, res) => {
             try {
@@ -934,8 +959,20 @@ class LonicFlexJiraService {
             // Initialize database connection
             await this.db.initialize();
 
-            // Test Jira connection
-            await this.testConnection();
+            // Test Jira connection (graceful fallback to demo mode)
+            try {
+                if (this.config.email && this.config.apiToken) {
+                    await this.testConnection();
+                } else {
+                    this.logger.info('No Jira credentials provided - running in demo mode');
+                    this.authenticated = false;
+                    this.config.demoMode = true;
+                }
+            } catch (error) {
+                this.logger.warn('Jira connection failed - falling back to demo mode', { error: error.message });
+                this.authenticated = false;
+                this.config.demoMode = true;
+            }
 
             // Load default project if specified
             if (this.config.defaultProject) {

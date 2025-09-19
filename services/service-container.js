@@ -14,8 +14,9 @@ const DocumentationService = require('./documentation-service');
 
 // Import for PartitionedContextManager
 const { PartitionedContextManager } = require('./partitioned-context-manager');
-const { AgentPoolManager } = require('./agent-pool-manager');
-const { WorkflowOrchestrator } = require('./workflow-orchestrator');
+// REMOVED: Direct imports that cause circular dependencies
+// const { AgentPoolManager } = require('./agent-pool-manager');
+// const { WorkflowOrchestrator } = require('./workflow-orchestrator');
 const { HealthMonitor } = require('./health-monitor');
 
 /**
@@ -69,14 +70,8 @@ class ServiceContainer {
             this.registerService('contextManager', partitionedContextManager);
 
             // Phase 2: Agent Lifecycle Management services
-            // Note: AgentPoolManager has circular dependency - needs refactoring
-            // const agentPoolManager = new AgentPoolManager(this);
-            // await agentPoolManager.initialize();
-            // this.registerService('agentPoolManager', agentPoolManager);
-
-            const workflowOrchestrator = new WorkflowOrchestrator(this);
-            await workflowOrchestrator.initialize();
-            this.registerService('workflowOrchestrator', workflowOrchestrator);
+            // Use lazy initialization to break circular dependencies
+            await this.initializeAgentLifecycleServices();
 
             // Phase 3: Infrastructure Management services
             const healthMonitor = new HealthMonitor(this);
@@ -95,10 +90,37 @@ class ServiceContainer {
     }
 
     /**
+     * Initialize agent lifecycle services with lazy loading to prevent circular dependencies
+     */
+    async initializeAgentLifecycleServices() {
+        try {
+            // Step 1: Initialize AgentPoolManager first (no dependencies on others)
+            const { AgentPoolManager } = require('./agent-pool-manager');
+            const agentPoolManager = new AgentPoolManager(this);
+            await agentPoolManager.initialize();
+            this.registerService('agentPoolManager', agentPoolManager);
+            console.log('✅ AgentPoolManager initialized successfully');
+
+            // Step 2: Initialize WorkflowOrchestrator with AgentPoolManager available
+            const { WorkflowOrchestrator } = require('./workflow-orchestrator');
+            const workflowOrchestrator = new WorkflowOrchestrator(this);
+            await workflowOrchestrator.initialize();
+            this.registerService('workflowOrchestrator', workflowOrchestrator);
+            console.log('✅ WorkflowOrchestrator initialized successfully');
+
+        } catch (error) {
+            console.error('❌ Agent lifecycle services initialization failed:', error.message);
+            // Continue initialization without these services for now
+            console.log('⚠️ ServiceContainer continuing without agent lifecycle services');
+        }
+    }
+
+    /**
      * Register a service instance
      */
     registerService(name, instance) {
         this.services.set(name, instance);
+        console.log(`🔧 Service registered: ${name} (${this.services.size} total services)`);
     }
 
     /**
@@ -109,10 +131,19 @@ class ServiceContainer {
             throw new Error('ServiceContainer must be initialized before getting services');
         }
 
+        return this._getServiceInternal(name);
+    }
+
+    /**
+     * Internal service getter that bypasses initialization check for bootstrap
+     */
+    _getServiceInternal(name) {
         const service = this.services.get(name);
         if (!service) {
+            console.log(`❌ Service '${name}' not found. Available services: [${Array.from(this.services.keys()).join(', ')}]`);
             throw new Error(`Service '${name}' not found in container`);
         }
+        console.log(`✅ Service retrieved: ${name}`);
         return service;
     }
 

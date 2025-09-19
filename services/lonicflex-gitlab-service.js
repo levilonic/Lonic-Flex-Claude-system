@@ -154,6 +154,22 @@ class LonicFlexGitLabService {
             });
         });
 
+        // Service status endpoint
+        this.app.get('/status', (req, res) => {
+            res.json({
+                service: this.config.serviceName,
+                status: 'operational',
+                uptime: Date.now() - this.startTime.getTime(),
+                stats: this.stats,
+                authenticated: this.authenticated,
+                projects: this.projects.size,
+                pipelines: this.pipelines.size,
+                mergeRequests: this.mergeRequests.size,
+                rateLimitRemaining: this.rateLimitRemaining,
+                lastHealthCheck: new Date().toISOString()
+            });
+        });
+
         // Trigger GitLab pipeline
         this.app.post('/pipelines/trigger', async (req, res) => {
             try {

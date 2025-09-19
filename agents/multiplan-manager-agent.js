@@ -560,15 +560,16 @@ module.exports = { MultiplanManagerAgent };
 // Demo/testing function
 async function demoMultiplanManager() {
     console.log('🎯 Multiplan Manager Agent Demo');
-    
-    const { SQLiteManager } = require('../database/sqlite-manager');
-    const dbManager = new SQLiteManager();
-    await dbManager.initialize();
-    
+
+    // Initialize ServiceContainer for proper dependency injection
+    const { initializeGlobalServiceContainer } = require('../services/service-container');
+    const serviceContainer = await initializeGlobalServiceContainer();
+    const dbManager = serviceContainer.getDatabaseService();
+
     const multiplanAgent = new MultiplanManagerAgent(`multiplan_demo_${Date.now()}`);
-    
+
     try {
-        await multiplanAgent.initialize(dbManager);
+        await multiplanAgent.initialize();
         
         // Execute multiplan orchestration
         const context = {
@@ -590,6 +591,9 @@ async function demoMultiplanManager() {
         
     } catch (error) {
         console.error(`❌ Error: ${error.message}`);
+    } finally {
+        // Cleanup ServiceContainer resources
+        await serviceContainer.shutdown();
     }
 }
 
