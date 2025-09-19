@@ -1,21 +1,27 @@
 #!/usr/bin/env node
 /**
- * LonicFLex DataDog Integration Service - Window 2
- * Real DataDog HTTP API integration for monitoring and observability
+ * LonicFLex DataDog Integration Service - Window 3 Enterprise Resource Monitoring
+ * Enhanced DataDog HTTP API integration for enterprise monitoring and observability
  *
  * Handles:
  * - DataDog HTTP API v1/v2 integration with API key authentication
- * - Metrics, logs, and traces collection
- * - Custom dashboard creation
- * - Alert management and routing
+ * - Enterprise resource monitoring and alerting
+ * - Governance and compliance metrics tracking
+ * - Cost tracking and resource optimization monitoring
+ * - Real-time performance dashboards
+ * - Multi-service health monitoring
  * - Cross-system workflow coordination
+ * - Alert correlation with cost management
  */
 
 const express = require('express');
 const axios = require('axios');
 const { SQLiteManager } = require('../database/sqlite-manager');
+const { GovernanceSchemaManager } = require('../database/governance-schema-manager');
+const { AuditManager } = require('../components/audit-manager');
 const { Factor3ContextManager } = require('../factor3-context-manager');
 const winston = require('winston');
+const crypto = require('crypto');
 require('dotenv').config();
 
 class LonicFlexDataDogService {
@@ -38,6 +44,8 @@ class LonicFlexDataDogService {
 
         // Initialize core components
         this.db = new SQLiteManager();
+        this.governanceDb = new GovernanceSchemaManager();
+        this.auditManager = new AuditManager();
         this.contextManager = new Factor3ContextManager();
 
         // DataDog state management
@@ -46,6 +54,16 @@ class LonicFlexDataDogService {
         this.monitors = new Map();                  // monitorId -> monitor data
         this.logs = [];                            // Recent log entries
         this.alerts = [];                          // Recent alerts
+
+        // Enterprise Resource Monitoring (Window 3)
+        this.serviceHealth = new Map();            // serviceId -> health metrics
+        this.costMetrics = new Map();              // entityId -> cost tracking metrics
+        this.governanceMetrics = new Map();        // policyId -> compliance metrics
+        this.resourceUtilization = new Map();      // resourceId -> utilization data
+        this.performanceBaselines = new Map();     // serviceId -> baseline metrics
+        this.alertCorrelation = new Map();         // alertId -> correlation data
+        this.enterpriseDashboards = new Map();     // dashboardId -> enterprise dashboard config
+
         this.stats = {
             metricsSubmitted: 0,
             logsSubmitted: 0,
@@ -54,7 +72,14 @@ class LonicFlexDataDogService {
             alertsReceived: 0,
             apiCalls: 0,
             failedCalls: 0,
-            averageResponseTime: 0
+            averageResponseTime: 0,
+            // Enterprise monitoring stats
+            servicesMonitored: 0,
+            costAlertsTriggered: 0,
+            governanceViolations: 0,
+            resourceOptimizationSuggestions: 0,
+            performanceIssuesDetected: 0,
+            alertsCorrelated: 0
         };
 
         // DataDog API client configuration
@@ -365,7 +390,128 @@ class LonicFlexDataDogService {
             }
         });
 
-        // Service statistics
+        // Enterprise Resource Monitoring Endpoints (Window 3)
+
+        // Service health monitoring
+        this.app.get('/enterprise/services/:serviceId/health', async (req, res) => {
+            try {
+                const { serviceId } = req.params;
+                const health = await this.getServiceHealth(serviceId);
+                res.json(health);
+            } catch (error) {
+                this.logger.error('Service health check failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        // Cost metrics and alerts
+        this.app.post('/enterprise/cost/track', async (req, res) => {
+            try {
+                const result = await this.trackCostMetrics(req.body);
+                res.json(result);
+            } catch (error) {
+                this.logger.error('Cost tracking failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        this.app.get('/enterprise/cost/alerts/:entityId', async (req, res) => {
+            try {
+                const { entityId } = req.params;
+                const alerts = await this.getCostAlerts(entityId);
+                res.json(alerts);
+            } catch (error) {
+                this.logger.error('Cost alerts retrieval failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        // Governance and compliance monitoring
+        this.app.post('/enterprise/governance/violations', async (req, res) => {
+            try {
+                const result = await this.trackGovernanceViolations(req.body);
+                res.json(result);
+            } catch (error) {
+                this.logger.error('Governance violation tracking failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        this.app.get('/enterprise/governance/metrics', async (req, res) => {
+            try {
+                const metrics = await this.getGovernanceMetrics(req.query);
+                res.json(metrics);
+            } catch (error) {
+                this.logger.error('Governance metrics retrieval failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        // Resource optimization monitoring
+        this.app.get('/enterprise/resources/optimization', async (req, res) => {
+            try {
+                const suggestions = await this.getResourceOptimizationSuggestions();
+                res.json(suggestions);
+            } catch (error) {
+                this.logger.error('Resource optimization failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        this.app.post('/enterprise/resources/utilization', async (req, res) => {
+            try {
+                const result = await this.trackResourceUtilization(req.body);
+                res.json(result);
+            } catch (error) {
+                this.logger.error('Resource utilization tracking failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        // Performance baseline management
+        this.app.post('/enterprise/performance/baseline', async (req, res) => {
+            try {
+                const baseline = await this.setPerformanceBaseline(req.body);
+                res.json(baseline);
+            } catch (error) {
+                this.logger.error('Performance baseline setting failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        this.app.get('/enterprise/performance/issues', async (req, res) => {
+            try {
+                const issues = await this.detectPerformanceIssues(req.query);
+                res.json(issues);
+            } catch (error) {
+                this.logger.error('Performance issue detection failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        // Alert correlation engine
+        this.app.post('/enterprise/alerts/correlate', async (req, res) => {
+            try {
+                const correlation = await this.correlateAlerts(req.body);
+                res.json(correlation);
+            } catch (error) {
+                this.logger.error('Alert correlation failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        // Enterprise dashboard management
+        this.app.post('/enterprise/dashboards/create', async (req, res) => {
+            try {
+                const dashboard = await this.createEnterpriseDashboard(req.body);
+                res.json(dashboard);
+            } catch (error) {
+                this.logger.error('Enterprise dashboard creation failed:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        // Service statistics (enhanced)
         this.app.get('/stats', (req, res) => {
             res.json({
                 service: this.config.serviceName,
@@ -376,7 +522,13 @@ class LonicFlexDataDogService {
                 monitors: this.monitors.size,
                 rateLimitRemaining: this.rateLimitRemaining,
                 recentLogs: this.logs.slice(-5),
-                recentAlerts: this.alerts.slice(-5)
+                recentAlerts: this.alerts.slice(-5),
+                // Enterprise monitoring stats
+                serviceHealth: this.serviceHealth.size,
+                costMetrics: this.costMetrics.size,
+                governanceMetrics: this.governanceMetrics.size,
+                resourceUtilization: this.resourceUtilization.size,
+                enterpriseDashboards: this.enterpriseDashboards.size
             });
         });
     }
@@ -712,6 +864,583 @@ class LonicFlexDataDogService {
             });
             throw error;
         }
+    }
+
+    // Enterprise Resource Monitoring Method Implementations (Window 3)
+
+    /**
+     * Get service health metrics
+     */
+    async getServiceHealth(serviceId) {
+        try {
+            // Fetch service metrics from DataDog
+            const now = Math.floor(Date.now() / 1000);
+            const oneHourAgo = now - 3600;
+
+            const healthMetrics = await this.queryMetrics(
+                `avg:lonicflex.service.health{service:${serviceId}}`,
+                oneHourAgo,
+                now
+            );
+
+            // Calculate health score
+            const healthScore = this.calculateHealthScore(healthMetrics);
+
+            // Check with governance system for service status
+            const governanceStatus = await this.checkServiceGovernanceStatus(serviceId);
+
+            const health = {
+                serviceId,
+                healthScore,
+                status: healthScore > 80 ? 'healthy' : healthScore > 60 ? 'degraded' : 'unhealthy',
+                metrics: healthMetrics,
+                governanceStatus,
+                lastChecked: new Date().toISOString(),
+                issues: []
+            };
+
+            // Detect issues
+            if (healthScore < 80) {
+                health.issues = await this.detectServiceIssues(serviceId, healthMetrics);
+                this.stats.performanceIssuesDetected += health.issues.length;
+            }
+
+            this.serviceHealth.set(serviceId, health);
+            this.stats.servicesMonitored++;
+
+            return health;
+
+        } catch (error) {
+            this.logger.error('Service health check failed:', { serviceId, error: error.message });
+            throw error;
+        }
+    }
+
+    /**
+     * Track cost metrics and correlate with DataDog
+     */
+    async trackCostMetrics(costData) {
+        try {
+            const { entityId, entityType, costs, timeRange } = costData;
+
+            // Submit cost metrics to DataDog
+            const costMetrics = [{
+                metric: `lonicflex.cost.${entityType}`,
+                points: [[Math.floor(Date.now() / 1000), costs.total]],
+                tags: [`entity_id:${entityId}`, `currency:${costs.currency}`]
+            }];
+
+            await this.submitMetrics(costMetrics);
+
+            // Check for cost threshold violations
+            const alerts = await this.checkCostThresholds(entityId, costs);
+
+            if (alerts.length > 0) {
+                this.stats.costAlertsTriggered += alerts.length;
+
+                // Create DataDog monitors for cost violations
+                for (const alert of alerts) {
+                    await this.createCostAlert(alert);
+                }
+            }
+
+            // Store in local cache
+            this.costMetrics.set(entityId, {
+                costs,
+                timeRange,
+                alerts,
+                lastUpdated: new Date().toISOString()
+            });
+
+            return {
+                success: true,
+                entityId,
+                costs,
+                alerts,
+                metricsSubmitted: costMetrics.length
+            };
+
+        } catch (error) {
+            this.logger.error('Cost metrics tracking failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get cost alerts for entity
+     */
+    async getCostAlerts(entityId) {
+        try {
+            const cachedMetrics = this.costMetrics.get(entityId);
+
+            if (!cachedMetrics) {
+                return { alerts: [], lastUpdated: null };
+            }
+
+            // Fetch recent cost alerts from DataDog monitors
+            const monitors = await this.getMonitorsByTag(`entity_id:${entityId}`);
+
+            const activeAlerts = monitors.filter(monitor =>
+                monitor.overall_state !== 'OK' && monitor.name.includes('cost')
+            );
+
+            return {
+                alerts: cachedMetrics.alerts || [],
+                activeAlerts,
+                lastUpdated: cachedMetrics.lastUpdated
+            };
+
+        } catch (error) {
+            this.logger.error('Cost alerts retrieval failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Track governance violations
+     */
+    async trackGovernanceViolations(violationData) {
+        try {
+            const { policyId, violationType, entityId, severity, details } = violationData;
+
+            // Submit governance violation metric to DataDog
+            const violationMetrics = [{
+                metric: 'lonicflex.governance.violation',
+                points: [[Math.floor(Date.now() / 1000), 1]],
+                tags: [
+                    `policy_id:${policyId}`,
+                    `violation_type:${violationType}`,
+                    `entity_id:${entityId}`,
+                    `severity:${severity}`
+                ]
+            }];
+
+            await this.submitMetrics(violationMetrics);
+
+            // Log violation for audit
+            await this.auditManager.logEvent('governance_violation', {
+                policyId,
+                violationType,
+                entityId,
+                severity,
+                details
+            });
+
+            // Update governance metrics
+            const existingMetrics = this.governanceMetrics.get(policyId) || { violations: 0 };
+            existingMetrics.violations++;
+            existingMetrics.lastViolation = new Date().toISOString();
+            this.governanceMetrics.set(policyId, existingMetrics);
+
+            this.stats.governanceViolations++;
+
+            return {
+                success: true,
+                policyId,
+                violationType,
+                recorded: true,
+                timestamp: new Date().toISOString()
+            };
+
+        } catch (error) {
+            this.logger.error('Governance violation tracking failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get governance metrics
+     */
+    async getGovernanceMetrics(filters = {}) {
+        try {
+            const { policyId, timeRange = '7d' } = filters;
+
+            // Query governance metrics from DataDog
+            const now = Math.floor(Date.now() / 1000);
+            const timeRangeSeconds = this.parseTimeRange(timeRange);
+            const start = now - timeRangeSeconds;
+
+            let query = 'sum:lonicflex.governance.violation{*} by {policy_id,violation_type}';
+            if (policyId) {
+                query = `sum:lonicflex.governance.violation{policy_id:${policyId}} by {violation_type}`;
+            }
+
+            const metrics = await this.queryMetrics(query, start, now);
+
+            return {
+                metrics,
+                timeRange,
+                totalViolations: this.stats.governanceViolations,
+                policiesTracked: this.governanceMetrics.size
+            };
+
+        } catch (error) {
+            this.logger.error('Governance metrics retrieval failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get resource optimization suggestions
+     */
+    async getResourceOptimizationSuggestions() {
+        try {
+            const suggestions = [];
+
+            // Analyze service health patterns
+            for (const [serviceId, health] of this.serviceHealth.entries()) {
+                if (health.healthScore < 70) {
+                    suggestions.push({
+                        type: 'performance',
+                        serviceId,
+                        suggestion: 'Consider scaling up service resources',
+                        priority: 'high',
+                        estimatedSavings: null
+                    });
+                }
+            }
+
+            // Analyze cost patterns
+            for (const [entityId, costData] of this.costMetrics.entries()) {
+                if (costData.costs.total > 1000) { // High cost threshold
+                    suggestions.push({
+                        type: 'cost',
+                        entityId,
+                        suggestion: 'Review Claude API usage patterns for optimization',
+                        priority: 'medium',
+                        estimatedSavings: costData.costs.total * 0.2 // 20% potential savings
+                    });
+                }
+            }
+
+            this.stats.resourceOptimizationSuggestions = suggestions.length;
+
+            return {
+                suggestions,
+                generatedAt: new Date().toISOString(),
+                totalSuggestions: suggestions.length
+            };
+
+        } catch (error) {
+            this.logger.error('Resource optimization failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Track resource utilization
+     */
+    async trackResourceUtilization(utilizationData) {
+        try {
+            const { resourceId, resourceType, utilization, capacity } = utilizationData;
+
+            // Submit utilization metrics to DataDog
+            const utilizationMetrics = [
+                {
+                    metric: `lonicflex.resource.utilization`,
+                    points: [[Math.floor(Date.now() / 1000), utilization]],
+                    tags: [`resource_id:${resourceId}`, `resource_type:${resourceType}`]
+                },
+                {
+                    metric: `lonicflex.resource.capacity`,
+                    points: [[Math.floor(Date.now() / 1000), capacity]],
+                    tags: [`resource_id:${resourceId}`, `resource_type:${resourceType}`]
+                }
+            ];
+
+            await this.submitMetrics(utilizationMetrics);
+
+            // Calculate utilization percentage
+            const utilizationPercent = (utilization / capacity) * 100;
+
+            // Store utilization data
+            this.resourceUtilization.set(resourceId, {
+                resourceType,
+                utilization,
+                capacity,
+                utilizationPercent,
+                timestamp: new Date().toISOString()
+            });
+
+            return {
+                success: true,
+                resourceId,
+                utilizationPercent,
+                status: utilizationPercent > 80 ? 'high' : utilizationPercent > 60 ? 'medium' : 'low'
+            };
+
+        } catch (error) {
+            this.logger.error('Resource utilization tracking failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Set performance baseline for service
+     */
+    async setPerformanceBaseline(baselineData) {
+        try {
+            const { serviceId, metrics } = baselineData;
+
+            // Store baseline in local cache
+            this.performanceBaselines.set(serviceId, {
+                metrics,
+                setAt: new Date().toISOString()
+            });
+
+            // Create DataDog monitors for baseline deviations
+            for (const [metricName, threshold] of Object.entries(metrics)) {
+                await this.createBaselineMonitor(serviceId, metricName, threshold);
+            }
+
+            return {
+                success: true,
+                serviceId,
+                baselineSet: true,
+                metrics
+            };
+
+        } catch (error) {
+            this.logger.error('Performance baseline setting failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Detect performance issues
+     */
+    async detectPerformanceIssues(filters = {}) {
+        try {
+            const { serviceId, timeRange = '1h' } = filters;
+
+            const issues = [];
+
+            // Check performance against baselines
+            if (serviceId && this.performanceBaselines.has(serviceId)) {
+                const baseline = this.performanceBaselines.get(serviceId);
+                const currentMetrics = await this.getCurrentServiceMetrics(serviceId);
+
+                for (const [metricName, baselineValue] of Object.entries(baseline.metrics)) {
+                    const currentValue = currentMetrics[metricName];
+                    if (currentValue && Math.abs(currentValue - baselineValue) > baselineValue * 0.2) {
+                        issues.push({
+                            type: 'baseline_deviation',
+                            serviceId,
+                            metric: metricName,
+                            baselineValue,
+                            currentValue,
+                            deviation: ((currentValue - baselineValue) / baselineValue) * 100
+                        });
+                    }
+                }
+            }
+
+            return {
+                issues,
+                detectedAt: new Date().toISOString(),
+                totalIssues: issues.length
+            };
+
+        } catch (error) {
+            this.logger.error('Performance issue detection failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Correlate alerts across systems
+     */
+    async correlateAlerts(correlationData) {
+        try {
+            const { alerts, correlationWindow = 300 } = correlationData; // 5 minute window
+
+            const correlations = [];
+
+            // Group alerts by time window
+            const groupedAlerts = this.groupAlertsByTimeWindow(alerts, correlationWindow);
+
+            for (const group of groupedAlerts) {
+                if (group.length > 1) {
+                    const correlation = {
+                        id: crypto.randomUUID(),
+                        alerts: group,
+                        correlationType: this.determineCorrelationType(group),
+                        confidence: this.calculateCorrelationConfidence(group),
+                        timestamp: new Date().toISOString()
+                    };
+
+                    correlations.push(correlation);
+                    this.alertCorrelation.set(correlation.id, correlation);
+                }
+            }
+
+            this.stats.alertsCorrelated += correlations.length;
+
+            return {
+                correlations,
+                totalCorrelations: correlations.length
+            };
+
+        } catch (error) {
+            this.logger.error('Alert correlation failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Create enterprise dashboard
+     */
+    async createEnterpriseDashboard(dashboardConfig) {
+        try {
+            const { title, description, widgets, tags = [] } = dashboardConfig;
+
+            // Create dashboard in DataDog
+            const dashboard = await this.createDashboard({
+                title: `[LonicFLex Enterprise] ${title}`,
+                description,
+                widgets: this.buildEnterpriseWidgets(widgets),
+                tags: ['lonicflex-enterprise', ...tags]
+            });
+
+            // Store enterprise dashboard config
+            this.enterpriseDashboards.set(dashboard.id, {
+                ...dashboardConfig,
+                datadogId: dashboard.id,
+                createdAt: new Date().toISOString()
+            });
+
+            return {
+                success: true,
+                dashboardId: dashboard.id,
+                url: dashboard.url
+            };
+
+        } catch (error) {
+            this.logger.error('Enterprise dashboard creation failed:', error);
+            throw error;
+        }
+    }
+
+    // Helper methods for enterprise monitoring
+
+    calculateHealthScore(metrics) {
+        // Implement health score calculation logic
+        if (!metrics.series || metrics.series.length === 0) return 50;
+
+        const avgValue = metrics.series.reduce((sum, point) => sum + point[1], 0) / metrics.series.length;
+        return Math.min(100, Math.max(0, avgValue));
+    }
+
+    async checkServiceGovernanceStatus(serviceId) {
+        try {
+            // Query governance database for service status
+            return await this.governanceDb.query(
+                'SELECT status, compliance_score FROM service_governance WHERE service_id = ?',
+                [serviceId]
+            );
+        } catch (error) {
+            return { status: 'unknown', compliance_score: null };
+        }
+    }
+
+    async detectServiceIssues(serviceId, metrics) {
+        const issues = [];
+
+        if (metrics.series) {
+            const latestValue = metrics.series[metrics.series.length - 1]?.[1] || 0;
+
+            if (latestValue < 50) {
+                issues.push({
+                    type: 'low_health_score',
+                    severity: 'high',
+                    description: 'Service health score is critically low'
+                });
+            }
+        }
+
+        return issues;
+    }
+
+    async checkCostThresholds(entityId, costs) {
+        // Implement cost threshold checking logic
+        const alerts = [];
+
+        if (costs.total > 1000) {
+            alerts.push({
+                type: 'high_cost',
+                threshold: 1000,
+                actual: costs.total,
+                severity: 'medium'
+            });
+        }
+
+        return alerts;
+    }
+
+    parseTimeRange(timeRange) {
+        const unit = timeRange.slice(-1);
+        const value = parseInt(timeRange.slice(0, -1));
+
+        switch (unit) {
+            case 'h': return value * 3600;
+            case 'd': return value * 86400;
+            case 'w': return value * 604800;
+            default: return 3600; // 1 hour default
+        }
+    }
+
+    groupAlertsByTimeWindow(alerts, windowSeconds) {
+        // Implement alert grouping logic
+        return [alerts]; // Simplified implementation
+    }
+
+    determineCorrelationType(alertGroup) {
+        // Implement correlation type determination
+        return 'service_cascade';
+    }
+
+    calculateCorrelationConfidence(alertGroup) {
+        // Implement confidence calculation
+        return Math.min(100, alertGroup.length * 20);
+    }
+
+    buildEnterpriseWidgets(widgets) {
+        // Transform enterprise widget config to DataDog format
+        return widgets.map(widget => ({
+            ...widget,
+            definition: {
+                ...widget.definition,
+                custom_links: [{
+                    label: 'LonicFLex Enterprise',
+                    link: 'https://lonicflex.enterprise'
+                }]
+            }
+        }));
+    }
+
+    async getCurrentServiceMetrics(serviceId) {
+        // Implement current metrics retrieval
+        return {};
+    }
+
+    async createCostAlert(alert) {
+        // Create DataDog monitor for cost alert
+        return await this.createMonitor({
+            name: `Cost Alert: ${alert.type}`,
+            query: `avg(last_1h):avg:lonicflex.cost{*} > ${alert.threshold}`,
+            message: `Cost threshold exceeded: ${alert.actual} > ${alert.threshold}`,
+            tags: ['lonicflex-cost', 'enterprise']
+        });
+    }
+
+    async createBaselineMonitor(serviceId, metricName, threshold) {
+        // Create DataDog monitor for baseline deviation
+        return await this.createMonitor({
+            name: `Baseline Deviation: ${serviceId} ${metricName}`,
+            query: `avg(last_5m):avg:${metricName}{service:${serviceId}} > ${threshold * 1.2}`,
+            message: `Performance baseline exceeded for ${serviceId}`,
+            tags: ['lonicflex-baseline', 'enterprise']
+        });
     }
 }
 

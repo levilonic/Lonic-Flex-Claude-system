@@ -540,6 +540,182 @@ module.exports = {
 
       health_check_http: 'http://localhost:3026/health',
       node_args: ['--max-old-space-size=512', '--optimize-for-size']
+    },
+
+    // ===== WINDOW 3: ENTERPRISE GOVERNANCE & ANALYTICS SERVICES =====
+
+    // Governance Coordination Service
+    {
+      name: 'lonicflex-governance',
+      script: 'services/lonicflex-governance-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1024M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'governance',
+        SERVICE_NAME: 'lonicflex-governance',
+        PORT: 3030
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-governance.log',
+      out_file: './logs/lonicflex-governance-out.log',
+      error_file: './logs/lonicflex-governance-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3030/health',
+      node_args: ['--max-old-space-size=1024', '--optimize-for-size']
+    },
+
+    // Permissions and RBAC Service
+    {
+      name: 'lonicflex-permissions',
+      script: 'services/lonicflex-permissions-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1024M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'permissions',
+        SERVICE_NAME: 'lonicflex-permissions',
+        PORT: 3031
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-permissions.log',
+      out_file: './logs/lonicflex-permissions-out.log',
+      error_file: './logs/lonicflex-permissions-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3031/health',
+      node_args: ['--max-old-space-size=1024', '--optimize-for-size']
+    },
+
+    // Cost Management Service
+    {
+      name: 'lonicflex-cost-management',
+      script: 'services/lonicflex-cost-management-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1024M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'cost-management',
+        SERVICE_NAME: 'lonicflex-cost-management',
+        PORT: 3032
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-cost-management.log',
+      out_file: './logs/lonicflex-cost-management-out.log',
+      error_file: './logs/lonicflex-cost-management-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3032/health',
+      node_args: ['--max-old-space-size=1024', '--optimize-for-size']
+    },
+
+    // Billing and Usage Analytics Service
+    {
+      name: 'lonicflex-billing',
+      script: 'services/lonicflex-billing-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1024M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'billing',
+        SERVICE_NAME: 'lonicflex-billing',
+        PORT: 3033
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-billing.log',
+      out_file: './logs/lonicflex-billing-out.log',
+      error_file: './logs/lonicflex-billing-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3033/health',
+      node_args: ['--max-old-space-size=1024', '--optimize-for-size']
+    },
+
+    // Analytics Processing Engine
+    {
+      name: 'lonicflex-analytics',
+      script: 'services/lonicflex-analytics-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '2048M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'analytics',
+        SERVICE_NAME: 'lonicflex-analytics',
+        PORT: 3034
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-analytics.log',
+      out_file: './logs/lonicflex-analytics-out.log',
+      error_file: './logs/lonicflex-analytics-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3034/health',
+      node_args: ['--max-old-space-size=2048', '--optimize-for-size']
+    },
+
+    // Executive Dashboard Service
+    {
+      name: 'lonicflex-dashboard',
+      script: 'services/lonicflex-dashboard-service.js',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1024M',
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        LONICFLEX_MODE: 'dashboard',
+        SERVICE_NAME: 'lonicflex-dashboard',
+        PORT: 3035
+      },
+
+      min_uptime: '10s',
+      max_restarts: 5,
+      restart_delay: 4000,
+
+      log_file: './logs/lonicflex-dashboard.log',
+      out_file: './logs/lonicflex-dashboard-out.log',
+      error_file: './logs/lonicflex-dashboard-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      health_check_http: 'http://localhost:3035/health',
+      node_args: ['--max-old-space-size=1024', '--optimize-for-size']
     }
   ],
   
