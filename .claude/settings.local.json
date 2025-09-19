@@ -172,7 +172,9 @@
       "Bash(rm:*)",
       "Bash(xargs -I {} git push origin --delete {})",
       "Bash(git for-each-ref:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(git fetch:*)",
+      "Bash(git rev-list:*)"
     ],
     "deny": [],
     "ask": []
