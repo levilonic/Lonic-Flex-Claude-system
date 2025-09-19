@@ -57,6 +57,24 @@ class SQLiteManager {
     }
 
     /**
+     * Expose database run method for direct SQL execution
+     */
+    async run(sql, params = []) {
+        if (!this.isInitialized) {
+            throw new Error('Database not initialized. Call initialize() first.');
+        }
+        return new Promise((resolve, reject) => {
+            this.db.run(sql, params, function(err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({ lastID: this.lastID, changes: this.changes });
+                }
+            });
+        });
+    }
+
+    /**
      * Create all necessary tables for multi-agent coordination
      */
     async createTables() {

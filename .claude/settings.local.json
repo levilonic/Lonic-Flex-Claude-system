@@ -160,7 +160,12 @@
       "Bash(done)",
       "WebFetch(domain:developer.servicenow.com)",
       "WebFetch(domain:docs.servicenow.com)",
-      "WebFetch(domain:www.servicenow.com)"
+      "WebFetch(domain:www.servicenow.com)",
+      "Bash(do echo \"Port $port:\")",
+      "Bash(pm2 describe:*)",
+      "Bash(pm2 list:*)",
+      "Bash(sqlite3:*)",
+      "Bash(do echo \"Testing port $port:\")"
     ],
     "deny": [],
     "ask": []
