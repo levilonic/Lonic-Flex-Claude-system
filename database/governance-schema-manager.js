@@ -896,7 +896,7 @@ class GovernanceSchemaManager extends SQLiteManager {
      * Get total table count
      */
     async getTableCount() {
-        const result = await this.get(
+        const result = await this.getSQL(
             "SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
         );
         return result.count;
@@ -906,7 +906,7 @@ class GovernanceSchemaManager extends SQLiteManager {
      * Get total index count
      */
     async getIndexCount() {
-        const result = await this.get(
+        const result = await this.getSQL(
             "SELECT COUNT(*) as count FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'"
         );
         return result.count;
@@ -932,7 +932,7 @@ class GovernanceSchemaManager extends SQLiteManager {
             ];
 
             for (const table of criticalTables) {
-                const exists = await this.get(
+                const exists = await this.getSQL(
                     "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
                     [table]
                 );
