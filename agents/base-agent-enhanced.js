@@ -8,19 +8,26 @@
  * Base class for all specialized agents in the multi-agent system
  */
 
+const { ValidatedAgent } = require('../core/validated-agent-base');
+
 /**
- * Enhanced BaseAgent with ServiceContainer dependency injection
- * Eliminates resource duplication and context explosion
+ * Enhanced BaseAgent with ServiceContainer dependency injection and ValidatedAgent architecture
+ * Eliminates resource duplication and context explosion with evidence-based validation
  */
-class BaseAgent {
+class BaseAgent extends ValidatedAgent {
     constructor(agentName, sessionId, serviceContainer, config = {}) {
         if (!serviceContainer) {
             throw new Error('ServiceContainer is required for BaseAgent initialization');
         }
 
-        this.agentName = agentName;
-        this.sessionId = sessionId;
-        this.agentId = `${sessionId}_${agentName}`;
+        // Call ValidatedAgent parent constructor
+        super(agentName, sessionId, {
+            maxSteps: 8,
+            timeout: 30000,
+            ...config
+        });
+
+        // ServiceContainer integration
         this.config = { maxSteps: 8, timeout: 30000, ...config };
 
         // DEPENDENCY INJECTION - Services provided by container
@@ -192,10 +199,27 @@ class BaseAgent {
                 result: result
             });
 
-            // Record successful pattern for documentation learning
+            // Record successful pattern for documentation learning with ValidatedAgent evidence
+            const evidence = {
+                stepCompleted: true,
+                stepNameProvided: !!stepName,
+                contextProvided: !!(stepName && currentIndex !== null && this.workflowId)
+            };
+
+            const validation = await this.validateSuccess({
+                evidence: evidence,
+                operation: `Step execution for ${stepName}`,
+                criteria: {
+                    stepCompleted: { required: true },
+                    stepNameProvided: { required: true }
+                }
+            });
+
             this.docs.recordSuccessPattern(this.agentName, stepName, {
-                success: true,
-                context: { step: stepName, index: currentIndex, workflow: this.workflowId }
+                success: validation.success,
+                context: { step: stepName, index: currentIndex, workflow: this.workflowId },
+                evidence: validation.evidence,
+                validation: validation.validation
             });
 
             return result;
@@ -627,15 +651,36 @@ class BaseWorkAgent extends BaseAgent {
             };
         }, 5);
 
+        // ValidatedAgent evidence-based validation for BaseWorkAgent completion
+        const evidence = {
+            workflowCompleted: true,
+            allStepsExecuted: this.executionSteps.length === 6,
+            resultsGenerated: !!results && typeof results === 'object',
+            serviceContainerIntegrated: !!this.services,
+            partitionIsolationActive: !!this.workflowId
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'BaseWorkAgent workflow execution',
+            criteria: {
+                workflowCompleted: { required: true },
+                allStepsExecuted: { required: true },
+                resultsGenerated: { required: true }
+            }
+        });
+
         return {
             agent: this.agentName,
             session: this.sessionId,
             workflow: this.workflowId,
-            success: true,
+            success: validation.success,
             steps_completed: this.executionSteps.length,
             architecture: 'service_container_injected',
             context_isolation: 'partition_based',
-            results
+            results,
+            evidence: validation.evidence,
+            validation: validation.validation
         };
     }
 }
