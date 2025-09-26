@@ -290,11 +290,28 @@ class EnhancedCodeAgent extends ValidatedAgent {
             lines_of_code: generatedCode.lines_of_code
         });
 
+        const evidence = {
+            filesGenerated: generatedCode.files.length,
+            linesOfCode: generatedCode.lines_of_code,
+            functionsCreated: generatedCode.functions,
+            classesCreated: generatedCode.classes
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Generate core code',
+            criteria: {
+                filesGenerated: { min: 1 },
+                linesOfCode: { min: 1 }
+            }
+        });
+
         return {
             step: 'generate_core_code',
-            success: await this.validateStepSuccess(stepName, stepEvidence),
+            success: validation.success,
             generated: generatedCode,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -309,11 +326,25 @@ class EnhancedCodeAgent extends ValidatedAgent {
             features: features
         });
 
+        const evidence = {
+            featuresImplemented: features.length,
+            featuresProvided: features.length > 0
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Implement features',
+            criteria: {
+                featuresImplemented: { min: 0 }
+            }
+        });
+
         return {
             step: 'implement_features',
-            success: await this.validateStepSuccess(stepName, stepEvidence),
+            success: validation.success,
             features_implemented: features.length,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -336,11 +367,29 @@ class EnhancedCodeAgent extends ValidatedAgent {
             coverage: tests.coverage
         });
 
+        const evidence = {
+            testFilesGenerated: tests.test_files.length,
+            testCasesCreated: tests.test_cases,
+            coverageAchieved: tests.coverage,
+            coverageAcceptable: tests.coverage >= 70
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Generate tests',
+            criteria: {
+                testFilesGenerated: { min: 1 },
+                testCasesCreated: { min: 1 },
+                coverageAcceptable: { required: true }
+            }
+        });
+
         return {
             step: 'generate_tests',
-            success: await this.validateStepSuccess(stepName, stepEvidence),
+            success: validation.success,
             tests,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -359,11 +408,30 @@ class EnhancedCodeAgent extends ValidatedAgent {
 
         await this.logEvent('code_quality_validated', quality);
 
+        const evidence = {
+            lintErrorsCount: quality.lint_errors,
+            complexityScore: quality.complexity_score,
+            maintainabilityLevel: quality.maintainability,
+            securityIssuesCount: quality.security_issues,
+            qualityAcceptable: quality.lint_errors === 0 && quality.security_issues === 0
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Validate code quality',
+            criteria: {
+                lintErrorsCount: { max: 0 },
+                securityIssuesCount: { max: 0 },
+                qualityAcceptable: { required: true }
+            }
+        });
+
         return {
             step: 'validate_code_quality',
-            success: await this.validateStepSuccess(stepName, stepEvidence),
+            success: validation.success,
             quality,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -379,11 +447,28 @@ class EnhancedCodeAgent extends ValidatedAgent {
 
         await this.logEvent('performance_optimized', optimization);
 
+        const evidence = {
+            optimizationsApplied: optimization.optimizations_applied.length,
+            performanceGain: optimization.performance_gain,
+            bundleSizeReduction: optimization.bundle_size_reduction,
+            optimizationComplete: optimization.optimizations_applied.length > 0
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Optimize performance',
+            criteria: {
+                optimizationsApplied: { min: 1 },
+                optimizationComplete: { required: true }
+            }
+        });
+
         return {
             step: 'optimize_performance',
-            success: await this.validateStepSuccess(stepName, stepEvidence),
+            success: validation.success,
             optimization,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -401,11 +486,29 @@ class EnhancedCodeAgent extends ValidatedAgent {
 
         await this.logEvent('code_output_finalized', output);
 
+        const evidence = {
+            totalFiles: output.total_files,
+            totalTests: output.total_tests,
+            linesOfCode: output.lines_of_code,
+            testCoverage: output.test_coverage,
+            outputComplete: output.total_files > 0 && output.output_directory
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Finalize code output',
+            criteria: {
+                totalFiles: { min: 0 },
+                outputComplete: { required: true }
+            }
+        });
+
         return {
             step: 'finalize_code_output',
-            success: await this.validateStepSuccess(stepName, stepEvidence),
+            success: validation.success,
             output,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 

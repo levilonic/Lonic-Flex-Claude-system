@@ -487,7 +487,21 @@ class ConditionalWorkflowEngine extends EventEmitter {
                     issueUrl: integrationResult.issueUrl
                 });
 
-                return { success: true, issueNumber: integrationResult.issueNumber };
+                const evidence = {
+                    issueCreated: !!integrationResult.issueNumber,
+                    integrationSuccessful: !!integrationResult,
+                    issueNumberReceived: typeof integrationResult.issueNumber === 'number'
+                };
+
+                const operationSuccess = evidence.issueCreated &&
+                                       evidence.integrationSuccessful &&
+                                       evidence.issueNumberReceived;
+
+                return {
+                    success: operationSuccess,
+                    issueNumber: integrationResult.issueNumber,
+                    evidence: evidence
+                };
             } else {
                 return { success: false, error: integrationResult.error };
             }

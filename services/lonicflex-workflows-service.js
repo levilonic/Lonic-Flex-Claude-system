@@ -146,7 +146,18 @@ class LonicFlexWorkflowsService {
                     steps: template.steps.length,
                     estimatedDuration: template.estimatedDuration
                 }));
-                res.json({ success: true, templates });
+                const evidence = {
+                    templatesGenerated: templates.length > 0,
+                    templatesArray: Array.isArray(templates),
+                    mapPopulated: this.workflowTemplates.size > 0
+                };
+
+                const operationSuccess = evidence.templatesGenerated && evidence.templatesArray;
+                res.json({
+                    success: operationSuccess,
+                    templates,
+                    evidence: evidence
+                });
             } catch (error) {
                 res.status(500).json({ error: error.message });
             }

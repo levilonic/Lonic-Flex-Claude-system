@@ -4,14 +4,14 @@
  * Extends BaseAgent with deployment-specific functionality following Factor 10
  */
 
-const { BaseAgent } = require('./base-agent');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const { spawn } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
 const { DockerManager } = require('../claude-docker-manager');
 const axios = require('axios');
 
-class DeployAgent extends BaseAgent {
+class DeployAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {
         super('deploy', sessionId, {
             maxSteps: 8,
@@ -252,8 +252,32 @@ class DeployAgent extends BaseAgent {
             instances_deployed: results.deployment.instances,
             health_status: results.healthCheck.healthyInstances > 0 ? 'healthy' : 'unhealthy',
             deployment_time: results.finalization.totalTime,
-            success: true,
             results
+        };
+
+        // Validate deployment workflow with evidence
+        const evidence = {
+            workflowExecuted: !!results,
+            instancesDeployed: results.deployment?.instances > 0,
+            healthyInstances: results.healthCheck?.healthyInstances > 0,
+            deploymentFinalized: !!results.finalization,
+            totalTimeRecorded: !!results.finalization?.totalTime
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Complete deployment workflow',
+            criteria: {
+                workflowExecuted: { required: true },
+                instancesDeployed: { required: true },
+                healthyInstances: { required: true }
+            }
+        });
+
+        return {
+            ...executionSummary,
+            success: validation.success,
+            validation: validation
         };
     }
 
@@ -328,8 +352,30 @@ class DeployAgent extends BaseAgent {
         return {
             artifacts,
             buildTime,
-            totalSize,
-            success: true
+            totalSize
+        };
+
+        // Validate artifacts build with evidence
+        const evidence = {
+            artifactsBuilt: artifacts?.length > 0,
+            buildTimeRecorded: !!buildTime,
+            totalSizeCalculated: !!totalSize,
+            artifactListPopulated: this.artifactsList.length > 0
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Build deployment artifacts',
+            criteria: {
+                artifactsBuilt: { required: true },
+                buildTimeRecorded: { required: true }
+            }
+        });
+
+        return {
+            ...artifactResult,
+            success: validation.success,
+            validation: validation
         };
     }
 
@@ -430,8 +476,30 @@ class DeployAgent extends BaseAgent {
             ...deployResult,
             deploymentId: preparation.deploymentId,
             strategy: preparation.strategy,
-            deployTime,
-            success: true
+            deployTime
+        };
+
+        // Validate deployment with evidence
+        const evidence = {
+            deploymentIdGenerated: !!preparation.deploymentId,
+            strategySet: !!preparation.strategy,
+            deployTimeRecorded: !!deployTime,
+            deploymentConfigured: !!this.deploymentId
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Deploy application',
+            criteria: {
+                deploymentIdGenerated: { required: true },
+                strategySet: { required: true }
+            }
+        });
+
+        return {
+            ...deployResult,
+            success: validation.success,
+            validation: validation
         };
     }
 

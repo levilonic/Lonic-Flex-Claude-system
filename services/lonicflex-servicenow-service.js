@@ -160,10 +160,21 @@ class LonicFlexServiceNowService {
         this.app.post('/incidents/create', async (req, res) => {
             try {
                 const incident = await this.createIncident(req.body);
+                const evidence = {
+                    incidentCreated: !!incident,
+                    incidentNumber: !!incident.number,
+                    incidentData: !!incident && typeof incident === 'object',
+                    apiCallSuccessful: true
+                };
+
+                const operationSuccess = evidence.incidentCreated &&
+                                       evidence.incidentNumber;
+
                 res.json({
-                    success: true,
+                    success: operationSuccess,
                     incident,
-                    message: `Incident ${incident.number} created successfully`
+                    message: `Incident ${incident.number} created successfully`,
+                    evidence: evidence
                 });
             } catch (error) {
                 this.logger.error('Incident creation failed', { error: error.message });

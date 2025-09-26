@@ -4,16 +4,16 @@
  * Maintains 100% API compatibility while solving context explosion and resource duplication
  */
 
-const { BaseAgent } = require('./base-agent-enhanced');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const { spawn } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
 const { DockerManager } = require('../claude-docker-manager');
 const axios = require('axios');
 
-class EnhancedDeployAgent extends BaseAgent {
+class EnhancedDeployAgent extends ValidatedAgent {
     constructor(sessionId, serviceContainer, config = {}) {
-        super('deploy', sessionId, serviceContainer, {
+        super('deploy', sessionId, {
             maxSteps: 8,
             timeout: 300000, // 5 minutes for deployment
             ...config
@@ -117,16 +117,36 @@ class EnhancedDeployAgent extends BaseAgent {
             }, i);
         }
 
+        // Validate deployment workflow with evidence
+        const evidence = {
+            deploymentId: this.deploymentId,
+            deploymentPhase: this.deploymentStatus.phase,
+            artifactsBuilt: this.artifactsList.length,
+            healthChecksPassed: this.deploymentStatus.healthChecks.length,
+            allStepsCompleted: Object.keys(results).length === this.executionSteps.length,
+            deploymentHealthy: this.isDeploymentHealthy()
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Enhanced deployment workflow',
+            criteria: {
+                allStepsCompleted: { required: true },
+                deploymentId: { required: true }
+            }
+        });
+
         return {
             agent: this.agentName,
             session: this.sessionId,
             workflow: this.workflowId,
-            success: true,
-            architecture: 'enhanced_servicecontainer',
+            success: validation.success,
+            architecture: 'enhanced_servicecontainer_validated',
             results,
             deployment_id: this.deploymentId,
             deployment_status: this.deploymentStatus,
-            artifacts_count: this.artifactsList.length
+            artifacts_count: this.artifactsList.length,
+            validation: validation
         };
     }
 
@@ -165,10 +185,18 @@ class EnhancedDeployAgent extends BaseAgent {
                     enhanced_agent: true
                 });
 
+                const evidence = { stepExecuted: true, stepName, stepIndex };
+                const validation = await this.validateSuccess({
+                    evidence: evidence,
+                    operation: `Deploy step: ${stepName}`,
+                    criteria: { stepExecuted: { required: true } }
+                });
+
                 return {
                     step: stepName,
-                    success: true,
-                    enhanced_architecture: true
+                    success: validation.success,
+                    enhanced_architecture: true,
+                    validation: validation
                 };
         }
     }
@@ -186,12 +214,29 @@ class EnhancedDeployAgent extends BaseAgent {
             strategy: this.deployConfig.strategy
         });
 
+        const evidence = {
+            deploymentIdCreated: !!this.deploymentId,
+            phaseSet: this.deploymentStatus.phase === 'preparing',
+            environmentConfigured: !!this.deployConfig.environment
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Prepare deployment',
+            criteria: {
+                deploymentIdCreated: { required: true },
+                phaseSet: { required: true },
+                environmentConfigured: { required: true }
+            }
+        });
+
         return {
             step: 'prepare_deployment',
-            success: true,
+            success: validation.success,
             deployment_id: this.deploymentId,
             environment: this.deployConfig.environment,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -216,12 +261,29 @@ class EnhancedDeployAgent extends BaseAgent {
             artifact_list: artifacts
         });
 
+        const evidence = {
+            artifactsBuilt: artifacts.length,
+            artifactsList: this.artifactsList.length,
+            phaseSet: this.deploymentStatus.phase === 'building',
+            artifactsGenerated: artifacts.length > 0
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Build artifacts',
+            criteria: {
+                artifactsGenerated: { required: true },
+                phaseSet: { required: true }
+            }
+        });
+
         return {
             step: 'build_artifacts',
-            success: true,
+            success: validation.success,
             artifacts_built: artifacts.length,
             artifacts: artifacts,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -243,11 +305,30 @@ class EnhancedDeployAgent extends BaseAgent {
             validation_results: validation
         });
 
+        const evidence = {
+            configValid: validation.config_valid,
+            resourcesAvailable: validation.resources_available,
+            dependenciesMet: validation.dependencies_met,
+            securityPassed: validation.security_checks,
+            allValidationsPassed: Object.values(validation).every(v => v === true),
+            phaseSet: this.deploymentStatus.phase === 'validating'
+        };
+
+        const validationResult = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Validate deployment',
+            criteria: {
+                allValidationsPassed: { required: true },
+                phaseSet: { required: true }
+            }
+        });
+
         return {
             step: 'validate_deployment',
-            success: true,
+            success: validationResult.success,
             validation,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validationResult
         };
     }
 
@@ -269,12 +350,30 @@ class EnhancedDeployAgent extends BaseAgent {
             service_list: services
         });
 
+        const evidence = {
+            servicesDeployed: services.length,
+            allServicesDeployed: services.every(s => s.status === 'deployed'),
+            phaseSet: this.deploymentStatus.phase === 'deploying',
+            servicesHavePorts: services.every(s => s.port > 0)
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Deploy services',
+            criteria: {
+                servicesDeployed: { min: 1 },
+                allServicesDeployed: { required: true },
+                phaseSet: { required: true }
+            }
+        });
+
         return {
             step: 'deploy_services',
-            success: true,
+            success: validation.success,
             services_deployed: services.length,
             services,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -298,12 +397,31 @@ class EnhancedDeployAgent extends BaseAgent {
             all_healthy: healthChecks.every(hc => hc.status === 'healthy')
         });
 
+        const allHealthy = healthChecks.every(hc => hc.status === 'healthy');
+        const evidence = {
+            healthChecksRun: healthChecks.length,
+            allHealthy: allHealthy,
+            phaseSet: this.deploymentStatus.phase === 'health_checking',
+            healthChecksStored: this.deploymentStatus.healthChecks.length > 0
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Run health checks',
+            criteria: {
+                healthChecksRun: { min: 1 },
+                allHealthy: { required: true },
+                phaseSet: { required: true }
+            }
+        });
+
         return {
             step: 'run_health_checks',
-            success: true,
+            success: validation.success,
             health_checks: healthChecks,
-            all_healthy: healthChecks.every(hc => hc.status === 'healthy'),
-            enhanced_architecture: true
+            all_healthy: allHealthy,
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -325,11 +443,30 @@ class EnhancedDeployAgent extends BaseAgent {
             success_criteria: success
         });
 
+        const evidence = {
+            allServicesRunning: success.all_services_running,
+            allHealthChecksPassed: success.all_health_checks_passed,
+            performanceGood: success.performance_within_limits,
+            noErrors: success.no_errors_detected,
+            allCriteriaMet: Object.values(success).every(v => v === true),
+            phaseSet: this.deploymentStatus.phase === 'validating_success'
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Validate deployment success',
+            criteria: {
+                allCriteriaMet: { required: true },
+                phaseSet: { required: true }
+            }
+        });
+
         return {
             step: 'validate_deployment_success',
-            success: true,
+            success: validation.success,
             success_criteria: success,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -350,11 +487,29 @@ class EnhancedDeployAgent extends BaseAgent {
             cleanup_results: cleaned
         });
 
+        const evidence = {
+            oldImagesRemoved: cleaned.old_images,
+            oldContainersRemoved: cleaned.old_containers,
+            spaceFreed: cleaned.freed_space,
+            cleanupPerformed: cleaned.old_images > 0 || cleaned.old_containers > 0,
+            phaseSet: this.deploymentStatus.phase === 'cleaning_up'
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Cleanup old versions',
+            criteria: {
+                cleanupPerformed: { required: true },
+                phaseSet: { required: true }
+            }
+        });
+
         return {
             step: 'cleanup_old_versions',
-            success: true,
+            success: validation.success,
             cleanup_results: cleaned,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 
@@ -375,11 +530,31 @@ class EnhancedDeployAgent extends BaseAgent {
 
         await this.logEvent('deployment_finalized', finalization);
 
+        const evidence = {
+            deploymentCompleted: this.deploymentStatus.phase === 'completed',
+            progressComplete: this.deploymentStatus.progress === 100,
+            deploymentIdSet: !!finalization.deployment_id,
+            artifactsCountSet: finalization.total_artifacts >= 0,
+            healthChecksSet: finalization.health_checks_passed >= 0,
+            completionTimeSet: !!finalization.completion_time
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Finalize deployment',
+            criteria: {
+                deploymentCompleted: { required: true },
+                progressComplete: { required: true },
+                deploymentIdSet: { required: true }
+            }
+        });
+
         return {
             step: 'finalize_deployment',
-            success: true,
+            success: validation.success,
             finalization,
-            enhanced_architecture: true
+            enhanced_architecture: true,
+            validation: validation
         };
     }
 

@@ -174,10 +174,21 @@ class EnhancedApprovalGatesCoordinator extends EventEmitter {
                 finalStatus: resolutionResult.status
             });
 
+            const evidence = {
+                resolutionCompleted: !!resolutionResult,
+                resolvedStatus: !!resolutionResult.resolved,
+                statusProvided: !!resolutionResult.status,
+                resolutionValid: resolutionResult && typeof resolutionResult === 'object'
+            };
+
+            const operationSuccess = evidence.resolutionCompleted &&
+                                   evidence.resolutionValid;
+
             return {
-                success: true,
+                success: operationSuccess,
                 resolved: resolutionResult.resolved,
-                status: resolutionResult.status
+                status: resolutionResult.status,
+                evidence: evidence
             };
 
         } catch (error) {

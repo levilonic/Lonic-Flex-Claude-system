@@ -4,12 +4,12 @@
  * Extends BaseAgent with security-specific functionality following Factor 10
  */
 
-const { BaseAgent } = require('./base-agent');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
 
-class SecurityAgent extends BaseAgent {
+class SecurityAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {
         super('security', sessionId, {
             maxSteps: 8,
@@ -353,8 +353,32 @@ class SecurityAgent extends BaseAgent {
             security_score: results.securityReport.summary.securityScore,
             total_findings: results.securityReport.summary.totalFindings,
             critical_issues: results.securityReport.summary.criticalIssues,
-            success: true,
             results
+        };
+
+        // Validate security scan with evidence
+        const evidence = {
+            securityScanCompleted: !!results.securityReport,
+            securityScoreGenerated: typeof results.securityReport.summary.securityScore === 'number',
+            findingsAnalyzed: typeof results.securityReport.summary.totalFindings === 'number',
+            criticalIssuesAssessed: typeof results.securityReport.summary.criticalIssues === 'number',
+            scanResultsGenerated: !!results
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Security scanning workflow',
+            criteria: {
+                securityScanCompleted: { required: true },
+                securityScoreGenerated: { required: true },
+                findingsAnalyzed: { required: true }
+            }
+        });
+
+        return {
+            ...scanSummary,
+            success: validation.success,
+            validation: validation
         };
     }
 

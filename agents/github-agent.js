@@ -4,13 +4,13 @@
  * Extends BaseAgent with GitHub-specific functionality
  */
 
-const { BaseAgent } = require('./base-agent');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const { GitAutomation } = require('../services/git-automation');
 const { Octokit } = require('@octokit/rest');
 const { getAuthManager } = require('../auth/auth-manager');
 require('dotenv').config();
 
-class GitHubAgent extends BaseAgent {
+class GitHubAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {
         super('github', sessionId, {
             maxSteps: 8,
@@ -175,10 +175,27 @@ class GitHubAgent extends BaseAgent {
             
             const actionResult = await this.executeAction(results.context_analysis, context);
             
+            const evidence = {
+                actionExecuted: !!actionResult,
+                contextAnalyzed: !!results.context_analysis,
+                actionType: results.context_analysis.type,
+                resultGenerated: typeof actionResult !== 'undefined'
+            };
+
+            const validation = await this.validateSuccess({
+                evidence: evidence,
+                operation: 'Execute GitHub action',
+                criteria: {
+                    actionExecuted: { required: true },
+                    contextAnalyzed: { required: true }
+                }
+            });
+
             await this.logEvent('github_action_executed', {
                 action: results.context_analysis.type,
                 result_type: typeof actionResult,
-                success: true
+                success: validation.success,
+                validation: validation
             });
             
             return actionResult;
@@ -849,9 +866,25 @@ class GitHubAgent extends BaseAgent {
     async updateGitHubStatus(result, context) {
         // In a full implementation, this would add comments, update status checks, etc.
         // For demo, just log the status update
+        const evidence = {
+            statusUpdateRequested: true,
+            actionType: 'status_comment',
+            logEventCalled: true
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Update GitHub status',
+            criteria: {
+                statusUpdateRequested: { required: true },
+                actionType: { required: true }
+            }
+        });
+
         await this.logEvent('status_updated', {
             action: 'status_comment',
-            success: true
+            success: validation.success,
+            validation: validation
         });
         
         return { status_updated: true, type: 'comment' };

@@ -162,10 +162,22 @@ class LonicFlexIntegrationHubService {
 
                 this.logger.info('Integration registered', { systemId, config: config.name });
 
+                const evidence = {
+                    integrationRegistered: this.integrations.has(systemId),
+                    integrationConfigValid: !!integration && typeof integration === 'object',
+                    systemIdProvided: !!systemId,
+                    registrationCompleted: true
+                };
+
+                const operationSuccess = evidence.integrationRegistered &&
+                                       evidence.integrationConfigValid &&
+                                       evidence.systemIdProvided;
+
                 res.json({
-                    success: true,
+                    success: operationSuccess,
                     message: `Integration ${systemId} registered successfully`,
                     integration: {
+                    evidence: evidence,
                         systemId,
                         name: config.name,
                         registered: true,

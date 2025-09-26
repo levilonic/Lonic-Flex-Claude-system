@@ -256,11 +256,24 @@ class LonicFlexPermissionsService {
                 const result = await this.checkPermission(userId, resource, action, context);
                 this.stats.totalPermissionChecks++;
 
+                // Evidence-based validation for permission check
+                const evidence = {
+                    permissionCheckCompleted: !!result,
+                    requestProcessed: !!req.requestId,
+                    responseTimeRecorded: typeof (Date.now() - startTime) === 'number',
+                    resultGenerated: result && typeof result === 'object'
+                };
+
+                const operationSuccess = evidence.permissionCheckCompleted &&
+                                       evidence.requestProcessed &&
+                                       evidence.resultGenerated;
+
                 res.json({
-                    success: true,
+                    success: operationSuccess,
                     ...result,
                     requestId: req.requestId,
-                    responseTime: Date.now() - startTime
+                    responseTime: Date.now() - startTime,
+                    evidence: evidence
                 });
 
             } catch (error) {

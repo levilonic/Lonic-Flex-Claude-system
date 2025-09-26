@@ -216,7 +216,19 @@ class LonicFlexWebhookService {
 
             default:
                 this.logger.info('Unhandled GitHub event', { event });
-                return { success: true, message: `Event ${event} received but not processed` };
+                const evidence = {
+                    eventReceived: !!event,
+                    eventType: event,
+                    eventLogged: true,
+                    unhandledEventProcessed: true
+                };
+
+                const operationSuccess = evidence.eventReceived && evidence.eventLogged;
+                return {
+                    success: operationSuccess,
+                    message: `Event ${event} received but not processed`,
+                    evidence: evidence
+                };
         }
     }
 

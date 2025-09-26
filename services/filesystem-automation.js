@@ -87,12 +87,27 @@ class FileSystemAutomation {
             this.operations.set(operationId, operation);
             console.log(`✅ Atomic write completed: ${filePath}`);
             
+            const bytesWritten = Buffer.byteLength(content, options.encoding || 'utf8');
+            const evidence = {
+                fileWritten: await this.fileExists(filePath),
+                operationTracked: this.operations.has(operationId),
+                backupCreated: !!(operation.originalExists ? operation.backupPath : true),
+                bytesWrittenCalculated: bytesWritten > 0,
+                atomicRenameCompleted: operation.tempPath === null
+            };
+
+            const operationSuccess = evidence.fileWritten &&
+                                   evidence.operationTracked &&
+                                   evidence.backupCreated &&
+                                   evidence.atomicRenameCompleted;
+
             return {
-                success: true,
+                success: operationSuccess,
                 operationId: operationId,
                 filePath: filePath,
                 backupPath: operation.backupPath,
-                bytesWritten: Buffer.byteLength(content, options.encoding || 'utf8')
+                bytesWritten: bytesWritten,
+                evidence: evidence
             };
             
         } catch (error) {

@@ -3,11 +3,11 @@
  * Provides instant access to Anthropic documentation without context abuse
  */
 
-const { BaseAgent } = require('./base-agent');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const AnthropicDocsManager = require('../docs/anthropic-docs-manager');
 const DocumentationSearchTool = require('../docs/doc-search');
 
-class DocumentationAgent extends BaseAgent {
+class DocumentationAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {
         super('DocumentationAgent', sessionId, config);
         
@@ -98,10 +98,27 @@ class DocumentationAgent extends BaseAgent {
                 };
             }
             
+            const evidence = {
+                documentationProcessed: !!results,
+                resultsGenerated: !!(results.results || results.documentation),
+                typeProvided: !!(results.type || type),
+                countCalculated: !!(results.count || results.results)
+            };
+
+            const validation = await this.validateSuccess({
+                evidence: evidence,
+                operation: 'Documentation workflow execution',
+                criteria: {
+                    documentationProcessed: { required: true },
+                    resultsGenerated: { required: true }
+                }
+            });
+
             return {
-                success: true,
+                success: validation.success,
                 type: results.type || type,
                 count: results.count || (results.results ? results.results.length : 1),
+                validation: validation,
                 data: results.results || results,
                 context: results.context_snippet || null
             };

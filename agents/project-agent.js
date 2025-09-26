@@ -4,11 +4,11 @@
  * Handles project creation, session linking, and context preservation
  */
 
-const { BaseAgent } = require('./base-agent');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const fs = require('fs').promises;
 const path = require('path');
 
-class ProjectAgent extends BaseAgent {
+class ProjectAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {
         super('project', sessionId, {
             maxSteps: 8,
@@ -86,11 +86,28 @@ class ProjectAgent extends BaseAgent {
 
             // Step 8: Finalize and return result
             await this.executeStep('finalize_result', async () => {
+                const evidence = {
+                    actionExecuted: !!actionResult,
+                    actionValid: context.action && this.supportedActions.includes(context.action),
+                    executionCompleted: true,
+                    dataGenerated: !!actionResult
+                };
+
+                const validation = await this.validateSuccess({
+                    evidence: evidence,
+                    operation: `Project action: ${context.action}`,
+                    criteria: {
+                        actionExecuted: { required: true },
+                        actionValid: { required: true }
+                    }
+                });
+
                 this.result = {
                     action: context.action,
-                    success: true,
+                    success: validation.success,
                     data: actionResult,
                     execution_time: Date.now() - this.startTime,
+                    validation: validation,
                     steps_executed: this.executionSteps.length
                 };
                 

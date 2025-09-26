@@ -4,12 +4,12 @@
  * Extends BaseAgent with code-specific functionality following Factor 10
  */
 
-const { BaseAgent } = require('./base-agent');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const { FileSystemAutomation } = require('../services/filesystem-automation');
 const fs = require('fs').promises;
 const path = require('path');
 
-class CodeAgent extends BaseAgent {
+class CodeAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {
         super('code', sessionId, {
             maxSteps: 8,

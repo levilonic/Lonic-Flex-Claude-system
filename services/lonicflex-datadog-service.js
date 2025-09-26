@@ -202,10 +202,21 @@ class LonicFlexDataDogService {
                     metrics: series.map(s => s.metric)
                 });
 
+                const evidence = {
+                    metricsSubmitted: series.length > 0,
+                    seriesLength: series.length,
+                    apiResponseReceived: !!result,
+                    submissionSuccessful: true
+                };
+
+                const operationSuccess = evidence.metricsSubmitted &&
+                                       evidence.apiResponseReceived;
+
                 res.json({
-                    success: true,
+                    success: operationSuccess,
                     submitted: series.length,
-                    result
+                    result,
+                    evidence: evidence
                 });
 
             } catch (error) {

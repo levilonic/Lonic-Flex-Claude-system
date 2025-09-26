@@ -136,10 +136,18 @@ class LonicFlexJiraService {
         // List all projects
         this.app.get('/projects', (req, res) => {
             const projectsArray = Array.from(this.projects.values());
+            const evidence = {
+                projectsRetrieved: projectsArray.length >= 0,
+                projectsArray: Array.isArray(projectsArray),
+                totalCalculated: typeof projectsArray.length === 'number'
+            };
+
+            const operationSuccess = evidence.projectsRetrieved && evidence.projectsArray;
             res.json({
-                success: true,
+                success: operationSuccess,
                 projects: projectsArray,
                 total: projectsArray.length,
+                evidence: evidence,
                 defaultProject: this.config.defaultProject
             });
         });

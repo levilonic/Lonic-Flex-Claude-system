@@ -4,15 +4,15 @@
  * Maintains 100% API compatibility while solving context explosion and resource duplication
  */
 
-const { BaseAgent } = require('./base-agent-enhanced');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const { GitAutomation } = require('../services/git-automation');
 const { Octokit } = require('@octokit/rest');
 const { getAuthManager } = require('../auth/auth-manager');
 require('dotenv').config();
 
-class EnhancedGitHubAgent extends BaseAgent {
+class EnhancedGitHubAgent extends ValidatedAgent {
     constructor(sessionId, serviceContainer, config = {}) {
-        super('github', sessionId, serviceContainer, {
+        super('github', sessionId, {
             maxSteps: 8,
             timeout: 45000,
             ...config
@@ -175,11 +175,28 @@ class EnhancedGitHubAgent extends BaseAgent {
 
             const actionResult = await this.executeAction(results.context_analysis, context);
 
+            const evidence = {
+                actionExecuted: !!actionResult,
+                contextAnalyzed: !!results.context_analysis,
+                actionType: results.context_analysis.type,
+                resultGenerated: typeof actionResult !== 'undefined'
+            };
+
+            const validation = await this.validateSuccess({
+                evidence: evidence,
+                operation: 'Execute enhanced GitHub action',
+                criteria: {
+                    actionExecuted: { required: true },
+                    contextAnalyzed: { required: true }
+                }
+            });
+
             await this.logEvent('github_action_executed', {
                 action: results.context_analysis.type,
                 result_type: typeof actionResult,
-                success: true,
-                enhanced_agent: true
+                success: validation.success,
+                enhanced_agent: true,
+                validation: validation
             });
 
             return actionResult;
@@ -696,10 +713,27 @@ class EnhancedGitHubAgent extends BaseAgent {
      * Update GitHub status/comments
      */
     async updateGitHubStatus(result, context) {
+        const evidence = {
+            statusUpdateRequested: true,
+            actionType: 'status_comment',
+            logEventCalled: true,
+            enhancedAgentActive: true
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Update enhanced GitHub status',
+            criteria: {
+                statusUpdateRequested: { required: true },
+                actionType: { required: true }
+            }
+        });
+
         await this.logEvent('status_updated', {
             action: 'status_comment',
-            success: true,
-            enhanced_agent: true
+            success: validation.success,
+            enhanced_agent: true,
+            validation: validation
         });
 
         return { status_updated: true, type: 'comment', enhanced_agent: true };

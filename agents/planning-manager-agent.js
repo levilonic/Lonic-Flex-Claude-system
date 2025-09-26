@@ -4,13 +4,13 @@
  * Coordinates research and strategic planning through specialized agent delegation
  */
 
-const { BaseAgent } = require('./base-agent');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const { ResearchAnalysisAgent } = require('./research-analysis-agent');
 const { ProtocolResearchAgent } = require('./protocol-research-agent');
 const { ArchitectureDesignAgent } = require('./architecture-design-agent');
 const { DocumentationAgent } = require('./documentation-agent');
 
-class PlanningManagerAgent extends BaseAgent {
+class PlanningManagerAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {
         super('planning-manager', sessionId, {
             maxSteps: 8,

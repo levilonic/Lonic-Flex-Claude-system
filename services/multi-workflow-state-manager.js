@@ -330,10 +330,22 @@ class MultiWorkflowStateManager {
                 owner: workflow.owner
             });
 
+            const evidence = {
+                workflowCreated: !!workflowId,
+                workflowStored: this.activeWorkflows.has(workflowId),
+                sessionMapped: this.workflowSessions.has(sessionId),
+                workflowValid: !!workflow && typeof workflow === 'object'
+            };
+
+            const operationSuccess = evidence.workflowCreated &&
+                                   evidence.workflowStored &&
+                                   evidence.sessionMapped;
+
             return {
-                success: true,
+                success: operationSuccess,
                 workflowId,
                 workflow: {
+                evidence: evidence,
                     id: workflowId,
                     name: workflow.name,
                     type: workflow.type,

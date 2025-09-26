@@ -4,12 +4,12 @@
  * Extends BaseAgent with code review functionality following Factor 10
  */
 
-const { BaseAgent } = require('./base-agent');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
 
-class PragmaticCodeReviewerAgent extends BaseAgent {
+class PragmaticCodeReviewerAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {
         super('pragmatic-code-reviewer', sessionId, {
             maxSteps: 8,
@@ -364,8 +364,31 @@ class PragmaticCodeReviewerAgent extends BaseAgent {
             overall_score: results.categoryAssessment.weightedScore,
             merge_recommendation: results.recommendations.mergeRecommendation,
             total_issues: results.severityClassification.totalIssues,
-            success: true,
             results
+        };
+
+        const evidence = {
+            reviewCompleted: !!results,
+            categoryAssessment: !!results.categoryAssessment,
+            severityClassification: !!results.severityClassification,
+            recommendations: !!results.recommendations,
+            overallScoreGenerated: typeof results.categoryAssessment.weightedScore === 'number'
+        };
+
+        const validation = await this.validateSuccess({
+            evidence: evidence,
+            operation: 'Pragmatic code review workflow',
+            criteria: {
+                reviewCompleted: { required: true },
+                categoryAssessment: { required: true },
+                recommendations: { required: true }
+            }
+        });
+
+        return {
+            ...reviewSummary,
+            success: validation.success,
+            validation: validation
         };
     }
 

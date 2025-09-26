@@ -4,9 +4,9 @@
  * Following Factor 10 principles (≤8 execution steps)
  */
 
-const { BaseAgent } = require('./base-agent');
+const { ValidatedAgent } = require('../core/validated-agent-base');
 
-class ProtocolResearchAgent extends BaseAgent {
+class ProtocolResearchAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {
         super('protocol-research', sessionId, {
             maxSteps: 8,

@@ -241,8 +241,23 @@ class AdvancedAgentCoordinator extends EventEmitter {
                 newTeamSize: coordinationState.agents.size
             });
 
+            const evidence = {
+                agentIntegrated: !!coordinationState.agents.has(agent.agentId),
+                roleAssigned: !!role,
+                agentIdValid: !!agent.agentId,
+                coordinationStateUpdated: true
+            };
+
+            const operationSuccess = evidence.agentIntegrated &&
+                                   evidence.roleAssigned &&
+                                   evidence.agentIdValid;
+
             console.log(`✅ Agent integrated: ${agent.agentId} (role: ${role})`);
-            return { success: true, role: role };
+            return {
+                success: operationSuccess,
+                role: role,
+                evidence: evidence
+            };
 
         } catch (error) {
             console.error(`❌ Failed to add agent ${agent.agentId}:`, error);
@@ -1720,10 +1735,22 @@ class AdvancedHandoffManager {
             }
         }
 
+        const evidence = {
+            handoffCompleted: !!handoffState,
+            stepsExecuted: handoffState.steps.length > 0,
+            durationCalculated: typeof (new Date() - handoffState.startTime) === 'number',
+            handoffStateValid: !!handoffState.startTime
+        };
+
+        const operationSuccess = evidence.handoffCompleted &&
+                               evidence.stepsExecuted &&
+                               evidence.handoffStateValid;
+
         return {
-            success: true,
+            success: operationSuccess,
             steps: handoffState.steps.length,
-            duration: new Date() - handoffState.startTime
+            duration: new Date() - handoffState.startTime,
+            evidence: evidence
         };
     }
 

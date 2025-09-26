@@ -180,10 +180,25 @@ class LonicFlexAgentsService {
 
         // List available agents
         this.app.get('/agents/available', (req, res) => {
+            const agentKeys = Object.keys(this.agentTypes);
+            const poolStatus = this.getAgentPoolStatus();
+
+            const evidence = {
+                agentTypesAvailable: agentKeys.length > 0,
+                agentKeysGenerated: Array.isArray(agentKeys),
+                poolStatusGenerated: !!poolStatus,
+                agentTypesCount: agentKeys.length
+            };
+
+            const operationSuccess = evidence.agentTypesAvailable &&
+                                   evidence.agentKeysGenerated &&
+                                   evidence.poolStatusGenerated;
+
             res.json({
-                success: true,
-                agents: Object.keys(this.agentTypes),
-                agentPool: this.getAgentPoolStatus(),
+                success: operationSuccess,
+                agents: agentKeys,
+                agentPool: poolStatus,
+                evidence: evidence,
                 capabilities: this.getAgentCapabilities()
             });
         });

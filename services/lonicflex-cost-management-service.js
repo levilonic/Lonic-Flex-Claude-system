@@ -219,7 +219,18 @@ class LonicFlexCostManagementService {
             try {
                 const { teamId, projectId, budgetType } = req.query;
                 const budgets = await this.getBudgets({ teamId, projectId, budgetType });
-                res.json({ success: true, budgets });
+                const evidence = {
+                    budgetsRetrieved: !!budgets,
+                    budgetsArray: Array.isArray(budgets),
+                    requestProcessed: true
+                };
+
+                const operationSuccess = evidence.budgetsRetrieved && evidence.requestProcessed;
+                res.json({
+                    success: operationSuccess,
+                    budgets,
+                    evidence: evidence
+                });
             } catch (error) {
                 this.logger.error('Failed to get budgets:', { error: error.message });
                 res.status(500).json({ success: false, error: 'Failed to retrieve budgets' });

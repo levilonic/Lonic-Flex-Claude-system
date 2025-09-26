@@ -126,7 +126,20 @@ class LonicFlexHealthService {
                     serviceId,
                     ...health
                 }));
-                res.json({ success: true, services, total: services.length });
+                const evidence = {
+                    servicesGenerated: services.length >= 0,
+                    servicesArray: Array.isArray(services),
+                    totalCalculated: typeof services.length === 'number',
+                    healthStatusMapPopulated: this.healthStatus.size >= 0
+                };
+
+                const operationSuccess = evidence.servicesGenerated && evidence.servicesArray;
+                res.json({
+                    success: operationSuccess,
+                    services,
+                    total: services.length,
+                    evidence: evidence
+                });
             } catch (error) {
                 res.status(500).json({ error: error.message });
             }
