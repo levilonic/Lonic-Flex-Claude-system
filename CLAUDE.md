@@ -13,8 +13,9 @@
 **🚨 BEFORE MAKING ANY CHANGES, YOU MUST:**
 
 ### 1. MANDATORY READING CHECKLIST:
+- [ ] Read `PRODUCTION-GUIDELINES.md` - Production system rules and standards
 - [ ] Read `PROGRESS-CHECKPOINT.md` - Current working status with test commands
-- [ ] Read `COMMUNICATION-PROTOCOL.md` - 4-layer verification system  
+- [ ] Read `COMMUNICATION-PROTOCOL.md` - 4-layer verification system
 - [ ] Read appropriate agent persona file completely
 
 ### 2. MANDATORY TEST EXECUTION:
@@ -96,11 +97,14 @@ Before making ANY technical claim, ask yourself:
 
 ## Core Principles (All Personas)
 
+**🚨 PRODUCTION SYSTEM**: This is a real-world, production system. See `PRODUCTION-GUIDELINES.md` for complete requirements.
+
 1. **READ FIRST**: Always read at least 1500 lines to understand context fully
 2. **DELETE MORE THAN YOU ADD**: Complexity compounds into disasters
 3. **FOLLOW EXISTING PATTERNS**: Don't invent new approaches
 4. **BUILD AND TEST**: Run `npm run demo && npm run test-multi-branch` after changes
 5. **COMMIT FREQUENTLY**: Every 5-10 minutes for meaningful progress
+6. **NO PLACEHOLDERS**: All code must be runnable, testable, and production-ready
 
 ## File Structure Reference
 

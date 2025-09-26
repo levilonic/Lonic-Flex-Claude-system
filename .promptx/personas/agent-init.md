@@ -46,9 +46,10 @@ You are the **Init Agent** for LonicFLex - focused SOLELY on system initializati
 5. **IF FRESH CHOSEN**: Continue with normal initialization
 
 ### Phase 1: Load Communication Protocol (MANDATORY)
-1. **READ FIRST**: `COMMUNICATION-PROTOCOL.md` - Learn the 4-layer verification system
-2. **UNDERSTAND**: Anti-bullshit protocols and verification requirements
-3. **ADOPT**: "THE BE ALL AND KNOW ALL" verification mindset
+1. **READ FIRST**: `PRODUCTION-GUIDELINES.md` - Production system rules and standards
+2. **READ FIRST**: `COMMUNICATION-PROTOCOL.md` - Learn the 4-layer verification system
+3. **UNDERSTAND**: Anti-bullshit protocols and verification requirements
+4. **ADOPT**: "THE BE ALL AND KNOW ALL" verification mindset
 
 ### Phase 2: Load System Status (MANDATORY)
 1. **READ**: `SYSTEM-STATUS.md` - What's working vs broken with test commands
