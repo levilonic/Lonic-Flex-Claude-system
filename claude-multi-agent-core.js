@@ -1,717 +1,425 @@
-const { ClaudeIntegration } = require('./claude-integration');
-const { BaseAgent, AgentFactory } = require('./agents/base-agent');
-const { GitHubAgent } = require('./agents/github-agent');
-const { SecurityAgent } = require('./agents/security-agent');
-const { CodeAgent } = require('./agents/code-agent');
-const { DeployAgent } = require('./agents/deploy-agent');
-const { CommAgent } = require('./agents/comm-agent');
-const { ProjectAgent } = require('./agents/project-agent');
-const { PragmaticCodeReviewerAgent } = require('./agents/pragmatic-code-reviewer');
-const { SQLiteManager } = require('./database/sqlite-manager');
-const DocumentationService = require('./services/documentation-service');
-const { BranchAwareAgentManager } = require('./services/branch-aware-agent-manager');
-const { CrossBranchCoordinator } = require('./services/cross-branch-coordinator');
-
 /**
- * Multi-Agent Core Coordination Engine
- * Following 12-Factor Agent Principles
+ * Clean Multi-Agent Core - Proper Software Engineering Implementation
+ *
+ * This replaces the corrupted claude-multi-agent-core.js with:
+ * 1. Proper dependency injection using ServiceContainer
+ * 2. Real error handling and verification
+ * 3. No fake success reporting
+ * 4. Evidence-based operations
+ * 5. Clean initialization pattern
  */
-class MultiAgentCore {
+
+const { systemStartup } = require('./system-startup');
+const { MinimalAgent } = require('./agents/minimal-agent');
+const { CleanGitHubAgent } = require('./agents/github-agent-clean');
+const { CleanSecurityAgent } = require('./agents/security-agent-clean');
+
+class CleanMultiAgentCore {
     constructor() {
-        this.claude = new ClaudeIntegration();
+        this.serviceContainer = null;
         this.activeAgents = new Map();
         this.sessionState = null;
-        this.contextHistory = [];
-        this.dbManager = new SQLiteManager();
-        this.docs = DocumentationService.getInstance();
-        
-        // Branch-aware functionality
-        this.branchManager = new BranchAwareAgentManager({ dbManager: this.dbManager });
-        this.crossBranchCoordinator = null;
-        this.branchAwareMode = false;
-        
         this.isInitialized = false;
     }
 
     /**
-     * Initialize the multi-agent system
+     * Initialize the multi-agent system using proper dependency injection
+     * No more individual agent initialization chaos
      */
     async initialize() {
-        if (this.isInitialized) return;
-        
-        await this.dbManager.initialize();
-        await this.branchManager.initialize();
-        
-        this.isInitialized = true;
-        
-        console.log('✅ Multi-Agent Core initialized with database and branch-aware capabilities');
-    }
-
-    /**
-     * Initialize multi-agent session (Factor 5: Unify Execution State)
-     */
-    async initializeSession(sessionId, workflowType, context = {}) {
-        // Ensure core is initialized
-        if (!this.isInitialized) {
-            await this.initialize();
+        if (this.isInitialized) {
+            console.log('⚠️ Multi-Agent Core already initialized');
+            return;
         }
 
-        this.sessionState = {
-            id: sessionId,
-            workflowType,
-            startedAt: Date.now(),
-            context: { ...context },
-            currentPhase: 'initialization',
-            status: 'active'
-        };
-
-        // Create database session
-        await this.dbManager.createSession(sessionId, workflowType, context);
-
-        // Start coordination tracking
-        const workflow = await this.claude.startWorkflow(workflowType, context);
-        
-        // Create real agent instances
-        await this.createAgentInstances(workflow.agentNames, sessionId, context);
-        
-        console.log(`🚀 Multi-Agent Session Started: ${sessionId}`);
-        console.log(`   Workflow: ${workflowType}`);
-        console.log(`   Agents: ${workflow.agentNames.join(' → ')}`);
-        
-        return workflow;
-    }
-
-    /**
-     * Create real agent instances for the session
-     */
-    async createAgentInstances(agentNames, sessionId, context) {
-        for (const agentName of agentNames) {
-            let agent;
-            
-            switch (agentName) {
-                case 'github':
-                    agent = new GitHubAgent(sessionId, context);
-                    break;
-                case 'security':
-                    agent = new SecurityAgent(sessionId, context);
-                    break;
-                case 'code':
-                    agent = new CodeAgent(sessionId, context);
-                    break;
-                case 'deploy':
-                    agent = new DeployAgent(sessionId, context);
-                    break;
-                case 'comm':
-                    agent = new CommAgent(sessionId, context);
-                    break;
-                case 'project':
-                    agent = new ProjectAgent(sessionId, context);
-                    break;
-                case 'code-reviewer':
-                case 'pragmatic-code-reviewer':
-                    agent = new PragmaticCodeReviewerAgent(sessionId, context);
-                    break;
-                default:
-                    throw new Error(`Unknown agent type: ${agentName}`);
-            }
-            
-            // Initialize agent with proper workflowId (not database object)
-            await agent.initialize(`${sessionId}_${agentName}_workflow`);
-            this.activeAgents.set(agentName, agent);
-            
-            console.log(`✅ Created real agent instance: ${agentName}`);
-        }
-    }
-
-    /**
-     * Execute agent workflow with context management (Factor 3)
-     */
-    async executeWorkflow(agentExecutors = {}) {
-        if (!this.sessionState) {
-            throw new Error('Session not initialized');
-        }
+        console.log('🚀 Initializing Clean Multi-Agent Core...');
 
         try {
-            const results = await this.claude.coordinateAgents(async (agentName, context, updateProgress) => {
-                // Get real agent instance
-                const agent = this.activeAgents.get(agentName);
-                if (!agent) {
-                    throw new Error(`Agent ${agentName} not found in active agents`);
-                }
-                
-                // Update session context
-                this.updateSessionContext(agentName, context);
-                
-                console.log(`🤖 Executing real agent: ${agentName}`);
-                
-                // Execute real agent workflow
-                return await agent.execute(context, updateProgress);
-            });
+            // Use proven system startup pattern
+            await systemStartup.initialize();
+            this.serviceContainer = systemStartup.getServiceContainer();
 
-            this.sessionState.status = 'completed';
-            this.sessionState.completedAt = Date.now();
-            
-            return {
-                sessionId: this.sessionState.id,
-                results: Object.fromEntries(results),
-                duration: this.sessionState.completedAt - this.sessionState.startedAt,
-                context: this.generateFinalContext()
-            };
-            
+            // Verify critical services are available
+            const database = this.serviceContainer.getService('database');
+            const memory = this.serviceContainer.getService('memory');
+
+            if (!database || !memory) {
+                throw new Error('Critical services not available after initialization');
+            }
+
+            this.isInitialized = true;
+            console.log('✅ Clean Multi-Agent Core initialized successfully');
+
         } catch (error) {
-            this.sessionState.status = 'failed';
-            this.sessionState.error = error.message;
+            console.error('❌ Multi-Agent Core initialization FAILED:');
+            console.error('Error:', error.message);
+            throw error; // Don't hide failures
+        }
+    }
+
+    /**
+     * Create agent using proper dependency injection
+     * No more bootstrap mode workarounds
+     */
+    async createAgent(agentType, sessionId) {
+        if (!this.isInitialized) {
+            throw new Error('Multi-Agent Core not initialized. Call initialize() first.');
+        }
+
+        console.log(`🔄 Creating ${agentType} agent for session ${sessionId}...`);
+
+        try {
+            let agent = null;
+
+            // Clean agents that follow proper patterns
+            switch (agentType) {
+                case 'minimal':
+                    agent = new MinimalAgent(sessionId, this.serviceContainer);
+                    break;
+
+                case 'github':
+                    agent = new CleanGitHubAgent(sessionId, this.serviceContainer);
+                    break;
+
+                case 'security':
+                    agent = new CleanSecurityAgent(sessionId, this.serviceContainer);
+                    break;
+
+                default:
+                    throw new Error(`Agent type '${agentType}' not yet cleaned up. Available: minimal, github, security`);
+            }
+
+            await agent.initialize();
+            this.activeAgents.set(sessionId, agent);
+
+            console.log(`✅ ${agentType} agent created and initialized`);
+            return agent;
+
+        } catch (error) {
+            console.error(`❌ Failed to create ${agentType} agent:`, error.message);
+            throw error; // Real error handling
+        }
+    }
+
+    /**
+     * Execute workflow with real verification
+     * No fake success claims
+     */
+    async executeWorkflow(workflowType, sessionId = null) {
+        if (!this.isInitialized) {
+            throw new Error('Multi-Agent Core not initialized');
+        }
+
+        sessionId = sessionId || `workflow-${Date.now()}`;
+        console.log(`🎯 Executing ${workflowType} workflow (session: ${sessionId})`);
+
+        try {
+            const startTime = Date.now();
+
+            let result = null;
+
+            switch (workflowType) {
+                case 'minimal':
+                    result = await this.executeMinimalWorkflow(sessionId);
+                    break;
+
+                case 'security-scan':
+                    result = await this.executeSecurityWorkflow(sessionId);
+                    break;
+
+                case 'github-check':
+                    result = await this.executeGitHubWorkflow(sessionId);
+                    break;
+
+                default:
+                    throw new Error(`Workflow type '${workflowType}' not yet implemented. Available: minimal, security-scan, github-check`);
+            }
+
+            const duration = Date.now() - startTime;
+
+            if (result && result.success) {
+                console.log(`✅ ${workflowType} workflow completed in ${duration}ms`);
+                return {
+                    success: true,
+                    workflowType,
+                    sessionId,
+                    duration,
+                    result
+                };
+            } else {
+                console.log(`❌ ${workflowType} workflow failed`);
+                return {
+                    success: false,
+                    workflowType,
+                    sessionId,
+                    duration,
+                    error: result ? result.error : 'Unknown error'
+                };
+            }
+
+        } catch (error) {
+            console.error(`❌ Workflow execution failed:`, error.message);
+            return {
+                success: false,
+                workflowType,
+                sessionId,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Execute security scan workflow
+     */
+    async executeSecurityWorkflow(sessionId) {
+        console.log('🔍 Executing security scan workflow...');
+
+        try {
+            // Create security agent
+            const agent = await this.createAgent('security', sessionId);
+
+            // Execute security scan on agents directory
+            const scanResult = await agent.scanDirectory('./agents');
+
+            // Generate security report
+            const reportResult = await agent.generateReport();
+
+            // Clean up
+            await agent.cleanup();
+            this.activeAgents.delete(sessionId);
+
+            if (scanResult.success && reportResult.success) {
+                console.log('✅ Security workflow completed successfully');
+                console.log(`Found ${scanResult.findings.length} security issues`);
+                console.log(`Risk score: ${scanResult.riskScore}/100`);
+
+                return {
+                    success: true,
+                    scanResults: scanResult,
+                    report: reportResult.report,
+                    summary: `${scanResult.findings.length} findings, risk score ${scanResult.riskScore}/100`
+                };
+            } else {
+                console.log('❌ Security workflow failed');
+                return {
+                    success: false,
+                    error: scanResult.error || reportResult.error
+                };
+            }
+
+        } catch (error) {
+            console.error('❌ Security workflow error:', error.message);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Execute GitHub check workflow
+     */
+    async executeGitHubWorkflow(sessionId) {
+        console.log('🔍 Executing GitHub check workflow...');
+
+        try {
+            // Create GitHub agent
+            const agent = await this.createAgent('github', sessionId);
+
+            // Check repository access
+            const repoResult = await agent.getRepository('levilonic', 'Lonic-Flex-Claude-system');
+
+            // List recent issues
+            const issuesResult = await agent.listIssues('levilonic', 'Lonic-Flex-Claude-system');
+
+            // Clean up
+            await agent.cleanup();
+            this.activeAgents.delete(sessionId);
+
+            if (repoResult.success && issuesResult.success) {
+                console.log('✅ GitHub workflow completed successfully');
+                console.log(`Repository: ${repoResult.repository.full_name}`);
+                console.log(`Issues: ${issuesResult.count} open issues`);
+
+                return {
+                    success: true,
+                    repository: repoResult.repository,
+                    issues: issuesResult.issues,
+                    summary: `${repoResult.repository.full_name}: ${issuesResult.count} open issues`
+                };
+            } else {
+                console.log('❌ GitHub workflow failed');
+                return {
+                    success: false,
+                    error: repoResult.error || issuesResult.error
+                };
+            }
+
+        } catch (error) {
+            console.error('❌ GitHub workflow error:', error.message);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Execute minimal workflow - proven to work
+     */
+    async executeMinimalWorkflow(sessionId) {
+        console.log('🔄 Executing minimal workflow...');
+
+        try {
+            // Create minimal agent
+            const agent = await this.createAgent('minimal', sessionId);
+
+            // Execute task with real verification
+            const result = await agent.executeTask();
+
+            // Clean up
+            await agent.cleanup();
+            this.activeAgents.delete(sessionId);
+
+            if (result.success) {
+                console.log('✅ Minimal workflow completed successfully');
+                console.log('Evidence:', result.verificationData);
+            } else {
+                console.log('❌ Minimal workflow failed:', result.error);
+            }
+
+            return result;
+
+        } catch (error) {
+            console.error('❌ Minimal workflow error:', error.message);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Get system status with real verification
+     */
+    async getSystemStatus() {
+        const status = {
+            initialized: this.isInitialized,
+            activeAgents: this.activeAgents.size,
+            serviceContainer: !!this.serviceContainer
+        };
+
+        if (this.isInitialized && this.serviceContainer) {
+            try {
+                // Verify critical services are actually working
+                const database = this.serviceContainer.getService('database');
+                const memory = this.serviceContainer.getService('memory');
+
+                status.databaseAvailable = !!database;
+                status.memoryAvailable = !!memory;
+
+                // Test database connectivity
+                if (database) {
+                    const testResult = await database.getAllSQL('SELECT 1 as test');
+                    status.databaseWorking = testResult && testResult.length > 0;
+                } else {
+                    status.databaseWorking = false;
+                }
+
+            } catch (error) {
+                status.error = error.message;
+                status.databaseWorking = false;
+            }
+        }
+
+        return status;
+    }
+
+    /**
+     * Clean shutdown
+     */
+    async shutdown() {
+        console.log('🧹 Shutting down Clean Multi-Agent Core...');
+
+        try {
+            // Clean up active agents
+            for (const [sessionId, agent] of this.activeAgents) {
+                if (agent.cleanup) {
+                    await agent.cleanup();
+                }
+            }
+            this.activeAgents.clear();
+
+            // Shutdown system
+            await systemStartup.shutdown();
+
+            this.isInitialized = false;
+            this.serviceContainer = null;
+
+            console.log('✅ Clean shutdown complete');
+
+        } catch (error) {
+            console.error('❌ Shutdown error:', error.message);
             throw error;
         }
     }
-
-    /**
-     * Update session context following Factor 3 (efficient XML format)
-     */
-    async updateSessionContext(agentName, context) {
-        // Get documentation suggestions for next agent in workflow
-        const nextAgentSuggestions = await this.getNextAgentDocumentation(agentName, context);
-        
-        const contextEntry = {
-            timestamp: Date.now(),
-            agent: agentName,
-            context: context,
-            sessionPhase: this.sessionState.currentPhase,
-            documentation_context: nextAgentSuggestions
-        };
-        
-        this.contextHistory.push(contextEntry);
-        this.sessionState.currentPhase = agentName;
-        
-        // Share documentation context with the next agent if available
-        if (nextAgentSuggestions.length > 0) {
-            this.sessionState.shared_documentation = nextAgentSuggestions;
-        }
-    }
-
-    /**
-     * Get documentation suggestions for the next agent in workflow
-     */
-    async getNextAgentDocumentation(currentAgent, context) {
-        // Predict what the next agent might need based on current results
-        let nextAgentType = this.predictNextAgent(currentAgent, context);
-        
-        if (!nextAgentType) return [];
-        
-        try {
-            const suggestions = await this.docs.getSuggestionsForContext(nextAgentType, 'initialization', {
-                previousAgent: currentAgent,
-                handoffContext: context
-            });
-            
-            return suggestions;
-        } catch (error) {
-            console.error('Failed to get next agent documentation:', error.message);
-            return [];
-        }
-    }
-    
-    /**
-     * Predict next agent based on current workflow
-     */
-    predictNextAgent(currentAgent, context) {
-        const workflowMap = {
-            'github': 'security',
-            'security': 'code', 
-            'code': 'deploy',
-            'deploy': 'comm'
-        };
-        
-        return workflowMap[currentAgent] || null;
-    }
-
-    /**
-     * Generate efficient context for LLM (Factor 3: Own Your Context Window)
-     */
-    generateFinalContext() {
-        const contextXml = this.contextHistory.map(entry => {
-            return `<${entry.agent}_execution>
-    timestamp: "${new Date(entry.timestamp).toISOString()}"
-    phase: "${entry.sessionPhase}"
-    context: |
-${JSON.stringify(entry.context, null, 4).split('\n').map(line => '        ' + line).join('\n')}
-</${entry.agent}_execution>`;
-        }).join('\n\n');
-
-        return `<multi_agent_session>
-    session_id: "${this.sessionState.id}"
-    workflow_type: "${this.sessionState.workflowType}"
-    status: "${this.sessionState.status}"
-    duration: "${this.sessionState.completedAt - this.sessionState.startedAt}ms"
-    
-    execution_history:
-${contextXml}
-</multi_agent_session>`;
-    }
-
-    /**
-     * Initialize branch-aware workflow with cross-branch coordination
-     */
-    async initializeBranchAwareWorkflow(sessionId, branches, workflowType, context = {}) {
-        if (!this.isInitialized) {
-            await this.initialize();
-        }
-
-        this.branchAwareMode = true;
-        
-        // Initialize cross-branch coordinator
-        this.crossBranchCoordinator = new CrossBranchCoordinator({
-            dbManager: this.dbManager,
-            sessionId,
-            repository: context.repository
-        });
-        await this.crossBranchCoordinator.initialize();
-
-        console.log(`🌿 Initializing branch-aware workflow: ${workflowType}`);
-        console.log(`   Branches: ${branches.join(', ')}`);
-
-        const branchWorkflows = {};
-
-        // Create agents for each branch
-        for (const branchName of branches) {
-            const branchContext = {
-                ...context,
-                branchName,
-                branchAware: true
-            };
-
-            // Register branch with coordinator
-            await this.crossBranchCoordinator.registerBranch(branchName, branchContext);
-
-            // Create branch-specific agents
-            const branchAgents = await this.branchManager.createAgentsForBranch(
-                sessionId, branchName, ['github', 'security', 'code'], branchContext
-            );
-
-            branchWorkflows[branchName] = {
-                agents: branchAgents,
-                context: branchContext,
-                status: 'initialized'
-            };
-        }
-
-        return {
-            sessionId,
-            workflowType,
-            branches,
-            branchWorkflows,
-            coordinator: this.crossBranchCoordinator
-        };
-    }
-
-    /**
-     * Execute workflow on specific branch
-     */
-    async executeBranchWorkflow(sessionId, branchName, workflowType, context = {}) {
-        if (!this.branchAwareMode) {
-            throw new Error('Branch-aware mode not initialized');
-        }
-
-        console.log(`⚡ Executing ${workflowType} on branch: ${branchName}`);
-
-        // Update branch context in coordinator
-        await this.crossBranchCoordinator.updateBranchContext(branchName, 'workflow_start', {
-            workflowType,
-            startedAt: Date.now()
-        });
-
-        // Execute workflow using branch manager
-        const result = await this.branchManager.executeBranchWorkflow(
-            sessionId, branchName, workflowType, context
-        );
-
-        // Update completion context
-        await this.crossBranchCoordinator.updateBranchContext(branchName, 'workflow_complete', {
-            workflowType,
-            completedAt: Date.now(),
-            result
-        });
-
-        return result;
-    }
-
-    /**
-     * Execute workflows on multiple branches in parallel
-     */
-    async executeParallelBranchWorkflows(sessionId, branchWorkflows) {
-        if (!this.branchAwareMode) {
-            throw new Error('Branch-aware mode not initialized');
-        }
-
-        console.log(`🔄 Executing parallel workflows on ${branchWorkflows.length} branches`);
-
-        const promises = branchWorkflows.map(async ({ branchName, workflowType, context }) => {
-            try {
-                const result = await this.executeBranchWorkflow(sessionId, branchName, workflowType, context);
-
-                const validation = await this.validateWorkflowResult(result, {
-                    branchName,
-                    workflowType,
-                    context
-                });
-
-                return {
-                    branchName,
-                    result,
-                    success: validation.success,
-                    evidence: validation.evidence,
-                    validation: validation,
-                    reason: validation.success ? 'Evidence-based validation passed' : validation.reason
-                };
-            } catch (error) {
-                console.error(`❌ Branch ${branchName} workflow failed:`, error.message);
-                return { branchName, error: error.message, success: false };
-            }
-        });
-
-        const results = await Promise.allSettled(promises);
-        
-        // Process results
-        const successfulBranches = results
-            .filter(r => r.status === 'fulfilled' && r.value.success)
-            .map(r => r.value);
-        
-        const failedBranches = results
-            .filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success))
-            .map(r => r.status === 'fulfilled' ? r.value : { error: r.reason.message });
-
-        return {
-            totalBranches: branchWorkflows.length,
-            successfulBranches,
-            failedBranches,
-            successRate: Math.round((successfulBranches.length / branchWorkflows.length) * 100)
-        };
-    }
-
-    /**
-     * Create branch with GitHub integration
-     */
-    async createBranch(sessionId, branchName, options = {}) {
-        if (!this.isInitialized) {
-            await this.initialize();
-        }
-
-        return await this.branchManager.createBranch(sessionId, branchName, options);
-    }
-
-    /**
-     * Create pull request from branch
-     */
-    async createPullRequest(branchName, options = {}) {
-        if (!this.isInitialized) {
-            await this.initialize();
-        }
-
-        return await this.branchManager.createPullRequest(branchName, options);
-    }
-
-    /**
-     * Get status of all branches
-     */
-    async getBranchStatuses(branches) {
-        if (!this.isInitialized) {
-            await this.initialize();
-        }
-
-        const statuses = {};
-        
-        for (const branchName of branches) {
-            try {
-                statuses[branchName] = await this.branchManager.getBranchStatus(branchName);
-            } catch (error) {
-                statuses[branchName] = { error: error.message };
-            }
-        }
-
-        return statuses;
-    }
-
-    /**
-     * Coordinate action across branches
-     */
-    async coordinateAcrossBranches(sessionId, branches, coordinationTask, actionData = {}) {
-        if (!this.crossBranchCoordinator) {
-            throw new Error('Cross-branch coordinator not initialized');
-        }
-
-        return await this.crossBranchCoordinator.coordinateAction(
-            coordinationTask, branches, actionData
-        );
-    }
-
-    /**
-     * Get cross-branch conflicts
-     */
-    async getCrossBranchConflicts(branches = null) {
-        if (!this.crossBranchCoordinator) {
-            return [];
-        }
-
-        return await this.crossBranchCoordinator.getAllConflicts(branches);
-    }
-
-    /**
-     * Get branch-aware status
-     */
-    getBranchAwareStatus() {
-        return {
-            branchAwareMode: this.branchAwareMode,
-            branchManager: this.branchManager.getStatus(),
-            crossBranchCoordinator: this.crossBranchCoordinator?.getStatus() || null,
-            activeBranches: this.crossBranchCoordinator?.activeBranches.size || 0
-        };
-    }
-
-    /**
-     * Cleanup all agents
-     */
-    async cleanupAgents() {
-        for (const [agentName, agent] of this.activeAgents) {
-            try {
-                await agent.cleanup();
-                console.log(`🧹 Cleaned up agent: ${agentName}`);
-            } catch (error) {
-                console.error(`❌ Error cleaning up ${agentName}:`, error.message);
-            }
-        }
-    }
-
-    /**
-     * Get session status
-     */
-    getSessionStatus() {
-        return this.sessionState;
-    }
-
-    /**
-     * ValidatedAgent-style evidence-based workflow result validation
-     * Eliminates theater code pattern: success: this.validateSuccess() without evidence
-     */
-    async validateWorkflowResult(result, context = {}) {
-        const evidence = {
-            // Basic result structure validation
-            resultExists: !!result,
-            resultHasProperties: result && Object.keys(result).length > 0,
-
-            // Agent completion validation
-            agentsProcessed: result?.agents ? Object.keys(result.agents).length : 0,
-            agentSuccessCount: result?.agents ?
-                Object.values(result.agents).filter(agent =>
-                    agent.status === 'completed' ||
-                    agent.status === 'success' ||
-                    agent.success === true
-                ).length : 0,
-
-            // Workflow status validation
-            workflowStatus: result?.status || result?.success,
-            workflowCompleted: !!(result?.status === 'completed' ||
-                                  result?.status === 'success' ||
-                                  result?.success === true),
-
-            // Context validation
-            branchName: context.branchName,
-            workflowType: context.workflowType,
-
-            // Error validation
-            hasErrors: !!(result?.error || result?.errors),
-            errorCount: result?.errors ? Object.keys(result.errors).length : (result?.error ? 1 : 0)
-        };
-
-        // Validation criteria for workflow success
-        const validationCriteria = {
-            // Must have valid result structure
-            resultExists: { required: true },
-            resultHasProperties: { required: true },
-
-            // If agents exist, at least 50% must succeed
-            agentSuccessRatio: evidence.agentsProcessed > 0 ?
-                (evidence.agentSuccessCount / evidence.agentsProcessed) : 1,
-
-            // Must not have critical errors
-            errorCount: { max: 0 }
-        };
-
-        // Evaluate success based on evidence
-        const successChecks = [];
-
-        // Basic structure checks
-        successChecks.push({
-            check: 'result_structure',
-            passed: evidence.resultExists && evidence.resultHasProperties,
-            evidence: { resultExists: evidence.resultExists, resultHasProperties: evidence.resultHasProperties }
-        });
-
-        // Agent success ratio check (if agents exist)
-        if (evidence.agentsProcessed > 0) {
-            const agentSuccessRatio = evidence.agentSuccessCount / evidence.agentsProcessed;
-            successChecks.push({
-                check: 'agent_success_ratio',
-                passed: agentSuccessRatio >= 0.5, // At least 50% success rate
-                evidence: {
-                    agentsProcessed: evidence.agentsProcessed,
-                    agentSuccessCount: evidence.agentSuccessCount,
-                    successRatio: agentSuccessRatio
-                }
-            });
-        }
-
-        // Workflow completion check
-        successChecks.push({
-            check: 'workflow_completion',
-            passed: evidence.workflowCompleted && !evidence.hasErrors,
-            evidence: {
-                workflowCompleted: evidence.workflowCompleted,
-                hasErrors: evidence.hasErrors,
-                errorCount: evidence.errorCount
-            }
-        });
-
-        // Calculate overall success
-        const passedChecks = successChecks.filter(check => check.passed).length;
-        const totalChecks = successChecks.length;
-        const successRatio = passedChecks / totalChecks;
-        const overallSuccess = successRatio >= 0.75; // 75% of checks must pass
-
-        return {
-            success: overallSuccess,
-            confidence: successRatio,
-            evidence: evidence,
-            validation: {
-                checks: successChecks,
-                passedChecks: passedChecks,
-                totalChecks: totalChecks,
-                successRatio: successRatio,
-                criteria: validationCriteria
-            },
-            reason: overallSuccess ?
-                `Validation passed: ${passedChecks}/${totalChecks} checks successful` :
-                `Validation failed: only ${passedChecks}/${totalChecks} checks passed (need ${Math.ceil(totalChecks * 0.75)})`
-        };
-    }
-
-    /**
-     * Clean up session
-     */
-    async cleanup() {
-        await this.cleanupAgents();
-        this.activeAgents.clear();
-        this.contextHistory = [];
-        this.sessionState = null;
-
-        if (this.dbManager) {
-            await this.dbManager.close();
-        }
-    }
 }
 
-/**
- * Real multi-agent workflow execution with actual GitHub operations
- */
-async function demonstrateMultiAgentWorkflow() {
-    console.log('🤖 Multi-Agent Core - Real Workflow Execution\n');
-    
-    const core = new MultiAgentCore();
-    
-    try {
-        // Get real repository information from git config
-        const { execSync } = require('child_process');
-        let repoInfo = {};
-        
-        try {
-            const remoteUrl = execSync('git remote get-url origin', { encoding: 'utf8' }).trim();
-            const repoMatch = remoteUrl.match(/github\.com[:/]([^/]+)\/([^/.]+)/);
-            
-            if (repoMatch) {
-                repoInfo = {
-                    owner: repoMatch[1],
-                    repo: repoMatch[2],
-                    repository: `${repoMatch[1]}/${repoMatch[2]}`
-                };
-                console.log(`📂 Detected repository: ${repoInfo.repository}`);
-            } else {
-                throw new Error('Not a GitHub repository');
-            }
-        } catch (error) {
-            console.log('⚠️  Could not detect GitHub repository, using environment config');
-            repoInfo = {
-                owner: process.env.GITHUB_OWNER || 'test-owner',
-                repo: process.env.GITHUB_REPO || 'test-repo',
-                repository: process.env.GITHUB_REPOSITORY || 'test-owner/test-repo'
-            };
-        }
+module.exports = { CleanMultiAgentCore };
 
-        // Initialize session with real repository data
-        const sessionId = `real_session_${Date.now()}`;
-        await core.initializeSession(sessionId, 'feature_development', {
-            ...repoInfo,
-            feature: 'multi-agent-integration',
-            branch: `feature/integration-${Date.now()}`,
-            realOperations: true
-        });
-        
-        // Test branch-aware functionality if requested
-        if (process.env.TEST_BRANCH_AWARE === 'true') {
-            console.log('\n🌿 Testing branch-aware functionality...');
-            
-            const testBranches = [`feature/test-${Date.now()}`];
-            
-            // Initialize branch-aware workflow
-            await core.initializeBranchAwareWorkflow(
-                sessionId,
-                testBranches,
-                'feature_development',
-                { ...repoInfo, testMode: true }
-            );
-            
-            // Create real branch on GitHub
-            const branchResult = await core.createBranch(sessionId, testBranches[0], {
-                baseBranch: 'main',
-                branchType: 'feature',
-                agentTypes: ['github']
-            });
-            
-            console.log(`   ✅ Branch operation: ${branchResult.existing ? 'existing' : 'created'}`);
-            
-            // Get real branch status
-            const branchStatuses = await core.getBranchStatuses(testBranches);
-            console.log(`   ✅ Branch status: ${branchStatuses[testBranches[0]]?.exists ? 'exists' : 'not found'}`);
-        }
-
-        // Execute workflow with real agents
-        const result = await core.executeWorkflow();
-        
-        console.log('\n🎉 Real Multi-Agent Workflow Completed Successfully!');
-        console.log(`   Session: ${result.sessionId}`);
-        console.log(`   Duration: ${result.duration}ms`);
-        console.log(`   Agents executed: ${Object.keys(result.results).length}`);
-        console.log(`   Repository: ${repoInfo.repository}`);
-        console.log(`   Real operations: ${result.context.includes('real') ? 'YES' : 'standard'}`);
-        
-        // Show branch-aware status if active
-        const branchStatus = core.getBranchAwareStatus();
-        if (branchStatus.branchAwareMode) {
-            console.log('\n🌿 Branch-Aware Status:');
-            console.log(`   Active branches: ${branchStatus.activeBranches}`);
-            console.log(`   GitHub connected: ${branchStatus.branchManager.githubConnected}`);
-        }
-        
-    } catch (error) {
-        console.error('❌ Workflow failed:', error.message);
-    } finally {
-        await core.cleanup();
-    }
-}
-
-module.exports = {
-    MultiAgentCore
-};
-
-// Run demo if called directly
+// For testing - demonstrate clean architecture
 if (require.main === module) {
-    demonstrateMultiAgentWorkflow().catch(console.error);
+    async function demonstrateCleanSystem() {
+        console.log('🧪 Demonstrating Clean Multi-Agent System...');
+
+        const core = new CleanMultiAgentCore();
+
+        try {
+            // Test system initialization
+            await core.initialize();
+
+            // Test system status
+            const status = await core.getSystemStatus();
+            console.log('📊 System status:', status);
+
+            // Test multiple workflows
+            console.log('\n🧪 Testing workflows...');
+
+            // Test minimal workflow
+            const minimalResult = await core.executeWorkflow('minimal');
+            console.log('📋 Minimal workflow:', minimalResult.success ? 'SUCCESS' : 'FAILED');
+
+            // Test security workflow
+            const securityResult = await core.executeWorkflow('security-scan');
+            console.log('📋 Security workflow:', securityResult.success ? 'SUCCESS' : 'FAILED');
+            if (securityResult.success) {
+                console.log('   ', securityResult.summary);
+            }
+
+            // Test GitHub workflow
+            const githubResult = await core.executeWorkflow('github-check');
+            console.log('📋 GitHub workflow:', githubResult.success ? 'SUCCESS' : 'FAILED');
+            if (githubResult.success) {
+                console.log('   ', githubResult.summary);
+            }
+
+            const allSuccessful = minimalResult.success && securityResult.success && githubResult.success;
+
+            if (allSuccessful) {
+                console.log('\n🎉 Clean Multi-Agent System: ALL WORKFLOWS WORKING!');
+            } else {
+                console.log('\n❌ Some workflows failed');
+            }
+
+            // Clean shutdown
+            await core.shutdown();
+
+        } catch (error) {
+            console.error('❌ Demonstration failed:', error.message);
+            console.error('Stack:', error.stack);
+            process.exit(1);
+        }
+    }
+
+    demonstrateCleanSystem();
 }
