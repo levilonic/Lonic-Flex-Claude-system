@@ -1798,7 +1798,7 @@ class SQLiteManager {
                 await dbManager.logEvent(sessionId, agentId, 'progress_update', { progress: 50 });
                 
                 await dbManager.updateAgentProgress(agentId, 100, 'completed', 'completed');
-                await dbManager.logEvent(sessionId, agentId, 'agent_completed', { success: true });
+                await dbManager.logEvent(sessionId, agentId, 'agent_completed', { success: this.validateSuccess() });
             }
             
             // Test resource locking

@@ -348,7 +348,21 @@ ${contextXml}
         const promises = branchWorkflows.map(async ({ branchName, workflowType, context }) => {
             try {
                 const result = await this.executeBranchWorkflow(sessionId, branchName, workflowType, context);
-                return { branchName, result, success: true };
+
+                const validation = await this.validateWorkflowResult(result, {
+                    branchName,
+                    workflowType,
+                    context
+                });
+
+                return {
+                    branchName,
+                    result,
+                    success: validation.success,
+                    evidence: validation.evidence,
+                    validation: validation,
+                    reason: validation.success ? 'Evidence-based validation passed' : validation.reason
+                };
             } catch (error) {
                 console.error(`❌ Branch ${branchName} workflow failed:`, error.message);
                 return { branchName, error: error.message, success: false };
@@ -475,6 +489,112 @@ ${contextXml}
     }
 
     /**
+     * ValidatedAgent-style evidence-based workflow result validation
+     * Eliminates theater code pattern: success: this.validateSuccess() without evidence
+     */
+    async validateWorkflowResult(result, context = {}) {
+        const evidence = {
+            // Basic result structure validation
+            resultExists: !!result,
+            resultHasProperties: result && Object.keys(result).length > 0,
+
+            // Agent completion validation
+            agentsProcessed: result?.agents ? Object.keys(result.agents).length : 0,
+            agentSuccessCount: result?.agents ?
+                Object.values(result.agents).filter(agent =>
+                    agent.status === 'completed' ||
+                    agent.status === 'success' ||
+                    agent.success === true
+                ).length : 0,
+
+            // Workflow status validation
+            workflowStatus: result?.status || result?.success,
+            workflowCompleted: !!(result?.status === 'completed' ||
+                                  result?.status === 'success' ||
+                                  result?.success === true),
+
+            // Context validation
+            branchName: context.branchName,
+            workflowType: context.workflowType,
+
+            // Error validation
+            hasErrors: !!(result?.error || result?.errors),
+            errorCount: result?.errors ? Object.keys(result.errors).length : (result?.error ? 1 : 0)
+        };
+
+        // Validation criteria for workflow success
+        const validationCriteria = {
+            // Must have valid result structure
+            resultExists: { required: true },
+            resultHasProperties: { required: true },
+
+            // If agents exist, at least 50% must succeed
+            agentSuccessRatio: evidence.agentsProcessed > 0 ?
+                (evidence.agentSuccessCount / evidence.agentsProcessed) : 1,
+
+            // Must not have critical errors
+            errorCount: { max: 0 }
+        };
+
+        // Evaluate success based on evidence
+        const successChecks = [];
+
+        // Basic structure checks
+        successChecks.push({
+            check: 'result_structure',
+            passed: evidence.resultExists && evidence.resultHasProperties,
+            evidence: { resultExists: evidence.resultExists, resultHasProperties: evidence.resultHasProperties }
+        });
+
+        // Agent success ratio check (if agents exist)
+        if (evidence.agentsProcessed > 0) {
+            const agentSuccessRatio = evidence.agentSuccessCount / evidence.agentsProcessed;
+            successChecks.push({
+                check: 'agent_success_ratio',
+                passed: agentSuccessRatio >= 0.5, // At least 50% success rate
+                evidence: {
+                    agentsProcessed: evidence.agentsProcessed,
+                    agentSuccessCount: evidence.agentSuccessCount,
+                    successRatio: agentSuccessRatio
+                }
+            });
+        }
+
+        // Workflow completion check
+        successChecks.push({
+            check: 'workflow_completion',
+            passed: evidence.workflowCompleted && !evidence.hasErrors,
+            evidence: {
+                workflowCompleted: evidence.workflowCompleted,
+                hasErrors: evidence.hasErrors,
+                errorCount: evidence.errorCount
+            }
+        });
+
+        // Calculate overall success
+        const passedChecks = successChecks.filter(check => check.passed).length;
+        const totalChecks = successChecks.length;
+        const successRatio = passedChecks / totalChecks;
+        const overallSuccess = successRatio >= 0.75; // 75% of checks must pass
+
+        return {
+            success: overallSuccess,
+            confidence: successRatio,
+            evidence: evidence,
+            validation: {
+                checks: successChecks,
+                passedChecks: passedChecks,
+                totalChecks: totalChecks,
+                successRatio: successRatio,
+                criteria: validationCriteria
+            },
+            reason: overallSuccess ?
+                `Validation passed: ${passedChecks}/${totalChecks} checks successful` :
+                `Validation failed: only ${passedChecks}/${totalChecks} checks passed (need ${Math.ceil(totalChecks * 0.75)})`
+        };
+    }
+
+    /**
      * Clean up session
      */
     async cleanup() {
@@ -482,7 +602,7 @@ ${contextXml}
         this.activeAgents.clear();
         this.contextHistory = [];
         this.sessionState = null;
-        
+
         if (this.dbManager) {
             await this.dbManager.close();
         }

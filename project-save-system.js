@@ -67,9 +67,10 @@ class ProjectSaveSystem {
             // Step 6: Generate save confirmation
             const duration = Date.now() - startTime;
             await this.generateSaveConfirmation(preservationResult, options, duration);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 projectId: projectContext.projectId,
                 sessionId: this.sessionId,
                 preservationLevel: this.saveMetadata.preservationLevel,

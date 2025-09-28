@@ -372,8 +372,10 @@ class MultiWorkflowStateManager {
             let workflow = this.activeWorkflows.get(workflowId);
 
             if (workflow) {
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     workflowId,
                     state: workflow,
                     source: 'active'
@@ -400,8 +402,9 @@ class MultiWorkflowStateManager {
                     updatedAt: row.updated_at
                 };
 
-                return {
-                    success: true,
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     workflowId,
                     state: workflow,
                     source: 'database'
@@ -483,8 +486,9 @@ class MultiWorkflowStateManager {
                 createdBy
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 workflowId,
                 workflowState
             };
@@ -503,8 +507,10 @@ class MultiWorkflowStateManager {
             // Check if already active
             if (this.activeWorkflows.has(workflowId)) {
                 this.logger.info('Workflow already active', { workflowId });
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     workflowId,
                     workflowState: this.activeWorkflows.get(workflowId),
                     resumed: false
@@ -582,8 +588,9 @@ class MultiWorkflowStateManager {
                 completionPercentage: workflowState.completionPercentage
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 workflowId,
                 workflowState,
                 resumed: true
@@ -645,8 +652,9 @@ class MultiWorkflowStateManager {
 
             this.logger.info('Workflow step added', { workflowId, stepName, stepType });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 stepId,
                 step
             };
@@ -721,7 +729,7 @@ class MultiWorkflowStateManager {
                 status: updateData.status
             });
 
-            return { success: true };
+            return { success: this.validateSuccess() };
 
         } catch (error) {
             this.logger.error('Failed to update workflow step', {
@@ -778,8 +786,9 @@ class MultiWorkflowStateManager {
 
             this.logger.info('Conditional rule added', { workflowId, ruleName, actionType });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 ruleId,
                 rule
             };
@@ -1375,8 +1384,9 @@ class MultiWorkflowStateManager {
                 }
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 workflowId,
                 workflow,
                 enterpriseFeatures: true

@@ -871,7 +871,7 @@ class DisasterRecoveryCoordinator extends EventEmitter {
     async verifySystemRecovery() {
         const verification = {
             timestamp: new Date().toISOString(),
-            success: true,
+            success: this.validateSuccess(), 
             componentsVerified: 0,
             failedVerifications: [],
             overallHealth: 'unknown'

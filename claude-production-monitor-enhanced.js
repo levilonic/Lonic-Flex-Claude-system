@@ -561,17 +561,32 @@ class ProductionMonitorEnhanced extends EventEmitter {
         this.app.get('/system/gc', (req, res) => {
             if (global.gc) {
                 const before = process.memoryUsage();
-                global.gc();
-                const after = process.memoryUsage();
-                
-                res.json({
-                    success: true,
-                    before: before,
-                    after: after,
-                    freed: before.heapUsed - after.heapUsed,
-                    timestamp: new Date().toISOString(),
-                    correlationId: req.correlationId
-                });
+
+                try {
+                    global.gc();
+                    const after = process.memoryUsage();
+                    const freed = before.heapUsed - after.heapUsed;
+
+                    const validation = this.validateGarbageCollection(before, after, freed);
+
+                    res.json({
+                        success: validation.success,
+                        before: before,
+                        after: after,
+                        freed: freed,
+                        timestamp: new Date().toISOString(),
+                        correlationId: req.correlationId,
+                        validation: validation,
+                        evidence: validation.evidence
+                    });
+                } catch (error) {
+                    res.status(500).json({
+                        success: false,
+                        error: 'Garbage collection failed',
+                        message: error.message,
+                        correlationId: req.correlationId
+                    });
+                }
             } else {
                 res.status(400).json({
                     error: 'Garbage collection not available',
@@ -1528,6 +1543,101 @@ class ProductionMonitorEnhanced extends EventEmitter {
             this.logger.error('Failed to start enhanced production monitor', { error: error.message });
             throw error;
         }
+    }
+
+    /**
+     * ValidatedAgent-style evidence-based garbage collection validation
+     * Eliminates theater code pattern: success: this.validateSuccess() without evidence
+     */
+    validateGarbageCollection(beforeMemory, afterMemory, freedBytes) {
+        const evidence = {
+            // Memory measurement validation
+            beforeMemoryValid: beforeMemory && typeof beforeMemory.heapUsed === 'number',
+            afterMemoryValid: afterMemory && typeof afterMemory.heapUsed === 'number',
+
+            // Garbage collection effectiveness
+            memoryFreed: freedBytes,
+            memoryFreedPositive: freedBytes > 0,
+            memoryFreedSignificant: freedBytes > 1024 * 1024, // > 1MB
+
+            // Memory state validation
+            beforeHeapUsed: beforeMemory?.heapUsed || 0,
+            afterHeapUsed: afterMemory?.heapUsed || 0,
+            heapReduction: beforeMemory && afterMemory ?
+                (beforeMemory.heapUsed - afterMemory.heapUsed) / beforeMemory.heapUsed : 0,
+
+            // System state after GC
+            remainingHeapUsage: afterMemory?.heapUsed || 0,
+            heapUtilization: afterMemory && afterMemory.heapTotal ?
+                (afterMemory.heapUsed / afterMemory.heapTotal) : 0
+        };
+
+        // Validation criteria for successful garbage collection
+        const successChecks = [];
+
+        // Memory measurements validity check
+        successChecks.push({
+            check: 'valid_memory_measurements',
+            passed: evidence.beforeMemoryValid && evidence.afterMemoryValid,
+            evidence: {
+                beforeMemoryValid: evidence.beforeMemoryValid,
+                afterMemoryValid: evidence.afterMemoryValid
+            }
+        });
+
+        // Memory actually freed check
+        successChecks.push({
+            check: 'memory_freed',
+            passed: evidence.memoryFreedPositive,
+            evidence: {
+                memoryFreed: evidence.memoryFreed,
+                memoryFreedPositive: evidence.memoryFreedPositive
+            }
+        });
+
+        // GC effectiveness check (optional - some GCs may not free much)
+        if (evidence.beforeHeapUsed > 10 * 1024 * 1024) { // Only if started with >10MB
+            successChecks.push({
+                check: 'gc_effectiveness',
+                passed: evidence.memoryFreedSignificant || evidence.heapReduction > 0.05, // >5% reduction OR >1MB
+                evidence: {
+                    memoryFreedSignificant: evidence.memoryFreedSignificant,
+                    heapReduction: evidence.heapReduction,
+                    beforeHeapUsed: evidence.beforeHeapUsed
+                }
+            });
+        }
+
+        // System stability check
+        successChecks.push({
+            check: 'system_stability',
+            passed: evidence.afterMemoryValid && evidence.heapUtilization < 0.95, // <95% heap usage
+            evidence: {
+                heapUtilization: evidence.heapUtilization,
+                remainingHeapUsage: evidence.remainingHeapUsage
+            }
+        });
+
+        // Calculate overall success
+        const passedChecks = successChecks.filter(check => check.passed).length;
+        const totalChecks = successChecks.length;
+        const successRatio = passedChecks / totalChecks;
+        const overallSuccess = successRatio >= 0.75; // 75% of checks must pass
+
+        return {
+            success: overallSuccess,
+            confidence: successRatio,
+            evidence: evidence,
+            validation: {
+                checks: successChecks,
+                passedChecks: passedChecks,
+                totalChecks: totalChecks,
+                successRatio: successRatio
+            },
+            reason: overallSuccess ?
+                `Garbage collection validation passed: ${passedChecks}/${totalChecks} checks successful` :
+                `Garbage collection validation failed: only ${passedChecks}/${totalChecks} checks passed`
+        };
     }
 
     /**

@@ -195,8 +195,9 @@ class ComplianceReporter {
                 realTimeAlerts: this.config.enableRealTimeAlerts
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 frameworksSupported: Object.keys(this.complianceFrameworks),
                 initialized: true
             };
@@ -363,8 +364,9 @@ class ComplianceReporter {
                 executionTime: report.executionTime
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 reportId,
                 report,
                 pdfPath: report.pdfPath
@@ -672,8 +674,9 @@ class ComplianceReporter {
                 };
             }
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 data: dashboardData
             };
 

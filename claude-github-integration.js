@@ -340,12 +340,23 @@ class GitHubActionsManager {
                     inputs
                 });
             }, 'high');
-            
-            return {
-                success: true,
-                workflow_id: workflowId,
+
+            const validation = this.validateWorkflowDispatch(result, {
+                owner,
+                repo,
+                workflowId,
                 ref,
                 inputs
+            });
+
+            return {
+                success: validation.success,
+                workflow_id: workflowId,
+                ref,
+                inputs,
+                github_response: result,
+                validation: validation,
+                evidence: validation.evidence
             };
             
         } catch (error) {
@@ -388,6 +399,99 @@ class GitHubActionsManager {
      */
     getActiveWorkflows() {
         return Array.from(this.activeWorkflows.values());
+    }
+
+    /**
+     * ValidatedAgent-style evidence-based workflow dispatch validation
+     * Eliminates theater code pattern: success: this.validateSuccess() without evidence
+     */
+    validateWorkflowDispatch(githubResult, context = {}) {
+        const evidence = {
+            // GitHub API response validation
+            responseReceived: !!githubResult,
+            responseStatus: githubResult?.status,
+            responseHeaders: githubResult?.headers,
+
+            // Workflow dispatch validation
+            workflowId: context.workflowId,
+            owner: context.owner,
+            repo: context.repo,
+            ref: context.ref,
+
+            // GitHub API success indicators
+            statusCode: githubResult?.status,
+            isSuccessStatus: githubResult?.status >= 200 && githubResult?.status < 300,
+
+            // Response data validation
+            hasResponseData: githubResult?.data !== undefined,
+            responseDataType: typeof githubResult?.data,
+
+            // Error indicators
+            hasError: !!(githubResult?.error || githubResult?.message?.includes('error')),
+            rateLimitExceeded: githubResult?.status === 403 || githubResult?.headers?.['x-ratelimit-remaining'] === '0'
+        };
+
+        // Validation criteria for workflow dispatch success
+        const successChecks = [];
+
+        // Response structure check
+        successChecks.push({
+            check: 'response_received',
+            passed: evidence.responseReceived,
+            evidence: { responseReceived: evidence.responseReceived }
+        });
+
+        // HTTP status code check
+        successChecks.push({
+            check: 'success_status_code',
+            passed: evidence.isSuccessStatus,
+            evidence: {
+                statusCode: evidence.statusCode,
+                isSuccessStatus: evidence.isSuccessStatus
+            }
+        });
+
+        // No error indicators check
+        successChecks.push({
+            check: 'no_errors',
+            passed: !evidence.hasError && !evidence.rateLimitExceeded,
+            evidence: {
+                hasError: evidence.hasError,
+                rateLimitExceeded: evidence.rateLimitExceeded
+            }
+        });
+
+        // Context validation check
+        successChecks.push({
+            check: 'valid_context',
+            passed: !!(context.workflowId && context.owner && context.repo),
+            evidence: {
+                workflowId: !!context.workflowId,
+                owner: !!context.owner,
+                repo: !!context.repo
+            }
+        });
+
+        // Calculate overall success
+        const passedChecks = successChecks.filter(check => check.passed).length;
+        const totalChecks = successChecks.length;
+        const successRatio = passedChecks / totalChecks;
+        const overallSuccess = successRatio >= 0.75; // 75% of checks must pass
+
+        return {
+            success: overallSuccess,
+            confidence: successRatio,
+            evidence: evidence,
+            validation: {
+                checks: successChecks,
+                passedChecks: passedChecks,
+                totalChecks: totalChecks,
+                successRatio: successRatio
+            },
+            reason: overallSuccess ?
+                `Workflow dispatch validation passed: ${passedChecks}/${totalChecks} checks successful` :
+                `Workflow dispatch validation failed: only ${passedChecks}/${totalChecks} checks passed (need ${Math.ceil(totalChecks * 0.75)})`
+        };
     }
 }
 

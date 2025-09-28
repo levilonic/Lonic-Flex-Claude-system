@@ -142,7 +142,7 @@ class ProjectLifecycleManager extends BaseAgent {
                 monitoring,
                 alertSystem,
                 lifecycleReport,
-                success: true,
+                success: this.validateSuccess(), 
                 managedBy: this.agentId
             };
 

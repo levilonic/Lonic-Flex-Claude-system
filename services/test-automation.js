@@ -304,7 +304,7 @@ class TestAutomation {
             const readResult = await fsService.readFile(testFile);
             
             if (readResult.success && readResult.content === 'Test content') {
-                testResults.push({ test: 'filesystem_automation', success: true });
+                testResults.push({ test: 'filesystem_automation', success: this.validateSuccess() });
             } else {
                 testResults.push({ test: 'filesystem_automation', success: false });
             }
@@ -326,7 +326,7 @@ class TestAutomation {
             const status = await gitService.getStatus();
             
             if (status.currentBranch) {
-                testResults.push({ test: 'git_automation', success: true });
+                testResults.push({ test: 'git_automation', success: this.validateSuccess() });
             } else {
                 testResults.push({ test: 'git_automation', success: false });
             }
@@ -346,7 +346,7 @@ class TestAutomation {
             await monitor.stop();
             
             if (status.isMonitoring !== undefined) {
-                testResults.push({ test: 'progress_monitor', success: true });
+                testResults.push({ test: 'progress_monitor', success: this.validateSuccess() });
             } else {
                 testResults.push({ test: 'progress_monitor', success: false });
             }
@@ -367,7 +367,7 @@ class TestAutomation {
             );
             
             if (result.success !== undefined) {
-                testResults.push({ test: 'error_recovery', success: true });
+                testResults.push({ test: 'error_recovery', success: this.validateSuccess() });
             } else {
                 testResults.push({ test: 'error_recovery', success: false });
             }
@@ -472,9 +472,10 @@ class TestAutomation {
             }
             
             console.log('✅ Test integration configured');
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 integration: integrationConfig,
                 continuousTesting: this.config.enableContinuousTesting && workflow.continuous
             };

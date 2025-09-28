@@ -357,8 +357,9 @@ Created: ${runManifest.created}
                 hasInitialCommit: createInitialCommit
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 branchName: fullBranchName,
                 sha: finalSha,
                 url: newRef.url,
@@ -385,8 +386,9 @@ Created: ${runManifest.created}
 
             this.stats.apiCalls++;
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 branches: branches.map(branch => ({
                     name: branch.name,
                     sha: branch.commit.sha,
@@ -433,8 +435,9 @@ Created: ${runManifest.created}
                 url: pr.html_url
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 pr: {
                     number: pr.number,
                     url: pr.html_url,
@@ -463,8 +466,9 @@ Created: ${runManifest.created}
 
             this.stats.apiCalls++;
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 pullRequests: prs.map(pr => ({
                     number: pr.number,
                     title: pr.title,
@@ -505,8 +509,9 @@ Created: ${runManifest.created}
                 url: issue.html_url
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 issue: {
                     number: issue.number,
                     url: issue.html_url,
@@ -533,8 +538,9 @@ Created: ${runManifest.created}
 
             this.stats.apiCalls++;
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 repository: {
                     name: repo.name,
                     fullName: repo.full_name,
@@ -573,7 +579,9 @@ Created: ${runManifest.created}
                     break;
             }
 
-            return { success: true, event, coordinated: true };
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, event, coordinated: true };
 
         } catch (error) {
             this.logger.error('Service coordination failed', { error: error.message, event });

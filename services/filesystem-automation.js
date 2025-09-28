@@ -125,8 +125,10 @@ class FileSystemAutomation {
     async readFile(filePath, options = {}) {
         try {
             const content = await fs.readFile(filePath, options.encoding || 'utf8');
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 filePath: filePath,
                 content: content,
                 size: Buffer.byteLength(content, options.encoding || 'utf8')
@@ -153,8 +155,10 @@ class FileSystemAutomation {
             await fs.mkdir(dirPath, { recursive: true, ...options });
             
             console.log(`📁 Directory created: ${dirPath}`);
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 operationId: operationId,
                 dirPath: dirPath
             };
@@ -182,9 +186,10 @@ class FileSystemAutomation {
                 encoding: null, // Preserve binary content
                 ...options
             });
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 operationId: operationId,
                 sourcePath: sourcePath,
                 destPath: destPath,
@@ -216,8 +221,10 @@ class FileSystemAutomation {
             
             // Check if file exists
             if (!await this.fileExists(filePath)) {
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     message: 'File already does not exist',
                     operationId: operationId,
                     filePath: filePath
@@ -236,9 +243,10 @@ class FileSystemAutomation {
             // Log operation
             this.operations.set(operationId, operation);
             console.log(`✅ File deleted: ${filePath}`);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 operationId: operationId,
                 filePath: filePath,
                 backupPath: operation.backupPath
@@ -284,8 +292,10 @@ class FileSystemAutomation {
             this.operations.delete(operationId);
             
             console.log(`✅ Rollback completed: ${operationId}`);
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 operationId: operationId,
                 rolledBackAt: Date.now()
             };
@@ -364,9 +374,10 @@ class FileSystemAutomation {
             }
             
             console.log(`✅ Project structure created: ${createdItems.length} items`);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 operationId: operationId,
                 projectPath: projectPath,
                 template: template,

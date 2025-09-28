@@ -5,18 +5,17 @@
  */
 
 const { getGlobalServiceContainer } = require('../services/service-container');
-const { ValidatedAgent } = require('../core/validated-agent-base');
 
-class BaseAgent extends ValidatedAgent {
+class BaseAgent {
     constructor(agentName, sessionId, config = {}) {
-        // Call ValidatedAgent parent constructor
-        super(agentName, sessionId, {
+        // Base agent initialization
+        this.agentName = agentName;
+        this.sessionId = sessionId;
+        this.config = {
             maxSteps: 8,
             timeout: 30000,
             ...config
-        });
-
-        this.config = { maxSteps: 8, timeout: 30000, ...config };
+        };
 
         // Get shared services from ServiceContainer (dependency injection)
         this.serviceContainer = getGlobalServiceContainer();

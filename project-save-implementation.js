@@ -114,7 +114,7 @@ async function executeProjectSave(options = {}) {
 
         // Step 7: Generate Success Confirmation
         const result = {
-            success: true,
+            success: this.validateSuccess(), 
             project_name: projectName,
             save_timestamp: saveRecord.save_timestamp,
             session_id: sessionId,

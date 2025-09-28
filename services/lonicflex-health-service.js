@@ -155,7 +155,7 @@ class LonicFlexHealthService {
 
                 const history = this.healthHistory.get(req.params.serviceId) || [];
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     service: req.params.serviceId,
                     health,
                     history: history.slice(-10) // Last 10 checks
@@ -194,7 +194,8 @@ class LonicFlexHealthService {
                     id: alertId,
                     ...alert
                 }));
-                res.json({ success: true, alerts, total: alerts.length });
+                res.json({
+            success: this.validateSuccess(),   alerts, total: alerts.length });
             } catch (error) {
                 res.status(500).json({ error: error.message });
             }
@@ -204,7 +205,8 @@ class LonicFlexHealthService {
         this.app.get('/metrics', (req, res) => {
             try {
                 const metrics = Object.fromEntries(this.metrics);
-                res.json({ success: true, metrics, timestamp: new Date() });
+                res.json({
+            success: this.validateSuccess(),   metrics, timestamp: new Date() });
             } catch (error) {
                 res.status(500).json({ error: error.message });
             }
@@ -318,8 +320,9 @@ class LonicFlexHealthService {
 
         this.logger.info('Service registered for monitoring', { id, name, url, critical });
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             service: { id, name, url, critical },
             message: 'Service registered successfully'
         };
@@ -436,8 +439,9 @@ class LonicFlexHealthService {
                 consecutiveFailures: health.consecutiveFailures
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 serviceId,
                 health
             };
@@ -601,8 +605,9 @@ class LonicFlexHealthService {
             ...alert
         }));
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             timestamp: new Date(),
             overview: {
                 totalServices: this.serviceRegistry.size,
@@ -635,7 +640,9 @@ class LonicFlexHealthService {
                     break;
             }
 
-            return { success: true, event, coordinated: true };
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, event, coordinated: true };
 
         } catch (error) {
             this.logger.error('Service coordination failed', { error: error.message, event });

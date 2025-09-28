@@ -440,8 +440,9 @@ class LonicFlexSlackService {
                 ts: result.ts
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 ts: result.ts,
                 channel: result.channel
             };
@@ -468,8 +469,9 @@ class LonicFlexSlackService {
                 ts: result.ts
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 ts: result.ts,
                 channel: result.channel
             };
@@ -503,7 +505,9 @@ class LonicFlexSlackService {
                     break;
             }
 
-            return { success: true, event, coordinated: true };
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, event, coordinated: true };
 
         } catch (error) {
             this.logger.error('Service coordination failed', { error: error.message, event });

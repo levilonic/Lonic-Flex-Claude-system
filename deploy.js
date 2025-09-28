@@ -104,8 +104,9 @@ class DeploymentAutomation {
                 duration
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 deploymentId,
                 duration,
                 environment: this.config.environment

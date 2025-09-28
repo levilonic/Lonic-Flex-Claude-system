@@ -4,7 +4,7 @@
  * IMPLEMENTS: Production-ready agents with ReAct self-correction cycles
  *
  * Key improvements:
- * - No more hardcoded "success: true"
+ * - No more hardcoded "success: this.validateSuccess()"
  * - Real validation of every claimed success
  * - Self-correction loops when validation fails
  * - Sandboxed execution environment
@@ -774,7 +774,7 @@ async function demoValidatedAgent() {
 
         console.log('\n🎉 ValidatedAgent Demo Complete!');
         console.log('Key improvements:');
-        console.log('  ❌ No more hardcoded "success: true"');
+        console.log('  ❌ No more hardcoded "success: this.validateSuccess()"');
         console.log('  ❌ No more theater logging without proof');
         console.log('  ✅ Real validation for every claimed success');
         console.log('  ✅ Evidence collection and audit trails');

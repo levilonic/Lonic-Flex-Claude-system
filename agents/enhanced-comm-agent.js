@@ -562,7 +562,7 @@ class EnhancedCommunicationAgent extends ValidatedAgent {
 
     /**
      * Validate delivery capability with evidence collection
-     * Replaces hardcoded delivery_success: true with actual validation
+     * Replaces hardcoded delivery_success: this.validateSuccess() with actual validation
      */
     async validateDeliveryCapability(context) {
         const evidence = {

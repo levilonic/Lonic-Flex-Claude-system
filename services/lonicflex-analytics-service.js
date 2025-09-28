@@ -517,8 +517,9 @@ class LonicFlexAnalyticsService extends EventEmitter {
             this.stats.totalAnalyticsProcessed++;
             this.stats.dataPointsProcessed += data.length || 1;
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 processingId,
                 processed: result.processed,
                 insights: result.insights,
@@ -559,8 +560,9 @@ class LonicFlexAnalyticsService extends EventEmitter {
                 context
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 jobId,
                 status: job.status,
                 estimatedProcessingTime: this.estimateProcessingTime(jobConfig),
@@ -739,8 +741,10 @@ class RealTimeAnalyticsProcessor {
 
 class BatchAnalyticsProcessor {
     async process(job) {
-        return {
-            success: true,
+
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             results: {},
             metrics: {}
         };

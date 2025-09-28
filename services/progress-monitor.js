@@ -75,9 +75,10 @@ class ProgressMonitor extends EventEmitter {
             });
             
             console.log(`✅ Progress monitoring started - reporting every ${this.config.reportInterval / 60000} minutes`);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 sessionId: sessionId,
                 monitoringStarted: this.startTime,
                 totalTasks: this.stats.totalTasks

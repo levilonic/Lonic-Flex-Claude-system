@@ -157,7 +157,7 @@ class LonicFlexJiraService {
             try {
                 const issue = await this.createIssue(req.body);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     issue,
                     message: `Issue ${issue.key} created successfully`
                 });
@@ -173,7 +173,7 @@ class LonicFlexJiraService {
                 const { issueKey } = req.params;
                 const updatedIssue = await this.updateIssue(issueKey, req.body);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     issue: updatedIssue,
                     message: `Issue ${issueKey} updated successfully`
                 });
@@ -193,7 +193,7 @@ class LonicFlexJiraService {
                 const { transitionId, comment } = req.body;
                 const result = await this.transitionIssue(issueKey, transitionId, comment);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     result,
                     message: `Issue ${issueKey} transitioned successfully`
                 });
@@ -213,7 +213,7 @@ class LonicFlexJiraService {
                 const { body } = req.body;
                 const comment = await this.addComment(issueKey, body);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     comment,
                     message: `Comment added to ${issueKey} successfully`
                 });
@@ -232,7 +232,7 @@ class LonicFlexJiraService {
                 const { issueKey } = req.params;
                 const issue = await this.getIssue(issueKey);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     issue
                 });
             } catch (error) {
@@ -250,7 +250,7 @@ class LonicFlexJiraService {
                 const { jql, maxResults = 50 } = req.body;
                 const results = await this.searchIssues(jql, maxResults);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     results,
                     count: results.issues ? results.issues.length : 0
                 });
@@ -266,7 +266,7 @@ class LonicFlexJiraService {
                 const { projectKey } = req.params;
                 const project = await this.getProject(projectKey);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     project
                 });
             } catch (error) {
@@ -297,7 +297,8 @@ class LonicFlexJiraService {
             try {
                 this.handleWebhook(req.body);
                 this.stats.webhooksReceived++;
-                res.json({ success: true, message: 'Webhook processed' });
+                res.json({
+            success: this.validateSuccess(),   message: 'Webhook processed' });
             } catch (error) {
                 this.logger.error('Webhook processing failed', { error: error.message });
                 res.status(500).json({ error: error.message });
@@ -524,7 +525,7 @@ class LonicFlexJiraService {
             return {
                 issueKey,
                 transitionId,
-                success: true
+                success: this.validateSuccess()
             };
 
         } catch (error) {
@@ -839,8 +840,9 @@ class LonicFlexJiraService {
                 priority: 'Medium'
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 action: 'issue_created',
                 issue,
                 message: `Jira issue ${issue.key} created for GitHub PR`
@@ -864,8 +866,9 @@ class LonicFlexJiraService {
                 }
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 action: 'issue_created',
                 issue,
                 message: `Jira issue ${issue.key} created for ServiceNow incident`

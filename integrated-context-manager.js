@@ -11,7 +11,6 @@ const { EventEmitter } = require('events');
 // Import all LonicFLex components
 const { Factor3ContextManager } = require('./factor3-context-manager');
 const { ContextAutoManager } = require('./context-auto-manager');
-const { ContextStatusLine } = require('./context-statusline');
 
 class IntegratedContextManager extends EventEmitter {
     constructor(options = {}) {
@@ -22,7 +21,6 @@ class IntegratedContextManager extends EventEmitter {
             cleanupThreshold: options.cleanupThreshold || 40,
             targetReduction: options.targetReduction || 0.3
         });
-        this.statusLine = new ContextStatusLine();
         
         this.isRunning = false;
         this.contextFile = path.join(__dirname, '.claude', 'current-context.xml');
@@ -230,7 +228,7 @@ class IntegratedContextManager extends EventEmitter {
             const contextXml = this.factor3Manager.generateContext();
             await fs.writeFile(this.contextFile, contextXml, 'utf8');
             
-            // Notify status line of update (if needed)
+            // Context updated successfully
             this.emit('context_updated', contextXml);
             
         } catch (error) {
@@ -282,26 +280,6 @@ class IntegratedContextManager extends EventEmitter {
         };
     }
     
-    /**
-     * Generate status line output
-     */
-    async generateStatusLine() {
-        try {
-            const usage = await this.getContextUsage();
-            if (!usage) return '🔴 Context: Error reading usage';
-            
-            const formatted = this.statusLine.formatStatusLine({
-                tokens: usage.tokens,
-                percentage: usage.percentage,
-                remaining: usage.tokens ? (200000 - usage.tokens) : 200000
-            });
-            
-            return formatted;
-            
-        } catch (error) {
-            return '🔴 Context: Status unavailable';
-        }
-    }
     
     /**
      * List recent events
@@ -366,9 +344,6 @@ async function demoIntegratedManager() {
         const status = await manager.getStatus();
         console.log('\n📊 Status:', JSON.stringify(status, null, 2));
         
-        // Generate status line
-        const statusLine = await manager.generateStatusLine();
-        console.log('\n📟 Status Line:', statusLine);
         
         // Show recent events
         console.log('\n📜 Recent Events:');
@@ -421,7 +396,7 @@ Usage:
 Features:
   - Real-time context tracking with Factor3 XML format
   - Auto-cleanup at 40% threshold with intelligent archiving
-  - Always-visible status line integration
+  - Real-time context monitoring
   - Live token counting and percentage monitoring
   - Event-driven architecture with comprehensive logging
 

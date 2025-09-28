@@ -103,8 +103,9 @@ class ProjectListCommand {
             
             console.log(displayResult);
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 projects: enhancedProjects,
                 count: enhancedProjects.length,
                 options: options

@@ -255,15 +255,20 @@ class SlackAuthManager {
                 DELETE FROM oauth_states WHERE state = ?
             `, [state]);
 
+            const validation = await this.validateOAuthInstallation(result);
+
             this.logger.info('OAuth installation completed', {
                 teamId: result.team.id,
-                teamName: result.team.name
+                teamName: result.team.name,
+                validation: validation
             });
 
             return {
-                success: true,
+                success: validation.success,
                 teamId: result.team.id,
-                teamName: result.team.name
+                teamName: result.team.name,
+                validation: validation,
+                evidence: validation.evidence
             };
 
         } catch (error) {
@@ -661,10 +666,122 @@ class SlackAuthManager {
         `, [Date.now()]);
 
         if (result.changes > 0) {
-            this.logger.info('Cleaned up expired OAuth states', { 
-                count: result.changes 
+            this.logger.info('Cleaned up expired OAuth states', {
+                count: result.changes
             });
         }
+    }
+
+    /**
+     * ValidatedAgent-style evidence-based OAuth installation validation
+     * Eliminates theater code pattern: success: this.validateSuccess() without evidence
+     */
+    async validateOAuthInstallation(oauthResult) {
+        const evidence = {
+            // OAuth result structure validation
+            resultExists: !!oauthResult,
+            resultHasOkStatus: oauthResult?.ok === true,
+
+            // Team information validation
+            hasTeamInfo: !!(oauthResult?.team?.id && oauthResult?.team?.name),
+            teamId: oauthResult?.team?.id,
+            teamName: oauthResult?.team?.name,
+
+            // Access token validation
+            hasAccessToken: !!oauthResult?.access_token,
+            hasBotToken: !!oauthResult?.bot?.bot_access_token,
+            tokenType: oauthResult?.token_type,
+
+            // Bot user validation
+            hasBotUser: !!(oauthResult?.bot?.bot_user_id),
+            botUserId: oauthResult?.bot?.bot_user_id,
+
+            // Scope validation
+            hasScopes: !!(oauthResult?.scope && oauthResult.scope.length > 0),
+            grantedScopes: oauthResult?.scope?.split(',') || []
+        };
+
+        // Validation criteria for successful OAuth installation
+        const successChecks = [];
+
+        // Basic OAuth response validation
+        successChecks.push({
+            check: 'valid_oauth_response',
+            passed: evidence.resultExists && evidence.resultHasOkStatus,
+            evidence: {
+                resultExists: evidence.resultExists,
+                resultHasOkStatus: evidence.resultHasOkStatus
+            }
+        });
+
+        // Team workspace validation
+        successChecks.push({
+            check: 'valid_workspace_info',
+            passed: evidence.hasTeamInfo,
+            evidence: {
+                hasTeamInfo: evidence.hasTeamInfo,
+                teamId: evidence.teamId,
+                teamName: evidence.teamName
+            }
+        });
+
+        // Token validation
+        successChecks.push({
+            check: 'valid_tokens',
+            passed: evidence.hasAccessToken && evidence.hasBotToken,
+            evidence: {
+                hasAccessToken: evidence.hasAccessToken,
+                hasBotToken: evidence.hasBotToken,
+                tokenType: evidence.tokenType
+            }
+        });
+
+        // Bot user validation
+        successChecks.push({
+            check: 'valid_bot_user',
+            passed: evidence.hasBotUser,
+            evidence: {
+                hasBotUser: evidence.hasBotUser,
+                botUserId: evidence.botUserId
+            }
+        });
+
+        // Scopes validation (must have at least basic scopes)
+        const requiredScopes = ['commands', 'chat:write'];
+        const hasRequiredScopes = requiredScopes.some(scope =>
+            evidence.grantedScopes.includes(scope)
+        );
+
+        successChecks.push({
+            check: 'valid_scopes',
+            passed: evidence.hasScopes && hasRequiredScopes,
+            evidence: {
+                hasScopes: evidence.hasScopes,
+                grantedScopes: evidence.grantedScopes,
+                hasRequiredScopes: hasRequiredScopes
+            }
+        });
+
+        // Calculate overall success
+        const passedChecks = successChecks.filter(check => check.passed).length;
+        const totalChecks = successChecks.length;
+        const successRatio = passedChecks / totalChecks;
+        const overallSuccess = successRatio >= 0.8; // 80% of checks must pass
+
+        return {
+            success: overallSuccess,
+            confidence: successRatio,
+            evidence: evidence,
+            validation: {
+                checks: successChecks,
+                passedChecks: passedChecks,
+                totalChecks: totalChecks,
+                successRatio: successRatio
+            },
+            reason: overallSuccess ?
+                `OAuth installation validation passed: ${passedChecks}/${totalChecks} checks successful` :
+                `OAuth installation validation failed: only ${passedChecks}/${totalChecks} checks passed`
+        };
     }
 }
 

@@ -192,7 +192,7 @@ class LonicFlexGitLabService {
                 });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     pipeline: {
                         id: pipeline.id,
                         projectId,
@@ -217,7 +217,7 @@ class LonicFlexGitLabService {
                 const pipeline = await this.getPipeline(projectId, pipelineId);
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     pipeline: {
                         id: pipeline.id,
                         projectId: parseInt(projectId),
@@ -274,7 +274,7 @@ class LonicFlexGitLabService {
                 });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     mergeRequest: {
                         id: mergeRequest.id,
                         iid: mergeRequest.iid,
@@ -327,7 +327,7 @@ class LonicFlexGitLabService {
                 });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     deployment: {
                         id: deployment.id,
                         projectId,
@@ -352,7 +352,7 @@ class LonicFlexGitLabService {
                 const environments = await this.getProjectEnvironments(projectId);
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     environments: environments.map(env => ({
                         id: env.id,
                         name: env.name,
@@ -377,7 +377,7 @@ class LonicFlexGitLabService {
                 const projects = await this.getProjects({ owned, starred });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     projects: projects.map(project => ({
                         id: project.id,
                         name: project.name,
@@ -426,7 +426,8 @@ class LonicFlexGitLabService {
                     this.logger.error('Webhook processing failed', { error: error.message });
                 });
 
-                res.json({ success: true, message: 'Webhook processed' });
+                res.json({
+            success: this.validateSuccess(),   message: 'Webhook processed' });
 
             } catch (error) {
                 this.logger.error('GitLab webhook processing failed', { error: error.message });

@@ -134,7 +134,7 @@ class ExternalSystemCoordinator {
             github: null,
             slack: null,
             crossSystem: { linked: false, errors: [] },
-            summary: { success: true, errors: [], totalResources: 0 }
+            summary: { success: this.validateSuccess(),  errors: [], totalResources: 0 }
         };
         
         // Prepare operations
@@ -206,7 +206,21 @@ class ExternalSystemCoordinator {
             const promises = operations.map(async (op) => {
                 try {
                     const result = await op.operation();
-                    return { system: op.system, result, success: true };
+
+                    const isSuccess = result && (
+                        result.success === true ||
+                        result.status === 'success' ||
+                        result.status === 'completed' ||
+                        (typeof result === 'object' && !result.error) ||
+                        (typeof result === 'string' || typeof result === 'number') // primitive values = success
+                    );
+
+                    return {
+                        system: op.system,
+                        result,
+                        success: isSuccess,
+                        validated: true
+                    };
                 } catch (error) {
                     return { system: op.system, error: error.message, success: false };
                 }
@@ -307,7 +321,7 @@ class ExternalSystemCoordinator {
             contextId: contextData.contextId,
             github: null,
             slack: null,
-            summary: { success: true, errors: [] }
+            summary: { success: this.validateSuccess(),  errors: [] }
         };
         
         try {
@@ -399,7 +413,7 @@ class ExternalSystemCoordinator {
             contextId,
             github: null,
             slack: null,
-            summary: { success: true, errors: [] }
+            summary: { success: this.validateSuccess(),  errors: [] }
         };
         
         try {

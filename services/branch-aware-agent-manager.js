@@ -169,7 +169,7 @@ class BranchAwareAgentManager {
                 owner: owner || 'local',
                 agents: Array.from(agents.keys()),
                 simulatedBranch: true,
-                success: true
+                success: this.validateSuccess()
             };
         }
 

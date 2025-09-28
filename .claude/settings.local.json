@@ -174,14 +174,27 @@
       "Bash(git for-each-ref:*)",
       "Bash(xargs:*)",
       "Bash(git fetch:*)",
-      "Bash(git rev-list:*)"
+      "Bash(git rev-list:*)",
+      "Bash(sort:*)",
+      "Bash(findstr:*)",
+      "Bash(cmd /c:*)",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(powershell.exe:*)"
     ],
     "deny": [],
     "ask": []
   },
-  "statusLine": {
-    "type": "command",
-    "command": "node ./context-statusline.js"
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -ExecutionPolicy Bypass -File \"./sounds/notification.ps1\""
+          }
+        ]
+      }
+    ]
   },
   "outputStyle": "default"
 }

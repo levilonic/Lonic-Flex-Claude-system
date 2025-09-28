@@ -166,7 +166,7 @@ class LonicFlexJenkinsService {
                 this.logger.info('Jenkins job created', { jobName });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     job: {
                         name: jobName,
                         url: `${this.config.jenkinsUrl}/job/${jobName}`,
@@ -200,7 +200,7 @@ class LonicFlexJenkinsService {
                 });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     build: {
                         jobName,
                         buildNumber: build.buildNumber,
@@ -225,7 +225,7 @@ class LonicFlexJenkinsService {
                 const build = await this.getBuildInfo(jobName, buildNumber);
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     build: {
                         jobName,
                         buildNumber: parseInt(buildNumber),
@@ -253,7 +253,7 @@ class LonicFlexJenkinsService {
                 const console = await this.getBuildConsole(jobName, buildNumber, parseInt(start));
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     console: {
                         jobName,
                         buildNumber: parseInt(buildNumber),
@@ -275,7 +275,7 @@ class LonicFlexJenkinsService {
                 const jobs = await this.getJobs();
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     jobs: jobs.map(job => ({
                         name: job.name,
                         url: job.url,
@@ -310,7 +310,7 @@ class LonicFlexJenkinsService {
                 this.logger.info('Jenkins pipeline created', { pipelineName, stages: stages.length });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     pipeline: {
                         name: pipelineName,
                         stages: stages.length,

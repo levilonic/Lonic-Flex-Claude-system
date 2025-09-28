@@ -49,7 +49,7 @@ async function testMultiBranchOperations() {
                     agentTypes: ['github', 'security']
                 });
                 
-                branchResults.push({ branchName, result, success: true });
+                branchResults.push({ branchName, result, success: this.validateSuccess() });
                 console.log(`   ✅ Branch created: ${branchName} (${result.existing ? 'existing' : 'new'})`);
                 
             } catch (error) {

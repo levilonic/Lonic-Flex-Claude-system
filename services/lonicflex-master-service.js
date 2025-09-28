@@ -196,7 +196,8 @@ class LonicFlexMasterService {
                     }
                 }
 
-                res.json({ success: true, message: 'Notification processed' });
+                res.json({
+            success: this.validateSuccess(),   message: 'Notification processed' });
 
             } catch (error) {
                 this.logger.error('Failed to process notification', { error: error.message });
@@ -272,8 +273,9 @@ class LonicFlexMasterService {
             runState.status = 'running';
             runState.updated = new Date();
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 runId,
                 branchName,
                 status: runState.status,

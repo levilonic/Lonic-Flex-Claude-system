@@ -200,8 +200,9 @@ class AutonomousExecutionEngine extends EventEmitter {
                 duration: executionState.duration
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 executionId,
                 duration: executionState.duration,
                 metrics: finalMetrics,

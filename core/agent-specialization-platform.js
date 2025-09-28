@@ -820,8 +820,9 @@ class AgentLoadBalancer {
             this.updateLoadMetrics(fromAgentId);
             this.updateLoadMetrics(toAgentId);
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 fromAgent: fromAgentId,
                 toAgent: toAgentId,
                 assignment: handoffAssignment

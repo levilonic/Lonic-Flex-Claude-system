@@ -182,7 +182,7 @@ class LonicFlexLinearService {
                 this.logger.info('Linear issue created', { issueId: issue.id, title });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     issue: {
                         id: issue.id,
                         title: issue.title,
@@ -213,7 +213,7 @@ class LonicFlexLinearService {
                 this.logger.info('Linear issue updated', { issueId, updates });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     issue: {
                         id: updatedIssue.id,
                         title: updatedIssue.title,
@@ -236,7 +236,7 @@ class LonicFlexLinearService {
                 const issue = await this.getIssue(issueId);
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     issue: {
                         id: issue.id,
                         title: issue.title,
@@ -283,7 +283,7 @@ class LonicFlexLinearService {
                 this.logger.info('Linear project created', { projectId: project.id, name });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     project: {
                         id: project.id,
                         name: project.name,
@@ -306,7 +306,7 @@ class LonicFlexLinearService {
                 const teams = await this.getTeams();
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     teams: teams.map(team => ({
                         id: team.id,
                         name: team.name,
@@ -349,7 +349,8 @@ class LonicFlexLinearService {
                     this.logger.error('Webhook processing failed', { error: error.message });
                 });
 
-                res.json({ success: true, message: 'Webhook processed' });
+                res.json({
+            success: this.validateSuccess(),   message: 'Webhook processed' });
 
             } catch (error) {
                 this.logger.error('Linear webhook processing failed', { error: error.message });
@@ -801,8 +802,9 @@ class LonicFlexLinearService {
         try {
             const linearIssue = await this.getIssue(linearIssueId);
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 linearIssue: {
                     id: linearIssue.id,
                     identifier: linearIssue.identifier,

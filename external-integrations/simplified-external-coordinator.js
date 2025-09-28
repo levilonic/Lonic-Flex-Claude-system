@@ -124,7 +124,7 @@ class SimplifiedExternalCoordinator {
             contextId: contextData.contextId,
             github: { resources: [], errors: [] },
             slack: { notifications: [], errors: [] },
-            summary: { success: true, errors: [], totalResources: 0 }
+            summary: { success: this.validateSuccess(),  errors: [], totalResources: 0 }
         };
         
         // GitHub operations
@@ -209,9 +209,10 @@ class SimplifiedExternalCoordinator {
             
             console.log(`✅ Branch created: ${branchName}`);
             console.log(`   URL: ${url}`);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 type: 'branch',
                 name: branchName,
                 url: url,
@@ -243,9 +244,10 @@ class SimplifiedExternalCoordinator {
             });
             
             console.log(`✅ Slack notification sent to ${this.config.slack.channel}`);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 type: 'notification',
                 channel: this.config.slack.channel,
                 timestamp: result.ts,
@@ -324,11 +326,30 @@ class SimplifiedExternalCoordinator {
         console.log(`🎯 Handling context completion: ${contextData.contextId}`);
         
         // Send completion notification if Slack is enabled
+        let notificationSent = false;
+        let notificationError = null;
+
         if (this.slackClient && this.config.slack.autoNotify) {
-            await this.sendSlackNotification(contextData, 'completed');
+            try {
+                const notificationResult = await this.sendSlackNotification(contextData, 'completed');
+                notificationSent = notificationResult && notificationResult.success !== false;
+            } catch (error) {
+                notificationError = error.message;
+                console.error(`Failed to send Slack notification:`, error.message);
+            }
         }
-        
-        return { success: true };
+
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success, // Context completion handling itself succeeded
+            notifications: {
+                slack: {
+                    attempted: this.slackClient && this.config.slack.autoNotify,
+                    sent: notificationSent,
+                    error: notificationError
+                }
+            }
+        };
     }
 
     /**
@@ -364,7 +385,7 @@ class SimplifiedExternalCoordinator {
         this.activeContexts.delete(contextId);
         
         console.log(`✅ Context cleanup complete: ${contextId}`);
-        return { success: true };
+        return { success: this.validateSuccess() };
     }
 }
 

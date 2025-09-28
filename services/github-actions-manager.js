@@ -176,8 +176,9 @@ class GitHubActionsManager {
 
             console.log(`✅ Workflow triggered: ${workflowId}`);
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 workflowId,
                 ref,
                 inputs,
@@ -649,8 +650,9 @@ class GitHubActionsManager {
 
             console.log(`🗑️ Deleted workflow: ${workflowFilename}`);
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 filename: workflowFilename,
                 deletedAt: new Date().toISOString()
             };

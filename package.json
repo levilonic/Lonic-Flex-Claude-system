@@ -57,7 +57,6 @@
     "context-auto-start": "node context-auto-manager.js --start",
     "context-integrated-start": "node integrated-context-manager.js --start",
     "context-integrated-demo": "node integrated-context-manager.js --demo",
-    "context-status": "node context-statusline.js",
     "context-archive": "node context-archive-manager.js list",
     "context-archive-stats": "node context-archive-manager.js stats",
     "context-archive-search": "node context-archive-manager.js search",
@@ -102,7 +101,9 @@
     "service:delete": "pm2 delete ecosystem.config.js",
     "service:dev": "pm2-dev start claude-execution-service.js",
     "autonomous:start": "node claude-execution-service.js",
-    "autonomous:test": "node -e \"const service = require('./claude-execution-service.js'); console.log('Service loaded successfully');\""
+    "autonomous:test": "node -e \"const service = require('./claude-execution-service.js'); console.log('Service loaded successfully');\"",
+    "test:foundation-v0": "node test-foundation-v0-live.js",
+    "test:live-system": "node test-foundation-v0-live.js"
   },
   "keywords": [
     "ai-agents",

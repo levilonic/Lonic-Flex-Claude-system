@@ -147,7 +147,7 @@ class HybridClaudeParser {
                 processingId,
                 route: routingDecision.route,
                 processingTime: Date.now() - startTime,
-                success: true
+                success: this.validateSuccess()
             });
 
             return result;
@@ -200,8 +200,9 @@ class HybridClaudeParser {
             throw new Error('Unable to parse command with internal parser');
         }
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             route: 'internal',
             command: parseResult.command,
             confidence: parseResult.confidence,
@@ -242,8 +243,9 @@ class HybridClaudeParser {
         // Get Claude analysis
         const claudeResult = await this.claudeService.analyzeWithClaude(analysisRequest);
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             route: 'claude',
             command: routingDecision.parseResult?.command || 'analyze',
             confidence: 0.95, // High confidence for Claude analysis
@@ -300,7 +302,7 @@ class HybridClaudeParser {
         }
 
         const hybridResult = {
-            success: true,
+            success: this.validateSuccess(), 
             route: 'hybrid',
             command: internalResult.result.command,
             confidence: internalResult.result.confidence,

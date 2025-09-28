@@ -437,7 +437,7 @@ async function testInputHandling(agent, testInputs) {
         try {
             const testInput = generateTestInput(inputType);
             const result = await agent.execute(testInput);
-            results.push({ inputType, success: true, result });
+            results.push({ inputType, success: this.validateSuccess(),  result });
         } catch (error) {
             results.push({ inputType, success: false, error: error.message });
         }
@@ -693,7 +693,7 @@ async function testErrorCondition_${errorCondition}(agent) {
             const performanceRecord = {
                 timestamp: Date.now(),
                 executionTime,
-                success: true,
+                success: this.validateSuccess(), 
                 contractViolations: contractViolations.length,
                 context: Object.keys(context)
             };
@@ -964,7 +964,7 @@ async function demoSpecDrivenAgent() {
                 return {
                     vulnerabilities: [],
                     scan_time: Date.now(),
-                    success: true
+                    success: this.validateSuccess()
                 };
             },
             async cleanup() { return true; },

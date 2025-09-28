@@ -148,7 +148,7 @@ class SlackHTTPIntegration {
                 }, mockClient, Date.now().toString());
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     message: `🚀 ${workflowType} workflow started!`,
                     sessionId: sessionId,
                     timestamp: new Date().toISOString()

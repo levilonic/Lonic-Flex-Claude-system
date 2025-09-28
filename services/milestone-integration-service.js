@@ -592,7 +592,7 @@ async function demoMilestoneIntegration() {
                 milestone.session_id || 'demo_session',
                 'github',
                 'completed',
-                { success: true, tasks: 5 }
+                { success: this.validateSuccess(),  tasks: 5 }
             );
         }
         

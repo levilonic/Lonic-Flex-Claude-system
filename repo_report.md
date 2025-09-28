@@ -723,7 +723,6 @@ workshops/2025-07-16
     "context-auto-start": "node context-auto-manager.js --start",
     "context-integrated-start": "node integrated-context-manager.js --start",
     "context-integrated-demo": "node integrated-context-manager.js --demo",
-    "context-status": "node context-statusline.js",
     "context-archive": "node context-archive-manager.js list",
     "context-archive-stats": "node context-archive-manager.js stats",
     "context-archive-search": "node context-archive-manager.js search",

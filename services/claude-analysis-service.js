@@ -340,7 +340,7 @@ Focus on best practices, security, performance, and maintainability.`;
      */
     processClaudeResponse(response, originalRequest) {
         const result = {
-            success: true,
+            success: this.validateSuccess(), 
             type: originalRequest.type,
             analysis: response.content?.[0]?.text || response.content || 'No analysis provided',
             usage: response.usage || {},
@@ -518,7 +518,10 @@ Focus on best practices, security, performance, and maintainability.`;
         const size = this.cache.size;
         this.cache.clear();
         this.logger.info('Analysis cache cleared', { clearedEntries: size });
-        return { success: true, clearedEntries: size };
+
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success, clearedEntries: size };
     }
 }
 

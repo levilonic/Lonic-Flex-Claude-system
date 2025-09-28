@@ -188,7 +188,7 @@ class LonicFlexServiceNowService {
                 const { sysId } = req.params;
                 const updatedIncident = await this.updateIncident(sysId, req.body);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     incident: updatedIncident,
                     message: `Incident updated successfully`
                 });
@@ -207,7 +207,7 @@ class LonicFlexServiceNowService {
                 const { sysId } = req.params;
                 const incident = await this.getIncident(sysId);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     incident
                 });
             } catch (error) {
@@ -224,7 +224,7 @@ class LonicFlexServiceNowService {
             try {
                 const change = await this.createChangeRequest(req.body);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     change,
                     message: `Change request ${change.number} created successfully`
                 });
@@ -240,7 +240,7 @@ class LonicFlexServiceNowService {
                 const { sysId } = req.params;
                 const updatedChange = await this.updateChangeRequest(sysId, req.body);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     change: updatedChange,
                     message: `Change request updated successfully`
                 });
@@ -259,7 +259,7 @@ class LonicFlexServiceNowService {
                 const { table, query, limit = 50 } = req.body;
                 const results = await this.searchRecords(table, query, limit);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     results,
                     count: results.length
                 });
@@ -274,7 +274,7 @@ class LonicFlexServiceNowService {
             try {
                 const approval = await this.createApproval(req.body);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     approval,
                     message: `Approval request created successfully`
                 });
@@ -291,7 +291,7 @@ class LonicFlexServiceNowService {
                 const { decision, comments } = req.body;
                 const result = await this.processApprovalDecision(sysId, decision, comments);
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     result,
                     message: `Approval decision processed successfully`
                 });
@@ -880,8 +880,9 @@ class LonicFlexServiceNowService {
                 subcategory: 'application'
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 action: 'incident_created',
                 incident,
                 message: `ServiceNow incident ${incident.number} created for Jira issue`
@@ -904,8 +905,9 @@ class LonicFlexServiceNowService {
                 implementation_plan: `Deploy changes from PR: ${data.url}`
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 action: 'change_created',
                 change,
                 message: `ServiceNow change request ${change.number} created for GitHub PR`
@@ -927,8 +929,9 @@ class LonicFlexServiceNowService {
                 subcategory: 'application'
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 action: 'incident_created',
                 incident,
                 message: `ServiceNow incident ${incident.number} created for production issue`

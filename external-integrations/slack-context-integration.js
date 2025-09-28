@@ -190,9 +190,10 @@ class SlackContextIntegration {
                 console.log(`✅ Channel created successfully: #${channelName}`);
                 console.log(`   ID: ${result.channel_id}`);
                 console.log(`   URL: ${channelUrl}`);
-                
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     channelName,
                     channelId: result.channel_id,
                     url: channelUrl
@@ -252,9 +253,10 @@ class SlackContextIntegration {
                     channel: this.config.mainNotificationChannel
                 });
                 this.notificationHistory.set(contextId, notifications);
-                
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     timestamp: new Date().toISOString(),
                     messageTs: result.message_ts
                 };
@@ -390,9 +392,10 @@ class SlackContextIntegration {
                     channel: this.config.mainNotificationChannel
                 });
                 this.notificationHistory.set(contextId, notifications);
-                
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     timestamp: new Date().toISOString(),
                     messageTs: result.message_ts
                 };
@@ -442,12 +445,32 @@ class SlackContextIntegration {
         try {
             console.log(`🧹 Cleaning up Slack resources for context: ${contextId}`);
             
-            this.activeChannels.delete(contextId);
-            this.contextMetadata.delete(contextId);
-            this.notificationHistory.delete(contextId);
-            
-            console.log(`✅ Cleanup complete for context: ${contextId}`);
-            return { success: true };
+            const channelsDeleted = this.activeChannels.delete(contextId);
+            const metadataDeleted = this.contextMetadata.delete(contextId);
+            const historyDeleted = this.notificationHistory.delete(contextId);
+
+            const cleanupSuccess = channelsDeleted || metadataDeleted || historyDeleted || (
+                !this.activeChannels.has(contextId) &&
+                !this.contextMetadata.has(contextId) &&
+                !this.notificationHistory.has(contextId)
+            );
+
+            if (cleanupSuccess) {
+                console.log(`✅ Cleanup complete for context: ${contextId}`);
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
+                    cleanedUp: { channelsDeleted, metadataDeleted, historyDeleted }
+                };
+            } else {
+                console.log(`⚠️ Nothing to clean up for context: ${contextId}`);
+                return {
+                    success: false,
+                    reason: 'No Slack resources found to clean up',
+                    contextId
+                };
+            }
             
         } catch (error) {
             console.error(`❌ Failed to cleanup context ${contextId}:`, error.message);

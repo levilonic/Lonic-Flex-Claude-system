@@ -37,8 +37,9 @@ class TestWorkflowAgent extends BaseAgent {
             return 'Workflow finalized';
         });
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             agent: this.agentName,
             results
         };
@@ -185,7 +186,10 @@ async function testPhase2LifecycleManagement() {
             console.log('   🏊 Agent pooling provides significant performance gains');
             console.log('   🎼 Workflow orchestration enables centralized coordination');
             console.log('   🔒 Context isolation maintained across all workflows');
-            return { success: true, improvement: improvementPercent };
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, improvement: improvementPercent };
         } else {
             console.log('\n⚠️ PHASE 2 IMPLEMENTATION: PARTIAL SUCCESS');
             console.log(`   ${totalTests - passedTests} components need attention`);

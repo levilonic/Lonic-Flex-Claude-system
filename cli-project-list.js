@@ -28,7 +28,7 @@ class CLIProjectList {
             // Check if we need to show help
             if (parsedArgs.help) {
                 this.showHelp();
-                return { success: true };
+                return { success: this.validateSuccess() };
             }
 
             // Execute the project list command

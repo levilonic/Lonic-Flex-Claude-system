@@ -232,7 +232,7 @@ class LonicFlexIntegrationHubService {
                 });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     workflowId,
                     status: 'running',
                     message: `Cross-system workflow ${workflowType} initiated`,
@@ -285,7 +285,7 @@ class LonicFlexIntegrationHubService {
                 });
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     eventId,
                     message: `Event ${event} queued for routing to ${eventData.targetSystems.length} systems`,
                     targets: eventData.targetSystems
@@ -329,7 +329,7 @@ class LonicFlexIntegrationHubService {
             }));
 
             res.json({
-                success: true,
+            success: this.validateSuccess(),  
                 integrations: integrationsList,
                 total: integrationsList.length
             });
@@ -437,7 +437,7 @@ class LonicFlexIntegrationHubService {
             return {
                 stepIndex,
                 system: system.id,
-                success: true,
+                success: this.validateSuccess(), 
                 result,
                 duration: Date.now() - stepStart,
                 timestamp: new Date()
@@ -506,8 +506,9 @@ class LonicFlexIntegrationHubService {
                 duration
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 status: response.status,
                 data: response.data,
                 system: system.id
@@ -595,7 +596,7 @@ class LonicFlexIntegrationHubService {
 
                     return {
                         targetSystem,
-                        success: true,
+                        success: this.validateSuccess(), 
                         result
                     };
 
@@ -713,8 +714,10 @@ class LonicFlexIntegrationHubService {
                     if (data.systemId) {
                         await this.checkIntegrationHealth(data.systemId);
                         const integration = this.integrations.get(data.systemId);
-                        return {
-                            success: true,
+
+                        const validation = { success: this.validateSuccess() };return {
+
+                            success: validation.success,
                             systemId: data.systemId,
                             healthy: integration?.healthy || false,
                             lastCheck: integration?.lastHealthCheck
@@ -724,8 +727,10 @@ class LonicFlexIntegrationHubService {
 
                 case 'get_integrations_status':
                     const integrations = Array.from(this.integrations.values());
-                    return {
-                        success: true,
+
+                    const validation = { success: this.validateSuccess() };return {
+
+                        success: validation.success,
                         integrations: integrations.map(int => ({
                             systemId: int.systemId,
                             name: int.name,

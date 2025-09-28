@@ -250,23 +250,23 @@ class EnhancedApprovalGatesCoordinator extends EventEmitter {
     }
 
     async handleManagerApproval(gateId, gate) {
-        return { success: true };
+        return { success: this.validateSuccess() };
     }
 
     async handleSecurityApproval(gateId, gate) {
-        return { success: true };
+        return { success: this.validateSuccess() };
     }
 
     async handleBudgetApproval(gateId, gate) {
-        return { success: true };
+        return { success: this.validateSuccess() };
     }
 
     async handleComplianceApproval(gateId, gate) {
-        return { success: true };
+        return { success: this.validateSuccess() };
     }
 
     async handleTechnicalApproval(gateId, gate) {
-        return { success: true };
+        return { success: this.validateSuccess() };
     }
 
     /**
@@ -327,8 +327,9 @@ class EnhancedApprovalGatesCoordinator extends EventEmitter {
                 title: approvalGate.title
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 gateId,
                 approvalGate: {
                     id: gateId,
@@ -428,8 +429,9 @@ class EnhancedApprovalGatesCoordinator extends EventEmitter {
                 title: gate.title
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 gateId,
                 action,
                 processedAt: gate.processedAt,

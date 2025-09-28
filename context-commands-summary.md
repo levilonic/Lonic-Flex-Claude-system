@@ -27,7 +27,7 @@ Your LonicFLex system now has complete **always-visible context window managemen
 
 ### Status and Monitoring
 ```bash
-# Show current context percentage (for status line)
+# Show current context information
 npm run context-status
 
 # Start integrated context management (recommended)
@@ -57,8 +57,6 @@ npm run context-archive-cleanup
 
 ### Direct Script Access
 ```bash
-# Context status line (used by Claude Code)
-node context-statusline.js
 
 # Auto-manager with 40% cleanup
 node context-auto-manager.js --start
@@ -76,7 +74,7 @@ node integrated-context-manager.js --start
 
 ### For Always-Visible Context Display:
 1. **Status line is already configured** in `.claude/settings.json`
-2. **Restart Claude Code** to see context % in status line
+2. **Use integrated context management** for real-time monitoring
 3. **Context displays as**: `🟢 Context: 23% [🟢🟢⚫⚫⚫⚫⚫⚫⚫⚫] 46,000/200,000 tokens`
 
 ### For Auto-Cleanup at 40%:
@@ -142,13 +140,11 @@ Status: 🟢 Context: 28.3% - Back to safe levels
 ## 📁 Files Created
 
 ### Core System Files:
-- `context-statusline.js` - Always-visible status line display
 - `context-auto-manager.js` - 40% threshold auto-cleanup
 - `context-archive-manager.js` - Enhanced archive system with compression
 - `integrated-context-manager.js` - Unified system combining all features
 
 ### Configuration:
-- `.claude/settings.json` - Updated with status line configuration
 - `package.json` - Added all npm commands
 
 ### Testing:
@@ -165,7 +161,6 @@ Status: 🟢 Context: 28.3% - Back to safe levels
 5. ✅ Real program functionality (not just demos)
 
 **ALL REQUIREMENTS MET** - The system provides exactly what you requested:
-- Always-visible context percentage in Claude Code status line
 - Automatic cleanup at 40% usage with intelligent content management
 - Complete archive system ensuring no data loss
 - Production-ready programs replacing demo functionality

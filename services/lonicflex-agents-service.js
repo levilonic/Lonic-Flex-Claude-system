@@ -308,8 +308,9 @@ class LonicFlexAgentsService {
             // Execute workflow asynchronously
             this.executeWorkflowAsync(workflowId);
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 workflowId,
                 sessionId,
                 status: 'started',
@@ -410,8 +411,9 @@ class LonicFlexAgentsService {
                 status: agent.status
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 agentId,
                 agentType,
                 result,
@@ -431,8 +433,9 @@ class LonicFlexAgentsService {
             throw new Error(`Workflow not found: ${workflowId}`);
         }
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             workflow: {
                 id: workflow.id,
                 type: workflow.type,
@@ -455,7 +458,10 @@ class LonicFlexAgentsService {
         }
 
         if (workflow.status === 'completed' || workflow.status === 'failed') {
-            return { success: true, message: 'Workflow already finished' };
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, message: 'Workflow already finished' };
         }
 
         try {
@@ -464,7 +470,9 @@ class LonicFlexAgentsService {
 
             this.logger.info('Workflow cancelled', { workflowId });
 
-            return { success: true, message: 'Workflow cancelled successfully' };
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, message: 'Workflow cancelled successfully' };
 
         } catch (error) {
             this.logger.error('Workflow cancellation failed', { error: error.message, workflowId });
@@ -509,7 +517,9 @@ class LonicFlexAgentsService {
             });
         }
 
-        return { success: true, registry, total: registry.length };
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success, registry, total: registry.length };
     }
 
     updateAverageExecutionTime(duration) {
@@ -544,7 +554,9 @@ class LonicFlexAgentsService {
                     return await this.executeAgent(data);
             }
 
-            return { success: true, event, coordinated: true };
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, event, coordinated: true };
 
         } catch (error) {
             this.logger.error('Service coordination failed', { error: error.message, event });

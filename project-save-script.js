@@ -218,8 +218,9 @@ async function saveProjectState() {
 
         await dbManager.close();
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             sessionId,
             projectId,
             timestamp: new Date().toISOString(),

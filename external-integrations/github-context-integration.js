@@ -185,9 +185,10 @@ class GitHubContextIntegration {
                 
                 console.log(`✅ Branch created successfully: ${branchName}`);
                 console.log(`   URL: ${branchUrl}`);
-                
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     branchName,
                     url: branchUrl
                 };
@@ -240,9 +241,10 @@ class GitHubContextIntegration {
                 
                 console.log(`✅ PR created successfully: #${result.pr_number}`);
                 console.log(`   URL: ${prUrl}`);
-                
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     prNumber: result.pr_number,
                     url: prUrl
                 };
@@ -302,8 +304,15 @@ class GitHubContextIntegration {
             const branchInfo = this.activeBranches.get(contextId);
             
             if (!branchInfo) {
-                console.log(`ℹ️ No GitHub branch found for completed context: ${contextId}`);
-                return { success: true, actions: [] };
+                console.log(`⚠️ No GitHub branch found for completed context: ${contextId}`);
+                
+                return {
+                    success: false,
+                    reason: 'No branch associated with context',
+                    contextId,
+                    actions: [],
+                    warning: 'Context completed but no GitHub resources to update'
+                };
             }
             
             console.log(`🎯 Context completed: ${contextId}`);
@@ -313,7 +322,7 @@ class GitHubContextIntegration {
             // For now, just log the completion
             
             const result = {
-                success: true,
+                success: this.validateSuccess(), 
                 actions: [
                     {
                         type: 'completion_logged',
@@ -363,12 +372,25 @@ class GitHubContextIntegration {
     async cleanupContext(contextId) {
         try {
             console.log(`🧹 Cleaning up GitHub resources for context: ${contextId}`);
-            
-            this.activeBranches.delete(contextId);
-            this.contextMetadata.delete(contextId);
-            
-            console.log(`✅ Cleanup complete for context: ${contextId}`);
-            return { success: true };
+
+            const branchDeleted = this.activeBranches.delete(contextId);
+            const metadataDeleted = this.contextMetadata.delete(contextId);
+
+            const cleanupSuccess = branchDeleted || metadataDeleted || (
+                !this.activeBranches.has(contextId) &&
+                !this.contextMetadata.has(contextId)
+            );
+
+            if (cleanupSuccess) {
+                console.log(`✅ Cleanup complete for context: ${contextId}`);
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success, cleanedUp: { branchDeleted, metadataDeleted } };
+            } else {
+                console.log(`⚠️ Nothing to clean up for context: ${contextId}`);
+                return { success: false, reason: 'No resources found to clean up', contextId };
+            }
             
         } catch (error) {
             console.error(`❌ Failed to cleanup context ${contextId}:`, error.message);

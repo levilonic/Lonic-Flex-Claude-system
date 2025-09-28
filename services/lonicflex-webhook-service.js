@@ -263,7 +263,9 @@ class LonicFlexWebhookService {
             return await this.processCLaudeMentionInCommit(claudeMentions, repository);
         }
 
-        return { success: true, message: 'Push processed' };
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success, message: 'Push processed' };
     }
 
     /**
@@ -293,7 +295,9 @@ class LonicFlexWebhookService {
             });
         }
 
-        return { success: true, message: 'Issue event processed' };
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success, message: 'Issue event processed' };
     }
 
     /**
@@ -332,8 +336,10 @@ class LonicFlexWebhookService {
         }
 
         // Just acknowledge the mention without specific command
-        return {
-            success: true,
+
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             message: '@claude mention acknowledged',
             action: 'mention_logged'
         };
@@ -395,7 +401,10 @@ class LonicFlexWebhookService {
         const chain = this.activeWebhookChains.get(runId);
         if (!chain) {
             this.logger.warn('No active webhook chain found for run', { runId });
-            return { success: true, message: 'No active chain found' };
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, message: 'No active chain found' };
         }
 
         // Advance the webhook chain based on commit content
@@ -406,7 +415,9 @@ class LonicFlexWebhookService {
             return await this.advanceWebhookChain(runId, stepAdvance);
         }
 
-        return { success: true, message: 'Commits processed' };
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success, message: 'Commits processed' };
     }
 
     /**
@@ -460,8 +471,9 @@ class LonicFlexWebhookService {
             // Trigger next step
             const nextStepResult = await this.triggerStep(runId, stepAdvance.nextStep);
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 runId,
                 currentStep: chain.currentStep,
                 nextStepTriggered: nextStepResult.success,
@@ -481,8 +493,9 @@ class LonicFlexWebhookService {
             this.stats.completedChains++;
             this.stats.activeChains--;
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 runId,
                 status: 'completed',
                 message: 'Webhook chain completed successfully'
@@ -736,7 +749,7 @@ class LonicFlexWebhookService {
                         try {
                             const result = JSON.parse(body);
                             if (res.statusCode >= 200 && res.statusCode < 300) {
-                                resolve({ success: true, ...result });
+                                resolve({ success: this.validateSuccess(),  ...result });
                             } else {
                                 resolve({ success: false, error: result.message || `HTTP ${res.statusCode}` });
                             }
@@ -890,8 +903,9 @@ class LonicFlexWebhookService {
 
             this.logger.info('Webhook chain initiated', { runId, masterRunId: result.runId });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 runId,
                 masterRunId: result.runId,
                 status: 'initiated',

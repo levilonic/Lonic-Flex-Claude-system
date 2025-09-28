@@ -714,8 +714,10 @@ class MessageRouter {
 
     async executeDirectRouting(envelope) {
         // Direct delivery with priority
-        return {
-            success: true,
+
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             strategy: 'direct',
             routingPath: [envelope.from, envelope.to],
             deliveryMethod: 'immediate'
@@ -724,8 +726,10 @@ class MessageRouter {
 
     async executeBroadcastRouting(envelope) {
         // Broadcast to multiple recipients
-        return {
-            success: true,
+
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             strategy: 'broadcast',
             routingPath: [envelope.from, 'broadcast', envelope.to],
             deliveryMethod: 'fanout'
@@ -736,8 +740,9 @@ class MessageRouter {
         // Use routing hints to optimize delivery
         const routingPath = [envelope.from, ...envelope.routingHints, envelope.to];
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             strategy: 'hinted',
             routingPath: routingPath,
             deliveryMethod: 'optimized'
@@ -746,8 +751,10 @@ class MessageRouter {
 
     async executeStandardRouting(envelope) {
         // Standard point-to-point routing
-        return {
-            success: true,
+
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             strategy: 'standard',
             routingPath: [envelope.from, envelope.to],
             deliveryMethod: 'standard'
@@ -808,7 +815,7 @@ class EventDispatcher {
                 if (filteredEvent) {
                     const transformedEvent = this.applyEventTransformers(filteredEvent, subscriberId);
                     await this.bus.deliverEvent(subscriberId, transformedEvent);
-                    dispatches.push({ subscriber: subscriberId, success: true });
+                    dispatches.push({ subscriber: subscriberId, success: this.validateSuccess() });
                 }
             } catch (error) {
                 dispatches.push({ subscriber: subscriberId, success: false, error: error.message });
@@ -1115,7 +1122,7 @@ class CommunicationPatterns {
                     message: message,
                     timestamp: new Date()
                 });
-                results.push({ subscriber: subscriberId, success: true });
+                results.push({ subscriber: subscriberId, success: this.validateSuccess() });
             } catch (error) {
                 results.push({ subscriber: subscriberId, success: false, error: error.message });
             }
@@ -1191,7 +1198,7 @@ class CommunicationPatterns {
 
                 stepResults.push({
                     participantId: participantId,
-                    success: true,
+                    success: this.validateSuccess(), 
                     response: response
                 });
             } catch (error) {

@@ -92,9 +92,10 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             
             // Display current phase information
             this.displayCurrentPhase(workflowEngine);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 contextId: contextName,
                 contextType: flags.project ? 'project' : 'session',
                 workflowTemplate,
@@ -246,7 +247,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
                 context.addEvent('workflow_phase_completed', {
                     phase: data.phase.name,
                     duration: data.phase.duration,
-                    success: true
+                    success: this.validateSuccess()
                 });
             }
         });

@@ -210,7 +210,10 @@ class GitHubAppInstaller {
                     repo: this.config.githubRepo,
                     per_page: 1
                 });
-                return { success: true, details: `Can access ${data.length} issues` };
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success, details: `Can access ${data.length} issues` };
             },
 
             'pull_requests': async () => {
@@ -220,7 +223,10 @@ class GitHubAppInstaller {
                     repo: this.config.githubRepo,
                     per_page: 1
                 });
-                return { success: true, details: `Can access ${data.length} PRs` };
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success, details: `Can access ${data.length} PRs` };
             },
 
             'contents': async () => {
@@ -230,7 +236,10 @@ class GitHubAppInstaller {
                     repo: this.config.githubRepo,
                     path: 'README.md'
                 });
-                return { success: true, details: 'Can access repository contents' };
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success, details: 'Can access repository contents' };
             }
         };
 
@@ -477,7 +486,7 @@ class GitHubAppInstaller {
             try {
                 const result = await task();
                 console.log(`  ✅ ${name}: ${result}`);
-                this.installationResults.enterpriseIntegration[name] = { success: true, result };
+                this.installationResults.enterpriseIntegration[name] = { success: this.validateSuccess(),  result };
             } catch (error) {
                 console.log(`  ⚠️  ${name}: ${error.message}`);
                 this.installationResults.enterpriseIntegration[name] = { success: false, error: error.message };
@@ -540,7 +549,7 @@ class GitHubAppInstaller {
             try {
                 const result = await test();
                 console.log(`  ✅ ${name}: ${result}`);
-                this.installationResults.testResults[name] = { success: true, result };
+                this.installationResults.testResults[name] = { success: this.validateSuccess(),  result };
                 passedTests++;
             } catch (error) {
                 console.log(`  ❌ ${name}: ${error.message}`);

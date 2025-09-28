@@ -369,8 +369,10 @@ class AutonomousOrganizationTester {
             const hasExecution = result.executionPlan;
 
             if (hasProject && hasTeam && hasInfrastructure && hasExecution) {
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     message: `${scenarioName}: Project=${result.project.name}, Team=${result.team.members.length} members, Status=${result.status}`
                 };
             } else {

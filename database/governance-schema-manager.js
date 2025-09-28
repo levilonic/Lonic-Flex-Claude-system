@@ -67,17 +67,32 @@ class GovernanceSchemaManager extends SQLiteManager {
             // Update schema version
             await this.updateSchemaVersion();
 
-            this.logger.info('Governance database schema initialized successfully', {
+            const tablesCreated = await this.getTableCount();
+            const indexesCreated = await this.getIndexCount();
+
+            // THEATER CODE ELIMINATED: Evidence-based validation instead of hardcoded success
+            const validation = await this.validateGovernanceSchemaInit({
                 schemaVersion: this.schemaVersion,
-                tablesCreated: await this.getTableCount(),
-                indexesCreated: await this.getIndexCount()
+                tablesCreated,
+                indexesCreated
+            });
+
+            this.logger.info('Governance database schema initialized', {
+                schemaVersion: this.schemaVersion,
+                tablesCreated: tablesCreated,
+                indexesCreated: indexesCreated,
+                success: validation.success,
+                validation: validation
             });
 
             return {
-                success: true,
+                success: validation.success,
                 schemaVersion: this.schemaVersion,
-                tablesCreated: await this.getTableCount(),
-                timestamp: new Date().toISOString()
+                tablesCreated: tablesCreated,
+                indexesCreated: indexesCreated,
+                timestamp: new Date().toISOString(),
+                validation: validation,
+                evidence: validation.evidence
             };
 
         } catch (error) {
@@ -951,6 +966,54 @@ class GovernanceSchemaManager extends SQLiteManager {
             this.logger.error('Schema integrity verification failed:', { error: error.message });
             throw error;
         }
+    }
+
+    /**
+     * ValidatedAgent-style evidence-based governance schema initialization validation
+     */
+    async validateGovernanceSchemaInit(context) {
+        const evidence = {
+            schemaVersion: context.schemaVersion,
+            schemaVersionValid: !!context.schemaVersion,
+            tablesCreated: context.tablesCreated || 0,
+            indexesCreated: context.indexesCreated || 0,
+            minimumTablesExpected: 3, // governance_policies, audit_logs, compliance_reports
+            minimumIndexesExpected: 2
+        };
+
+        const successChecks = [];
+
+        // Schema version check
+        successChecks.push({
+            check: 'schema_version',
+            passed: evidence.schemaVersionValid,
+            evidence: { schemaVersion: evidence.schemaVersion }
+        });
+
+        // Tables created check
+        successChecks.push({
+            check: 'tables_created',
+            passed: evidence.tablesCreated >= evidence.minimumTablesExpected,
+            evidence: { tablesCreated: evidence.tablesCreated, minimumTablesExpected: evidence.minimumTablesExpected }
+        });
+
+        // Indexes created check
+        successChecks.push({
+            check: 'indexes_created',
+            passed: evidence.indexesCreated >= evidence.minimumIndexesExpected,
+            evidence: { indexesCreated: evidence.indexesCreated, minimumIndexesExpected: evidence.minimumIndexesExpected }
+        });
+
+        const passedChecks = successChecks.filter(check => check.passed).length;
+        const totalChecks = successChecks.length;
+        const overallSuccess = passedChecks === totalChecks;
+
+        return {
+            success: overallSuccess,
+            evidence: evidence,
+            validation: { checks: successChecks, passedChecks, totalChecks },
+            reason: overallSuccess ? `Governance schema validation passed: ${passedChecks}/${totalChecks}` : `Governance schema validation failed: ${passedChecks}/${totalChecks}`
+        };
     }
 }
 

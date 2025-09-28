@@ -157,8 +157,9 @@ class LongTermPersistence {
         console.log(`✅ Context archived in ${archiveTime}ms`);
         console.log(`📊 Size: ${contextXml.length} → ${compressedContext.length} (${(archiveMetadata.compressionRatio * 100).toFixed(1)}% of original)`);
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             contextId,
             archiveLevel: archiveLevel.name,
             compressionRatio: archiveMetadata.compressionRatio,
@@ -217,8 +218,9 @@ class LongTermPersistence {
         const performanceStatus = restoreTime <= this.targets.resumeTime ? '🚀 TARGET MET' : '⚠️ SLOW';
         console.log(`✅ Context restored in ${restoreTime}ms ${performanceStatus}`);
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             contextId,
             scope,
             context: enhancedContext,

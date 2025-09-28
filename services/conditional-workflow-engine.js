@@ -544,7 +544,9 @@ class ConditionalWorkflowEngine extends EventEmitter {
                     }
                 );
 
-                return { success: true, messageTimestamp: slackResult.timestamp };
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success, messageTimestamp: slackResult.timestamp };
             } else {
                 return { success: false, error: slackResult.error };
             }
@@ -593,7 +595,9 @@ class ConditionalWorkflowEngine extends EventEmitter {
                     slackResult.timestamp
                 );
 
-                return { success: true, gateId, slackThread: slackResult.timestamp };
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success, gateId, slackThread: slackResult.timestamp };
             } else {
                 return { success: false, error: slackResult.error };
             }
@@ -663,8 +667,9 @@ class ConditionalWorkflowEngine extends EventEmitter {
                 url: response.data.html_url
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 issueNumber: response.data.number,
                 issueUrl: response.data.html_url
             };
@@ -690,8 +695,9 @@ class ConditionalWorkflowEngine extends EventEmitter {
                 timestamp: response.data.ts
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 timestamp: response.data.ts
             };
         } catch (error) {
@@ -718,8 +724,9 @@ class ConditionalWorkflowEngine extends EventEmitter {
                 timestamp: response.data.ts
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 timestamp: response.data.ts,
                 approvalId: approvalData.approvalId
             };
@@ -820,7 +827,8 @@ class ConditionalWorkflowEngine extends EventEmitter {
         this.app.post('/rule/create', async (req, res) => {
             try {
                 const ruleId = await this.createRule(req.body);
-                res.json({ success: true, ruleId });
+                res.json({
+            success: this.validateSuccess(),   ruleId });
             } catch (error) {
                 res.status(400).json({ success: false, error: error.message });
             }
@@ -831,7 +839,8 @@ class ConditionalWorkflowEngine extends EventEmitter {
             try {
                 const { ruleId } = req.params;
                 const result = await this.evaluateRule(ruleId, req.body.context);
-                res.json({ success: true, result });
+                res.json({
+            success: this.validateSuccess(),   result });
             } catch (error) {
                 res.status(400).json({ success: false, error: error.message });
             }
@@ -842,7 +851,8 @@ class ConditionalWorkflowEngine extends EventEmitter {
             try {
                 const { ruleId } = req.params;
                 const status = await this.getRuleStatus(ruleId);
-                res.json({ success: true, status });
+                res.json({
+            success: this.validateSuccess(),   status });
             } catch (error) {
                 res.status(400).json({ success: false, error: error.message });
             }

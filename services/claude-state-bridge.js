@@ -266,8 +266,9 @@ class ClaudeStateBridge {
                 workflowId
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 conversationId,
                 conversationState
             };
@@ -363,8 +364,9 @@ class ClaudeStateBridge {
                 responseTime: Date.now() - interactionStart
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 conversationId,
                 interaction,
                 claudeResult,

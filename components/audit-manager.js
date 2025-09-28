@@ -276,8 +276,9 @@ class AuditManager extends EventEmitter {
                 processingTime
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 eventId,
                 processingTime,
                 complianceFrameworks: this.getApplicableFrameworks(eventData)
@@ -361,7 +362,9 @@ class AuditManager extends EventEmitter {
                 complianceRelevant: true
             });
 
-            return { success: true, logged: true };
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, logged: true };
 
         } catch (error) {
             this.logger.error('Failed to log access event:', { error: error.message, accessData });
@@ -435,7 +438,9 @@ class AuditManager extends EventEmitter {
                 complianceRelevant: true
             });
 
-            return { success: true, changeId, logged: true };
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, changeId, logged: true };
 
         } catch (error) {
             this.logger.error('Failed to log configuration change:', { error: error.message, changeData });
@@ -528,8 +533,9 @@ class AuditManager extends EventEmitter {
                 complianceRelevant: true
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 report
             };
 
@@ -644,8 +650,9 @@ class AuditManager extends EventEmitter {
                 complianceRelevant: true
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 verification
             };
 
@@ -749,8 +756,9 @@ class AuditManager extends EventEmitter {
             const countQuery = `SELECT COUNT(*) as total FROM audit_trail ${whereClause}`;
             const countResult = await this.db.get(countQuery, params.slice(0, -2)); // Remove limit and offset
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 results: results.map(entry => this.sanitizeAuditEntry(entry)),
                 total: countResult.total,
                 limit,

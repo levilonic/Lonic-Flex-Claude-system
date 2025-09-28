@@ -36,8 +36,9 @@ class SimpleTestAgent extends BaseAgent {
             return 'Finished successfully';
         });
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             agent: this.agentName,
             sessionId: this.sessionId,
             results
@@ -167,8 +168,9 @@ async function testPhase2Simple() {
             console.log('   🎯 Performance improvements achieved');
             console.log('   🔒 Context isolation maintained');
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 readyComponents,
                 totalComponents,
                 avgInitTime: avgInitTime.toFixed(1),

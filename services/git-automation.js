@@ -86,9 +86,10 @@ class GitAutomation {
             }
             
             console.log(`✅ Workflow branch created: ${this.workflowBranch}`);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 branchName: this.workflowBranch,
                 baseBranch: this.baseBranch,
                 initialCommit: this.lastCommitHash
@@ -109,8 +110,10 @@ class GitAutomation {
             const hasChanges = await this.hasUncommittedChanges();
             if (!hasChanges && !force) {
                 console.log('📝 No changes to commit');
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     message: 'No changes to commit',
                     commitHash: this.lastCommitHash
                 };
@@ -158,9 +161,10 @@ Session: ${this.getSessionFromBranch()}
             if (this.config.enableAutoPush) {
                 await this.pushBranch(this.currentBranch);
             }
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 commitHash: this.lastCommitHash,
                 message: message,
                 timestamp: timestamp
@@ -222,9 +226,10 @@ Session: ${this.getSessionFromBranch()}
             }
             
             console.log(`✅ Rolled back to commit: ${commitHash}`);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 commitHash: commitHash,
                 branch: this.currentBranch,
                 rolledBackAt: Date.now()
@@ -248,9 +253,10 @@ Session: ${this.getSessionFromBranch()}
             await this.execGitCommand(`push -u ${this.config.remoteOrigin} ${branch}`);
             
             console.log(`✅ Branch pushed: ${branch}`);
-            
-            return {
-                success: true,
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 branch: branch,
                 remote: this.config.remoteOrigin
             };

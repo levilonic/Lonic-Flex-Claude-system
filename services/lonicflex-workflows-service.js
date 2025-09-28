@@ -300,8 +300,9 @@ class LonicFlexWorkflowsService {
         // Execute workflow asynchronously
         this.executeWorkflowAsync(workflowId);
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             workflowId,
             templateId,
             status: 'started',
@@ -448,8 +449,10 @@ class LonicFlexWorkflowsService {
             // Check workflow history
             const historyEntry = this.workflowHistory.find(w => w.id === workflowId);
             if (historyEntry) {
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     workflow: {
                         id: historyEntry.id,
                         status: historyEntry.status,
@@ -461,8 +464,9 @@ class LonicFlexWorkflowsService {
             throw new Error(`Workflow not found: ${workflowId}`);
         }
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             workflow: {
                 id: workflow.id,
                 templateId: workflow.templateId,
@@ -494,14 +498,20 @@ class LonicFlexWorkflowsService {
         }
 
         if (workflow.status === 'completed' || workflow.status === 'failed') {
-            return { success: true, message: 'Workflow already finished' };
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, message: 'Workflow already finished' };
         }
 
         workflow.status = 'cancelled';
         workflow.endTime = new Date();
 
         this.logger.info('Workflow cancelled', { workflowId });
-        return { success: true, message: 'Workflow cancelled successfully' };
+
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success, message: 'Workflow cancelled successfully' };
     }
 
     async createWorkflowTemplate({ name, description, steps, estimatedDuration }) {
@@ -527,8 +537,9 @@ class LonicFlexWorkflowsService {
 
         this.logger.info('Custom workflow template created', { templateId, name, steps: steps.length });
 
-        return {
-            success: true,
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success,
             templateId,
             template: {
                 id: templateId,
@@ -561,7 +572,9 @@ class LonicFlexWorkflowsService {
                     break;
             }
 
-            return { success: true, event, coordinated: true };
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, event, coordinated: true };
 
         } catch (error) {
             this.logger.error('Service coordination failed', { error: error.message, event });
@@ -643,7 +656,10 @@ class LonicFlexWorkflowsService {
             }
 
             this.logger.info('Service step completed', { service, step, success: result.success });
-            return { success: true, service, action: step, result: result.data || result.message };
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, service, action: step, result: result.data || result.message };
 
         } catch (error) {
             this.logger.error('Service step failed', { service, step, error: error.message });
@@ -683,7 +699,10 @@ class LonicFlexWorkflowsService {
             }
 
             const responseData = await response.json();
-            return { success: true, data: responseData, status: response.status };
+
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success, data: responseData, status: response.status };
 
         } catch (error) {
             clearTimeout(timeoutId);

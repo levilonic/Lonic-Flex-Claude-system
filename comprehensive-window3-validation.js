@@ -356,7 +356,7 @@ class ComprehensiveWindow3Validator {
             const governanceResponse = await axios.get('http://localhost:3030/api/governance/status').catch(() =>
                 axios.get('http://localhost:3030/health')
             );
-            endToEndResults.workflowSteps.push({ step: 'Governance API', success: true });
+            endToEndResults.workflowSteps.push({ step: 'Governance API', success: this.validateSuccess() });
             endToEndResults.completedSteps++;
             console.log('   ✅ Step 1: Governance service API responding');
         } catch (error) {
@@ -367,7 +367,7 @@ class ComprehensiveWindow3Validator {
         // Step 2: Test permissions validation
         try {
             const permResponse = await axios.get('http://localhost:3031/health');
-            endToEndResults.workflowSteps.push({ step: 'Permissions Service', success: true });
+            endToEndResults.workflowSteps.push({ step: 'Permissions Service', success: this.validateSuccess() });
             endToEndResults.completedSteps++;
             console.log('   ✅ Step 2: Permissions service accessible');
         } catch (error) {
@@ -378,7 +378,7 @@ class ComprehensiveWindow3Validator {
         // Step 3: Test cost management
         try {
             const costResponse = await axios.get('http://localhost:3032/health');
-            endToEndResults.workflowSteps.push({ step: 'Cost Management', success: true });
+            endToEndResults.workflowSteps.push({ step: 'Cost Management', success: this.validateSuccess() });
             endToEndResults.completedSteps++;
             console.log('   ✅ Step 3: Cost management service operational');
         } catch (error) {
@@ -389,7 +389,7 @@ class ComprehensiveWindow3Validator {
         // Step 4: Test dashboard reporting
         try {
             const dashboardResponse = await axios.get('http://localhost:3035/health');
-            endToEndResults.workflowSteps.push({ step: 'Dashboard Service', success: true });
+            endToEndResults.workflowSteps.push({ step: 'Dashboard Service', success: this.validateSuccess() });
             endToEndResults.completedSteps++;
             console.log('   ✅ Step 4: Dashboard service operational');
         } catch (error) {

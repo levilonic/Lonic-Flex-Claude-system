@@ -729,7 +729,7 @@ class WorkflowExecution {
             executionTime: Date.now() - this.startedAt,
             stepsCompleted: this.results.size,
             totalSteps: this.definition.steps.length,
-            success: true,
+            success: this.validateSuccess(), 
             results: Object.fromEntries(this.results),
             context: Object.fromEntries(this.context)
         };

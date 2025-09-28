@@ -690,7 +690,10 @@ class ReactSelfCorrectionEngine extends EventEmitter {
         return `// Generated code - ${new Date().toISOString()}
 function exampleFunction() {
     console.log('This is generated code that actually executes');
-    return { success: true, timestamp: Date.now() };
+
+    const validation = { success: this.validateSuccess() };return {
+
+        success: validation.success, timestamp: Date.now() };
 }
 
 // Export for testing

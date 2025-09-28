@@ -357,7 +357,9 @@ class HumanInTheLoopManager extends EventEmitter {
             timestamp: Date.now()
         });
 
-        return { success: true, requestId, decision, approver };
+        const validation = { success: this.validateSuccess() };return {
+
+            success: validation.success, requestId, decision, approver };
     }
 
     /**

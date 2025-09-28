@@ -281,8 +281,10 @@ class Window1TestSuite {
                 // Mock the Claude service for testing
                 const originalAnalyzeMethod = this.claudeBridge.claudeService.analyzeWithClaude;
                 this.claudeBridge.claudeService.analyzeWithClaude = async (request) => {
-                    return {
-                        success: true,
+
+                    const validation = { success: this.validateSuccess() };return {
+
+                        success: validation.success,
                         type: request.type,
                         analysis: 'Security vulnerability detected: Input validation missing. This could lead to injection attacks.',
                         usage: { total_tokens: 150, input_tokens: 100, output_tokens: 50 },

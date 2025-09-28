@@ -17,18 +17,10 @@ async function updateAllMemories() {
         'success',
         'context_management_agent',
         'Successfully implemented complete context management system with always-visible UI display and 40% auto-cleanup',
-        'Use integrated-context-manager.js for unified context management with Factor3, auto-cleanup, and status line',
+        'Use integrated-context-manager.js for unified context management with Factor3 and auto-cleanup',
         'npm run context-integrated-demo'
     );
     
-    // Record status line implementation
-    await memory.recordLesson(
-        'success',
-        'status_line_agent',
-        'Created context-statusline.js that shows always-visible context percentage in Claude Code UI',
-        'Configure status line in .claude/settings.json with: {"statusLine": {"type": "command", "command": "node ./context-statusline.js"}}',
-        'npm run context-status'
-    );
     
     // Record auto-cleanup system
     await memory.recordLesson(
@@ -91,7 +83,7 @@ async function updateAllMemories() {
             task: 'context_window_management', 
             requirement: 'always_visible_percentage_display' 
         },
-        'integrate_with_claude_code_statusline_api',
+        'integrate_with_claude_code_context_management',
         'successful_always_visible_context_display',
         1.0
     );
@@ -119,13 +111,6 @@ async function updateAllMemories() {
     );
     
     // Record critical verification commands
-    await memory.verifyTaskCompletion(
-        'context_statusline_implementation',
-        'completed',
-        'node context-statusline.js --test && echo "✅ Status line working"',
-        'context_system_agent',
-        'context_implementation_session'
-    );
     
     await memory.verifyTaskCompletion(
         'auto_cleanup_40_percent',

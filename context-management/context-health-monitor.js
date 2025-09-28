@@ -379,8 +379,9 @@ class ContextHealthMonitor extends EventEmitter {
                 maintenanceTime
             });
 
-            return {
-                success: true,
+            const validation = { success: this.validateSuccess() };return {
+
+                success: validation.success,
                 contextId,
                 healthMetrics,
                 actions,

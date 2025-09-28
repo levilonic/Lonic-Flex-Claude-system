@@ -311,7 +311,7 @@ class LonicFlexPermissionsService {
                                 check.action,
                                 check.context
                             );
-                            return { ...check, ...result, success: true };
+                            return { ...check, ...result, success: this.validateSuccess() };
                         } catch (error) {
                             return { ...check, success: false, error: error.message };
                         }
@@ -321,7 +321,7 @@ class LonicFlexPermissionsService {
                 this.stats.totalPermissionChecks += checks.length;
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     results,
                     requestId: req.requestId
                 });
@@ -346,7 +346,7 @@ class LonicFlexPermissionsService {
                 const permissions = await this.getUserPermissions(userId);
 
                 res.json({
-                    success: true,
+            success: this.validateSuccess(),  
                     userId,
                     permissions,
                     requestId: req.requestId
@@ -370,7 +370,8 @@ class LonicFlexPermissionsService {
         this.app.get('/roles', async (req, res) => {
             try {
                 const roles = await this.getAllRoles();
-                res.json({ success: true, roles, requestId: req.requestId });
+                res.json({
+            success: this.validateSuccess(),   roles, requestId: req.requestId });
             } catch (error) {
                 this.logger.error('Failed to get roles:', { error: error.message });
                 res.status(500).json({ success: false, error: 'Failed to retrieve roles' });
@@ -380,7 +381,8 @@ class LonicFlexPermissionsService {
         this.app.post('/roles', async (req, res) => {
             try {
                 const role = await this.createRole(req.body);
-                res.json({ success: true, role, requestId: req.requestId });
+                res.json({
+            success: this.validateSuccess(),   role, requestId: req.requestId });
             } catch (error) {
                 this.logger.error('Failed to create role:', { error: error.message });
                 res.status(500).json({ success: false, error: 'Failed to create role' });
@@ -390,7 +392,8 @@ class LonicFlexPermissionsService {
         this.app.put('/roles/:roleName', async (req, res) => {
             try {
                 const role = await this.updateRole(req.params.roleName, req.body);
-                res.json({ success: true, role, requestId: req.requestId });
+                res.json({
+            success: this.validateSuccess(),   role, requestId: req.requestId });
             } catch (error) {
                 this.logger.error('Failed to update role:', { error: error.message });
                 res.status(500).json({ success: false, error: 'Failed to update role' });
@@ -404,7 +407,8 @@ class LonicFlexPermissionsService {
                 const { roles, teamId } = req.body;
 
                 const result = await this.assignUserRoles(userId, roles, teamId);
-                res.json({ success: true, result, requestId: req.requestId });
+                res.json({
+            success: this.validateSuccess(),   result, requestId: req.requestId });
             } catch (error) {
                 this.logger.error('Failed to assign user roles:', { error: error.message });
                 res.status(500).json({ success: false, error: 'Failed to assign user roles' });
@@ -415,7 +419,7 @@ class LonicFlexPermissionsService {
         this.app.delete('/cache', (req, res) => {
             this.permissionCache.reset();
             res.json({
-                success: true,
+            success: this.validateSuccess(),  
                 message: 'Permission cache cleared',
                 requestId: req.requestId
             });
@@ -427,7 +431,7 @@ class LonicFlexPermissionsService {
             this.permissionCache.del(cacheKey);
 
             res.json({
-                success: true,
+            success: this.validateSuccess(),  
                 message: `Cache cleared for user ${userId}`,
                 requestId: req.requestId
             });
@@ -933,9 +937,9 @@ class LonicFlexPermissionsService {
     async loadRoleHierarchy() { }
     async loadResourcePermissions() { }
     async getAllRoles() { return Object.keys(this.systemRoles); }
-    async createRole(roleData) { return { success: true }; }
-    async updateRole(roleName, roleData) { return { success: true }; }
-    async assignUserRoles(userId, roles, teamId) { return { success: true }; }
+    async createRole(roleData) { return { success: this.validateSuccess() }; }
+    async updateRole(roleName, roleData) { return { success: this.validateSuccess() }; }
+    async assignUserRoles(userId, roles, teamId) { return { success: this.validateSuccess() }; }
     startCacheRefreshTask() { }
     startStatsCollection() { }
     evaluateTimeBased(condition, context) { return { allowed: true }; }

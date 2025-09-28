@@ -58,9 +58,10 @@ class ErrorRecovery extends EventEmitter {
                 console.log(`🔄 Retrying operation in ${delay}ms (attempt ${attempt})`);
                 
                 await new Promise(resolve => setTimeout(resolve, delay));
-                
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     strategy: 'retry_operation',
                     attempt: attempt,
                     delay: delay,
@@ -124,8 +125,10 @@ class ErrorRecovery extends EventEmitter {
                 const component = context.component || 'unknown';
                 
                 // Mock component restart - in production this would restart actual services
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     strategy: 'restart_component',
                     component: component,
                     message: `Component ${component} restart simulated`
@@ -141,9 +144,10 @@ class ErrorRecovery extends EventEmitter {
             conditions: ['non_critical_error', 'optional_step', 'dependency_missing'],
             action: async (error, context) => {
                 console.log('⏭️ Skipping current step...');
-                
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     strategy: 'skip_step',
                     skippedStep: context.currentStep,
                     message: `Step ${context.currentStep} skipped due to error`
@@ -178,9 +182,10 @@ Human intervention required immediately.`);
                 } catch (notificationError) {
                     console.error('Failed to send escalation notification:', notificationError.message);
                 }
-                
-                return {
-                    success: true,
+
+                const validation = { success: this.validateSuccess() };return {
+
+                    success: validation.success,
                     strategy: 'escalate_error',
                     escalated: true,
                     message: 'Error escalated for human intervention'
