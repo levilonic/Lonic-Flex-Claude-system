@@ -267,7 +267,7 @@ Timestamp: ${new Date(report.timestamp).toLocaleString()}`;
             info('📢 Slack progress report sent');
             
         } catch (error) {
-            console.log('📝 Slack unavailable, progress logged locally:', {
+            info('📝 Slack unavailable, progress logged locally:', {
                 uptime: report.uptimeFormatted,
                 progress: `${report.progress.completed}/${report.progress.total}`,
                 phase: report.currentPhase,

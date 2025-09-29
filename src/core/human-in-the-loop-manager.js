@@ -233,7 +233,7 @@ class HumanInTheLoopManager extends EventEmitter {
             return result;
 
         } catch (error) {
-            error(`);
+            error('Error occurred');
             throw error;
         }
     }

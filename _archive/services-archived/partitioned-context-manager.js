@@ -5,7 +5,7 @@
  * Infrastructure is shared but context events remain completely separate
  */
 
-const { Factor3ContextManager } = require('../../context-management/factor3-context-manager');
+const { Factor3ContextManager } = require('../../src/context-management/factor3-context-manager');
 
 /**
  * Context Partition - Isolated context for a single workflow

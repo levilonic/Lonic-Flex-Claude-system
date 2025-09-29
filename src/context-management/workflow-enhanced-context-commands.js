@@ -194,7 +194,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             if (result) {
                 info(`Quality Gate PASSED: ${gateId}`);
             } else {
-                error(`);
+                error('Error occurred');
             }
             
             // Display updated phase status

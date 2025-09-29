@@ -428,7 +428,7 @@ if (require.main === module) {
             process.exit(0);
         });
     } else {
-        console.log(`
+        info(`
 Context Auto Manager - Intelligent cleanup at 40% threshold
 
 Usage:

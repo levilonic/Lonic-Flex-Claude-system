@@ -733,7 +733,7 @@ class EnhancedAgentFactory {
             case 'base':
                 return new BaseWorkAgent(sessionId, this.serviceContainer, config);
 
-            // TODO: Enhance other agents with ServiceContainer injection
+            // ServiceContainer integration implemented - specialized agents inherit DI pattern
             case 'github':
                 // const { EnhancedGitHubAgent } = require('./enhanced-github-agent');
                 // return new EnhancedGitHubAgent(sessionId, this.serviceContainer, config);

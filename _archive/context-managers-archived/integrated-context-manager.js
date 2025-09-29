@@ -386,7 +386,7 @@ if (require.main === module) {
             });
         }).catch(console.error);
     } else {
-        console.log(`
+        info(`
 Integrated Context Manager - Unified context management system
 
 Usage:

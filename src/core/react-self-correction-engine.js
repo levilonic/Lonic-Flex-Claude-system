@@ -829,7 +829,7 @@ async function demoReActSelfCorrection() {
             }
         );
 
-        console.log('✅ Result 1:', {
+        info('✅ Result 1:', {
             attempts: result1.attempts,
             confidence: result1.confidence,
             verificationCommand: result1.verificationCommand
@@ -844,7 +844,7 @@ async function demoReActSelfCorrection() {
             }
         );
 
-        console.log('✅ Result 2:', {
+        info('✅ Result 2:', {
             attempts: result2.attempts,
             confidence: result2.confidence,
             verificationCommand: result2.verificationCommand

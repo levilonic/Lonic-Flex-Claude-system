@@ -346,7 +346,7 @@ class WorkflowEngine extends EventEmitter {
             this.workflow.metrics.qualityGatesPassed++;
             info(`Quality Gate PASSED: ${gate.name}`);
         } else {
-            error(`);
+            error('Error occurred');
             info(`   Criteria: ${gate.criteria}`);
         }
         

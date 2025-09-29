@@ -12,9 +12,10 @@ const { ContextWindowMonitor } = require('../context-management/context-window-m
 const { TwelveFactorCompliance } = require('../core/12-factor-compliance-tracker');
 const DocumentationService = require('./documentation-service');
 const { LonicFlexLogger } = require('./logger');
+const { info, warn, error } = require('./logger');
 
-// Import for PartitionedContextManager
-const { PartitionedContextManager } = require('./archived/partitioned-context-manager');
+// Import for context management
+const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
 // REMOVED: Direct imports that cause circular dependencies
 // const { AgentPoolManager } = require('./agent-pool-manager');
 // const { WorkflowOrchestrator } = require('./workflow-orchestrator');
@@ -75,10 +76,12 @@ class ServiceContainer {
             const docs = DocumentationService.getInstance();
             this.registerService('documentation', docs);
 
-            // Partitioned context manager (replaces shared context)
-            const partitionedContextManager = new PartitionedContextManager(this);
-            await partitionedContextManager.initialize();
-            this.registerService('contextManager', partitionedContextManager);
+            // Context manager (using Factor3ContextManager as primary)
+            const contextManager = new Factor3ContextManager({
+                contextScope: 'system',
+                contextId: `service_container_${Date.now()}`
+            });
+            this.registerService('contextManager', contextManager);
 
             // Phase 2: Agent Lifecycle Management services
             // Use lazy initialization to break circular dependencies
@@ -97,13 +100,13 @@ class ServiceContainer {
 
             return this;
 
-        } catch (error) {
+        } catch (initError) {
             if (this.logger) {
-                this.logger.error('ServiceContainer initialization failed', { error: error.message });
+                this.logger.error('ServiceContainer initialization failed', { error: initError.message });
             } else {
-                console.error('❌ ServiceContainer initialization failed:', error.message);
+                error('❌ ServiceContainer initialization failed:', initError.message);
             }
-            throw error;
+            throw initError;
         }
     }
 
@@ -146,7 +149,7 @@ class ServiceContainer {
             });
         } else {
             // Fallback for logger service registration itself
-            console.log(`Service registered: ${name} (${this.services.size} total services)`);
+            info(`Service registered: ${name} (${this.services.size} total services)`);
         }
     }
 
@@ -174,7 +177,7 @@ class ServiceContainer {
                     availableServices
                 });
             } else {
-                console.log(`❌ Service '${name}' not found. Available services: [${availableServices.join(', ')}]`);
+                info(`❌ Service '${name}' not found. Available services: [${availableServices.join(', ')}]`);
             }
             throw new Error(`Service '${name}' not found in container`);
         }
@@ -249,8 +252,8 @@ class ServiceContainer {
     }
 
     /**
-     * Create isolated context partition for a workflow
-     * Solves Context Explosion Anti-Pattern by providing isolation
+     * Create workflow context for isolated task execution
+     * Simplified context management using Factor3ContextManager
      */
     async createWorkflowPartition(workflowId, config = {}) {
         if (!this.initialized) {
@@ -261,19 +264,20 @@ class ServiceContainer {
             throw new Error(`Workflow partition '${workflowId}' already exists`);
         }
 
-        const contextManager = this.getService('contextManager');
-        if (!contextManager) {
-            throw new Error('PartitionedContextManager not available');
-        }
-
-        const partition = await contextManager.createPartition(workflowId, config);
-        this.workflowPartitions.set(workflowId, partition);
-
-        this.logger.info('Created isolated partition for workflow', {
-            workflowId: typeof workflowId === 'object' ? '[object]' : workflowId,
-            partitionType: 'isolated'
+        // Create a new Factor3ContextManager for this workflow
+        const workflowContext = new Factor3ContextManager({
+            contextScope: 'workflow',
+            contextId: workflowId,
+            ...config
         });
-        return partition;
+
+        this.workflowPartitions.set(workflowId, workflowContext);
+
+        this.logger.info('Created isolated context for workflow', {
+            workflowId: typeof workflowId === 'object' ? '[object]' : workflowId,
+            contextType: 'workflow'
+        });
+        return workflowContext;
     }
 
     /**
@@ -296,13 +300,13 @@ class ServiceContainer {
             return; // Already cleaned up
         }
 
-        const contextManager = this.getService('contextManager');
-        if (contextManager && typeof contextManager.cleanupPartition === 'function') {
-            await contextManager.cleanupPartition(workflowId);
+        // Factor3ContextManager cleanup (if it has cleanup methods)
+        if (partition && typeof partition.cleanup === 'function') {
+            await partition.cleanup();
         }
 
         this.workflowPartitions.delete(workflowId);
-        this.logger.info('Cleaned up partition for workflow', {
+        this.logger.info('Cleaned up workflow context', {
             workflowId: workflowId
         });
     }
@@ -356,7 +360,7 @@ class ServiceContainer {
                 services: this.services.size
             });
         } else {
-            console.log('ServiceContainer shutting down...');
+            info('ServiceContainer shutting down...');
         }
 
         // Cleanup all workflow partitions
@@ -381,7 +385,7 @@ class ServiceContainer {
         this.initialized = false;
         this.logger = null;
 
-        console.log('ServiceContainer shutdown complete');
+        info('ServiceContainer shutdown complete');
     }
 
     /**

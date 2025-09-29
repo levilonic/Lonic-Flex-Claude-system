@@ -167,7 +167,7 @@ class ProjectListCommand {
                 });
 
             } catch (error) {
-                console.warn(`⚠️ Could not enhance project ${project.name}:`, error.message);
+                warn(`⚠️ Could not enhance project ${project.name}:`, error.message);
                 // Add basic enhancement even if detailed info fails
                 enhanced.push({
                     ...project,
@@ -462,7 +462,7 @@ async function main() {
     const args = process.argv.slice(2);
     
     if (args.includes('--help') || args.includes('-h')) {
-        console.log(`
+        info(`
 Project List Command - LonicFLex
 
 USAGE:

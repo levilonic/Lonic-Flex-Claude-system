@@ -363,7 +363,7 @@ class ContextHealthChecker {
             
             return testResult.source === 'api' ? 'optimal' : 'functional';
         } catch (error) {
-            error(`);
+            error('Error occurred');
             return 'broken';
         }
     }

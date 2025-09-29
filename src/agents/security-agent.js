@@ -5,7 +5,7 @@ const { info, warn, error } = require('../services/logger');
  * Maintains 100% security scanning functionality while solving context explosion
  */
 
-const { BaseAgent } = require('./base-agent-enhanced');
+const { BaseAgent } = require('./base-agent');
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');

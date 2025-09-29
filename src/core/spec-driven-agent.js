@@ -737,7 +737,7 @@ async function testErrorCondition_${errorCondition}(agent) {
 
             registeredAgent.performanceHistory.push(performanceRecord);
 
-            error(`);
+            error('Error occurred');
 
             throw error;
         }

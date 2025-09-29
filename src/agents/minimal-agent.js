@@ -173,7 +173,7 @@ if (require.main === module) {
             if (result.success) {
                 info('🎉 MinimalAgent test: SUCCESS');
             } else {
-                error(');
+                error('🚨 MinimalAgent test: FAILED');
                 info('Error:', result.error);
             }
 

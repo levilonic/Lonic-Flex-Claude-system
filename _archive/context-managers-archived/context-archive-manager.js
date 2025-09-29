@@ -168,7 +168,7 @@ class ContextArchiveManager {
             // Verify integrity
             const checksum = this.calculateChecksum(processedContent);
             if (checksum !== metadata.checksum) {
-                console.warn(`⚠️ Checksum mismatch for archive ${archiveId}`);
+                warn(`⚠️ Checksum mismatch for archive ${archiveId}`);
             }
             
             return {
@@ -482,7 +482,7 @@ async function runCLI() {
                 break;
                 
             default:
-                console.log(`
+                info(`
 Context Archive Manager - Enhanced storage and retrieval
 
 Commands:

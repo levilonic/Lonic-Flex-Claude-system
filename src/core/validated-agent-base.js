@@ -100,7 +100,7 @@ class ValidatedAgent {
                 info(`Step validated: ${stepName} (${stepResult.confidence}% confidence)`);
 
             } catch (error) {
-                error(`);
+                error(`Step validation failed: ${stepName}`, { error: error.message });
 
                 stepValidations.push({
                     step: stepName,
@@ -201,7 +201,7 @@ class ValidatedAgent {
                 timestamp: Date.now()
             });
 
-            error(`);
+            error('Error occurred');
             throw error;
         }
     }
@@ -422,7 +422,7 @@ class ValidatedAgent {
             return correctionResult;
 
         } catch (error) {
-            error(`);
+            error('Error occurred');
             throw new Error(`Self-correction failed after maximum attempts: ${error.message}`);
         }
     }

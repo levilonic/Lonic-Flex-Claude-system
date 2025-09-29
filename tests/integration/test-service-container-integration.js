@@ -6,8 +6,8 @@
  * 3. Performance issues (90%+ context usage, 2-minute timeouts)
  */
 
-const { initializeGlobalServiceContainer } = require('../services/service-container');
-const { BaseWorkAgent, EnhancedAgentFactory } = require('./agents/base-agent-enhanced');
+const { initializeGlobalServiceContainer } = require('../../src/services/service-container');
+const { BaseAgent } = require('../../src/agents/base-agent');
 
 async function testServiceContainerIntegration() {
     console.log('🧪 Testing ServiceContainer Integration - Phase 2');
