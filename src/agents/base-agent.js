@@ -39,6 +39,14 @@ class BaseAgent extends ValidatedAgent {
         this.compliance = this.services.getComplianceService();
         this.docs = this.services.getDocumentationService();
 
+        // Logger service integration
+        const loggerService = this.services.getService('logger');
+        this.logger = loggerService ? loggerService.createContextLogger({
+            category: 'agent',
+            agentId: this.agentId,
+            sessionId: this.sessionId
+        }) : null;
+
         // Context manager through partition system (eliminates context explosion)
         this.contextPartition = null;
         this.contextManager = null;
@@ -54,7 +62,12 @@ class BaseAgent extends ValidatedAgent {
         // Workflow configuration for partitioning
         this.workflowId = config.workflowId || `workflow_${this.agentId}`;
 
-        console.log(`✅ Enhanced BaseAgent created: ${this.agentName} (ServiceContainer injected)`);
+        if (this.logger) {
+            this.logger.info('Enhanced BaseAgent created', {
+                serviceContainer: 'injected',
+                workflowId: this.workflowId
+            });
+        }
     }
 
     /**
@@ -98,7 +111,12 @@ class BaseAgent extends ValidatedAgent {
             config: this.config
         });
 
-        console.log(`🔧 Agent ${this.agentName} initialized with isolated partition: ${this.workflowId}`);
+        if (this.logger) {
+            this.logger.info('Agent initialized with isolated partition', {
+                workflowId: this.workflowId,
+                partitionId: this.contextPartition.partitionId
+            });
+        }
         return this;
     }
 
@@ -446,7 +464,9 @@ class BaseAgent extends ValidatedAgent {
         this.contextPartition = null;
         this.contextManager = null;
 
-        console.log(`🔄 Agent ${this.agentName} reset for pool reuse`);
+        if (this.logger) {
+            this.logger.info('Agent reset for pool reuse');
+        }
         return this;
     }
 
@@ -477,7 +497,12 @@ class BaseAgent extends ValidatedAgent {
             reused: true
         });
 
-        console.log(`🔧 Agent ${this.agentName} configured for workflow: ${this.workflowId}`);
+        if (this.logger) {
+            this.logger.info('Agent configured for workflow', {
+                workflowId: this.workflowId,
+                reused: true
+            });
+        }
         return this;
     }
 
@@ -523,7 +548,13 @@ class BaseAgent extends ValidatedAgent {
             });
         }
 
-        console.log(`🧹 Agent ${this.agentName} cleanup completed (workflow: ${this.workflowId})`);
+        if (this.logger) {
+            this.logger.info('Agent cleanup completed', {
+                workflowId: this.workflowId,
+                finalState: this.state,
+                finalProgress: this.progress
+            });
+        }
     }
 
     /**
