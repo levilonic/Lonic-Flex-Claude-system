@@ -1,4 +1,4 @@
-# Runtime state (additions)
+# Runtime state
 *.db
 *.db-wal
 *.db-shm
@@ -9,7 +9,7 @@ logs/
 node_modules/
 dist/
 
-# Existing rules you already had
+# Environment configs
 env.production.local
 
 # OS generated files
@@ -21,43 +21,41 @@ env.production.local
 ehthumbs.db
 Thumbs.db
 
-# IDE files
+# IDE/editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Coverage directory used by tools like istanbul
+# Coverage / testing outputs
 coverage/
 .nyc_output
-
-# Temporary folders
-tmp/
-temp/
-
-# Runtime files that get regenerated
 test-reports/
 *.pid
 *.seed
 *.pid.lock
 
-# Optional npm cache directory
+# Temp folders
+tmp/
+temp/
+
+# Optional npm cache
 .npm
 
-# Optional REPL history
+# REPL history
 .node_repl_history
 
 # Output of 'npm pack'
 *.tgz
 
-# Yarn Integrity file
+# Yarn Integrity
 .yarn-integrity
 
-# Session and temporary files
+# Session + temporary context files
 data/sessions/current-*
 current-session-context.xml
 
-# Development tools
+# Development tools / binaries
 tools/ngrok.exe
 
 # Backups
