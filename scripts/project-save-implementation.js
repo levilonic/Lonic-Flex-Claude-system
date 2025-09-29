@@ -5,7 +5,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
-const { MultiAgentCore } = require('./claude-multi-agent-core');
+const { MultiAgentCore } = require('../../integrations/claude/claude-multi-agent-core');
 
 /**
  * Execute Project Save for ServiceContainer Migration Project

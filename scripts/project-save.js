@@ -8,8 +8,8 @@
 
 require('dotenv').config();
 
-const { MultiAgentCore } = require('./claude-multi-agent-core');
-const { Factor3ContextManager } = require('./factor3-context-manager');
+const { MultiAgentCore } = require('../../integrations/claude/claude-multi-agent-core');
+const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
 const fs = require('fs').promises;
 const path = require('path');
 

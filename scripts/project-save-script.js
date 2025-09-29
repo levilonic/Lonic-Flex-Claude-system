@@ -1,5 +1,5 @@
 const { SQLiteManager } = require('./database/sqlite-manager');
-const { Factor3ContextManager } = require('./factor3-context-manager');
+const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
 const fs = require('fs').promises;
 
 async function saveProjectState() {
