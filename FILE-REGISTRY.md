@@ -6,7 +6,7 @@
 
 | Category | Location | Count | Purpose |
 |----------|----------|-------|---------|
-| [**Agents**](#agents) | `src/agents/` | 31 | Autonomous agent implementations |
+| [**Agents**](#agents) | `src/agents/` | 21 | Autonomous agent implementations |
 | [**Services**](#services) | `src/services/` | 48 | PM2 microservices |
 | [**Core Systems**](#core-systems) | `src/core/` | 19 | Core system components |
 | [**Context Management**](#context-management) | `src/context-management/` | 14 | Context preservation system |
@@ -19,14 +19,17 @@
 | [**Scripts & Utilities**](#scripts--utilities) | `scripts/` | 19 | Deployment & utility scripts |
 | [**Configuration**](#configuration) | `config/` | 1+ | System configuration |
 | [**Documentation**](#documentation) | `docs/` | 8+ | Architecture & guides |
+| [**Entry Points**](#entry-points) | Root | 2 | Main application interfaces |
 
 ---
 
 ## 📁 Detailed File Catalog
 
 ### Agents
-**Location**: `src/agents/` (31 files)
+**Location**: `src/agents/` (21 files)
 **Purpose**: Autonomous agent implementations following Factor 10 principles
+
+**Phase 5 Update**: Consolidated duplicate agents, removed -clean suffix pattern
 
 | File | Purpose | Dependencies | Status |
 |------|---------|--------------|---------|
@@ -35,10 +38,8 @@
 | `code-agent.js` | Code generation and analysis | base-agent | ✅ Working |
 | `security-agent.js` | Security scanning and analysis | base-agent | ✅ Working |
 | `deploy-agent.js` | Deployment automation | base-agent, docker | ⚠️ Docker dependent |
-| `github-agent.js` | GitHub API integration | base-agent, octokit | ✅ Working |
+| `github-agent.js` | Consolidated GitHub API agent | ValidatedAgent, GitAutomation | ✅ Working |
 | `comm-agent.js` | Communication & notifications | base-agent | ✅ Working |
-| `enhanced-*.js` | Enhanced versions of core agents | respective base agents | ✅ Working |
-| `*-clean.js` | Cleaned/refactored versions | N/A | ✅ Working |
 | `testing-agent.js` | Test automation | base-agent | ✅ Working |
 | `documentation-agent.js` | Documentation generation | base-agent | ✅ Working |
 | `architecture-design-agent.js` | System architecture design | base-agent | ✅ Working |
@@ -226,6 +227,25 @@
 - `test-service-container-integration.js` - Service integration testing
 - `test-unified-commands.js` - Command interface testing
 - `test-universal-context.js` - Universal context system testing
+
+### Entry Points
+**Location**: Root directory (2 files)
+**Purpose**: Main application interfaces following Phase 5 consolidation
+
+| File | Purpose | Usage | Status |
+|------|---------|-------|---------|
+| `index.js` | Main system entry point | `node index.js` or `npm start` | ✅ Active |
+| `cli.js` | Command-line interface | `node cli.js <command>` or `npm run cli` | ✅ Active |
+
+**New NPM Scripts** (Phase 5):
+- `npm start` - Start LonicFLex system
+- `npm run cli` - Access command-line interface
+- `npm test` - Run comprehensive tests
+- `npm run status` - Show system status
+- `npm run health` - Run health check
+- `npm run agents` - List available agents
+
+**Eliminated Scripts**: Reduced from 71+ to 22 focused scripts (72% reduction)
 - `test-two-phase-system.js` - Two-phase system testing
 - [Additional integration tests...]
 
