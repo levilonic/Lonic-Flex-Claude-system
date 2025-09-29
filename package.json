@@ -11,7 +11,7 @@
     "health": "node cli.js health",
     "agents": "node cli.js agents",
     "dev": "nodemon index.js",
-    "services:start": "pm2 start ecosystem.config.js",
+    "services:start": "pm2 start config/ecosystem.config.js",
     "services:stop": "pm2 stop all",
     "services:restart": "pm2 restart all",
     "services:status": "pm2 status",

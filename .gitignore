@@ -6,8 +6,11 @@ yarn-error.log*
 
 # Runtime databases and logs
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
+data/database/*.db*
 logs/
 *.log
 
@@ -58,3 +61,14 @@ test-reports/
 
 # Yarn Integrity file
 .yarn-integrity
+
+# Session and temporary files
+data/sessions/current-*
+current-session-context.xml
+
+# Development tools
+tools/ngrok.exe
+
+# Backups
+backups/
+*.backup
