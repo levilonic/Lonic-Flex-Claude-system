@@ -4,8 +4,12 @@
   "description": "12-Factor Agents methodology with live multi-agent infrastructure implementation",
   "main": "index.js",
   "scripts": {
+    "demo": "node demo.js",
+    "working-demo": "node working-demo.js",
+    "test:real": "node tests/real/pr-review-integration.test.js",
     "start": "node index.js",
     "cli": "node cli.js",
+    "cli-working": "node cli-working.js",
     "test": "node cli.js test",
     "status": "node cli.js status",
     "health": "node cli.js health",

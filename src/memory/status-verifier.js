@@ -285,8 +285,8 @@ async function main() {
             info('  npm run verify-task   # Interactive task verification');
         }
 
-    } catch (error) {
-        error('❌ Verification system error:', error.message);
+    } catch (err) {
+        error('❌ Verification system error:', err.message);
         process.exit(1);
     } finally {
         await verifier.cleanup();

@@ -54,10 +54,10 @@ class Factor3ContextManager {
         
         // Enhanced with real token counting
         this.tokenCounter = new TokenCounter(options.tokenCounter);
-        this.monitor = options.enableMonitoring !== false ? 
-            new ContextWindowMonitor({ 
-                ...options.monitor, 
-                tokenCounter: this.tokenCounter 
+        this.monitor = options.enableMonitoring === true ?
+            new ContextWindowMonitor({
+                ...options.monitor,
+                tokenCounter: this.tokenCounter
             }) : null;
         
         // Token usage tracking
