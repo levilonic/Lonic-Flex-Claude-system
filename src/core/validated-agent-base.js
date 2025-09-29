@@ -11,24 +11,31 @@
  * - Evidence-based confidence scoring
  */
 
-const { BaseAgent } = require('../agents/base-agent');
+// NOTE: BaseAgent now extends ValidatedAgent, removed circular dependency
 const { ReactSelfCorrectionEngine } = require('./react-self-correction-engine');
 const fs = require('fs');
 const path = require('path');
 
 /**
  * ValidatedAgent - Production-ready agent with real validation
- * Extends BaseAgent but replaces theater with verification
+ * Base class with evidence-based validation (no circular dependencies)
  */
-class ValidatedAgent extends BaseAgent {
+class ValidatedAgent {
     constructor(agentName, sessionId, config = {}) {
-        super(agentName, sessionId, {
+        // Base agent properties without extending BaseAgent
+        this.agentName = agentName;
+        this.sessionId = sessionId;
+        this.agentId = `${sessionId}_${agentName}`;
+
+        this.config = {
             enableValidation: true,
             maxValidationAttempts: 3,
             requireEvidence: true,
             confidenceThreshold: 80,
+            maxSteps: 8,
+            timeout: 30000,
             ...config
-        });
+        };
 
         // Initialize ReAct self-correction engine
         this.reactEngine = new ReactSelfCorrectionEngine({
