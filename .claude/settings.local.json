@@ -179,7 +179,8 @@
       "Bash(findstr:*)",
       "Bash(cmd /c:*)",
       "WebFetch(domain:gist.github.com)",
-      "Bash(powershell.exe:*)"
+      "Bash(powershell.exe:*)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []
