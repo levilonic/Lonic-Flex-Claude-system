@@ -13,7 +13,7 @@ const { TwelveFactorCompliance } = require('../core/12-factor-compliance-tracker
 const DocumentationService = require('./documentation-service');
 
 // Import for PartitionedContextManager
-const { PartitionedContextManager } = require('./partitioned-context-manager');
+const { PartitionedContextManager } = require('./archived/partitioned-context-manager');
 // REMOVED: Direct imports that cause circular dependencies
 // const { AgentPoolManager } = require('./agent-pool-manager');
 // const { WorkflowOrchestrator } = require('./workflow-orchestrator');

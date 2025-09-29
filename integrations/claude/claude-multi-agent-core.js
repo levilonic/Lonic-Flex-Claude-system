@@ -11,8 +11,8 @@
 
 const { systemStartup } = require('../../src/core/system-startup');
 const { MinimalAgent } = require('../../src/agents/minimal-agent');
-const { CleanGitHubAgent } = require('../../src/agents/github-agent-clean');
-const { CleanSecurityAgent } = require('../../src/agents/security-agent-clean');
+const { GitHubAgent } = require('../../src/agents/github-agent');
+const { SecurityAgent } = require('../../src/agents/security-agent');
 
 class CleanMultiAgentCore {
     constructor() {
@@ -78,11 +78,11 @@ class CleanMultiAgentCore {
                     break;
 
                 case 'github':
-                    agent = new CleanGitHubAgent(sessionId, this.serviceContainer);
+                    agent = new GitHubAgent(sessionId, this.serviceContainer);
                     break;
 
                 case 'security':
-                    agent = new CleanSecurityAgent(sessionId, this.serviceContainer);
+                    agent = new SecurityAgent(sessionId, this.serviceContainer);
                     break;
 
                 default:
