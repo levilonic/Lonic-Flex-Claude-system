@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 /**
  * REAL Repository Configuration Manager
  * Actually manages GitHub repository settings via API
@@ -19,7 +19,7 @@ class RepositoryConfigManager {
         this.octokit = null;
         this.repoSettings = null;
 
-        logger.info('⚙️ Repository Configuration Manager initialized for', `${this.config.owner}/${this.config.repo}`);
+        info('⚙️ Repository Configuration Manager initialized for', `${this.config.owner}/${this.config.repo}`);
     }
 
     /**
@@ -33,7 +33,7 @@ class RepositoryConfigManager {
             try {
                 // Get token from GitHub CLI
                 token = execSync('gh auth token', { encoding: 'utf8' }).trim();
-                logger.info('Using GitHub CLI token');
+                info('Using GitHub CLI token');
             } catch (error) {
                 throw new Error('No valid GitHub token available. Set GITHUB_TOKEN or authenticate with gh CLI');
             }
@@ -47,7 +47,7 @@ class RepositoryConfigManager {
         // Verify authentication and repository access
         try {
             const { data: user } = await this.octokit.rest.users.getAuthenticated();
-            logger.info(`REAL GitHub API authenticated as: ${user.login}`);
+            info(`REAL GitHub API authenticated as: ${user.login}`);
 
             const { data: repo } = await this.octokit.rest.repos.get({
                 owner: this.config.owner,
@@ -55,7 +55,7 @@ class RepositoryConfigManager {
             });
 
             this.repoSettings = repo;
-            logger.info(`Repository access verified: ${repo.full_name}`);
+            info(`Repository access verified: ${repo.full_name}`);
 
             return true;
 
@@ -104,14 +104,14 @@ class RepositoryConfigManager {
                 ...updates
             });
 
-            logger.info('Repository settings updated successfully');
-            logger.info(`   Description: ${updatedRepo.description}`);
-            logger.info(`   Topics: ${updatedRepo.topics.join(', ')}`);
+            info('Repository settings updated successfully');
+            info(`   Description: ${updatedRepo.description}`);
+            info(`   Topics: ${updatedRepo.topics.join(', ')}`);
 
             return updatedRepo;
 
         } catch (error) {
-            logger.error('❌ Failed to configure repository:', error.message);
+            error('❌ Failed to configure repository:', error.message);
             throw error;
         }
     }
@@ -120,7 +120,7 @@ class RepositoryConfigManager {
      * Set up branch protection rules
      */
     async configureBranchProtection(branch = 'master') {
-        logger.info(`🛡️ Configuring branch protection for: ${branch}`);
+        info(`🛡️ Configuring branch protection for: ${branch}`);
 
         try {
             const protectionRules = {
@@ -144,17 +144,17 @@ class RepositoryConfigManager {
                 ...protectionRules
             });
 
-            logger.info(`Branch protection configured for: ${branch}`);
-            logger.info(`   Required status checks: ${protection.required_status_checks.contexts.join(', ')}`);
+            info(`Branch protection configured for: ${branch}`);
+            info(`   Required status checks: ${protection.required_status_checks.contexts.join(', ')}`);
 
             return protection;
 
         } catch (error) {
             if (error.status === 404) {
-                logger.warn(`Branch ${branch} not found or no push access for protection rules`);
+                warn(`Branch ${branch} not found or no push access for protection rules`);
                 return null;
             }
-            logger.error(`❌ Failed to configure branch protection for ${branch}:`, error.message);
+            error(`❌ Failed to configure branch protection for ${branch}:`, error.message);
             throw error;
         }
     }
@@ -163,7 +163,7 @@ class RepositoryConfigManager {
      * Set up repository labels for LonicFLex
      */
     async configureLabels() {
-        logger.info('🏷️ Configuring repository labels...');
+        info('🏷️ Configuring repository labels...');
 
         const lonicflexLabels = [
             // Agent types
@@ -213,7 +213,7 @@ class RepositoryConfigManager {
                 });
 
                 createdLabels.push(createdLabel.name);
-                logger.info(`Created label: ${createdLabel.name}`);
+                info(`Created label: ${createdLabel.name}`);
 
             } catch (error) {
                 if (error.status === 422) {
@@ -228,20 +228,20 @@ class RepositoryConfigManager {
                         });
 
                         updatedLabels.push(updatedLabel.name);
-                        logger.info(`🔄 Updated label: ${updatedLabel.name}`);
+                        info(`🔄 Updated label: ${updatedLabel.name}`);
 
                     } catch (updateError) {
                         errors.push({ label: label.name, error: updateError.message });
-                        logger.error(`❌ Failed to update label ${label.name}:`, updateError.message);
+                        error(`❌ Failed to update label ${label.name}:`, updateError.message);
                     }
                 } else {
                     errors.push({ label: label.name, error: error.message });
-                    logger.error(`❌ Failed to create label ${label.name}:`, error.message);
+                    error(`❌ Failed to create label ${label.name}:`, error.message);
                 }
             }
         }
 
-        logger.info(`Label configuration complete: ${createdLabels.length} created, ${updatedLabels.length} updated`);
+        info(`Label configuration complete: ${createdLabels.length} created, ${updatedLabels.length} updated`);
 
         return {
             created: createdLabels,
@@ -254,7 +254,7 @@ class RepositoryConfigManager {
      * Create repository environments for deployment
      */
     async configureEnvironments() {
-        logger.info('🌍 Configuring deployment environments...');
+        info('🌍 Configuring deployment environments...');
 
         const environments = [
             {
@@ -298,10 +298,10 @@ class RepositoryConfigManager {
                 });
 
                 results.push(environment);
-                logger.info(`Environment configured: ${env.name}`);
+                info(`Environment configured: ${env.name}`);
 
             } catch (error) {
-                logger.error(`❌ Failed to configure environment ${env.name}:`, error.message);
+                error(`❌ Failed to configure environment ${env.name}:`, error.message);
                 results.push({ name: env.name, error: error.message });
             }
         }
@@ -313,7 +313,7 @@ class RepositoryConfigManager {
      * Set up webhooks for LonicFLex integration
      */
     async configureWebhooks() {
-        logger.info('🔗 Configuring repository webhooks...');
+        info('🔗 Configuring repository webhooks...');
 
         const webhooks = [
             {
@@ -347,10 +347,10 @@ class RepositoryConfigManager {
                 const existing = existingWebhooks.find(w => w.config.url === webhook.config.url);
 
                 if (existing) {
-                    logger.info(`🔄 Webhook already exists: ${webhook.name}`);
+                    info(`🔄 Webhook already exists: ${webhook.name}`);
                     results.push({ ...existing, status: 'exists' });
                 } else if (webhook.config.url.includes('your-lonicflex-webhook.com')) {
-                    logger.warn(`Skipping webhook creation - placeholder URL: ${webhook.name}`);
+                    warn(`Skipping webhook creation - placeholder URL: ${webhook.name}`);
                     results.push({ name: webhook.name, status: 'skipped', reason: 'placeholder_url' });
                 } else {
                     const { data: createdWebhook } = await this.octokit.rest.repos.createWebhook({
@@ -363,11 +363,11 @@ class RepositoryConfigManager {
                     });
 
                     results.push({ ...createdWebhook, status: 'created' });
-                    logger.info(`Webhook created: ${webhook.name}`);
+                    info(`Webhook created: ${webhook.name}`);
                 }
 
             } catch (error) {
-                logger.error(`❌ Failed to configure webhook ${webhook.name}:`, error.message);
+                error(`❌ Failed to configure webhook ${webhook.name}:`, error.message);
                 results.push({ name: webhook.name, error: error.message });
             }
         }
@@ -383,7 +383,7 @@ class RepositoryConfigManager {
             const { data: user } = await this.octokit.rest.users.getAuthenticated();
             return user.id;
         } catch (error) {
-            logger.error('❌ Failed to get user ID:', error.message);
+            error('❌ Failed to get user ID:', error.message);
             return null;
         }
     }
@@ -392,7 +392,7 @@ class RepositoryConfigManager {
      * Complete repository configuration
      */
     async configureAll() {
-        logger.info('Starting complete repository configuration...');
+        info('Starting complete repository configuration...');
 
         const results = {
             repository: null,
@@ -413,24 +413,24 @@ class RepositoryConfigManager {
             try {
                 results.branchProtection = await this.configureBranchProtection('master');
             } catch (error) {
-                logger.warn('Branch protection skipped (insufficient permissions or branch not found)');
+                warn('Branch protection skipped (insufficient permissions or branch not found)');
             }
 
             // Configure environments (optional, might fail)
             try {
                 results.environments = await this.configureEnvironments();
             } catch (error) {
-                logger.warn('Environment configuration skipped (requires additional permissions)');
+                warn('Environment configuration skipped (requires additional permissions)');
             }
 
             // Configure webhooks
             results.webhooks = await this.configureWebhooks();
 
-            logger.info('🎉 Repository configuration complete!');
+            info('🎉 Repository configuration complete!');
             return results;
 
         } catch (error) {
-            logger.error('❌ Repository configuration failed:', error.message);
+            error('❌ Repository configuration failed:', error.message);
             throw error;
         }
     }
@@ -478,7 +478,7 @@ class RepositoryConfigManager {
             };
 
         } catch (error) {
-            logger.error('❌ Failed to get repository configuration:', error.message);
+            error('❌ Failed to get repository configuration:', error.message);
             throw error;
         }
     }
@@ -492,18 +492,18 @@ if (require.main === module) {
         const configManager = new RepositoryConfigManager();
 
         try {
-            logger.info('REAL Repository Configuration Starting...');
+            info('REAL Repository Configuration Starting...');
 
             await configManager.initialize();
             const results = await configManager.configureAll();
 
-            logger.info('\n🎉 REAL Repository Configuration Complete!');
-            logger.info(`   Repository: ${results.repository?.full_name || 'configured'}`);
-            logger.info(`   Labels: ${results.labels?.created?.length || 0} created, ${results.labels?.updated?.length || 0} updated`);
-            logger.info(`   Webhooks: ${results.webhooks?.filter(w => w.status === 'created').length || 0} created`);
+            info('\n🎉 REAL Repository Configuration Complete!');
+            info(`   Repository: ${results.repository?.full_name || 'configured'}`);
+            info(`   Labels: ${results.labels?.created?.length || 0} created, ${results.labels?.updated?.length || 0} updated`);
+            info(`   Webhooks: ${results.webhooks?.filter(w => w.status === 'created').length || 0} created`);
 
         } catch (error) {
-            logger.error('\n❌ REAL configuration failed:', error.message);
+            error('\n❌ REAL configuration failed:', error.message);
             process.exit(1);
         }
     })();

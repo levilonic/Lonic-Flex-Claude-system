@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 const { Octokit } = require('@octokit/rest');
 const { getAuthManager } = require('../auth/auth-manager');
 const { SQLiteManager } = require('../database/sqlite-manager');
@@ -61,7 +61,7 @@ class MilestoneIntegrationService {
         await this.createMilestoneIntegrationDatabase();
 
         const { data: user } = await this.octokit.rest.users.getAuthenticated();
-        logger.info(`Milestone Integration Service authenticated as: ${user.login}`);
+        info(`Milestone Integration Service authenticated as: ${user.login}`);
 
         this.initialized = true;
     }
@@ -136,7 +136,7 @@ class MilestoneIntegrationService {
             // Check if milestone already exists for this branch/session
             const existing = await this.findExistingMilestone(owner, repo, branchName, sessionId);
             if (existing) {
-                logger.info(`Using existing milestone: ${existing.title}`);
+                info(`Using existing milestone: ${existing.title}`);
                 return existing;
             }
 
@@ -167,11 +167,11 @@ class MilestoneIntegrationService {
             this.milestonesCache.set(milestone.id, milestone);
             this.branchMilestoneMap.set(`${branchName}_${sessionId}`, milestone);
 
-            logger.info(`Created branch milestone: ${milestone.title} (Due: ${dueDate.toDateString()})`);
+            info(`Created branch milestone: ${milestone.title} (Due: ${dueDate.toDateString()})`);
             return milestone;
 
         } catch (error) {
-            logger.error(`❌ Failed to create branch milestone: ${error.message}`);
+            error(`❌ Failed to create branch milestone: ${error.message}`);
             return null;
         }
     }
@@ -226,11 +226,11 @@ class MilestoneIntegrationService {
                 await this.completeMilestone(milestoneId, branchName, sessionId);
             }
 
-            logger.info(`Updated milestone progress: ${agentType} -> ${status} (${overallProgress.completionPercentage}% overall)`);
+            info(`Updated milestone progress: ${agentType} -> ${status} (${overallProgress.completionPercentage}% overall)`);
             return overallProgress;
 
         } catch (error) {
-            logger.error(`❌ Failed to update milestone progress: ${error.message}`);
+            error(`❌ Failed to update milestone progress: ${error.message}`);
             return null;
         }
     }
@@ -311,10 +311,10 @@ class MilestoneIntegrationService {
                 completedAt: new Date().toISOString()
             });
 
-            logger.info(`Milestone completed: ${milestone.title}`);
+            info(`Milestone completed: ${milestone.title}`);
 
         } catch (error) {
-            logger.error(`❌ Failed to complete milestone: ${error.message}`);
+            error(`❌ Failed to complete milestone: ${error.message}`);
         }
     }
 
@@ -393,7 +393,7 @@ ${progressBar}
             });
 
         } catch (error) {
-            logger.error(`❌ Failed to update milestone description: ${error.message}`);
+            error(`❌ Failed to update milestone description: ${error.message}`);
         }
     }
 
@@ -566,7 +566,7 @@ module.exports = { MilestoneIntegrationService };
 
 // Demo/testing function
 async function demoMilestoneIntegration() {
-    logger.info('Milestone Integration Service Demo');
+    info('Milestone Integration Service Demo');
     
     const milestoneService = new MilestoneIntegrationService();
     
@@ -584,7 +584,7 @@ async function demoMilestoneIntegration() {
         );
         
         if (milestone) {
-            logger.info(`Created milestone: ${milestone.title}`);
+            info(`Created milestone: ${milestone.title}`);
             
             // Simulate agent progress
             await milestoneService.updateMilestoneProgress(
@@ -598,7 +598,7 @@ async function demoMilestoneIntegration() {
         }
         
     } catch (error) {
-        logger.error(`❌ Error: ${error.message}`);
+        error(`❌ Error: ${error.message}`);
     }
 }
 

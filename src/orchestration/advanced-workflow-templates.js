@@ -5,7 +5,7 @@ const { info, warn, error } = require('../services/logger');
  * Enhanced @claude integration workflow templates for real-world development scenarios
  */
 
-const { SQLiteManager } = require('./database/sqlite-manager');
+const { SQLiteManager } = require('../database/sqlite-manager');
 
 class AdvancedWorkflowTemplates {
     constructor() {

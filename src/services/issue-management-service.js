@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 const { Octokit } = require('@octokit/rest');
 const { getAuthManager } = require('../auth/auth-manager');
 const { SQLiteManager } = require('../database/sqlite-manager');
@@ -50,7 +50,7 @@ class IssueManagementService {
 
         // Test authentication
         const { data: user } = await this.octokit.rest.users.getAuthenticated();
-        logger.info(`Issue Management Service authenticated as: ${user.login}`);
+        info(`Issue Management Service authenticated as: ${user.login}`);
 
         // Initialize database
         if (!this.dbManager.isInitialized) {
@@ -176,12 +176,12 @@ class IssueManagementService {
                         this.labelsCache.set(existingLabel.name, existingLabel);
                     }
                 } else {
-                    logger.error(`❌ Failed to create label ${labelConfig.name}: ${error.message}`);
+                    error(`❌ Failed to create label ${labelConfig.name}: ${error.message}`);
                 }
             }
         }
 
-        logger.info(`Created/verified ${createdLabels.length} workflow labels`);
+        info(`Created/verified ${createdLabels.length} workflow labels`);
         return createdLabels;
     }
 
@@ -204,11 +204,11 @@ class IssueManagementService {
             this.milestonesCache.set(milestone.id, milestone);
             await this.storeMilestoneInDatabase(milestone, sessionId, workflowType);
 
-            logger.info(`Created workflow milestone: ${milestone.title}`);
+            info(`Created workflow milestone: ${milestone.title}`);
             return milestone;
 
         } catch (error) {
-            logger.error(`❌ Failed to create milestone: ${error.message}`);
+            error(`❌ Failed to create milestone: ${error.message}`);
             return null;
         }
     }
@@ -289,11 +289,11 @@ ${this.getAgentResponsibilities(agentType)}
                 `);
             }
 
-            logger.info(`Created agent issue #${issue.number} for ${agentType}`);
+            info(`Created agent issue #${issue.number} for ${agentType}`);
             return issue;
 
         } catch (error) {
-            logger.error(`❌ Failed to create agent issue: ${error.message}`);
+            error(`❌ Failed to create agent issue: ${error.message}`);
             return null;
         }
     }
@@ -348,10 +348,10 @@ ${this.getStatusDetails(status, results)}
                 });
             }
 
-            logger.info(`Updated issue #${issueNumber} with ${status} status`);
+            info(`Updated issue #${issueNumber} with ${status} status`);
 
         } catch (error) {
-            logger.error(`❌ Failed to update issue: ${error.message}`);
+            error(`❌ Failed to update issue: ${error.message}`);
         }
     }
 
@@ -400,7 +400,7 @@ ${issues.map(issue => `• #${issue.number} - ${issue.title}`).join('\n')}
             `);
         }
 
-        logger.info(`Created workflow with ${issues.length} agent issues`);
+        info(`Created workflow with ${issues.length} agent issues`);
         return { issues, milestone };
     }
 
@@ -602,7 +602,7 @@ module.exports = { IssueManagementService };
 
 // Demo/testing function
 async function demoIssueManagement() {
-    logger.info('Issue Management Service Demo');
+    info('Issue Management Service Demo');
     
     const issueService = new IssueManagementService();
     
@@ -619,10 +619,10 @@ async function demoIssueManagement() {
             'feature_development'
         );
         
-        logger.info(`Created ${result.issues.length} issues with milestone: ${result.milestone?.title}`);
+        info(`Created ${result.issues.length} issues with milestone: ${result.milestone?.title}`);
         
     } catch (error) {
-        logger.error(`❌ Error: ${error.message}`);
+        error(`❌ Error: ${error.message}`);
     }
 }
 

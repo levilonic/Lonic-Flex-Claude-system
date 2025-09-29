@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 const { graphql } = require('@octokit/graphql');
 const { Octokit } = require('@octokit/rest');
 const { getAuthManager } = require('../auth/auth-manager');
@@ -55,7 +55,7 @@ class GitHubProjectsManager {
 
         // Test authentication
         const { data: user } = await this.octokit.rest.users.getAuthenticated();
-        logger.info(`GitHub Projects Manager authenticated as: ${user.login}`);
+        info(`GitHub Projects Manager authenticated as: ${user.login}`);
 
         // Initialize database
         if (!this.dbManager.isInitialized) {
@@ -532,10 +532,10 @@ This issue tracks the progress of the ${agentType} agent in the multi-agent work
                 [`agent:${agentType}`, `workflow:${sessionId}`, `branch:${branchName}`]
             );
 
-            logger.info(`Created issue #${issue.number} for ${agentType} agent`);
+            info(`Created issue #${issue.number} for ${agentType} agent`);
         }
 
-        logger.info(`Created workflow project: ${project.title}`);
+        info(`Created workflow project: ${project.title}`);
         return project;
     }
 
@@ -582,7 +582,7 @@ module.exports = { GitHubProjectsManager };
 
 // Demo/testing function
 async function demoGitHubProjects() {
-    logger.info('GitHub Projects Manager Demo');
+    info('GitHub Projects Manager Demo');
     
     const projectsManager = new GitHubProjectsManager();
     
@@ -591,19 +591,19 @@ async function demoGitHubProjects() {
         
         // Get existing projects
         const projects = await projectsManager.getProjects('levilonic', 'user');
-        logger.info(`Found ${projects.length} projects`);
+        info(`Found ${projects.length} projects`);
         
         if (projects.length > 0) {
             const project = projects[0];
-            logger.info(`Project: ${project.title} (${project.url})`);
+            info(`Project: ${project.title} (${project.url})`);
             
             // Get project items
             const items = await projectsManager.getProjectItems(project.id);
-            logger.info(`📝 Project has ${items.length} items`);
+            info(`📝 Project has ${items.length} items`);
         }
         
     } catch (error) {
-        logger.error(`❌ Error: ${error.message}`);
+        error(`❌ Error: ${error.message}`);
     }
 }
 

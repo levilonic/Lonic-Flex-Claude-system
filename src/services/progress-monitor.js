@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 /**
  * Progress Monitoring Service
  * Real-time progress tracking and Slack notifications every 15 minutes
@@ -45,7 +45,7 @@ class ProgressMonitor extends EventEmitter {
             estimatedTimeRemaining: null
         };
         
-        logger.info('📊 Progress Monitor initialized');
+        info('📊 Progress Monitor initialized');
     }
     
     /**
@@ -53,7 +53,7 @@ class ProgressMonitor extends EventEmitter {
      */
     async startMonitoring(sessionId, executionPlan) {
         try {
-            logger.info(`📊 Starting progress monitoring for session: ${sessionId}`);
+            info(`📊 Starting progress monitoring for session: ${sessionId}`);
             
             this.sessionId = sessionId;
             this.executionPlan = executionPlan;
@@ -75,7 +75,7 @@ class ProgressMonitor extends EventEmitter {
                 startTime: this.startTime
             });
             
-            logger.info(`Progress monitoring started - reporting every ${this.config.reportInterval / 60000} minutes`);
+            info(`Progress monitoring started - reporting every ${this.config.reportInterval / 60000} minutes`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -86,7 +86,7 @@ class ProgressMonitor extends EventEmitter {
             };
             
         } catch (error) {
-            logger.error('❌ Failed to start progress monitoring:', error.message);
+            error('❌ Failed to start progress monitoring:', error.message);
             throw error;
         }
     }
@@ -133,7 +133,7 @@ class ProgressMonitor extends EventEmitter {
         
         // Console logging
         if (this.config.enableConsoleLogging) {
-            logger.info(`📊 Progress: ${phase} - ${step} (${this.formatUptime(progressEntry.uptime)})`);
+            info(`📊 Progress: ${phase} - ${step} (${this.formatUptime(progressEntry.uptime)})`);
         }
         
         // Emit progress event
@@ -166,7 +166,7 @@ class ProgressMonitor extends EventEmitter {
         this.milestones.push(milestoneEntry);
         this.stats.milestonesReached++;
         
-        logger.info(`Milestone achieved: ${milestone}`);
+        info(`Milestone achieved: ${milestone}`);
         
         // Send detailed milestone notification
         await this.sendMilestoneNotification(milestoneEntry);
@@ -190,11 +190,11 @@ class ProgressMonitor extends EventEmitter {
                 await this.sendPeriodicReport();
                 this.stats.progressReports++;
             } catch (error) {
-                logger.error('❌ Periodic report failed:', error.message);
+                error('❌ Periodic report failed:', error.message);
             }
         }, this.config.reportInterval);
         
-        logger.info(`⏰ Periodic reporting scheduled every ${this.config.reportInterval / 60000} minutes`);
+        info(`⏰ Periodic reporting scheduled every ${this.config.reportInterval / 60000} minutes`);
     }
     
     /**
@@ -264,7 +264,7 @@ Session: \`${this.sessionId}\`
 Timestamp: ${new Date(report.timestamp).toLocaleString()}`;
 
             await commAgent.sendSlackNotification('autonomous-execution-progress', message);
-            logger.info('📢 Slack progress report sent');
+            info('📢 Slack progress report sent');
             
         } catch (error) {
             console.log('📝 Slack unavailable, progress logged locally:', {
@@ -324,10 +324,10 @@ ${Object.entries(milestoneEntry.achievements).map(([key, value]) => `• ${key}:
 Session: \`${this.sessionId}\``;
 
             await commAgent.sendSlackNotification('autonomous-execution-milestones', message);
-            logger.info('Milestone notification sent to Slack');
+            info('Milestone notification sent to Slack');
             
         } catch (error) {
-            logger.info('Milestone logged locally:', milestoneEntry.milestone);
+            info('Milestone logged locally:', milestoneEntry.milestone);
         }
     }
     
@@ -397,7 +397,7 @@ Session: \`${this.sessionId}\``;
      * Stop progress monitoring
      */
     async stop() {
-        logger.info('🛑 Stopping progress monitoring...');
+        info('🛑 Stopping progress monitoring...');
         
         this.isMonitoring = false;
         
@@ -422,10 +422,10 @@ Session: \`${this.sessionId}\``;
             });
             
         } catch (error) {
-            logger.error('❌ Final report failed:', error.message);
+            error('❌ Final report failed:', error.message);
         }
         
-        logger.info('Progress monitoring stopped');
+        info('Progress monitoring stopped');
     }
     
     /**
@@ -486,7 +486,7 @@ module.exports = { ProgressMonitor };
 // If run directly, demonstrate the service
 if (require.main === module) {
     (async () => {
-        logger.info('🧪 Testing Progress Monitoring Service...');
+        info('🧪 Testing Progress Monitoring Service...');
         
         const monitor = new ProgressMonitor({
             reportInterval: 5000, // 5 seconds for testing
@@ -516,15 +516,15 @@ if (require.main === module) {
             
             // Check status
             const status = monitor.getStatus();
-            logger.info('Monitor status:', status);
+            info('Monitor status:', status);
             
             // Stop monitoring
             await monitor.stop();
             
-            logger.info('Progress Monitoring Service test completed');
+            info('Progress Monitoring Service test completed');
             
         } catch (error) {
-            logger.error('❌ Test failed:', error.message);
+            error('❌ Test failed:', error.message);
         }
     })();
 }

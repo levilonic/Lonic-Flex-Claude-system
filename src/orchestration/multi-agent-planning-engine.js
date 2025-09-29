@@ -13,7 +13,7 @@ const { CodeAgent } = require('./agents/code-agent');
 const { DeployAgent } = require('./agents/deploy-agent');
 const { CommunicationAgent } = require('./agents/comm-agent');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
-const { SQLiteManager } = require('./database/sqlite-manager');
+const { SQLiteManager } = require('../database/sqlite-manager');
 
 /**
  * Agent skill definitions for role assignment

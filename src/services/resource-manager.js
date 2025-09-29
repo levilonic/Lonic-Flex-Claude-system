@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 /**
  * Resource Manager - Phase 3C Implementation
  * Comprehensive resource management with circuit breakers and health monitoring
@@ -80,7 +80,7 @@ class ResourceManager extends EventEmitter {
         this.alertHistory = [];
         this.lastAlerts = new Map();
 
-        logger.info('🎛️ ResourceManager created with intelligent resource management');
+        info('🎛️ ResourceManager created with intelligent resource management');
     }
 
     /**
@@ -102,11 +102,11 @@ class ResourceManager extends EventEmitter {
             // Start monitoring
             this.startMonitoring();
 
-            logger.info('ResourceManager initialized with monitoring and circuit breakers');
+            info('ResourceManager initialized with monitoring and circuit breakers');
             return this;
 
         } catch (error) {
-            logger.error('❌ ResourceManager initialization failed:', error.message);
+            error('❌ ResourceManager initialization failed:', error.message);
             throw error;
         }
     }
@@ -246,7 +246,7 @@ class ResourceManager extends EventEmitter {
 
             if (breaker.isOpen()) {
                 if (fallback) {
-                    logger.info(`🔄 Circuit breaker open for ${serviceName}, using fallback`);
+                    info(`🔄 Circuit breaker open for ${serviceName}, using fallback`);
                     return await fallback();
                 } else {
                     throw new Error(`Circuit breaker open for ${serviceName}`);
@@ -269,10 +269,10 @@ class ResourceManager extends EventEmitter {
             breaker.recordFailure();
             this.metrics.failedRequests++;
 
-            logger.error(`❌ Operation failed for ${serviceName}:`, error.message);
+            error(`❌ Operation failed for ${serviceName}:`, error.message);
 
             if (fallback && breaker.isOpen()) {
-                logger.info(`🔄 Using fallback for ${serviceName}`);
+                info(`🔄 Using fallback for ${serviceName}`);
                 return await fallback();
             }
 
@@ -361,7 +361,7 @@ class ResourceManager extends EventEmitter {
 
         if (usage.memory.percentage > this.config.gcThreshold) {
             if (global.gc) {
-                logger.info(`🧹 Performing garbage collection (memory: ${(usage.memory.percentage * 100).toFixed(1)}%)`);
+                info(`🧹 Performing garbage collection (memory: ${(usage.memory.percentage * 100).toFixed(1)}%)`);
                 global.gc();
 
                 // Emit GC event
@@ -396,7 +396,7 @@ class ResourceManager extends EventEmitter {
             this.circuitBreakers.set(service, breaker);
         }
 
-        logger.info(`🔒 Initialized ${criticalServices.length} circuit breakers`);
+        info(`🔒 Initialized ${criticalServices.length} circuit breakers`);
     }
 
     /**
@@ -421,7 +421,7 @@ class ResourceManager extends EventEmitter {
             totalRequests: 0
         });
 
-        logger.info('🏊 Initialized connection pools');
+        info('🏊 Initialized connection pools');
     }
 
     /**
@@ -435,7 +435,7 @@ class ResourceManager extends EventEmitter {
             try {
                 await this.performMonitoringCycle();
             } catch (error) {
-                logger.error('❌ Monitoring cycle error:', error.message);
+                error('❌ Monitoring cycle error:', error.message);
             }
         }, this.config.monitoringInterval);
 
@@ -449,12 +449,12 @@ class ResourceManager extends EventEmitter {
                     await this.sendAlert('critical', 'System health critical', health);
                 }
             } catch (error) {
-                logger.error('❌ Health check error:', error.message);
+                error('❌ Health check error:', error.message);
             }
         }, this.config.healthCheckInterval);
 
         this.isMonitoring = true;
-        logger.info('👁️ Resource monitoring started');
+        info('👁️ Resource monitoring started');
     }
 
     /**
@@ -529,7 +529,7 @@ class ResourceManager extends EventEmitter {
         }
 
         this.emit('alert', alert);
-        logger.info(`🚨 Resource Alert [${level.toUpperCase()}]: ${message}`, data);
+        info(`🚨 Resource Alert [${level.toUpperCase()}]: ${message}`, data);
     }
 
     /**
@@ -637,7 +637,7 @@ class ResourceManager extends EventEmitter {
      * Shutdown resource manager
      */
     async shutdown() {
-        logger.info('🛑 Shutting down ResourceManager...');
+        info('🛑 Shutting down ResourceManager...');
 
         // Stop monitoring
         if (this.monitoringTimer) {
@@ -657,7 +657,7 @@ class ResourceManager extends EventEmitter {
         this.connectionPools.clear();
 
         this.emit('shutdown');
-        logger.info('ResourceManager shutdown complete');
+        info('ResourceManager shutdown complete');
     }
 }
 
@@ -684,7 +684,7 @@ class CircuitBreaker {
         if (this.state === 'OPEN') {
             if (Date.now() > this.nextAttemptTime) {
                 this.state = 'HALF_OPEN';
-                logger.info(`🔄 Circuit breaker ${this.serviceName} moving to HALF_OPEN`);
+                info(`🔄 Circuit breaker ${this.serviceName} moving to HALF_OPEN`);
                 return false;
             }
             return true;
@@ -699,7 +699,7 @@ class CircuitBreaker {
         if (this.state === 'HALF_OPEN') {
             this.state = 'CLOSED';
             this.failureCount = 0;
-            logger.info(`Circuit breaker ${this.serviceName} reset to CLOSED`);
+            info(`Circuit breaker ${this.serviceName} reset to CLOSED`);
         }
     }
 
@@ -713,7 +713,7 @@ class CircuitBreaker {
         if (this.failureCount >= this.failureThreshold) {
             this.state = 'OPEN';
             this.nextAttemptTime = Date.now() + this.resetTimeout;
-            logger.info(`🔒 Circuit breaker ${this.serviceName} opened after ${this.failureCount} failures`);
+            info(`🔒 Circuit breaker ${this.serviceName} opened after ${this.failureCount} failures`);
         }
     }
 

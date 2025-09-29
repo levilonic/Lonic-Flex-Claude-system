@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 /**
  * Workflow Orchestrator - Phase 3B Implementation
  * Intelligent coordination of multi-agent workflows with ServiceContainer integration
@@ -65,7 +65,7 @@ class WorkflowOrchestrator extends EventEmitter {
         this.isInitialized = false;
         this.isShuttingDown = false;
 
-        logger.info('🎭 WorkflowOrchestrator created with intelligent coordination');
+        info('🎭 WorkflowOrchestrator created with intelligent coordination');
     }
 
     /**
@@ -81,9 +81,9 @@ class WorkflowOrchestrator extends EventEmitter {
             try {
                 // Use internal getter to bypass initialization check during bootstrap
                 this.poolManager = this.serviceContainer._getServiceInternal('agentPoolManager');
-                logger.info('AgentPoolManager connected to WorkflowOrchestrator');
+                info('AgentPoolManager connected to WorkflowOrchestrator');
             } catch (error) {
-                logger.warn(`AgentPoolManager not available: ${error.message}, WorkflowOrchestrator operating without pool manager`);
+                warn(`AgentPoolManager not available: ${error.message}, WorkflowOrchestrator operating without pool manager`);
                 this.poolManager = null;
             }
 
@@ -104,11 +104,11 @@ class WorkflowOrchestrator extends EventEmitter {
             this.isInitialized = true;
             this.emit('initialized');
 
-            logger.info('WorkflowOrchestrator initialized with AgentPoolManager');
+            info('WorkflowOrchestrator initialized with AgentPoolManager');
             return this;
 
         } catch (error) {
-            logger.error('❌ WorkflowOrchestrator initialization failed:', error.message);
+            error('❌ WorkflowOrchestrator initialization failed:', error.message);
             throw error;
         }
     }
@@ -149,7 +149,7 @@ class WorkflowOrchestrator extends EventEmitter {
         });
 
         try {
-            logger.info(`🎭 Starting workflow orchestration: ${workflowId}`);
+            info(`🎭 Starting workflow orchestration: ${workflowId}`);
             const result = await execution.execute();
 
             // Move to completed tracking
@@ -170,7 +170,7 @@ class WorkflowOrchestrator extends EventEmitter {
                 executionTime: Date.now() - execution.startedAt
             });
 
-            logger.info(`Workflow orchestration completed: ${workflowId}`);
+            info(`Workflow orchestration completed: ${workflowId}`);
 
             // Process any queued workflows
             this.processWorkflowQueue();
@@ -187,7 +187,7 @@ class WorkflowOrchestrator extends EventEmitter {
                 executionTime: Date.now() - execution.startedAt
             });
 
-            logger.error(`❌ Workflow orchestration failed: ${workflowId}`, error.message);
+            error(`❌ Workflow orchestration failed: ${workflowId}`, error.message);
             throw error;
         }
     }
@@ -210,7 +210,7 @@ class WorkflowOrchestrator extends EventEmitter {
      */
     registerWorkflowTemplate(name, template) {
         this.workflowTemplates.set(name, template);
-        logger.info(`Registered workflow template: ${name}`);
+        info(`Registered workflow template: ${name}`);
     }
 
     /**
@@ -326,7 +326,7 @@ class WorkflowOrchestrator extends EventEmitter {
                     queue: false
                 });
             } catch (error) {
-                logger.error('❌ Error processing queued workflow:', error.message);
+                error('❌ Error processing queued workflow:', error.message);
                 // Could implement retry logic here
             }
         }
@@ -434,7 +434,7 @@ class WorkflowOrchestrator extends EventEmitter {
      * Shutdown orchestrator
      */
     async shutdown() {
-        logger.info('🛑 Shutting down WorkflowOrchestrator...');
+        info('🛑 Shutting down WorkflowOrchestrator...');
         this.isShuttingDown = true;
 
         // Wait for active workflows to complete (with timeout)
@@ -442,7 +442,7 @@ class WorkflowOrchestrator extends EventEmitter {
         const startTime = Date.now();
 
         while (this.activeWorkflows.size > 0 && (Date.now() - startTime) < shutdownTimeout) {
-            logger.info(`⏳ Waiting for ${this.activeWorkflows.size} workflows to complete...`);
+            info(`⏳ Waiting for ${this.activeWorkflows.size} workflows to complete...`);
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
@@ -467,7 +467,7 @@ class WorkflowOrchestrator extends EventEmitter {
         this.isInitialized = false;
 
         this.emit('shutdown');
-        logger.info('WorkflowOrchestrator shutdown complete');
+        info('WorkflowOrchestrator shutdown complete');
     }
 }
 
@@ -497,7 +497,7 @@ class WorkflowExecution {
      */
     async execute() {
         try {
-            logger.info(`🎬 Executing workflow: ${this.workflowId}`);
+            info(`🎬 Executing workflow: ${this.workflowId}`);
 
             // Initialize workflow context
             await this.initializeWorkflowContext();
@@ -507,7 +507,7 @@ class WorkflowExecution {
                 const step = this.definition.steps[i];
                 this.currentStep = step.name || `step_${i + 1}`;
 
-                logger.info(`Executing step: ${this.currentStep}`);
+                info(`Executing step: ${this.currentStep}`);
 
                 const stepResult = await this.executeStep(step, i);
                 this.results.set(this.currentStep, stepResult);
@@ -562,12 +562,12 @@ class WorkflowExecution {
             }
 
         } catch (error) {
-            logger.error(`❌ Step execution failed: ${this.currentStep}`, error.message);
+            error(`❌ Step execution failed: ${this.currentStep}`, error.message);
             throw error;
 
         } finally {
             const stepExecutionTime = Date.now() - stepStartTime;
-            logger.info(`⏱️ Step ${this.currentStep} completed in ${stepExecutionTime}ms`);
+            info(`⏱️ Step ${this.currentStep} completed in ${stepExecutionTime}ms`);
         }
     }
 
@@ -742,7 +742,7 @@ class WorkflowExecution {
      * Handle execution errors
      */
     async handleExecutionError(error) {
-        logger.error(`❌ Workflow execution failed: ${this.workflowId}`, error.message);
+        error(`❌ Workflow execution failed: ${this.workflowId}`, error.message);
 
         // Could implement retry logic, partial recovery, etc.
         this.context.set('error', error.message);
@@ -754,7 +754,7 @@ class WorkflowExecution {
      * Force stop execution
      */
     async forceStop() {
-        logger.info(`🛑 Force stopping workflow: ${this.workflowId}`);
+        info(`🛑 Force stopping workflow: ${this.workflowId}`);
         await this.cleanup();
     }
 

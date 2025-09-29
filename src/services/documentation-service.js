@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 /**
  * Documentation Service - Lightweight singleton for intelligent documentation access
  * Transforms documentation from lookup service to embedded intelligence
@@ -45,7 +45,7 @@ class DocumentationService {
             await this.loadAgentSuggestions();
             this.isInitialized = true;
         } catch (error) {
-            logger.error('DocumentationService initialization failed:', error.message);
+            error('DocumentationService initialization failed:', error.message);
         }
     }
     
@@ -73,7 +73,7 @@ class DocumentationService {
             this.cacheResult(cacheKey, formatted);
             return formatted;
         } catch (error) {
-            logger.error('Quick search failed:', error.message);
+            error('Quick search failed:', error.message);
             return [];
         }
     }

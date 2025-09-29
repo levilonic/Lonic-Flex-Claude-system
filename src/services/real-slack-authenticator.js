@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 /**
  * REAL Slack Authentication Manager
  * Handles actual Slack API authentication and token validation
@@ -31,18 +31,18 @@ class RealSlackAuthenticator {
             enableIntegration: process.env.ENABLE_SLACK_INTEGRATION === 'true'
         };
 
-        logger.info('🔐 REAL Slack Authenticator initialized');
+        info('🔐 REAL Slack Authenticator initialized');
     }
 
     /**
      * Initialize and validate REAL Slack authentication
      */
     async initialize() {
-        logger.info('Initializing REAL Slack authentication...');
+        info('Initializing REAL Slack authentication...');
 
         // Step 1: Check if integration is enabled
         if (!this.config.enableIntegration) {
-            logger.warn('Slack integration is DISABLED (ENABLE_SLACK_INTEGRATION=false)');
+            warn('Slack integration is DISABLED (ENABLE_SLACK_INTEGRATION=false)');
             this.authStatus.errors.push('Integration disabled in environment configuration');
             return this.authStatus;
         }
@@ -50,7 +50,7 @@ class RealSlackAuthenticator {
         // Step 2: Validate token presence and format
         const tokenValidation = this.validateTokens();
         if (!tokenValidation.hasRealTokens) {
-            logger.error(');
+            error(');
             this.showTokenSetupInstructions();
             return this.authStatus;
         }
@@ -58,10 +58,10 @@ class RealSlackAuthenticator {
         // Step 3: Test REAL Slack API connectivity
         try {
             await this.testSlackConnectivity();
-            logger.info('REAL Slack authentication successful');
+            info('REAL Slack authentication successful');
             this.authStatus.isAuthenticated = true;
         } catch (error) {
-            logger.error('❌ REAL Slack authentication failed:', error.message);
+            error('❌ REAL Slack authentication failed:', error.message);
             this.authStatus.errors.push(error.message);
             this.showTroubleshootingSteps();
         }
@@ -73,7 +73,7 @@ class RealSlackAuthenticator {
      * Validate token formats and detect real vs placeholder tokens
      */
     validateTokens() {
-        logger.info('🔍 Validating Slack token configuration...');
+        info('🔍 Validating Slack token configuration...');
 
         const validation = {
             hasRealTokens: false,
@@ -92,7 +92,7 @@ class RealSlackAuthenticator {
             validation.issues.push('Bot token appears truncated or invalid');
         } else {
             validation.botTokenValid = true;
-            logger.info('Bot token format valid');
+            info('Bot token format valid');
         }
 
         // Validate App Token (for Socket Mode)
@@ -104,7 +104,7 @@ class RealSlackAuthenticator {
             validation.issues.push('App token appears to be redacted/sanitized');
         } else {
             validation.appTokenValid = true;
-            logger.info('App token format appears valid');
+            info('App token format appears valid');
         }
 
         // Validate Signing Secret
@@ -114,7 +114,7 @@ class RealSlackAuthenticator {
             validation.issues.push('Signing secret appears invalid (too short)');
         } else {
             validation.signingSecretValid = true;
-            logger.info('Signing secret present');
+            info('Signing secret present');
         }
 
         // Determine if we have sufficient real tokens
@@ -123,8 +123,8 @@ class RealSlackAuthenticator {
         this.authStatus.hasRealTokens = validation.hasRealTokens;
 
         if (validation.issues.length > 0) {
-            logger.warn('Token validation issues:');
-            validation.issues.forEach(issue => logger.info(`   - ${issue}`));
+            warn('Token validation issues:');
+            validation.issues.forEach(issue => info(`   - ${issue}`));
         }
 
         return validation;
@@ -134,13 +134,13 @@ class RealSlackAuthenticator {
      * Test REAL Slack API connectivity
      */
     async testSlackConnectivity() {
-        logger.info('🧪 Testing REAL Slack API connectivity...');
+        info('🧪 Testing REAL Slack API connectivity...');
 
         // Initialize Slack Web API client
         this.slackClient = new WebClient(this.config.botToken);
 
         // Test 1: Bot authentication
-        logger.info('   Testing bot authentication...');
+        info('   Testing bot authentication...');
         const authTest = await this.slackClient.auth.test();
 
         this.authStatus.botInfo = {
@@ -150,10 +150,10 @@ class RealSlackAuthenticator {
             teamName: authTest.team
         };
 
-        logger.info(`   ✅ Bot authenticated as: ${authTest.user} in ${authTest.team}`);
+        info(`   ✅ Bot authenticated as: ${authTest.user} in ${authTest.team}`);
 
         // Test 2: Workspace information
-        logger.info('   Fetching workspace information...');
+        info('   Fetching workspace information...');
         const teamInfo = await this.slackClient.team.info();
 
         this.authStatus.workspaceInfo = {
@@ -163,10 +163,10 @@ class RealSlackAuthenticator {
             icon: teamInfo.team.icon?.image_68
         };
 
-        logger.info(`   ✅ Workspace: ${teamInfo.team.name} (${teamInfo.team.domain})`);
+        info(`   ✅ Workspace: ${teamInfo.team.name} (${teamInfo.team.domain})`);
 
         // Test 3: Bot permissions
-        logger.info('   Checking bot permissions...');
+        info('   Checking bot permissions...');
         try {
             const channels = await this.slackClient.conversations.list({
                 types: 'public_channel',
@@ -179,7 +179,7 @@ class RealSlackAuthenticator {
             ];
 
             if (channels.channels && channels.channels.length > 0) {
-                logger.info(`   ✅ Can read ${channels.channels.length} public channels`);
+                info(`   ✅ Can read ${channels.channels.length} public channels`);
 
                 // Test posting capability (if possible)
                 const testChannel = channels.channels.find(ch =>
@@ -187,7 +187,7 @@ class RealSlackAuthenticator {
                 );
 
                 if (testChannel) {
-                    logger.info(`   Testing message posting to #${testChannel.name}...`);
+                    info(`   Testing message posting to #${testChannel.name}...`);
                     try {
                         const message = await this.slackClient.chat.postMessage({
                             channel: testChannel.id,
@@ -204,23 +204,23 @@ class RealSlackAuthenticator {
                         });
 
                         this.authStatus.permissions.push('chat:write');
-                        logger.info(`   ✅ Successfully posted test message (ts: ${message.ts})`);
+                        info(`   ✅ Successfully posted test message (ts: ${message.ts})`);
 
                     } catch (postError) {
-                        logger.info(`   ⚠️ Cannot post messages: ${postError.message}`);
+                        info(`   ⚠️ Cannot post messages: ${postError.message}`);
                         this.authStatus.errors.push(`Message posting failed: ${postError.message}`);
                     }
                 }
             }
 
         } catch (permError) {
-            logger.info(`   ⚠️ Limited permissions: ${permError.message}`);
+            info(`   ⚠️ Limited permissions: ${permError.message}`);
             this.authStatus.errors.push(`Permission check failed: ${permError.message}`);
         }
 
         // Test 4: Socket Mode (if app token available)
         if (this.config.appToken && !this.config.appToken.includes('[REDACTED_SECRET]')) {
-            logger.info('   Testing Socket Mode connectivity...');
+            info('   Testing Socket Mode connectivity...');
             try {
                 // Initialize Slack Bolt App for Socket Mode
                 this.slackApp = new App({
@@ -230,11 +230,11 @@ class RealSlackAuthenticator {
                     logLevel: 'error' // Suppress debug logs
                 });
 
-                logger.info('   ✅ Socket Mode app initialized');
+                info('   ✅ Socket Mode app initialized');
                 this.authStatus.permissions.push('socket:mode');
 
             } catch (socketError) {
-                logger.info(`   ⚠️ Socket Mode unavailable: ${socketError.message}`);
+                info(`   ⚠️ Socket Mode unavailable: ${socketError.message}`);
                 this.authStatus.errors.push(`Socket Mode failed: ${socketError.message}`);
             }
         }
@@ -246,71 +246,71 @@ class RealSlackAuthenticator {
      * Show setup instructions for getting REAL Slack tokens
      */
     showTokenSetupInstructions() {
-        logger.info('\n📋 REAL Slack Integration Setup Instructions:');
-        logger.info('=' .repeat(60));
-        logger.info('');
-        logger.info('To enable REAL Slack-GitHub integration, you need to:');
-        logger.info('');
-        logger.info('1️⃣ **Create a Slack App:**');
-        logger.info('   • Go to https://api.slack.com/apps');
-        logger.info('   • Click "Create New App" → "From scratch"');
-        logger.info('   • App Name: "LonicFLex GitHub Automation"');
-        logger.info('   • Pick your Slack workspace');
-        logger.info('');
-        logger.info('2️⃣ **Configure OAuth Scopes:**');
-        logger.info('   • Go to OAuth & Permissions');
-        logger.info('   • Add Bot Token Scopes:');
-        logger.info('     - channels:read');
-        logger.info('     - chat:write');
-        logger.info('     - commands');
-        logger.info('     - files:write');
-        logger.info('     - users:read');
-        logger.info('');
-        logger.info('3️⃣ **Install App to Workspace:**');
-        logger.info('   • Click "Install to Workspace"');
-        logger.info('   • Copy the Bot User OAuth Token (starts with xoxb-)');
-        logger.info('');
-        logger.info('4️⃣ **Enable Socket Mode (for slash commands):**');
-        logger.info('   • Go to Socket Mode → Enable');
-        logger.info('   • Generate App-Level Token with connections:write scope');
-        logger.info('   • Copy the App Token (starts with xapp-)');
-        logger.info('');
-        logger.info('5️⃣ **Update .env file:**');
-        logger.info('   SLACK_BOT_TOKEN=xoxb-your-real-token-here');
-        logger.info('   SLACK_APP_TOKEN=xapp-your-real-token-here');
-        logger.info('   ENABLE_SLACK_INTEGRATION=true');
-        logger.info('');
-        logger.info('6️⃣ **Test the integration:**');
-        logger.info('   node services/real-slack-authenticator.js');
-        logger.info('');
-        logger.info('=' .repeat(60));
+        info('\n📋 REAL Slack Integration Setup Instructions:');
+        info('=' .repeat(60));
+        info('');
+        info('To enable REAL Slack-GitHub integration, you need to:');
+        info('');
+        info('1️⃣ **Create a Slack App:**');
+        info('   • Go to https://api.slack.com/apps');
+        info('   • Click "Create New App" → "From scratch"');
+        info('   • App Name: "LonicFLex GitHub Automation"');
+        info('   • Pick your Slack workspace');
+        info('');
+        info('2️⃣ **Configure OAuth Scopes:**');
+        info('   • Go to OAuth & Permissions');
+        info('   • Add Bot Token Scopes:');
+        info('     - channels:read');
+        info('     - chat:write');
+        info('     - commands');
+        info('     - files:write');
+        info('     - users:read');
+        info('');
+        info('3️⃣ **Install App to Workspace:**');
+        info('   • Click "Install to Workspace"');
+        info('   • Copy the Bot User OAuth Token (starts with xoxb-)');
+        info('');
+        info('4️⃣ **Enable Socket Mode (for slash commands):**');
+        info('   • Go to Socket Mode → Enable');
+        info('   • Generate App-Level Token with connections:write scope');
+        info('   • Copy the App Token (starts with xapp-)');
+        info('');
+        info('5️⃣ **Update .env file:**');
+        info('   SLACK_BOT_TOKEN=xoxb-your-real-token-here');
+        info('   SLACK_APP_TOKEN=xapp-your-real-token-here');
+        info('   ENABLE_SLACK_INTEGRATION=true');
+        info('');
+        info('6️⃣ **Test the integration:**');
+        info('   node services/real-slack-authenticator.js');
+        info('');
+        info('=' .repeat(60));
     }
 
     /**
      * Show troubleshooting steps for authentication failures
      */
     showTroubleshootingSteps() {
-        logger.info('\n🔧 Slack Authentication Troubleshooting:');
-        logger.info('=' .repeat(50));
-        logger.info('');
-        logger.info('Common issues and solutions:');
-        logger.info('');
-        logger.info('❌ "invalid_auth" error:');
-        logger.info('   → Check if Bot Token is correct and not expired');
-        logger.info('   → Ensure app is installed to workspace');
-        logger.info('');
-        logger.info('❌ "missing_scope" error:');
-        logger.info('   → Add required OAuth scopes to your Slack app');
-        logger.info('   → Reinstall app to workspace after adding scopes');
-        logger.info('');
-        logger.info('❌ "not_in_channel" error:');
-        logger.info('   → Invite the bot to channels where it needs to post');
-        logger.info('   → Use /invite @LonicFLex in the channel');
-        logger.info('');
-        logger.error(');
-        logger.info('   → Check internet connectivity');
-        logger.info('   → Verify Slack service status');
-        logger.info('');
+        info('\n🔧 Slack Authentication Troubleshooting:');
+        info('=' .repeat(50));
+        info('');
+        info('Common issues and solutions:');
+        info('');
+        info('❌ "invalid_auth" error:');
+        info('   → Check if Bot Token is correct and not expired');
+        info('   → Ensure app is installed to workspace');
+        info('');
+        info('❌ "missing_scope" error:');
+        info('   → Add required OAuth scopes to your Slack app');
+        info('   → Reinstall app to workspace after adding scopes');
+        info('');
+        info('❌ "not_in_channel" error:');
+        info('   → Invite the bot to channels where it needs to post');
+        info('   → Use /invite @LonicFLex in the channel');
+        info('');
+        error(');
+        info('   → Check internet connectivity');
+        info('   → Verify Slack service status');
+        info('');
     }
 
     /**
@@ -371,11 +371,11 @@ class RealSlackAuthenticator {
                 ]
             });
 
-            logger.info(`Test message posted to #${channelName} (ts: ${result.ts})`);
+            info(`Test message posted to #${channelName} (ts: ${result.ts})`);
             return result;
 
         } catch (error) {
-            logger.error(`❌ Failed to post to #${channelName}:`, error.message);
+            error(`❌ Failed to post to #${channelName}:`, error.message);
             throw error;
         }
     }
@@ -386,39 +386,39 @@ module.exports = { RealSlackAuthenticator };
 // Execute REAL authentication test
 if (require.main === module) {
     (async () => {
-        logger.info('REAL Slack Authentication Test Starting...\n');
+        info('REAL Slack Authentication Test Starting...\n');
 
         const authenticator = new RealSlackAuthenticator();
 
         try {
             const authStatus = await authenticator.initialize();
 
-            logger.info('\n📊 REAL Authentication Results:');
-            logger.info('=' .repeat(40));
-            logger.info(`Has Real Tokens: ${authStatus.hasRealTokens}`);
-            logger.info(`Is Authenticated: ${authStatus.isAuthenticated}`);
+            info('\n📊 REAL Authentication Results:');
+            info('=' .repeat(40));
+            info(`Has Real Tokens: ${authStatus.hasRealTokens}`);
+            info(`Is Authenticated: ${authStatus.isAuthenticated}`);
 
             if (authStatus.botInfo) {
-                logger.info(`Bot User: ${authStatus.botInfo.userId} in ${authStatus.botInfo.teamName}`);
+                info(`Bot User: ${authStatus.botInfo.userId} in ${authStatus.botInfo.teamName}`);
             }
 
             if (authStatus.permissions.length > 0) {
-                logger.info(`✅ Permissions: ${authStatus.permissions.join(', ')}`);
+                info(`✅ Permissions: ${authStatus.permissions.join(', ')}`);
             }
 
             if (authStatus.errors.length > 0) {
-                logger.warn(`Issues: ${authStatus.errors.length} errors`);
-                authStatus.errors.forEach(error => logger.info(`   - ${error}`));
+                warn(`Issues: ${authStatus.errors.length} errors`);
+                authStatus.errors.forEach(error => info(`   - ${error}`));
             }
 
             if (authStatus.isAuthenticated) {
-                logger.info('\n🎉 REAL Slack integration ready for GitHub automation!');
+                info('\n🎉 REAL Slack integration ready for GitHub automation!');
             } else {
-                logger.info('\n⚠️ REAL tokens required for full functionality');
+                info('\n⚠️ REAL tokens required for full functionality');
             }
 
         } catch (error) {
-            logger.error('\n❌ REAL authentication failed:', error.message);
+            error('\n❌ REAL authentication failed:', error.message);
             process.exit(1);
         }
     })();

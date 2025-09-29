@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 /**
  * Git Automation Service
  * Provides autonomous Git workflow with progress commits every 30 minutes
@@ -36,7 +36,7 @@ class GitAutomation {
         this.lastCommitHash = null;
         this.uncommittedChanges = [];
         
-        logger.info(`🌿 Git Automation initialized for: ${this.config.repositoryPath}`);
+        info(`🌿 Git Automation initialized for: ${this.config.repositoryPath}`);
     }
     
     /**
@@ -51,15 +51,15 @@ class GitAutomation {
             this.baseBranch = await this.getCurrentBranch();
             this.currentBranch = this.baseBranch;
             
-            logger.info(`📍 Base branch: ${this.baseBranch}`);
+            info(`📍 Base branch: ${this.baseBranch}`);
             
             // Check for uncommitted changes
             await this.checkUncommittedChanges();
             
-            logger.info('Git automation initialized successfully');
+            info('Git automation initialized successfully');
             
         } catch (error) {
-            logger.error('❌ Git automation initialization failed:', error.message);
+            error('❌ Git automation initialization failed:', error.message);
             throw error;
         }
     }
@@ -72,7 +72,7 @@ class GitAutomation {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
             this.workflowBranch = branchName || `${this.config.branchPrefix}-${sessionId}-${timestamp}`;
             
-            logger.info(`🌿 Creating workflow branch: ${this.workflowBranch}`);
+            info(`🌿 Creating workflow branch: ${this.workflowBranch}`);
             
             // Create and switch to new branch
             await this.execGitCommand(`checkout -b ${this.workflowBranch}`);
@@ -86,7 +86,7 @@ class GitAutomation {
                 await this.pushBranch(this.workflowBranch);
             }
             
-            logger.info(`Workflow branch created: ${this.workflowBranch}`);
+            info(`Workflow branch created: ${this.workflowBranch}`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -97,7 +97,7 @@ class GitAutomation {
             };
             
         } catch (error) {
-            logger.error('❌ Failed to create workflow branch:', error.message);
+            error('❌ Failed to create workflow branch:', error.message);
             throw error;
         }
     }
@@ -110,7 +110,7 @@ class GitAutomation {
             // Check if there are changes to commit
             const hasChanges = await this.hasUncommittedChanges();
             if (!hasChanges && !force) {
-                logger.info('📝 No changes to commit');
+                info('📝 No changes to commit');
 
                 const validation = { success: this.validateSuccess() };return {
 
@@ -120,7 +120,7 @@ class GitAutomation {
                 };
             }
             
-            logger.info(`📝 Committing progress: ${message}`);
+            info(`📝 Committing progress: ${message}`);
             
             // Stage files
             if (files.length > 0) {
@@ -156,7 +156,7 @@ Session: ${this.getSessionFromBranch()}
                 files: files.length > 0 ? files : ['all changes']
             });
             
-            logger.info(`Progress committed: ${this.lastCommitHash.substring(0, 8)}`);
+            info(`Progress committed: ${this.lastCommitHash.substring(0, 8)}`);
             
             // Push if enabled
             if (this.config.enableAutoPush) {
@@ -172,7 +172,7 @@ Session: ${this.getSessionFromBranch()}
             };
             
         } catch (error) {
-            logger.error('❌ Failed to commit progress:', error.message);
+            error('❌ Failed to commit progress:', error.message);
             throw error;
         }
     }
@@ -182,17 +182,17 @@ Session: ${this.getSessionFromBranch()}
      */
     startAutoCommit() {
         if (this.autoCommitTimer) {
-            logger.info('🔄 Auto-commit already running');
+            info('🔄 Auto-commit already running');
             return;
         }
         
-        logger.info(`⏰ Starting auto-commit every ${this.config.commitInterval / 60000} minutes`);
+        info(`⏰ Starting auto-commit every ${this.config.commitInterval / 60000} minutes`);
         
         this.autoCommitTimer = setInterval(async () => {
             try {
                 await this.commitProgress(`Automatic progress commit - ${new Date().toLocaleTimeString()}`);
             } catch (error) {
-                logger.error('❌ Auto-commit failed:', error.message);
+                error('❌ Auto-commit failed:', error.message);
             }
         }, this.config.commitInterval);
     }
@@ -204,7 +204,7 @@ Session: ${this.getSessionFromBranch()}
         if (this.autoCommitTimer) {
             clearInterval(this.autoCommitTimer);
             this.autoCommitTimer = null;
-            logger.info('⏹️ Auto-commit stopped');
+            info('⏹️ Auto-commit stopped');
         }
     }
     
@@ -213,7 +213,7 @@ Session: ${this.getSessionFromBranch()}
      */
     async rollbackToCommit(commitHash) {
         try {
-            logger.info(`🔄 Rolling back to commit: ${commitHash}`);
+            info(`🔄 Rolling back to commit: ${commitHash}`);
             
             // Hard reset to the specified commit
             await this.execGitCommand(`reset --hard ${commitHash}`);
@@ -226,7 +226,7 @@ Session: ${this.getSessionFromBranch()}
                 await this.execGitCommand(`push --force-with-lease ${this.config.remoteOrigin} ${this.currentBranch}`);
             }
             
-            logger.info(`Rolled back to commit: ${commitHash}`);
+            info(`Rolled back to commit: ${commitHash}`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -237,7 +237,7 @@ Session: ${this.getSessionFromBranch()}
             };
             
         } catch (error) {
-            logger.error('❌ Rollback failed:', error.message);
+            error('❌ Rollback failed:', error.message);
             throw error;
         }
     }
@@ -248,12 +248,12 @@ Session: ${this.getSessionFromBranch()}
     async pushBranch(branchName = null) {
         try {
             const branch = branchName || this.currentBranch;
-            logger.info(`⬆️ Pushing branch: ${branch}`);
+            info(`⬆️ Pushing branch: ${branch}`);
             
             // Push branch with upstream tracking
             await this.execGitCommand(`push -u ${this.config.remoteOrigin} ${branch}`);
             
-            logger.info(`Branch pushed: ${branch}`);
+            info(`Branch pushed: ${branch}`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -280,7 +280,7 @@ Session: ${this.getSessionFromBranch()}
         try {
             const target = targetBranch || this.baseBranch;
             
-            logger.info(`Creating pull request: ${this.currentBranch} -> ${target}`);
+            info(`Creating pull request: ${this.currentBranch} -> ${target}`);
             
             // This would integrate with GitHub/GitLab APIs
             // For now, just return the information needed
@@ -304,11 +304,11 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
                 url: null // Would be populated by actual API integration
             };
             
-            logger.info(`Pull request prepared: ${title}`);
+            info(`Pull request prepared: ${title}`);
             return prInfo;
             
         } catch (error) {
-            logger.error('❌ Failed to create pull request:', error.message);
+            error('❌ Failed to create pull request:', error.message);
             throw error;
         }
     }
@@ -319,11 +319,11 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
     async switchToBaseBranch() {
         try {
             if (this.currentBranch === this.baseBranch) {
-                logger.info(`📍 Already on base branch: ${this.baseBranch}`);
+                info(`📍 Already on base branch: ${this.baseBranch}`);
                 return;
             }
             
-            logger.info(`🔄 Switching to base branch: ${this.baseBranch}`);
+            info(`🔄 Switching to base branch: ${this.baseBranch}`);
             
             // Check for uncommitted changes
             const hasChanges = await this.hasUncommittedChanges();
@@ -334,10 +334,10 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
             await this.execGitCommand(`checkout ${this.baseBranch}`);
             this.currentBranch = this.baseBranch;
             
-            logger.info(`Switched to base branch: ${this.baseBranch}`);
+            info(`Switched to base branch: ${this.baseBranch}`);
             
         } catch (error) {
-            logger.error('❌ Failed to switch to base branch:', error.message);
+            error('❌ Failed to switch to base branch:', error.message);
             throw error;
         }
     }
@@ -348,11 +348,11 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
     async cleanupWorkflowBranch(deleteRemote = false) {
         try {
             if (!this.workflowBranch) {
-                logger.info('🧹 No workflow branch to clean up');
+                info('🧹 No workflow branch to clean up');
                 return;
             }
             
-            logger.info(`🧹 Cleaning up workflow branch: ${this.workflowBranch}`);
+            info(`🧹 Cleaning up workflow branch: ${this.workflowBranch}`);
             
             // Switch to base branch first
             await this.switchToBaseBranch();
@@ -364,17 +364,17 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
             if (deleteRemote) {
                 try {
                     await this.execGitCommand(`push ${this.config.remoteOrigin} --delete ${this.workflowBranch}`);
-                    logger.info(`🗑️ Remote branch deleted: ${this.workflowBranch}`);
+                    info(`🗑️ Remote branch deleted: ${this.workflowBranch}`);
                 } catch (error) {
                     console.warn('⚠️ Failed to delete remote branch:', error.message);
                 }
             }
             
-            logger.info(`Workflow branch cleaned up: ${this.workflowBranch}`);
+            info(`Workflow branch cleaned up: ${this.workflowBranch}`);
             this.workflowBranch = null;
             
         } catch (error) {
-            logger.error('❌ Cleanup failed:', error.message);
+            error('❌ Cleanup failed:', error.message);
             throw error;
         }
     }
@@ -398,7 +398,7 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
             };
             
         } catch (error) {
-            logger.error('❌ Failed to get Git status:', error.message);
+            error('❌ Failed to get Git status:', error.message);
             throw error;
         }
     }
@@ -429,7 +429,7 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
         if (hasChanges) {
             const statusOutput = await this.execGitCommand('status --porcelain');
             this.uncommittedChanges = statusOutput.stdout.split('\n').filter(line => line.trim());
-            logger.warn(`Found ${this.uncommittedChanges.length} uncommitted changes`);
+            warn(`Found ${this.uncommittedChanges.length} uncommitted changes`);
         }
     }
     
@@ -458,7 +458,7 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
             
             return result;
         } catch (error) {
-            logger.error(`❌ Git command failed: ${fullCommand}`);
+            error(`❌ Git command failed: ${fullCommand}`);
             throw error;
         }
     }
@@ -467,7 +467,7 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
      * Stop all Git automation processes
      */
     async stop() {
-        logger.info('🛑 Stopping Git automation...');
+        info('🛑 Stopping Git automation...');
         
         // Stop auto-commit timer
         this.stopAutoCommit();
@@ -479,10 +479,10 @@ ${this.commitHistory.map(c => `- ${c.hash.substring(0, 8)}: ${c.message}`).join(
                 await this.commitProgress('Final autonomous execution commit');
             }
         } catch (error) {
-            logger.error('❌ Final commit failed:', error.message);
+            error('❌ Final commit failed:', error.message);
         }
         
-        logger.info('Git automation stopped');
+        info('Git automation stopped');
     }
 }
 
@@ -491,7 +491,7 @@ module.exports = { GitAutomation };
 // If run directly, demonstrate the service
 if (require.main === module) {
     (async () => {
-        logger.info('🧪 Testing Git Automation Service...');
+        info('🧪 Testing Git Automation Service...');
         
         const gitService = new GitAutomation({
             repositoryPath: process.cwd(),
@@ -504,16 +504,16 @@ if (require.main === module) {
             
             // Get status
             const status = await gitService.getStatus();
-            logger.info('Git status:', status);
+            info('Git status:', status);
             
             // Create workflow branch (commented out to avoid creating branches during test)
             // const branchResult = await gitService.createWorkflowBranch('test-session');
-            // logger.info('Branch created:', branchResult);
+            // info('Branch created:', branchResult);
             
-            logger.info('Git Automation Service test completed');
+            info('Git Automation Service test completed');
             
         } catch (error) {
-            logger.error('❌ Test failed:', error.message);
+            error('❌ Test failed:', error.message);
         }
     })();
 }

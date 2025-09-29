@@ -10,7 +10,7 @@ const { UniversalContextCommands } = require('./universal-context-commands');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
 const { MultiAgentPlanningEngine } = require('./multi-agent-planning-engine');
 const { AgentRoleAssignmentSystem } = require('./agent-role-assignment-system');
-const { SQLiteManager } = require('./database/sqlite-manager');
+const { SQLiteManager } = require('../database/sqlite-manager');
 const EventEmitter = require('events');
 
 /**

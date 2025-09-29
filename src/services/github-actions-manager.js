@@ -1,4 +1,4 @@
-const { logger } = require('./logger');
+const { info, warn, error } = require('./logger');
 /**
  * GitHub Actions Manager Service
  * Automated workflow creation and management for CI/CD automation
@@ -26,7 +26,7 @@ class GitHubActionsManager {
 
         this.workflowTemplates = this.getWorkflowTemplates();
 
-        logger.info('⚙️ GitHub Actions Manager initialized for', `${this.config.owner}/${this.config.repository}`);
+        info('⚙️ GitHub Actions Manager initialized for', `${this.config.owner}/${this.config.repository}`);
     }
 
     /**
@@ -34,7 +34,7 @@ class GitHubActionsManager {
      */
     async createWorkflows(workflowTypes = ['ci', 'security', 'deploy']) {
         try {
-            logger.info('Creating GitHub Actions workflows...');
+            info('Creating GitHub Actions workflows...');
 
             const results = {
                 created: [],
@@ -58,16 +58,16 @@ class GitHubActionsManager {
                         workflowType,
                         error: error.message
                     });
-                    logger.error(`❌ Failed to create ${workflowType} workflow:`, error.message);
+                    error(`❌ Failed to create ${workflowType} workflow:`, error.message);
                 }
             }
 
-            logger.info(`Workflows processed: ${results.created.length} created, ${results.updated.length} updated`);
+            info(`Workflows processed: ${results.created.length} created, ${results.updated.length} updated`);
 
             return results;
 
         } catch (error) {
-            logger.error('❌ Failed to create workflows:', error.message);
+            error('❌ Failed to create workflows:', error.message);
             throw error;
         }
     }
@@ -118,7 +118,7 @@ class GitHubActionsManager {
                 ...(existingFile && { sha: existingFile.sha })
             });
 
-            logger.info(`✅ ${existingFile ? 'Updated' : 'Created'} workflow: ${template.filename}`);
+            info(`✅ ${existingFile ? 'Updated' : 'Created'} workflow: ${template.filename}`);
 
             return {
                 workflowType,
@@ -130,7 +130,7 @@ class GitHubActionsManager {
             };
 
         } catch (error) {
-            logger.error(`❌ Failed to create workflow ${workflowType}:`, error.message);
+            error(`❌ Failed to create workflow ${workflowType}:`, error.message);
             throw error;
         }
     }
@@ -155,7 +155,7 @@ class GitHubActionsManager {
                     message: 'Create GitHub workflows directory',
                     content: Buffer.from('# GitHub Actions workflows directory\n').toString('base64')
                 });
-                logger.info('📁 Created workflows directory');
+                info('📁 Created workflows directory');
             }
         }
     }
@@ -165,7 +165,7 @@ class GitHubActionsManager {
      */
     async triggerWorkflow(workflowId, ref = 'master', inputs = {}) {
         try {
-            logger.info(`▶️ Triggering workflow: ${workflowId}`);
+            info(`▶️ Triggering workflow: ${workflowId}`);
 
             const response = await this.octokit.rest.actions.createWorkflowDispatch({
                 owner: this.config.owner,
@@ -175,7 +175,7 @@ class GitHubActionsManager {
                 inputs: inputs
             });
 
-            logger.info(`Workflow triggered: ${workflowId}`);
+            info(`Workflow triggered: ${workflowId}`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -187,7 +187,7 @@ class GitHubActionsManager {
             };
 
         } catch (error) {
-            logger.error(`❌ Failed to trigger workflow ${workflowId}:`, error.message);
+            error(`❌ Failed to trigger workflow ${workflowId}:`, error.message);
             throw error;
         }
     }
@@ -213,7 +213,7 @@ class GitHubActionsManager {
 
             const response = await this.octokit.rest.actions.listWorkflowRunsForRepo(params);
 
-            logger.info(`📊 Found ${response.data.total_count} workflow runs`);
+            info(`📊 Found ${response.data.total_count} workflow runs`);
 
             return {
                 total: response.data.total_count,
@@ -231,7 +231,7 @@ class GitHubActionsManager {
             };
 
         } catch (error) {
-            logger.error('❌ Failed to get workflow runs:', error.message);
+            error('❌ Failed to get workflow runs:', error.message);
             throw error;
         }
     }
@@ -241,7 +241,7 @@ class GitHubActionsManager {
      */
     async createEnvironmentSecrets(environment, secrets) {
         try {
-            logger.info(`🔐 Setting up secrets for environment: ${environment}`);
+            info(`🔐 Setting up secrets for environment: ${environment}`);
 
             const results = [];
 
@@ -270,7 +270,7 @@ class GitHubActionsManager {
                         status: 'created'
                     });
 
-                    logger.info(`Secret created: ${secretName}`);
+                    info(`Secret created: ${secretName}`);
 
                 } catch (error) {
                     results.push({
@@ -279,14 +279,14 @@ class GitHubActionsManager {
                         status: 'error',
                         error: error.message
                     });
-                    logger.error(`❌ Failed to create secret ${secretName}:`, error.message);
+                    error(`❌ Failed to create secret ${secretName}:`, error.message);
                 }
             }
 
             return results;
 
         } catch (error) {
-            logger.error('❌ Failed to setup environment secrets:', error.message);
+            error('❌ Failed to setup environment secrets:', error.message);
             throw error;
         }
     }
@@ -309,7 +309,7 @@ class GitHubActionsManager {
             return this.repositoryId;
 
         } catch (error) {
-            logger.error('❌ Failed to get repository ID:', error.message);
+            error('❌ Failed to get repository ID:', error.message);
             throw error;
         }
     }
@@ -611,7 +611,7 @@ class GitHubActionsManager {
                 content: Buffer.from(yamlContent).toString('base64')
             });
 
-            logger.info(`Created custom workflow: ${filename}`);
+            info(`Created custom workflow: ${filename}`);
 
             return {
                 filename,
@@ -621,7 +621,7 @@ class GitHubActionsManager {
             };
 
         } catch (error) {
-            logger.error(`❌ Failed to create custom workflow ${name}:`, error.message);
+            error(`❌ Failed to create custom workflow ${name}:`, error.message);
             throw error;
         }
     }
@@ -649,7 +649,7 @@ class GitHubActionsManager {
                 sha: fileResponse.data.sha
             });
 
-            logger.info(`🗑️ Deleted workflow: ${workflowFilename}`);
+            info(`🗑️ Deleted workflow: ${workflowFilename}`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -659,7 +659,7 @@ class GitHubActionsManager {
             };
 
         } catch (error) {
-            logger.error(`❌ Failed to delete workflow ${workflowFilename}:`, error.message);
+            error(`❌ Failed to delete workflow ${workflowFilename}:`, error.message);
             throw error;
         }
     }
@@ -670,10 +670,10 @@ module.exports = { GitHubActionsManager };
 // If run directly, demonstrate the service
 if (require.main === module) {
     (async () => {
-        logger.info('🧪 Testing GitHub Actions Manager...');
+        info('🧪 Testing GitHub Actions Manager...');
 
         // This would require actual GitHub token for testing
-        logger.info('GitHub Actions Manager structure validated');
-        logger.info('Available workflow templates:', Object.keys(new GitHubActionsManager().getWorkflowTemplates()));
+        info('GitHub Actions Manager structure validated');
+        info('Available workflow templates:', Object.keys(new GitHubActionsManager().getWorkflowTemplates()));
     })();
 }
