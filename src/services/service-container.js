@@ -11,6 +11,7 @@ const { TokenCounter } = require('../context-management/token-counter');
 const { ContextWindowMonitor } = require('../context-management/context-window-monitor');
 const { TwelveFactorCompliance } = require('../core/12-factor-compliance-tracker');
 const DocumentationService = require('./documentation-service');
+const { LonicFlexLogger } = require('./logger');
 
 // Import for PartitionedContextManager
 const { PartitionedContextManager } = require('./archived/partitioned-context-manager');
@@ -28,6 +29,7 @@ class ServiceContainer {
         this.services = new Map();
         this.workflowPartitions = new Map();
         this.initialized = false;
+        this.logger = null;
     }
 
     /**
@@ -39,6 +41,15 @@ class ServiceContainer {
         }
 
         try {
+            // Initialize logger service FIRST (required by all other services)
+            const lonicFlexLogger = new LonicFlexLogger();
+            this.registerService('logger', lonicFlexLogger);
+            this.logger = lonicFlexLogger.createContextLogger({
+                category: 'system',
+                component: 'ServiceContainer'
+            });
+            this.logger.info('ServiceContainer initialization started');
+
             // Core database service (single instance for all agents)
             const sqliteManager = new SQLiteManager();
             await sqliteManager.initialize();
@@ -79,12 +90,19 @@ class ServiceContainer {
             this.registerService('healthMonitor', healthMonitor);
 
             this.initialized = true;
-            console.log('✅ ServiceContainer initialized with Phase 3 infrastructure management services');
+            this.logger.info('ServiceContainer initialized with Phase 3 infrastructure management services', {
+                totalServices: this.services.size,
+                phase: 'Phase 3'
+            });
 
             return this;
 
         } catch (error) {
-            console.error('❌ ServiceContainer initialization failed:', error.message);
+            if (this.logger) {
+                this.logger.error('ServiceContainer initialization failed', { error: error.message });
+            } else {
+                console.error('❌ ServiceContainer initialization failed:', error.message);
+            }
             throw error;
         }
     }
@@ -99,19 +117,21 @@ class ServiceContainer {
             const agentPoolManager = new AgentPoolManager(this);
             await agentPoolManager.initialize();
             this.registerService('agentPoolManager', agentPoolManager);
-            console.log('✅ AgentPoolManager initialized successfully');
+            this.logger.info('AgentPoolManager initialized successfully');
 
             // Step 2: Initialize WorkflowOrchestrator with AgentPoolManager available
             const { WorkflowOrchestrator } = require('./workflow-orchestrator');
             const workflowOrchestrator = new WorkflowOrchestrator(this);
             await workflowOrchestrator.initialize();
             this.registerService('workflowOrchestrator', workflowOrchestrator);
-            console.log('✅ WorkflowOrchestrator initialized successfully');
+            this.logger.info('WorkflowOrchestrator initialized successfully');
 
         } catch (error) {
-            console.error('❌ Agent lifecycle services initialization failed:', error.message);
-            // Continue initialization without these services for now
-            console.log('⚠️ ServiceContainer continuing without agent lifecycle services');
+            this.logger.error('Agent lifecycle services initialization failed', {
+                error: error.message,
+                continuingWithoutServices: true
+            });
+            this.logger.warn('ServiceContainer continuing without agent lifecycle services');
         }
     }
 
@@ -120,7 +140,14 @@ class ServiceContainer {
      */
     registerService(name, instance) {
         this.services.set(name, instance);
-        console.log(`🔧 Service registered: ${name} (${this.services.size} total services)`);
+        if (this.logger) {
+            this.logger.info(`Service registered: ${name}`, {
+                totalServices: this.services.size
+            });
+        } else {
+            // Fallback for logger service registration itself
+            console.log(`🔧 Service registered: ${name} (${this.services.size} total services)`);
+        }
     }
 
     /**
@@ -140,10 +167,21 @@ class ServiceContainer {
     _getServiceInternal(name) {
         const service = this.services.get(name);
         if (!service) {
-            console.log(`❌ Service '${name}' not found. Available services: [${Array.from(this.services.keys()).join(', ')}]`);
+            const availableServices = Array.from(this.services.keys());
+            if (this.logger) {
+                this.logger.error(`Service '${name}' not found`, {
+                    requestedService: name,
+                    availableServices
+                });
+            } else {
+                console.log(`❌ Service '${name}' not found. Available services: [${availableServices.join(', ')}]`);
+            }
             throw new Error(`Service '${name}' not found in container`);
         }
-        console.log(`✅ Service retrieved: ${name}`);
+
+        if (this.logger) {
+            this.logger.debug(`Service retrieved: ${name}`);
+        }
         return service;
     }
 
@@ -231,7 +269,10 @@ class ServiceContainer {
         const partition = await contextManager.createPartition(workflowId, config);
         this.workflowPartitions.set(workflowId, partition);
 
-        console.log(`🔧 Created isolated partition for workflow: ${typeof workflowId === 'object' ? '[object]' : workflowId}`);
+        this.logger.info('Created isolated partition for workflow', {
+            workflowId: typeof workflowId === 'object' ? '[object]' : workflowId,
+            partitionType: 'isolated'
+        });
         return partition;
     }
 
@@ -261,7 +302,9 @@ class ServiceContainer {
         }
 
         this.workflowPartitions.delete(workflowId);
-        console.log(`🧹 Cleaned up partition for workflow: ${workflowId}`);
+        this.logger.info('Cleaned up partition for workflow', {
+            workflowId: workflowId
+        });
     }
 
     /**
@@ -307,7 +350,14 @@ class ServiceContainer {
      * Shutdown and cleanup all services
      */
     async shutdown() {
-        console.log('🔧 ServiceContainer shutting down...');
+        if (this.logger) {
+            this.logger.info('ServiceContainer shutting down', {
+                workflowPartitions: this.workflowPartitions.size,
+                services: this.services.size
+            });
+        } else {
+            console.log('🔧 ServiceContainer shutting down...');
+        }
 
         // Cleanup all workflow partitions
         for (const workflowId of this.workflowPartitions.keys()) {
@@ -320,9 +370,16 @@ class ServiceContainer {
             await db.close();
         }
 
+        // Shutdown logger last
+        const logger = this.services.get('logger');
+        if (logger && typeof logger.shutdown === 'function') {
+            await logger.shutdown();
+        }
+
         this.services.clear();
         this.workflowPartitions.clear();
         this.initialized = false;
+        this.logger = null;
 
         console.log('✅ ServiceContainer shutdown complete');
     }
