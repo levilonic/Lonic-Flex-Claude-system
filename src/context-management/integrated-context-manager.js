@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Integrated Context Manager - Combines Factor3, Auto-cleanup, and Status Line
  * Provides unified context management with live tracking and auto-cleanup at 40%
@@ -37,7 +38,7 @@ class IntegratedContextManager extends EventEmitter {
         };
         
         this.setupEventHandlers();
-        console.log('✅ IntegratedContextManager initialized');
+        info('IntegratedContextManager initialized');
     }
     
     /**
@@ -46,13 +47,13 @@ class IntegratedContextManager extends EventEmitter {
     setupEventHandlers() {
         // Auto-manager cleanup events
         this.autoManager.on('cleanup_completed', (data) => {
-            console.log(`🧹 Auto-cleanup: ${data.originalTokens} → ${data.cleanedTokens} tokens`);
+            info(`🧹 Auto-cleanup: ${data.originalTokens} → ${data.cleanedTokens} tokens`);
             this.stats.autoCleanups++;
             this.emit('context_cleaned', data);
         });
         
         this.autoManager.on('cleanup_failed', (error) => {
-            console.error('❌ Auto-cleanup failed:', error.message);
+            error('❌ Auto-cleanup failed:', error.message);
             this.emit('cleanup_error', error);
         });
     }
@@ -62,12 +63,12 @@ class IntegratedContextManager extends EventEmitter {
      */
     async start() {
         if (this.isRunning) {
-            console.log('⚠️ Integrated context manager already running');
+            warn('Integrated context manager already running');
             return;
         }
         
         this.isRunning = true;
-        console.log('🚀 Starting integrated context management system...');
+        info('Starting integrated context management system...');
         
         try {
             // Initialize all components
@@ -80,11 +81,11 @@ class IntegratedContextManager extends EventEmitter {
             // Start real-time updates
             this.startRealTimeUpdates();
             
-            console.log('✅ Integrated context manager started successfully');
+            info('Integrated context manager started successfully');
             this.emit('manager_started');
             
         } catch (error) {
-            console.error('❌ Failed to start integrated manager:', error.message);
+            error('❌ Failed to start integrated manager:', error.message);
             throw error;
         }
     }
@@ -107,7 +108,7 @@ class IntegratedContextManager extends EventEmitter {
             this.intervalId = null;
         }
         
-        console.log('🛑 Integrated context manager stopped');
+        info('🛑 Integrated context manager stopped');
         this.emit('manager_stopped');
     }
     
@@ -134,7 +135,7 @@ class IntegratedContextManager extends EventEmitter {
             return event;
             
         } catch (error) {
-            console.error('❌ Failed to add event:', error.message);
+            error('❌ Failed to add event:', error.message);
             throw error;
         }
     }
@@ -152,7 +153,7 @@ class IntegratedContextManager extends EventEmitter {
             return usage;
             
         } catch (error) {
-            console.error('❌ Failed to get context usage:', error.message);
+            error('❌ Failed to get context usage:', error.message);
             return null;
         }
     }
@@ -161,7 +162,7 @@ class IntegratedContextManager extends EventEmitter {
      * Force context cleanup (manual trigger)
      */
     async forceCleanup(aggressive = false) {
-        console.log(`🧹 Forcing ${aggressive ? 'aggressive' : 'standard'} context cleanup...`);
+        info(`🧹 Forcing ${aggressive ? 'aggressive' : 'standard'} context cleanup...`);
         
         try {
             const currentUsage = await this.getContextUsage();
@@ -180,10 +181,10 @@ class IntegratedContextManager extends EventEmitter {
             // Reload cleaned context
             await this.reloadCleanedContext();
             
-            console.log('✅ Manual cleanup completed');
+            info('Manual cleanup completed');
             
         } catch (error) {
-            console.error('❌ Manual cleanup failed:', error.message);
+            error('❌ Manual cleanup failed:', error.message);
             throw error;
         }
     }
@@ -192,14 +193,14 @@ class IntegratedContextManager extends EventEmitter {
      * Start real-time context updates
      */
     startRealTimeUpdates() {
-        console.log('⏱️ Starting real-time context updates...');
+        info('⏱️ Starting real-time context updates...');
         
         this.intervalId = setInterval(async () => {
             try {
                 await this.updateContextFile();
                 await this.getContextUsage();
             } catch (error) {
-                console.error('❌ Real-time update failed:', error.message);
+                error('❌ Real-time update failed:', error.message);
             }
         }, this.updateInterval);
     }
@@ -216,7 +217,7 @@ class IntegratedContextManager extends EventEmitter {
             await this.updateContextFile();
             
         } catch (error) {
-            console.error('❌ Failed to ensure context file:', error.message);
+            error('❌ Failed to ensure context file:', error.message);
         }
     }
     
@@ -232,7 +233,7 @@ class IntegratedContextManager extends EventEmitter {
             this.emit('context_updated', contextXml);
             
         } catch (error) {
-            console.error('❌ Failed to update context file:', error.message);
+            error('❌ Failed to update context file:', error.message);
         }
     }
     
@@ -245,7 +246,7 @@ class IntegratedContextManager extends EventEmitter {
             
             // Parse and reload into Factor3 manager
             // This is a simplified approach - in production you'd want more sophisticated parsing
-            console.log('🔄 Reloading cleaned context...');
+            info('🔄 Reloading cleaned context...');
             
             // Reset Factor3 manager with cleaned content
             // Note: This is a basic implementation - you might want more sophisticated handling
@@ -258,7 +259,7 @@ class IntegratedContextManager extends EventEmitter {
             });
             
         } catch (error) {
-            console.error('❌ Failed to reload cleaned context:', error.message);
+            error('❌ Failed to reload cleaned context:', error.message);
         }
     }
     
@@ -298,24 +299,24 @@ class IntegratedContextManager extends EventEmitter {
      * Clear resolved errors (manual cleanup)
      */
     async clearResolvedErrors() {
-        console.log('🔧 Clearing resolved errors...');
+        logger.debug('Clearing resolved errors...');
         
         try {
             this.factor3Manager.clearResolvedErrors();
             await this.updateContextFile();
             
             const usage = await this.getContextUsage();
-            console.log(`✅ Resolved errors cleared. Current usage: ${usage?.percentage.toFixed(1)}%`);
+            info(`Resolved errors cleared. Current usage: ${usage?.percentage.toFixed(1)}%`);
             
         } catch (error) {
-            console.error('❌ Failed to clear resolved errors:', error.message);
+            error('❌ Failed to clear resolved errors:', error.message);
         }
     }
 }
 
 // Demo function
 async function demoIntegratedManager() {
-    console.log('🧪 Testing Integrated Context Manager...\n');
+    info('🧪 Testing Integrated Context Manager...\n');
     
     const manager = new IntegratedContextManager({
         cleanupThreshold: 10, // Lower for demo
@@ -324,42 +325,42 @@ async function demoIntegratedManager() {
     
     // Setup event listeners
     manager.on('event_added', (event) => {
-        console.log(`📝 Event added: ${event.type}`);
+        info(`📝 Event added: ${event.type}`);
     });
     
     manager.on('context_cleaned', (data) => {
-        console.log(`🧹 Context cleaned: ${data.savedTokens} tokens saved`);
+        info(`🧹 Context cleaned: ${data.savedTokens} tokens saved`);
     });
     
     try {
         await manager.start();
         
         // Add some test events
-        console.log('📈 Adding test events...');
+        info('📈 Adding test events...');
         await manager.addEvent('test_start', { message: 'Starting integration test' });
         await manager.addEvent('demo_action', { action: 'create_file', file: 'test.js' });
         await manager.addEvent('demo_success', { result: 'File created successfully' });
         
         // Show status
         const status = await manager.getStatus();
-        console.log('\n📊 Status:', JSON.stringify(status, null, 2));
+        info('\n📊 Status:', JSON.stringify(status, null, 2));
         
         
         // Show recent events
-        console.log('\n📜 Recent Events:');
+        info('\n📜 Recent Events:');
         const events = manager.getRecentEvents(5);
         events.forEach(event => {
-            console.log(`  ${event.timestamp} - ${event.type}`);
+            info(`  ${event.timestamp} - ${event.type}`);
         });
         
         // Wait a moment then stop
         await new Promise(resolve => setTimeout(resolve, 3000));
         
         manager.stop();
-        console.log('\n✅ Integrated manager demo completed!');
+        info('\n✅ Integrated manager demo completed!');
         
     } catch (error) {
-        console.error('❌ Demo failed:', error.message);
+        error('❌ Demo failed:', error.message);
         manager.stop();
     }
 }
@@ -374,12 +375,12 @@ if (require.main === module) {
         const manager = new IntegratedContextManager();
         
         manager.start().then(() => {
-            console.log('🎯 Integrated context manager running...');
-            console.log('Press Ctrl+C to stop');
+            info('Integrated context manager running...');
+            info('Press Ctrl+C to stop');
             
             // Handle graceful shutdown
             process.on('SIGINT', () => {
-                console.log('\n👋 Shutting down integrated manager...');
+                info('\n👋 Shutting down integrated manager...');
                 manager.stop();
                 process.exit(0);
             });

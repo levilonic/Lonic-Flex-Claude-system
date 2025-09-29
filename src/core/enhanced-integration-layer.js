@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Enhanced Integration Layer
  * Phase 2 Implementation: Week 1, Days 4-5
@@ -41,7 +42,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
         // Active integrations
         this.activeIntegrations = new Map();
 
-        console.log(`🔗 Enhanced Integration Layer initialized: ${this.layerId}`);
+        info(`🔗 Enhanced Integration Layer initialized: ${this.layerId}`);
     }
 
     /**
@@ -49,7 +50,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
      */
     async initialize() {
         try {
-            console.log('🚀 Initializing Enhanced Integration Layer...');
+            info('Initializing Enhanced Integration Layer...');
 
             const results = {
                 github: null,
@@ -66,7 +67,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
                     initializedAt: new Date(),
                     capabilities: results.github.capabilities
                 });
-                console.log('✅ GitHub integration initialized');
+                info('GitHub integration initialized');
             } catch (error) {
                 console.warn('⚠️ GitHub integration failed:', error.message);
                 results.github = { error: error.message };
@@ -85,7 +86,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
                     initializedAt: new Date(),
                     capabilities: results.slack.capabilities
                 });
-                console.log('✅ Slack integration initialized');
+                info('Slack integration initialized');
             } catch (error) {
                 console.warn('⚠️ Slack integration failed:', error.message);
                 results.slack = { error: error.message };
@@ -98,11 +99,11 @@ class EnhancedIntegrationLayer extends EventEmitter {
 
             // Initialize cross-platform features
             results.crossPlatform = await this.initializeCrossPlatformFeatures();
-            console.log('✅ Cross-platform features initialized');
+            info('Cross-platform features initialized');
 
             // Initialize webhook processing
             results.webhooks = await this.webhookProcessor.initialize();
-            console.log('✅ Webhook processing initialized');
+            info('Webhook processing initialized');
 
             this.emit('initialized', {
                 layerId: this.layerId,
@@ -112,11 +113,11 @@ class EnhancedIntegrationLayer extends EventEmitter {
                 )
             });
 
-            console.log(`🎯 Enhanced Integration Layer ready with ${results.github ? 'GitHub' : ''} ${results.slack ? 'Slack' : ''} support`);
+            info(`🎯 Enhanced Integration Layer ready with ${results.github ? 'GitHub' : ''} ${results.slack ? 'Slack' : ''} support`);
             return results;
 
         } catch (error) {
-            console.error('❌ Enhanced Integration Layer initialization failed:', error);
+            error('❌ Enhanced Integration Layer initialization failed:', error);
             throw error;
         }
     }
@@ -127,7 +128,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
     async setupProjectIntegration(project, team, infrastructure) {
         const integrationId = `integration-${project.id}`;
 
-        console.log(`🔧 Setting up project integration: ${project.name}`);
+        logger.debug(`Setting up project integration: ${project.name}`);
 
         const integration = {
             id: integrationId,
@@ -171,7 +172,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
             workflows: integration.workflows.length
         });
 
-        console.log(`✅ Project integration setup complete: ${Object.keys(integration.platforms).join(', ')}`);
+        info(`✅ Project integration setup complete: ${Object.keys(integration.platforms).join(', ')}`);
         return integration;
     }
 
@@ -180,7 +181,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
      */
     async processEvent(platform, event, context = {}) {
         try {
-            console.log(`📡 Processing ${platform} event: ${event.type}`);
+            info(`📡 Processing ${platform} event: ${event.type}`);
 
             // Route event through cross-platform router
             const routingResult = await this.crossPlatformRouter.routeEvent(platform, event, context);
@@ -206,7 +207,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
             return routingResult;
 
         } catch (error) {
-            console.error(`❌ Event processing failed for ${platform}:`, error);
+            error(`❌ Event processing failed for ${platform}:`, error);
             this.integrationMetrics.recordError(platform, event.type, error.message);
             throw error;
         }
@@ -218,7 +219,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
     async executeAction(action, context) {
         const actionId = `action-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        console.log(`⚡ Executing cross-platform action: ${action.type}`);
+        info(`⚡ Executing cross-platform action: ${action.type}`);
 
         const execution = {
             id: actionId,
@@ -280,7 +281,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
                 duration: execution.endTime - execution.startTime
             });
 
-            console.log(`✅ Cross-platform action completed: ${successfulPlatforms}/${action.platforms.length} platforms successful`);
+            info(`Cross-platform action completed: ${successfulPlatforms}/${action.platforms.length} platforms successful`);
             return execution;
 
         } catch (error) {
@@ -288,7 +289,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
             execution.error = error.message;
             execution.endTime = new Date();
 
-            console.error(`❌ Cross-platform action failed: ${actionId}`, error);
+            error(`❌ Cross-platform action failed: ${actionId}`, error);
             throw error;
         }
     }
@@ -513,7 +514,7 @@ class AdvancedGitHubIntegration {
     }
 
     async initialize() {
-        console.log('🔧 Initializing Advanced GitHub Integration...');
+        logger.debug('Initializing Advanced GitHub Integration...');
 
         if (!this.config.token) {
             throw new Error('GitHub token not provided');
@@ -525,7 +526,7 @@ class AdvancedGitHubIntegration {
 
             // Test API connection
             const user = await this.githubApi.users.getAuthenticated();
-            console.log(`✅ GitHub API connected as: ${user.data.login}`);
+            info(`GitHub API connected as: ${user.data.login}`);
 
             // Initialize components
             await this.actionsManager.initialize();
@@ -557,7 +558,7 @@ class AdvancedGitHubIntegration {
             };
 
         } catch (error) {
-            console.error('❌ GitHub integration initialization failed:', error);
+            error('❌ GitHub integration initialization failed:', error);
             throw error;
         }
     }
@@ -576,12 +577,12 @@ class AdvancedGitHubIntegration {
 
         this.activeProjects.set(project.id, projectIntegration);
 
-        console.log(`🏗️ GitHub project integration setup: ${project.name}`);
+        info(`GitHub project integration setup: ${project.name}`);
         return projectIntegration;
     }
 
     async executeAction(action, context) {
-        console.log(`⚡ Executing GitHub action: ${action.type}`);
+        info(`⚡ Executing GitHub action: ${action.type}`);
 
         switch (action.type) {
             case 'create_branch':
@@ -670,7 +671,7 @@ class AdvancedGitHubIntegration {
     }
 
     async setupProjectRepository(project) {
-        console.log(`📁 Setting up repository for project: ${project.name}`);
+        info(`📁 Setting up repository for project: ${project.name}`);
 
         // Create project-specific branch
         const branchName = `autonomous/${project.id}`;
@@ -694,7 +695,7 @@ class AdvancedGitHubIntegration {
 
         } catch (error) {
             if (error.status === 422) {
-                console.log(`📁 Branch already exists: ${branchName}`);
+                info(`📁 Branch already exists: ${branchName}`);
                 return { name: this.config.repo, branch: branchName, structure: 'existing' };
             }
             throw error;
@@ -984,7 +985,7 @@ class AdvancedSlackIntegration {
     }
 
     async initialize() {
-        console.log('🔧 Initializing Advanced Slack Integration...');
+        logger.debug('Initializing Advanced Slack Integration...');
 
         if (!this.config.token) {
             throw new Error('Slack bot token not provided');
@@ -996,7 +997,7 @@ class AdvancedSlackIntegration {
 
             // Test API connection
             const auth = await this.slackApp.auth.test();
-            console.log(`✅ Slack API connected as: ${auth.user} (${auth.team})`);
+            info(`Slack API connected as: ${auth.user} (${auth.team})`);
 
             // Initialize Socket Mode if app token available
             if (this.config.appToken) {
@@ -1031,7 +1032,7 @@ class AdvancedSlackIntegration {
             };
 
         } catch (error) {
-            console.error('❌ Slack integration initialization failed:', error);
+            error('❌ Slack integration initialization failed:', error);
             throw error;
         }
     }
@@ -1048,12 +1049,12 @@ class AdvancedSlackIntegration {
 
         this.activeProjects.set(project.id, projectIntegration);
 
-        console.log(`💬 Slack project integration setup: ${project.name}`);
+        info(`💬 Slack project integration setup: ${project.name}`);
         return projectIntegration;
     }
 
     async executeAction(action, context) {
-        console.log(`⚡ Executing Slack action: ${action.type}`);
+        info(`⚡ Executing Slack action: ${action.type}`);
 
         switch (action.type) {
             case 'send_message':
@@ -1100,7 +1101,7 @@ class AdvancedSlackIntegration {
             this.socketMode.on('interactive', this.handleInteraction.bind(this));
 
             await this.socketMode.start();
-            console.log('✅ Slack Socket Mode connected');
+            info('Slack Socket Mode connected');
 
         } catch (error) {
             console.warn('⚠️ Slack Socket Mode not available:', error.message);
@@ -1405,7 +1406,7 @@ class AdvancedSlackIntegration {
     }
 
     async handleSocketEvent(event) {
-        console.log(`📡 Received Slack event: ${event.event.type}`);
+        info(`📡 Received Slack event: ${event.event.type}`);
 
         // Route event through parent layer
         await this.parent.processEvent('slack', {
@@ -1416,7 +1417,7 @@ class AdvancedSlackIntegration {
     }
 
     async handleInteraction(interaction) {
-        console.log(`🔄 Received Slack interaction: ${interaction.type}`);
+        info(`🔄 Received Slack interaction: ${interaction.type}`);
 
         await this.interactionHandler.handleInteraction(interaction);
     }
@@ -1468,7 +1469,7 @@ class GitHubActionsManager {
     }
 
     async initialize() {
-        console.log('🔧 GitHub Actions Manager initialized');
+        logger.debug('GitHub Actions Manager initialized');
 
         const evidence = {
             initializationCompleted: true,
@@ -1551,7 +1552,7 @@ class GitHubSecurityManager {
     }
 
     async initialize() {
-        console.log('🔧 GitHub Security Manager initialized');
+        logger.debug('GitHub Security Manager initialized');
 
         const evidence = {
             securityManagerInitialized: true,
@@ -1634,7 +1635,7 @@ class GitHubEnvironmentManager {
     }
 
     async initialize() {
-        console.log('🔧 GitHub Environment Manager initialized');
+        logger.debug('GitHub Environment Manager initialized');
 
         const evidence = {
             environmentManagerInitialized: true,
@@ -1713,7 +1714,7 @@ class SlackWorkflowManager {
     }
 
     async initialize() {
-        console.log('🔧 Slack Workflow Manager initialized');
+        logger.debug('Slack Workflow Manager initialized');
         const evidence = { initializationCompleted: true };
         const validatedResult = this.validateOperation('slack_workflow_init', evidence);
         return {
@@ -1783,7 +1784,7 @@ class SlackInteractionHandler {
     }
 
     async initialize() {
-        console.log('🔧 Slack Interaction Handler initialized');
+        logger.debug('Slack Interaction Handler initialized');
         const evidence = { initializationCompleted: true };
         const validatedResult = this.validateOperation('slack_interaction_init', evidence);
         return {
@@ -1854,7 +1855,7 @@ class CrossPlatformEventRouter {
     }
 
     async initialize() {
-        console.log('🔧 Cross-Platform Event Router initialized');
+        logger.debug('Cross-Platform Event Router initialized');
         const evidence = { routerInitialized: true };
         const validatedResult = this.validateOperation('event_router_init', evidence);
         return {
@@ -1925,7 +1926,7 @@ class CrossPlatformStateSync {
     }
 
     async initialize() {
-        console.log('🔧 Cross-Platform State Sync initialized');
+        logger.debug('Cross-Platform State Sync initialized');
         const evidence = { syncInitialized: true };
         const validatedResult = this.validateOperation('state_sync_init', evidence);
         return {
@@ -1992,7 +1993,7 @@ class AdvancedWebhookProcessor {
     }
 
     async initialize() {
-        console.log('🔧 Advanced Webhook Processor initialized');
+        logger.debug('Advanced Webhook Processor initialized');
         const evidence = { webhookProcessorInitialized: true };
         const validatedResult = this.validateOperation('webhook_processor_init', evidence);
         return {

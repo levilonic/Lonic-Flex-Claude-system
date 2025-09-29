@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Global Context Manager - Singleton for preventing context duplication
  * Addresses the core issue where each agent creates its own context system
@@ -25,7 +26,7 @@ class GlobalContextManager {
     getSharedContext(agentId, options = {}) {
         // Create shared context manager if it doesn't exist
         if (!this.sharedContextManager) {
-            console.log('🔧 Creating shared context manager for multi-agent workflow');
+            logger.debug('Creating shared context manager for multi-agent workflow');
             this.sharedContextManager = new Factor3ContextManager({
                 contextId: `shared_workflow_${Date.now()}`,
                 contextScope: options.contextScope || 'session',
@@ -37,7 +38,7 @@ class GlobalContextManager {
         this.contextSharing.set(agentId, this.sharedContextManager);
         this.agentCount++;
 
-        console.log(`🔗 Agent ${agentId} connected to shared context (${this.agentCount} agents)`);
+        info(`🔗 Agent ${agentId} connected to shared context (${this.agentCount} agents)`);
 
         return this.sharedContextManager;
     }
@@ -50,11 +51,11 @@ class GlobalContextManager {
             this.contextSharing.delete(agentId);
             this.agentCount--;
 
-            console.log(`🔌 Agent ${agentId} disconnected from shared context (${this.agentCount} agents remaining)`);
+            info(`🔌 Agent ${agentId} disconnected from shared context (${this.agentCount} agents remaining)`);
 
             // Clean up shared context if no agents remain
             if (this.agentCount === 0) {
-                console.log('🧹 All agents disconnected - cleaning up shared context');
+                info('🧹 All agents disconnected - cleaning up shared context');
                 this.sharedContextManager = null;
             }
         }
@@ -81,7 +82,7 @@ class GlobalContextManager {
      * Force cleanup of shared context
      */
     cleanup() {
-        console.log('🧹 Force cleanup of global context manager');
+        info('🧹 Force cleanup of global context manager');
         this.sharedContextManager = null;
         this.agentCount = 0;
         this.contextSharing.clear();
@@ -98,7 +99,7 @@ class GlobalContextManager {
             ...options
         });
 
-        console.log(`🔒 Created isolated context for agent ${agentId}`);
+        info(`🔒 Created isolated context for agent ${agentId}`);
         return contextManager;
     }
 }

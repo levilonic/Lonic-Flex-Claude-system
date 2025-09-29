@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Factor 3: Own Your Context Window - Universal Context System
  * Following 12-Factor Agents methodology to prevent auto-compact
@@ -70,11 +71,11 @@ class Factor3ContextManager {
         // Auto-monitoring setup
         if (this.monitor) {
             this.monitor.on('threshold_warning', (state) => {
-                console.log(`🟡 CONTEXT WARNING: ${state.percentage.toFixed(1)}% usage - approaching 40% limit!`);
+                info(`🟡 CONTEXT WARNING: ${state.percentage.toFixed(1)}% usage - approaching 40% limit!`);
             });
             
             this.monitor.on('threshold_critical', (state) => {
-                console.log(`🟠 CONTEXT CRITICAL: ${state.percentage.toFixed(1)}% usage - auto-compact prevention active!`);
+                info(`🟠 CONTEXT CRITICAL: ${state.percentage.toFixed(1)}% usage - auto-compact prevention active!`);
             });
             
             // Start monitoring with this context manager as source
@@ -82,7 +83,7 @@ class Factor3ContextManager {
             this.monitor.startMonitoring();
         }
         
-        console.log('✅ Enhanced Factor3ContextManager with token counting & monitoring');
+        info('Enhanced Factor3ContextManager with token counting & monitoring');
     }
 
     /**
@@ -372,7 +373,7 @@ ${instruction}`
         const afterCount = this.events.length;
         
         if (beforeCount !== afterCount) {
-            console.log(`🗑️ Cleared ${beforeCount - afterCount} resolved errors`);
+            info(`🗑️ Cleared ${beforeCount - afterCount} resolved errors`);
             await this.updateContext();
         }
     }
@@ -400,7 +401,7 @@ ${instruction}`
      */
     async emergencyCompact() {
         try {
-            console.log('🚨 EMERGENCY COMPACT: Context approaching auto-compact limits!');
+            info('🚨 EMERGENCY COMPACT: Context approaching auto-compact limits!');
             
             const { ContextPruner } = require("./context-pruner");
             const pruner = new ContextPruner();
@@ -421,11 +422,11 @@ ${instruction}`
             }];
             
             await this.updateContext();
-            console.log('✅ Emergency compact completed');
+            info('Emergency compact completed');
             
             return this.tokenUsage;
         } catch (error) {
-            console.error('🚨 Emergency compact failed:', error);
+            error('🚨 Emergency compact failed:', error);
             throw error;
         }
     }
@@ -436,7 +437,7 @@ ${instruction}`
     async updateContextFromXml(newXml) {
         // This allows the monitor to update context after pruning
         // For now, we'll just log - in full implementation this would parse XML back to events
-        console.log('📝 Context updated from external source');
+        info('📝 Context updated from external source');
         this.currentContext.context_window = newXml;
         await this.updateContext();
     }
@@ -449,7 +450,7 @@ ${instruction}`
             this.monitor.stopMonitoring();
             this.monitor.removeAllListeners();
         }
-        console.log('🛑 Factor3ContextManager destroyed');
+        info('🛑 Factor3ContextManager destroyed');
     }
 
     /**
@@ -486,7 +487,7 @@ ${instruction}`
      * Demo of Enhanced Factor 3 context management with token counting
      */
     static async demo() {
-        console.log('📄 Enhanced Factor 3: Context Window + Token Monitoring Demo\n');
+        info('📄 Enhanced Factor 3: Context Window + Token Monitoring Demo\n');
         
         // Create enhanced context manager with monitoring
         const context = new Factor3ContextManager({
@@ -497,17 +498,17 @@ ${instruction}`
             }
         });
         
-        console.log('📈 Adding events and monitoring token usage...\n');
+        info('📈 Adding events and monitoring token usage...\n');
         
         // Add events following Factor 3 principles (now async)
         await context.addSlackEvent("Can you deploy the backend?", "#deployments", "@alex");
-        console.log('✅ Added Slack event');
+        info('Added Slack event');
         
         await context.addGitHubEvent("list_tags", "backend-service");
-        console.log('✅ Added GitHub event');
+        info('Added GitHub event');
         
         await context.addAgentEvent("github", "processing", { status: "scanning_tags" });
-        console.log('✅ Added agent processing event');
+        info('Added agent processing event');
         
         await context.addAgentEvent("github", "completed", { 
             tags: [
@@ -515,46 +516,46 @@ ${instruction}`
                 { name: "v1.2.2", commit: "def456", date: "2024-03-14T15:30:00Z" }
             ]
         });
-        console.log('✅ Added agent completed event');
+        info('Added agent completed event');
 
         // Show enhanced context summary with token data
-        console.log('\n📊 Enhanced Context Summary with Token Counting:');
+        info('\n📊 Enhanced Context Summary with Token Counting:');
         const summary = await context.getContextSummary();
-        console.log(JSON.stringify(summary, null, 2));
+        info(JSON.stringify(summary, null, 2));
         
         // Show token percentage monitoring
-        console.log('\n🎯 Token Usage Monitoring:');
+        info('\n🎯 Token Usage Monitoring:');
         const tokenData = await context.getTokenPercentage();
-        console.log(`Current usage: ${tokenData.tokens} tokens (${tokenData.percentage.toFixed(1)}%)`);
-        console.log(`Remaining until auto-compact: ${tokenData.remainingPercentage.toFixed(1)}%`);
-        console.log(`Warning level: ${tokenData.isWarning ? '🟡 WARNING' : '🟢 SAFE'}`);
+        info(`Current usage: ${tokenData.tokens} tokens (${tokenData.percentage.toFixed(1)}%)`);
+        info(`Remaining until auto-compact: ${tokenData.remainingPercentage.toFixed(1)}%`);
+        info(`Warning level: ${tokenData.isWarning ? '🟡 WARNING' : '🟢 SAFE'}`);
         
         // Test resolved error clearing
-        console.log('\n🗑️ Testing resolved error clearing...');
+        info('\n🗑️ Testing resolved error clearing...');
         await context.addEvent('error', { 
             message: 'Test error', 
             status: 'resolved' 
         });
-        console.log('Added resolved error');
+        info('Added resolved error');
         
         await context.clearResolvedErrors();
-        console.log('Cleared resolved errors');
+        info('Cleared resolved errors');
         
         // Generate context for LLM
-        console.log('\n💬 LLM Context Generation:');
+        info('\n💬 LLM Context Generation:');
         const llmMessages = context.getContextForLLM("What's the deployment status?");
-        console.log(`Generated ${llmMessages.length} messages for LLM`);
-        console.log(`Total context length: ${llmMessages[1].content.length} characters`);
+        info(`Generated ${llmMessages.length} messages for LLM`);
+        info(`Total context length: ${llmMessages[1].content.length} characters`);
         
         // Clean up
         context.destroy();
         
-        console.log('\n✅ Enhanced Factor 3 demo completed!');
-        console.log('🎯 This system now provides:');
-        console.log('  - Real token counting (not just character estimates)');
-        console.log('  - 40% threshold monitoring with warnings');  
-        console.log('  - Automatic context pruning when approaching limits');
-        console.log('  - Factor 3 XML format for auto-compact prevention');
+        info('\n✅ Enhanced Factor 3 demo completed!');
+        info('This system now provides:');
+        info('  - Real token counting (not just character estimates)');
+        info('  - 40% threshold monitoring with warnings');  
+        info('  - Automatic context pruning when approaching limits');
+        info('  - Factor 3 XML format for auto-compact prevention');
     }
 
     /**

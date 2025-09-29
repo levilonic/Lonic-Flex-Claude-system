@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Clean Security Agent - Proper Software Engineering Implementation
  *
@@ -77,7 +78,7 @@ class CleanSecurityAgent {
         }
 
         this.status = 'initialized';
-        console.log(`✅ CleanSecurityAgent ${this.sessionId} initialized`);
+        info(`CleanSecurityAgent ${this.sessionId} initialized`);
     }
 
     /**
@@ -89,7 +90,7 @@ class CleanSecurityAgent {
             throw new Error('Agent not initialized. Call initialize() first.');
         }
 
-        console.log(`🔍 Security scanning directory: ${directoryPath}`);
+        info(`🔍 Security scanning directory: ${directoryPath}`);
 
         try {
             const findings = [];
@@ -139,8 +140,8 @@ class CleanSecurityAgent {
             // Calculate risk score based on findings
             const riskScore = this.calculateRiskScore(findings);
 
-            console.log(`✅ Security scan completed: ${findings.length} findings in ${scannedFiles.length} files`);
-            console.log(`📊 Risk score: ${riskScore}/100`);
+            info(`Security scan completed: ${findings.length} findings in ${scannedFiles.length} files`);
+            info(`📊 Risk score: ${riskScore}/100`);
 
             return {
                 success: true,
@@ -152,7 +153,7 @@ class CleanSecurityAgent {
             };
 
         } catch (error) {
-            console.error(`❌ Security scan failed:`, error.message);
+            error(`❌ Security scan failed:`, error.message);
 
             return {
                 success: false,
@@ -250,7 +251,7 @@ class CleanSecurityAgent {
                 }))
             };
 
-            console.log(`📋 Security report generated for ${recentScans.length} scans`);
+            info(`Security report generated for ${recentScans.length} scans`);
 
             return {
                 success: true,
@@ -260,7 +261,7 @@ class CleanSecurityAgent {
             };
 
         } catch (error) {
-            console.error(`❌ Report generation failed:`, error.message);
+            error(`❌ Report generation failed:`, error.message);
 
             return {
                 success: false,
@@ -283,9 +284,9 @@ class CleanSecurityAgent {
                 'DELETE FROM agents WHERE session_id = ?',
                 [this.sessionId]
             );
-            console.log(`🧹 Cleaned up security agent records for ${this.sessionId}`);
+            info(`🧹 Cleaned up security agent records for ${this.sessionId}`);
         } catch (error) {
-            console.log(`⚠️ Cleanup error: ${error.message}`);
+            warn(`Cleanup error: ${error.message}`);
         }
     }
 
@@ -312,7 +313,7 @@ if (require.main === module) {
     const { systemStartup } = require('../system-startup');
 
     async function testCleanSecurityAgent() {
-        console.log('🧪 Testing CleanSecurityAgent...');
+        info('🧪 Testing CleanSecurityAgent...');
 
         let agent = null;
 
@@ -324,44 +325,44 @@ if (require.main === module) {
             // Create and test agent
             agent = new CleanSecurityAgent('test-security-agent', serviceContainer);
 
-            console.log('📝 Agent status before init:', agent.getStatus());
+            info('📝 Agent status before init:', agent.getStatus());
 
             await agent.initialize();
-            console.log('📝 Agent status after init:', agent.getStatus());
+            info('📝 Agent status after init:', agent.getStatus());
 
             // Test security scan on current directory (should find issues)
             const scanResult = await agent.scanDirectory('./agents');
-            console.log('📝 Scan result:', scanResult.success ? 'SUCCESS' : 'FAILED');
+            info('📝 Scan result:', scanResult.success ? 'SUCCESS' : 'FAILED');
 
             if (scanResult.success) {
-                console.log(`Found ${scanResult.findings.length} security findings`);
-                console.log(`Risk score: ${scanResult.riskScore}/100`);
+                info(`Found ${scanResult.findings.length} security findings`);
+                info(`Risk score: ${scanResult.riskScore}/100`);
 
                 // Show first few findings
                 scanResult.findings.slice(0, 3).forEach(finding => {
-                    console.log(`  ${finding.severity}: ${finding.pattern} in ${finding.file}:${finding.line}`);
+                    info(`  ${finding.severity}: ${finding.pattern} in ${finding.file}:${finding.line}`);
                 });
             } else {
-                console.log('Error:', scanResult.error);
+                info('Error:', scanResult.error);
             }
 
             // Test report generation
             const reportResult = await agent.generateReport();
-            console.log('📝 Report result:', reportResult.success ? 'SUCCESS' : 'FAILED');
+            info('📝 Report result:', reportResult.success ? 'SUCCESS' : 'FAILED');
 
             if (reportResult.success) {
-                console.log(`Report contains ${reportResult.report.scansPerformed} scans`);
+                info(`Report contains ${reportResult.report.scansPerformed} scans`);
             }
 
-            console.log('🎉 CleanSecurityAgent test completed');
+            info('🎉 CleanSecurityAgent test completed');
 
             // Clean up
             await agent.cleanup();
             await systemStartup.shutdown();
 
         } catch (error) {
-            console.error('❌ Test failed:', error.message);
-            console.error('Stack:', error.stack);
+            error('❌ Test failed:', error.message);
+            error('Stack:', error.stack);
 
             if (agent) {
                 await agent.cleanup();

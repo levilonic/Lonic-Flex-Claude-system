@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * ReAct Framework Self-Correction Engine
  * SOLVES: "Bullshit Code" problem - AI systems claiming success without validation
@@ -49,7 +50,7 @@ class ReactSelfCorrectionEngine extends EventEmitter {
         // Initialize sandbox directory
         this.initializeSandbox();
 
-        console.log('🔄 ReAct Self-Correction Engine initialized');
+        info('🔄 ReAct Self-Correction Engine initialized');
     }
 
     /**
@@ -70,9 +71,9 @@ class ReactSelfCorrectionEngine extends EventEmitter {
                 }
             });
 
-            console.log(`📦 Sandbox initialized at: ${this.sandbox.workingDir}`);
+            info(`📦 Sandbox initialized at: ${this.sandbox.workingDir}`);
         } catch (error) {
-            console.error('❌ Failed to initialize sandbox:', error.message);
+            error('❌ Failed to initialize sandbox:', error.message);
             throw error;
         }
     }
@@ -689,7 +690,7 @@ class ReactSelfCorrectionEngine extends EventEmitter {
         // Simple example code generation - in real implementation, this would use LLM
         return `// Generated code - ${new Date().toISOString()}
 function exampleFunction() {
-    console.log('This is generated code that actually executes');
+    info('This is generated code that actually executes');
 
     const validation = { success: this.validateSuccess() };return {
 
@@ -702,7 +703,7 @@ module.exports = { exampleFunction };
 // Execute if run directly
 if (require.main === module) {
     const result = exampleFunction();
-    console.log('Result:', result);
+    info('Result:', result);
     process.exit(result.success ? 0 : 1);
 }`;
     }
@@ -717,10 +718,10 @@ function runTest() {
         assert.strictEqual(typeof Date.now(), 'number');
         assert(Date.now() > 0);
 
-        console.log('✅ Test passed: Basic functionality verified');
+        info('Test passed: Basic functionality verified');
         return true;
     } catch (error) {
-        console.error('❌ Test failed:', error.message);
+        error('❌ Test failed:', error.message);
         return false;
     }
 }
@@ -741,7 +742,7 @@ process.exit(testPassed ? 0 : 1);`;
         return `// Corrected code - ${new Date().toISOString()}
 // Applied corrections: ${correctionPlan.changes.join(', ')}
 function correctedFunction() {
-    console.log('This code has been corrected based on previous errors');
+    info('This code has been corrected based on previous errors');
     return {
         corrected: true,
         timestamp: Date.now(),
@@ -753,7 +754,7 @@ module.exports = { correctedFunction };
 
 if (require.main === module) {
     const result = correctedFunction();
-    console.log('Corrected result:', result);
+    info('Corrected result:', result);
     process.exit(0);
 }`;
     }
@@ -768,7 +769,7 @@ if (require.main === module) {
 
     log(message) {
         if (this.config.logLevel === 'debug' || this.config.logLevel === 'info') {
-            console.log(`[ReAct] ${message}`);
+            info(`[ReAct] ${message}`);
         }
     }
 
@@ -799,9 +800,9 @@ if (require.main === module) {
             }
             this.sandbox.tempFiles.clear();
 
-            console.log('🧹 ReAct sandbox cleaned up');
+            info('🧹 ReAct sandbox cleaned up');
         } catch (error) {
-            console.error('❌ Error during sandbox cleanup:', error.message);
+            error('❌ Error during sandbox cleanup:', error.message);
         }
     }
 }
@@ -810,7 +811,7 @@ module.exports = { ReactSelfCorrectionEngine };
 
 // Demo execution
 async function demoReActSelfCorrection() {
-    console.log('🔄 ReAct Self-Correction Engine Demo\n');
+    info('🔄 ReAct Self-Correction Engine Demo\n');
 
     const engine = new ReactSelfCorrectionEngine({
         maxCorrectionAttempts: 3,
@@ -819,7 +820,7 @@ async function demoReActSelfCorrection() {
 
     try {
         // Test 1: Code generation with validation
-        console.log('📝 Test 1: Code Generation with Self-Correction');
+        info('📝 Test 1: Code Generation with Self-Correction');
         const result1 = await engine.executeWithSelfCorrection(
             'Generate a simple function that calculates factorial',
             {
@@ -835,7 +836,7 @@ async function demoReActSelfCorrection() {
         });
 
         // Test 2: Validation script
-        console.log('\n🧪 Test 2: Validation Script Generation');
+        info('\n🧪 Test 2: Validation Script Generation');
         const result2 = await engine.executeWithSelfCorrection(
             'Create a test script that validates the generated function',
             {
@@ -849,17 +850,17 @@ async function demoReActSelfCorrection() {
             verificationCommand: result2.verificationCommand
         });
 
-        console.log('\n🎉 ReAct Self-Correction Demo Complete!');
-        console.log('Key improvements over "bullshit code":');
-        console.log('  ✓ Real validation loops instead of hardcoded success');
-        console.log('  ✓ Sandboxed execution with actual error detection');
-        console.log('  ✓ Self-correction cycles that improve on failures');
-        console.log('  ✓ Confidence scoring based on actual test results');
+        info('\n🎉 ReAct Self-Correction Demo Complete!');
+        info('Key improvements over "bullshit code":');
+        info('  ✓ Real validation loops instead of hardcoded success');
+        info('  ✓ Sandboxed execution with actual error detection');
+        info('  ✓ Self-correction cycles that improve on failures');
+        info('  ✓ Confidence scoring based on actual test results');
 
     } catch (error) {
-        console.error('❌ Demo failed:', error.message);
+        error('❌ Demo failed:', error.message);
         if (error.executionHistory) {
-            console.log('📊 Execution history:', error.executionHistory.length, 'attempts');
+            info('📊 Execution history:', error.executionHistory.length, 'attempts');
         }
     } finally {
         await engine.cleanup();

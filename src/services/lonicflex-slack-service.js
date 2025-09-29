@@ -650,21 +650,21 @@ if (require.main === module) {
     const service = new LonicFlexSlackService();
     service.start()
         .then(() => {
-            console.log('✅ LonicFLex Slack Service started successfully');
+            logger.info('LonicFLex Slack Service started successfully');
         })
         .catch((error) => {
-            console.error('❌ Failed to start Slack service:', error.message);
+            logger.error('❌ Failed to start Slack service:', error.message);
             process.exit(1);
         });
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        console.log('Slack service shutting down...');
+        logger.info('Slack service shutting down...');
         process.exit(0);
     });
 
     process.on('SIGINT', () => {
-        console.log('Slack service shutting down...');
+        logger.info('Slack service shutting down...');
         process.exit(0);
     });
 }

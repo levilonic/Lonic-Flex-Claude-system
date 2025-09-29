@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Agent Specialization Platform
  * Phase 2 Implementation: Week 1, Days 2-3
@@ -51,7 +52,7 @@ class AgentSpecializationPlatform extends EventEmitter {
             resourceUtilization: 0
         };
 
-        console.log(`🤖 Agent Specialization Platform initialized: ${this.platformId}`);
+        info(`🤖 Agent Specialization Platform initialized: ${this.platformId}`);
     }
 
     /**
@@ -98,7 +99,7 @@ class AgentSpecializationPlatform extends EventEmitter {
             specialties: ['project_management', 'team_leadership', 'communication', 'coordination']
         });
 
-        console.log(`✅ Initialized ${this.agentCapabilities.size} agent specialization profiles`);
+        info(`Initialized ${this.agentCapabilities.size} agent specialization profiles`);
     }
 
     /**
@@ -106,7 +107,7 @@ class AgentSpecializationPlatform extends EventEmitter {
      */
     async createSpecializedAgent(agentType, requirements, projectContext) {
         try {
-            console.log(`🏭 Creating specialized ${agentType} agent for project: ${projectContext.projectId}`);
+            info(`🏭 Creating specialized ${agentType} agent for project: ${projectContext.projectId}`);
 
             // Check resource availability
             const resourceCheck = await this.resourceAllocator.checkAvailability(agentType, requirements);
@@ -140,11 +141,11 @@ class AgentSpecializationPlatform extends EventEmitter {
                 requirements: requirements
             });
 
-            console.log(`✅ Created specialized ${agentType} agent: ${agent.agentId}`);
+            info(`Created specialized ${agentType} agent: ${agent.agentId}`);
             return agent;
 
         } catch (error) {
-            console.error(`❌ Failed to create ${agentType} agent:`, error);
+            error(`❌ Failed to create ${agentType} agent:`, error);
             throw error;
         }
     }
@@ -245,7 +246,7 @@ class AgentSpecializationPlatform extends EventEmitter {
         }
         this.specializedAgents.get(specialty).push(agent.agentId);
 
-        console.log(`📝 Registered ${agentType} agent: ${agent.agentId} (specialty: ${specialty})`);
+        info(`📝 Registered ${agentType} agent: ${agent.agentId} (specialty: ${specialty})`);
     }
 
     /**
@@ -290,7 +291,7 @@ class AgentSpecializationPlatform extends EventEmitter {
         scoredAgents.sort((a, b) => b.compositeScore - a.compositeScore);
 
         const optimalAgent = scoredAgents[0];
-        console.log(`🎯 Selected optimal agent: ${optimalAgent.agent.agentId} (score: ${optimalAgent.compositeScore.toFixed(2)})`);
+        info(`Selected optimal agent: ${optimalAgent.agent.agentId} (score: ${optimalAgent.compositeScore.toFixed(2)})`);
 
         return optimalAgent.agent;
     }
@@ -315,11 +316,11 @@ class AgentSpecializationPlatform extends EventEmitter {
                 assignment: assignment
             });
 
-            console.log(`✅ Task assigned: ${task.id} → ${agent.agentId}`);
+            info(`Task assigned: ${task.id} → ${agent.agentId}`);
             return assignment;
 
         } catch (error) {
-            console.error('❌ Task assignment failed:', error);
+            error('❌ Task assignment failed:', error);
             throw error;
         }
     }
@@ -329,7 +330,7 @@ class AgentSpecializationPlatform extends EventEmitter {
      */
     async performAgentHandoff(fromAgent, toAgent, task, handoffData) {
         try {
-            console.log(`🔄 Performing agent handoff: ${fromAgent.agentId} → ${toAgent.agentId}`);
+            info(`🔄 Performing agent handoff: ${fromAgent.agentId} → ${toAgent.agentId}`);
 
             // Prepare handoff context
             const handoffContext = {
@@ -360,11 +361,11 @@ class AgentSpecializationPlatform extends EventEmitter {
                 result: handoffResult
             });
 
-            console.log(`✅ Agent handoff completed: ${handoffResult.success ? 'SUCCESS' : 'FAILED'}`);
+            info(`✅ Agent handoff completed: ${handoffResult.success ? 'SUCCESS' : 'FAILED'}`);
             return handoffResult;
 
         } catch (error) {
-            console.error('❌ Agent handoff failed:', error);
+            error('❌ Agent handoff failed:', error);
             throw error;
         }
     }
@@ -374,7 +375,7 @@ class AgentSpecializationPlatform extends EventEmitter {
      */
     async scaleAgentPool(projectContext, demandMetrics) {
         try {
-            console.log(`📈 Scaling agent pool for project: ${projectContext.projectId}`);
+            info(`📈 Scaling agent pool for project: ${projectContext.projectId}`);
 
             const currentAgents = this.getProjectAgents(projectContext.projectId);
             const scalingDecision = this.calculateScalingNeed(currentAgents, demandMetrics);
@@ -388,7 +389,7 @@ class AgentSpecializationPlatform extends EventEmitter {
                     newAgents.push(agent);
                 }
 
-                console.log(`✅ Scaled up: Created ${newAgents.length} new agents`);
+                info(`Scaled up: Created ${newAgents.length} new agents`);
                 return { action: 'scaled_up', agents: newAgents };
 
             } else if (scalingDecision.action === 'scale_down') {
@@ -398,16 +399,16 @@ class AgentSpecializationPlatform extends EventEmitter {
                     removedAgents.push(agentId);
                 }
 
-                console.log(`✅ Scaled down: Removed ${removedAgents.length} agents`);
+                info(`Scaled down: Removed ${removedAgents.length} agents`);
                 return { action: 'scaled_down', agents: removedAgents };
 
             } else {
-                console.log(`✅ No scaling needed: Current pool optimal`);
+                info(`No scaling needed: Current pool optimal`);
                 return { action: 'no_change', agents: currentAgents };
             }
 
         } catch (error) {
-            console.error('❌ Agent pool scaling failed:', error);
+            error('❌ Agent pool scaling failed:', error);
             throw error;
         }
     }
@@ -423,7 +424,7 @@ class AgentSpecializationPlatform extends EventEmitter {
                 return;
             }
 
-            console.log(`🗑️ Destroying agent: ${agentId}`);
+            info(`🗑️ Destroying agent: ${agentId}`);
 
             // Stop performance monitoring
             this.performanceMonitor.stopMonitoring(registration.agent);
@@ -457,10 +458,10 @@ class AgentSpecializationPlatform extends EventEmitter {
                 projectId: registration.projectId
             });
 
-            console.log(`✅ Agent destroyed: ${agentId}`);
+            info(`Agent destroyed: ${agentId}`);
 
         } catch (error) {
-            console.error(`❌ Failed to destroy agent ${agentId}:`, error);
+            error(`❌ Failed to destroy agent ${agentId}:`, error);
             throw error;
         }
     }
@@ -677,7 +678,7 @@ class SpecializedAgentFactory {
             // Base agent for communication type
             this.agentConstructors.set('comm', BaseAgent);
 
-            console.log(`✅ Initialized ${this.agentConstructors.size} specialized agent constructors`);
+            info(`Initialized ${this.agentConstructors.size} specialized agent constructors`);
         } catch (error) {
             console.warn('⚠️ Some agent constructors not available:', error.message);
             // Fallback to base agent
@@ -916,7 +917,7 @@ class ResourceAllocator {
 
         this.allocatedResources.set(agentId, allocation);
 
-        console.log(`📊 Allocated resources to ${agentId}: CPU=${allocation.cpu}, Memory=${allocation.memory}`);
+        info(`📊 Allocated resources to ${agentId}: CPU=${allocation.cpu}, Memory=${allocation.memory}`);
         return allocation;
     }
 
@@ -924,7 +925,7 @@ class ResourceAllocator {
         const allocation = this.allocatedResources.get(agentId);
         if (allocation) {
             this.allocatedResources.delete(agentId);
-            console.log(`📊 Released resources from ${agentId}: CPU=${allocation.cpu}, Memory=${allocation.memory}`);
+            info(`📊 Released resources from ${agentId}: CPU=${allocation.cpu}, Memory=${allocation.memory}`);
         }
     }
 
@@ -980,7 +981,7 @@ class AgentPerformanceMonitor {
         };
 
         this.monitoredAgents.set(agentId, monitoringData);
-        console.log(`📈 Started monitoring agent: ${agentId}`);
+        info(`📈 Started monitoring agent: ${agentId}`);
     }
 
     stopMonitoring(agent) {
@@ -991,7 +992,7 @@ class AgentPerformanceMonitor {
             // Archive performance history
             this.archivePerformanceHistory(agentId, monitoringData);
             this.monitoredAgents.delete(agentId);
-            console.log(`📈 Stopped monitoring agent: ${agentId}`);
+            info(`📈 Stopped monitoring agent: ${agentId}`);
         }
     }
 

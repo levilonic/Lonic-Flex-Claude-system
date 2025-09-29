@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Agent Role Assignment System
  * Manages clear responsibilities and coordination protocols for collaborative agents
@@ -165,7 +166,7 @@ class AgentRoleAssignmentSystem {
      * Create role assignments from team plan
      */
     async createRoleAssignments(teamPlan) {
-        console.log('👥 Creating detailed role assignments...');
+        info('👥 Creating detailed role assignments...');
         
         this.teamPlan = teamPlan;
         
@@ -183,7 +184,7 @@ class AgentRoleAssignmentSystem {
         // Set up conflict resolution
         await this.setupConflictResolution();
         
-        console.log(`   ✅ Role assignments created for ${this.assignments.size} agents`);
+        info(`   ✅ Role assignments created for ${this.assignments.size} agents`);
         return this.getRoleAssignmentSummary();
     }
 
@@ -250,7 +251,7 @@ class AgentRoleAssignmentSystem {
      * Setup communication matrix between agents
      */
     async setupCommunicationMatrix() {
-        console.log('📡 Setting up agent communication matrix...');
+        info('📡 Setting up agent communication matrix...');
         
         const agents = Array.from(this.assignments.keys());
         
@@ -274,14 +275,14 @@ class AgentRoleAssignmentSystem {
             }
         }
         
-        console.log(`   ✅ Communication protocols established for ${this.communicationMatrix.size} agent pairs`);
+        info(`   ✅ Communication protocols established for ${this.communicationMatrix.size} agent pairs`);
     }
 
     /**
      * Setup resource sharing between agents
      */
     async setupResourceSharing() {
-        console.log('🔄 Setting up resource sharing protocols...');
+        info('🔄 Setting up resource sharing protocols...');
         
         const resourceMap = {
             'repository_access': { provider: 'github', consumers: ['security', 'code', 'deploy'] },
@@ -306,14 +307,14 @@ class AgentRoleAssignmentSystem {
             }
         }
         
-        console.log(`   ✅ Resource sharing configured for ${this.resourceRegistry.size} resources`);
+        info(`   ✅ Resource sharing configured for ${this.resourceRegistry.size} resources`);
     }
 
     /**
      * Setup conflict resolution rules
      */
     async setupConflictResolution() {
-        console.log('⚖️ Setting up conflict resolution protocols...');
+        info('⚖️ Setting up conflict resolution protocols...');
         
         const resolutionRules = new Map([
             ['resource_contention', {
@@ -343,7 +344,7 @@ class AgentRoleAssignmentSystem {
         ]);
         
         this.conflictResolutionRules = resolutionRules;
-        console.log(`   ✅ Conflict resolution rules established for ${resolutionRules.size} scenarios`);
+        info(`   ✅ Conflict resolution rules established for ${resolutionRules.size} scenarios`);
     }
 
     /**
@@ -487,7 +488,7 @@ class AgentRoleAssignmentSystem {
      * Save role assignments to Universal Context
      */
     async saveToUniversalContext() {
-        console.log('💾 Saving role assignments to Universal Context...');
+        info('💾 Saving role assignments to Universal Context...');
         
         await this.contextManager.addEvent('role_assignments_created', {
             assignments: this.getRoleAssignmentSummary(),
@@ -495,7 +496,7 @@ class AgentRoleAssignmentSystem {
             ready_for_execution: true
         });
         
-        console.log('   ✅ Role assignments saved to Universal Context');
+        info('   ✅ Role assignments saved to Universal Context');
     }
 }
 
@@ -504,7 +505,7 @@ module.exports = { AgentRoleAssignmentSystem, ROLE_TEMPLATES, COMMUNICATION_PATT
 // Demo/test functionality
 if (require.main === module) {
     async function demoRoleAssignment() {
-        console.log('👥 Agent Role Assignment System Demo\n');
+        info('👥 Agent Role Assignment System Demo\n');
         
         // Mock team plan from planning engine
         const mockTeamPlan = {
@@ -523,23 +524,23 @@ if (require.main === module) {
         
         const assignments = await roleSystem.createRoleAssignments(mockTeamPlan);
         
-        console.log('\n📋 ROLE ASSIGNMENT SUMMARY:');
-        console.log(`   Total agents: ${assignments.total_agents}`);
-        console.log(`   Communication pairs: ${assignments.communication_matrix.length}`);
-        console.log(`   Shared resources: ${assignments.resource_sharing.length}`);
+        info('\n📋 ROLE ASSIGNMENT SUMMARY:');
+        info(`   Total agents: ${assignments.total_agents}`);
+        info(`   Communication pairs: ${assignments.communication_matrix.length}`);
+        info(`   Shared resources: ${assignments.resource_sharing.length}`);
         
-        console.log('\n👥 AGENT RESPONSIBILITIES:');
+        info('\n👥 AGENT RESPONSIBILITIES:');
         assignments.assignments.forEach(assignment => {
-            console.log(`   ${assignment.name}:`);
-            console.log(`     Primary: ${assignment.primary_responsibilities.length} responsibilities`);
-            console.log(`     Coordination: ${assignment.coordination_duties.length} duties`);
-            console.log(`     Resources provided: ${assignment.resources_provided.length}`);
-            console.log(`     Resources needed: ${assignment.resources_needed.length}`);
+            info(`   ${assignment.name}:`);
+            info(`     Primary: ${assignment.primary_responsibilities.length} responsibilities`);
+            info(`     Coordination: ${assignment.coordination_duties.length} duties`);
+            info(`     Resources provided: ${assignment.resources_provided.length}`);
+            info(`     Resources needed: ${assignment.resources_needed.length}`);
         });
         
         await roleSystem.saveToUniversalContext();
         
-        console.log('\n✅ Role assignment demo complete');
+        info('\n✅ Role assignment demo complete');
     }
     
     demoRoleAssignment().catch(console.error);

@@ -1,3 +1,4 @@
+const { logger } = require('./logger');
 /**
  * GitHub Workflow Manager - Advanced GitHub Automation
  * Provides intelligent branch management, PR automation, and workflow orchestration
@@ -59,7 +60,7 @@ class GitHubWorkflowManager extends EventEmitter {
         this.rateLimitInfo = null;
         this.lastApiCall = 0;
 
-        console.log('🐙 GitHubWorkflowManager created with intelligent automation');
+        logger.info('🐙 GitHubWorkflowManager created with intelligent automation');
     }
 
     /**
@@ -97,11 +98,11 @@ class GitHubWorkflowManager extends EventEmitter {
             // Load existing branch state
             await this.loadBranchState();
 
-            console.log(`✅ GitHubWorkflowManager initialized for ${this.config.owner}/${this.config.repo}`);
+            logger.info(`GitHubWorkflowManager initialized for ${this.config.owner}/${this.config.repo}`);
             return this;
 
         } catch (error) {
-            console.error('❌ GitHubWorkflowManager initialization failed:', error.message);
+            logger.error('❌ GitHubWorkflowManager initialization failed:', error.message);
             throw error;
         }
     }
@@ -116,7 +117,7 @@ class GitHubWorkflowManager extends EventEmitter {
             // Check if branch already exists
             const existingBranch = await this.getBranchInfo(branchInfo.name);
             if (existingBranch) {
-                console.log(`🌿 Branch already exists: ${branchInfo.name}`);
+                logger.info(`🌿 Branch already exists: ${branchInfo.name}`);
                 return { ...branchInfo, existed: true, branch: existingBranch };
             }
 
@@ -140,12 +141,12 @@ class GitHubWorkflowManager extends EventEmitter {
             });
 
             this.emit('branchCreated', branchInfo);
-            console.log(`✅ Smart branch created: ${branchInfo.name}`);
+            logger.info(`Smart branch created: ${branchInfo.name}`);
 
             return { ...branchInfo, created: true, localBranch, remoteBranch };
 
         } catch (error) {
-            console.error(`❌ Failed to create branch ${branchInfo.name}:`, error.message);
+            logger.error(`❌ Failed to create branch ${branchInfo.name}:`, error.message);
             throw error;
         }
     }
@@ -329,13 +330,13 @@ class GitHubWorkflowManager extends EventEmitter {
                 sha: baseBranchRef.data.object.sha
             });
 
-            console.log(`🌿 Remote branch created: ${branchName}`);
+            logger.info(`🌿 Remote branch created: ${branchName}`);
             return newBranchRef.data;
 
         } catch (error) {
             // Branch might already exist
             if (error.status === 422) {
-                console.log(`⚠️ Remote branch already exists: ${branchName}`);
+                logger.warn(`Remote branch already exists: ${branchName}`);
                 return await this.getBranchInfo(branchName);
             }
             throw error;
@@ -410,11 +411,11 @@ class GitHubWorkflowManager extends EventEmitter {
                 automated: true
             });
 
-            console.log(`✅ Automated PR created: #${pr.data.number} - ${prContent.title}`);
+            logger.info(`Automated PR created: #${pr.data.number} - ${prContent.title}`);
             return pr.data;
 
         } catch (error) {
-            console.error(`❌ Failed to create PR for branch ${branchName}:`, error.message);
+            logger.error(`❌ Failed to create PR for branch ${branchName}:`, error.message);
             throw error;
         }
     }
@@ -588,7 +589,7 @@ class GitHubWorkflowManager extends EventEmitter {
                 reviewers: Array.isArray(reviewers) ? reviewers : [reviewers]
             });
 
-            console.log(`👥 Reviewers assigned to PR #${prNumber}: ${reviewers.join(', ')}`);
+            logger.info(`👥 Reviewers assigned to PR #${prNumber}: ${reviewers.join(', ')}`);
         } catch (error) {
             console.warn(`⚠️ Could not assign reviewers to PR #${prNumber}:`, error.message);
         }
@@ -606,7 +607,7 @@ class GitHubWorkflowManager extends EventEmitter {
                 labels
             });
 
-            console.log(`🏷️ Labels added to PR #${prNumber}: ${labels.join(', ')}`);
+            logger.info(`🏷️ Labels added to PR #${prNumber}: ${labels.join(', ')}`);
         } catch (error) {
             console.warn(`⚠️ Could not add labels to PR #${prNumber}:`, error.message);
         }
@@ -619,7 +620,7 @@ class GitHubWorkflowManager extends EventEmitter {
         try {
             // Test authentication
             const { data: user } = await this.octokit.rest.users.getAuthenticated();
-            console.log(`🔐 GitHub authenticated as: ${user.login}`);
+            logger.info(`🔐 GitHub authenticated as: ${user.login}`);
 
             // Test repository access
             const { data: repo } = await this.octokit.rest.repos.get({
@@ -627,18 +628,18 @@ class GitHubWorkflowManager extends EventEmitter {
                 repo: this.config.repo
             });
 
-            console.log(`📁 Repository access confirmed: ${repo.full_name}`);
+            logger.info(`📁 Repository access confirmed: ${repo.full_name}`);
 
             // Check rate limit
             const { data: rateLimit } = await this.octokit.rest.rateLimit.get();
             this.rateLimitInfo = rateLimit.rate;
 
-            console.log(`⚡ API rate limit: ${this.rateLimitInfo.remaining}/${this.rateLimitInfo.limit}`);
+            logger.info(`⚡ API rate limit: ${this.rateLimitInfo.remaining}/${this.rateLimitInfo.limit}`);
 
             return { user, repo, rateLimit };
 
         } catch (error) {
-            console.error('❌ GitHub validation failed:', error.message);
+            logger.error('❌ GitHub validation failed:', error.message);
             throw error;
         }
     }
@@ -659,7 +660,7 @@ class GitHubWorkflowManager extends EventEmitter {
                 branch.name.startsWith(this.config.branchPrefix)
             );
 
-            console.log(`📊 Found ${managedBranches.length} managed branches`);
+            logger.info(`📊 Found ${managedBranches.length} managed branches`);
 
             // Load branch information
             for (const branch of managedBranches) {
@@ -762,7 +763,7 @@ class GitHubWorkflowManager extends EventEmitter {
                         this.activeBranches.delete(branchName);
                         cleanedCount++;
 
-                        console.log(`🧹 Cleaned up old branch: ${branchName}`);
+                        logger.info(`🧹 Cleaned up old branch: ${branchName}`);
                     }
                 } catch (error) {
                     console.warn(`⚠️ Could not cleanup branch ${branchName}:`, error.message);
@@ -771,7 +772,7 @@ class GitHubWorkflowManager extends EventEmitter {
         }
 
         if (cleanedCount > 0) {
-            console.log(`✅ Cleaned up ${cleanedCount} old branches`);
+            logger.info(`Cleaned up ${cleanedCount} old branches`);
         }
 
         return cleanedCount;
@@ -781,7 +782,7 @@ class GitHubWorkflowManager extends EventEmitter {
      * Shutdown workflow manager
      */
     async shutdown() {
-        console.log('🛑 Shutting down GitHubWorkflowManager...');
+        logger.info('🛑 Shutting down GitHubWorkflowManager...');
 
         // Cleanup any pending operations
         if (this.gitAutomation) {
@@ -794,7 +795,7 @@ class GitHubWorkflowManager extends EventEmitter {
         this.workflowHistory = [];
 
         this.emit('shutdown');
-        console.log('✅ GitHubWorkflowManager shutdown complete');
+        logger.info('GitHubWorkflowManager shutdown complete');
     }
 }
 

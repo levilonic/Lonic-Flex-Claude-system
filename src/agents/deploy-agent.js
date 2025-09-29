@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * EnhancedDeployAgent - ServiceContainer Migration
  * Migrated from Heavy Agent Anti-Pattern to ServiceContainer dependency injection
@@ -63,7 +64,7 @@ class EnhancedDeployAgent extends ValidatedAgent {
             'finalize_deployment'
         ];
 
-        console.log(`✅ Enhanced DeployAgent created with ServiceContainer`);
+        info(`Enhanced DeployAgent created with ServiceContainer`);
     }
 
     /**
@@ -90,7 +91,7 @@ class EnhancedDeployAgent extends ValidatedAgent {
             }
         });
 
-        console.log(`✅ Enhanced DeployAgent initialized with ServiceContainer`);
+        info(`Enhanced DeployAgent initialized with ServiceContainer`);
         return this;
     }
 

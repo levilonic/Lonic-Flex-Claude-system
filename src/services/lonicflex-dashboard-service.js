@@ -759,7 +759,7 @@ module.exports = { LonicFlexDashboardService };
 if (require.main === module) {
     const service = new LonicFlexDashboardService();
     service.start().catch(error => {
-        console.error('Failed to start dashboard service:', error);
+        logger.error('Failed to start dashboard service:', error);
         process.exit(1);
     });
 }

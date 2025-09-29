@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Spec-First Development System for Agents
  * IMPLEMENTS: 12-factor-agents spec-driven development principles
@@ -117,7 +118,7 @@ class SpecDrivenAgentSystem extends EventEmitter {
         };
 
         this.initializeSpecDirectory();
-        console.log('📋 Spec-Driven Agent System initialized with 12-factor principles');
+        info('Spec-Driven Agent System initialized with 12-factor principles');
     }
 
     /**
@@ -126,7 +127,7 @@ class SpecDrivenAgentSystem extends EventEmitter {
     initializeSpecDirectory() {
         if (!fs.existsSync(this.config.specDirectory)) {
             fs.mkdirSync(this.config.specDirectory, { recursive: true });
-            console.log(`📁 Created specification directory: ${this.config.specDirectory}`);
+            info(`📁 Created specification directory: ${this.config.specDirectory}`);
         }
     }
 
@@ -137,7 +138,7 @@ class SpecDrivenAgentSystem extends EventEmitter {
     async createAgentSpecification(specData, options = {}) {
         const specId = specData.metadata?.name || this.generateSpecId();
 
-        console.log(`📋 Creating agent specification: ${specId}`);
+        info(`Creating agent specification: ${specId}`);
 
         // Validate specification structure
         const validationResult = this.validateSpecification(specData);
@@ -166,7 +167,7 @@ class SpecDrivenAgentSystem extends EventEmitter {
             await this.saveSpecificationToFile(specification);
         }
 
-        console.log(`✅ Specification created: ${specId} (valid: ${validationResult.isValid})`);
+        info(`Specification created: ${specId} (valid: ${validationResult.isValid})`);
 
         // Emit specification created event
         this.emit('specificationCreated', {
@@ -512,7 +513,7 @@ async function testErrorCondition_${errorCondition}(agent) {
         const specification = this.specifications.get(specId);
         const agentId = options.agentId || `${agentInstance.constructor.name}_${Date.now()}`;
 
-        console.log(`📋 Registering agent: ${agentId} with specification: ${specId}`);
+        info(`Registering agent: ${agentId} with specification: ${specId}`);
 
         // Validate agent implements specification
         const complianceResult = await this.validateAgentCompliance(agentInstance, specification);
@@ -533,9 +534,9 @@ async function testErrorCondition_${errorCondition}(agent) {
         this.stats.registeredAgents++;
 
         if (!complianceResult.compliant) {
-            console.log(`⚠️ Agent ${agentId} is not fully compliant: ${complianceResult.violations.join(', ')}`);
+            info(`⚠️ Agent ${agentId} is not fully compliant: ${complianceResult.violations.join(', ')}`);
         } else {
-            console.log(`✅ Agent ${agentId} successfully registered and compliant`);
+            info(`Agent ${agentId} successfully registered and compliant`);
         }
 
         // Emit registration event
@@ -643,7 +644,7 @@ async function testErrorCondition_${errorCondition}(agent) {
         const registeredAgent = this.registeredAgents.get(agentId);
         const { instance: agent, specification } = registeredAgent;
 
-        console.log(`🏃 Executing agent ${agentId} with contract validation`);
+        info(`🏃 Executing agent ${agentId} with contract validation`);
 
         const executionStart = Date.now();
         let contractViolations = [];
@@ -712,7 +713,7 @@ async function testErrorCondition_${errorCondition}(agent) {
                 }
             }
 
-            console.log(`✅ Agent ${agentId} executed successfully (${executionTime}ms, ${contractViolations.length} violations)`);
+            info(`Agent ${agentId} executed successfully (${executionTime}ms, ${contractViolations.length} violations)`);
 
             return {
                 agentId,
@@ -736,7 +737,7 @@ async function testErrorCondition_${errorCondition}(agent) {
 
             registeredAgent.performanceHistory.push(performanceRecord);
 
-            console.log(`❌ Agent ${agentId} execution failed: ${error.message}`);
+            error(`);
 
             throw error;
         }
@@ -752,9 +753,9 @@ async function testErrorCondition_${errorCondition}(agent) {
         try {
             const specData = JSON.stringify(specification, null, 2);
             fs.writeFileSync(filePath, specData);
-            console.log(`💾 Specification saved: ${filePath}`);
+            info(`💾 Specification saved: ${filePath}`);
         } catch (error) {
-            console.error(`❌ Failed to save specification: ${error.message}`);
+            error(`❌ Failed to save specification: ${error.message}`);
         }
     }
 
@@ -773,7 +774,7 @@ async function testErrorCondition_${errorCondition}(agent) {
                 this.stats.validSpecs++;
             }
 
-            console.log(`📋 Specification loaded: ${specId}`);
+            info(`Specification loaded: ${specId}`);
             return specData;
         } catch (error) {
             throw new Error(`Failed to load specification: ${error.message}`);
@@ -868,7 +869,7 @@ async function testErrorCondition_${errorCondition}(agent) {
         this.performanceMetrics.clear();
         this.removeAllListeners();
 
-        console.log('📋 Spec-Driven Agent System cleanup complete');
+        info('Spec-Driven Agent System cleanup complete');
     }
 }
 
@@ -880,7 +881,7 @@ module.exports = {
 
 // Demo execution
 async function demoSpecDrivenAgent() {
-    console.log('📋 Spec-Driven Agent System Demo\n');
+    info('Spec-Driven Agent System Demo\n');
 
     const specSystem = new SpecDrivenAgentSystem({
         validationLevel: 'MODERATE',
@@ -889,10 +890,10 @@ async function demoSpecDrivenAgent() {
     });
 
     try {
-        console.log('📝 Creating agent specifications...\n');
+        info('📝 Creating agent specifications...\n');
 
         // Test 1: Create comprehensive specification
-        console.log('🔹 Test 1: Create comprehensive SecurityAgent specification');
+        info('🔹 Test 1: Create comprehensive SecurityAgent specification');
         const securityAgentSpec = await specSystem.createAgentSpecification({
             metadata: {
                 name: 'SecurityAgent',
@@ -933,11 +934,11 @@ async function demoSpecDrivenAgent() {
             }
         });
 
-        console.log(`   Specification completeness: ${securityAgentSpec.validation.completeness}%`);
-        console.log(`   Generated tests: ${securityAgentSpec.testing.generated_tests.length}`);
+        info(`   Specification completeness: ${securityAgentSpec.validation.completeness}%`);
+        info(`   Generated tests: ${securityAgentSpec.testing.generated_tests.length}`);
 
         // Test 2: Create minimal specification
-        console.log('\n🔸 Test 2: Create minimal agent specification');
+        info('\n🔸 Test 2: Create minimal agent specification');
         const minimalSpec = await specSystem.createAgentSpecification({
             metadata: {
                 name: 'SimpleAgent'
@@ -947,12 +948,12 @@ async function demoSpecDrivenAgent() {
             }
         });
 
-        console.log(`   Specification completeness: ${minimalSpec.validation.completeness}%`);
-        console.log(`   Validation errors: ${minimalSpec.validation.errors.length}`);
-        console.log(`   Validation warnings: ${minimalSpec.validation.warnings.length}`);
+        info(`   Specification completeness: ${minimalSpec.validation.completeness}%`);
+        info(`   Validation errors: ${minimalSpec.validation.errors.length}`);
+        info(`   Validation warnings: ${minimalSpec.validation.warnings.length}`);
 
         // Test 3: Mock agent registration (demo purposes)
-        console.log('\n🔺 Test 3: Agent registration and compliance validation');
+        info('\n🔺 Test 3: Agent registration and compliance validation');
 
         // Create mock agent that implements the specification
         const mockSecurityAgent = {
@@ -980,40 +981,40 @@ async function demoSpecDrivenAgent() {
             agentId: 'security_agent_demo'
         });
 
-        console.log(`   Agent compliance: ${registeredAgent.compliance.compliancePercentage}%`);
-        console.log(`   Compliance violations: ${registeredAgent.compliance.violations.length}`);
+        info(`   Agent compliance: ${registeredAgent.compliance.compliancePercentage}%`);
+        info(`   Compliance violations: ${registeredAgent.compliance.violations.length}`);
 
         // Test 4: Execute agent with contract validation
         if (registeredAgent.compliance.compliant) {
-            console.log('\n🚀 Test 4: Execute agent with contract validation');
+            info('\n🚀 Test 4: Execute agent with contract validation');
 
             const executionResult = await specSystem.executeAgentWithContracts('security_agent_demo', {
                 code: 'function test() { return true; }'
             });
 
-            console.log(`   Execution time: ${executionResult.executionTime}ms`);
-            console.log(`   Contract violations: ${executionResult.contractViolations.length}`);
+            info(`   Execution time: ${executionResult.executionTime}ms`);
+            info(`   Contract violations: ${executionResult.contractViolations.length}`);
         }
 
         // Show system statistics
         const stats = specSystem.getStats();
-        console.log('\n📊 System Statistics:');
-        console.log(`   Total specifications: ${stats.totalSpecs}`);
-        console.log(`   Valid specifications: ${stats.validSpecs}`);
-        console.log(`   Registered agents: ${stats.registeredAgents}`);
-        console.log(`   Spec compliance rate: ${stats.specComplianceRate}%`);
-        console.log(`   Test coverage: ${stats.testCoverage}%`);
+        info('\n📊 System Statistics:');
+        info(`   Total specifications: ${stats.totalSpecs}`);
+        info(`   Valid specifications: ${stats.validSpecs}`);
+        info(`   Registered agents: ${stats.registeredAgents}`);
+        info(`   Spec compliance rate: ${stats.specComplianceRate}%`);
+        info(`   Test coverage: ${stats.testCoverage}%`);
 
-        console.log('\n🎉 Spec-Driven Agent Demo Complete!');
-        console.log('Key features demonstrated:');
-        console.log('  ✅ Specification creation and validation');
-        console.log('  ✅ Auto-generated test suite creation');
-        console.log('  ✅ Agent compliance verification');
-        console.log('  ✅ Contract-based execution (preconditions/postconditions)');
-        console.log('  ✅ Performance requirement enforcement');
+        info('\n🎉 Spec-Driven Agent Demo Complete!');
+        info('Key features demonstrated:');
+        info('  ✅ Specification creation and validation');
+        info('  ✅ Auto-generated test suite creation');
+        info('  ✅ Agent compliance verification');
+        info('  ✅ Contract-based execution (preconditions/postconditions)');
+        info('  ✅ Performance requirement enforcement');
 
     } catch (error) {
-        console.error('❌ Demo failed:', error.message);
+        error('❌ Demo failed:', error.message);
     } finally {
         await specSystem.cleanup();
     }

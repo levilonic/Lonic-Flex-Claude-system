@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Context Health Monitor - Phase 3B
  * Automatic degradation detection and proactive context maintenance
@@ -47,7 +48,7 @@ class ContextHealthMonitor extends EventEmitter {
         this.runningJobs = new Set();
         this.maintenanceInterval = null;
         
-        console.log('✅ ContextHealthMonitor initialized with proactive maintenance');
+        info('ContextHealthMonitor initialized with proactive maintenance');
         this.ensureDirectories();
     }
 
@@ -115,7 +116,7 @@ class ContextHealthMonitor extends EventEmitter {
             return healthMetrics;
 
         } catch (error) {
-            console.error('Health score calculation failed:', error);
+            error('Health score calculation failed:', error);
             return {
                 ...healthMetrics,
                 error: error.message,
@@ -356,7 +357,7 @@ class ContextHealthMonitor extends EventEmitter {
         const startTime = Date.now();
 
         try {
-            console.log(`🔧 Starting maintenance for context: ${contextId}`);
+            logger.debug(`Starting maintenance for context: ${contextId}`);
 
             // Calculate health score
             const healthMetrics = await this.calculateHealthScore(contextId, contextData, metadata);
@@ -368,7 +369,7 @@ class ContextHealthMonitor extends EventEmitter {
             const actions = await this.executeMaintenance(contextId, contextData, healthMetrics, metadata);
 
             const maintenanceTime = Date.now() - startTime;
-            console.log(`✅ Maintenance completed for ${contextId} in ${maintenanceTime}ms`);
+            info(`Maintenance completed for ${contextId} in ${maintenanceTime}ms`);
 
             // Emit health event
             this.emit('maintenance_completed', {
@@ -389,7 +390,7 @@ class ContextHealthMonitor extends EventEmitter {
             };
 
         } catch (error) {
-            console.error(`Maintenance failed for ${contextId}:`, error);
+            error(`Maintenance failed for ${contextId}:`, error);
             this.emit('maintenance_failed', { contextId, error: error.message });
             return {
                 success: false,
@@ -473,7 +474,7 @@ class ContextHealthMonitor extends EventEmitter {
 
             await fs.writeFile(logFile, JSON.stringify(healthHistory, null, 2));
         } catch (error) {
-            console.error('Failed to log health status:', error);
+            error('Failed to log health status:', error);
         }
     }
 
@@ -485,7 +486,7 @@ class ContextHealthMonitor extends EventEmitter {
             return;
         }
 
-        console.log('🤖 Starting background context maintenance');
+        info('🤖 Starting background context maintenance');
         
         this.maintenanceInterval = setInterval(async () => {
             await this.runBackgroundMaintenance();
@@ -502,7 +503,7 @@ class ContextHealthMonitor extends EventEmitter {
         if (this.maintenanceInterval) {
             clearInterval(this.maintenanceInterval);
             this.maintenanceInterval = null;
-            console.log('🛑 Stopped background context maintenance');
+            info('🛑 Stopped background context maintenance');
         }
     }
 
@@ -515,16 +516,16 @@ class ContextHealthMonitor extends EventEmitter {
         // Skip during quiet hours
         if (hour >= this.maintenanceConfig.quietHours.start || 
             hour < this.maintenanceConfig.quietHours.end) {
-            console.log('😴 Skipping maintenance during quiet hours');
+            info('😴 Skipping maintenance during quiet hours');
             return;
         }
 
         if (this.runningJobs.size >= this.maintenanceConfig.maxConcurrentJobs) {
-            console.log('⏳ Maintenance queue full, skipping cycle');
+            info('⏳ Maintenance queue full, skipping cycle');
             return;
         }
 
-        console.log('🔍 Running background maintenance cycle');
+        info('🔍 Running background maintenance cycle');
 
         try {
             // Get contexts that need maintenance (would integrate with context registry)
@@ -537,11 +538,11 @@ class ContextHealthMonitor extends EventEmitter {
                 
                 // Run maintenance without blocking
                 this.performMaintenance(context.id, context.data, context.metadata)
-                    .catch(error => console.error('Background maintenance error:', error));
+                    .catch(error => error('Background maintenance error:', error));
             }
 
         } catch (error) {
-            console.error('Background maintenance cycle failed:', error);
+            error('Background maintenance cycle failed:', error);
         }
     }
 
@@ -581,7 +582,7 @@ class ContextHealthMonitor extends EventEmitter {
      * Demo showing health monitoring capabilities
      */
     async demo() {
-        console.log('🏥 Context Health Monitor Demo - Proactive Context Maintenance\n');
+        info('🏥 Context Health Monitor Demo - Proactive Context Maintenance\n');
 
         // Mock contexts with different health conditions
         const testContexts = [
@@ -616,30 +617,30 @@ class ContextHealthMonitor extends EventEmitter {
 
         // Test health calculation for each context
         for (const context of testContexts) {
-            console.log(`\n🔍 Health check for: ${context.id}`);
+            info(`\n🔍 Health check for: ${context.id}`);
             
             const healthMetrics = await this.calculateHealthScore(context.id, context.data);
             
-            console.log(`📊 Overall Score: ${(healthMetrics.overallScore * 100).toFixed(1)}% (${healthMetrics.level})`);
-            console.log(`📈 Detailed Scores:`);
+            info(`📊 Overall Score: ${(healthMetrics.overallScore * 100).toFixed(1)}% (${healthMetrics.level})`);
+            info(`📈 Detailed Scores:`);
             Object.entries(healthMetrics.scores).forEach(([metric, score]) => {
-                console.log(`   ${metric}: ${(score * 100).toFixed(1)}%`);
+                info(`   ${metric}: ${(score * 100).toFixed(1)}%`);
             });
             
             if (healthMetrics.recommendations.length > 0) {
-                console.log(`💡 Recommendations:`);
-                healthMetrics.recommendations.forEach(rec => console.log(`   - ${rec}`));
+                info(`💡 Recommendations:`);
+                healthMetrics.recommendations.forEach(rec => info(`   - ${rec}`));
             }
 
             // Test maintenance
             const maintenanceResult = await this.performMaintenance(context.id, context.data);
             if (maintenanceResult.success) {
-                console.log(`🔧 Maintenance: ${maintenanceResult.actions.join(', ') || 'No actions needed'}`);
+                info(`🔧 Maintenance: ${maintenanceResult.actions.join(', ') || 'No actions needed'}`);
             }
         }
 
-        console.log('\n✅ Context Health Monitor demo completed!');
-        console.log('🎯 System ready for proactive context maintenance and degradation prevention');
+        info('\n✅ Context Health Monitor demo completed!');
+        info('System ready for proactive context maintenance and degradation prevention');
     }
 }
 

@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * SQLite Database Manager - Phase 2.2
  * Multi-agent coordination database with WAL mode (Factor 5: Unify Execution State)
@@ -1750,7 +1751,7 @@ class SQLiteManager {
         if (this.db) {
             return new Promise((resolve) => {
                 this.db.close((err) => {
-                    if (err) console.error('Database close error:', err);
+                    if (err) error('Database close error:', err);
                     this.isInitialized = false;
                     resolve();
                 });
@@ -1762,14 +1763,14 @@ class SQLiteManager {
      * Demo and testing
      */
     static async demo() {
-        console.log('📊 SQLite Manager Demo - Multi-Agent Database\n');
+        info('📊 SQLite Manager Demo - Multi-Agent Database\n');
         
         const dbManager = new SQLiteManager(':memory:'); // In-memory for demo
         
         try {
             // Initialize database
             await dbManager.initialize();
-            console.log('✅ Database initialized with WAL mode');
+            info('Database initialized with WAL mode');
             
             // Create demo session
             const sessionId = 'demo_session_' + Date.now();
@@ -1777,14 +1778,14 @@ class SQLiteManager {
                 repository: 'test-repo',
                 branch: 'feature/demo'
             });
-            console.log(`✅ Session created: ${sessionId}`);
+            info(`Session created: ${sessionId}`);
             
             // Create agents
             const agents = ['github', 'security', 'code', 'deploy'];
             for (const agentName of agents) {
                 const agentId = `${sessionId}_${agentName}`;
                 await dbManager.createAgent(agentId, sessionId, agentName, { role: agentName });
-                console.log(`✅ Agent created: ${agentName}`);
+                info(`Agent created: ${agentName}`);
             }
             
             // Simulate agent progress
@@ -1803,7 +1804,7 @@ class SQLiteManager {
             
             // Test resource locking
             const lockResult = await dbManager.acquireLock('github_api', 'github_agent', sessionId);
-            console.log(`✅ Resource lock acquired: ${lockResult}`);
+            info(`Resource lock acquired: ${lockResult}`);
             
             // Get session data
             const session = await dbManager.getSession(sessionId);
@@ -1811,22 +1812,22 @@ class SQLiteManager {
             const events = await dbManager.getSessionEvents(sessionId);
             const stats = await dbManager.getStats();
             
-            console.log('\n📊 Demo Results:');
-            console.log(`   Session: ${session.id} (${session.workflow_type})`);
-            console.log(`   Agents: ${sessionAgents.length} total`);
-            console.log(`   Events: ${events.length} logged`);
-            console.log(`   Database stats:`, stats);
+            info('\n📊 Demo Results:');
+            info(`   Session: ${session.id} (${session.workflow_type})`);
+            info(`   Agents: ${sessionAgents.length} total`);
+            info(`   Events: ${events.length} logged`);
+            info(`   Database stats:`, stats);
             
             // Release lock
             await dbManager.releaseLock('github_api');
-            console.log('✅ Resource lock released');
+            info('Resource lock released');
             
-            console.log('\n✅ SQLite Manager demo completed successfully!');
-            console.log('   WAL mode enables concurrent multi-agent access');
-            console.log('   Factor 3 context events are tracked persistently');
+            info('\n✅ SQLite Manager demo completed successfully!');
+            info('   WAL mode enables concurrent multi-agent access');
+            info('   Factor 3 context events are tracked persistently');
             
         } catch (error) {
-            console.error('❌ Demo failed:', error.message);
+            error('❌ Demo failed:', error.message);
         } finally {
             await dbManager.close();
         }

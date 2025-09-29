@@ -1,3 +1,4 @@
+const { logger } = require('./logger');
 /**
  * Error Recovery Service
  * Autonomous error handling and recovery with pattern learning
@@ -40,7 +41,7 @@ class ErrorRecovery extends EventEmitter {
             averageRecoveryTime: 0
         };
         
-        console.log('🔧 Error Recovery System initialized');
+        logger.debug('Error Recovery System initialized');
     }
     
     /**
@@ -55,7 +56,7 @@ class ErrorRecovery extends EventEmitter {
             conditions: ['transient_error', 'network_timeout', 'rate_limit'],
             action: async (error, context, attempt = 1) => {
                 const delay = Math.min(this.config.retryDelay * Math.pow(2, attempt - 1), 30000);
-                console.log(`🔄 Retrying operation in ${delay}ms (attempt ${attempt})`);
+                logger.info(`🔄 Retrying operation in ${delay}ms (attempt ${attempt})`);
                 
                 await new Promise(resolve => setTimeout(resolve, delay));
 
@@ -77,7 +78,7 @@ class ErrorRecovery extends EventEmitter {
             priority: 2,
             conditions: ['file_write_error', 'database_constraint', 'invalid_state'],
             action: async (error, context) => {
-                console.log('🔄 Rolling back last change...');
+                logger.info('🔄 Rolling back last change...');
                 
                 // Integrate with file system automation and git automation
                 const rollbackResults = [];
@@ -120,7 +121,7 @@ class ErrorRecovery extends EventEmitter {
             priority: 3,
             conditions: ['service_unavailable', 'memory_leak', 'deadlock'],
             action: async (error, context) => {
-                console.log('🔄 Restarting component...');
+                logger.info('🔄 Restarting component...');
                 
                 const component = context.component || 'unknown';
                 
@@ -143,7 +144,7 @@ class ErrorRecovery extends EventEmitter {
             priority: 4,
             conditions: ['non_critical_error', 'optional_step', 'dependency_missing'],
             action: async (error, context) => {
-                console.log('⏭️ Skipping current step...');
+                logger.info('⏭️ Skipping current step...');
 
                 const validation = { success: this.validateSuccess() };return {
 
@@ -162,7 +163,7 @@ class ErrorRecovery extends EventEmitter {
             priority: 5,
             conditions: ['critical_error', 'security_issue', 'data_corruption'],
             action: async (error, context) => {
-                console.log('🚨 Escalating error for human intervention...');
+                logger.info('🚨 Escalating error for human intervention...');
                 
                 // Send escalation notification
                 try {
@@ -180,7 +181,7 @@ class ErrorRecovery extends EventEmitter {
 Human intervention required immediately.`);
                     
                 } catch (notificationError) {
-                    console.error('Failed to send escalation notification:', notificationError.message);
+                    logger.error('Failed to send escalation notification:', notificationError.message);
                 }
 
                 const validation = { success: this.validateSuccess() };return {
@@ -193,7 +194,7 @@ Human intervention required immediately.`);
             }
         });
         
-        console.log(`✅ Initialized ${this.recoveryStrategies.size} recovery strategies`);
+        logger.info(`Initialized ${this.recoveryStrategies.size} recovery strategies`);
     }
     
     /**
@@ -204,7 +205,7 @@ Human intervention required immediately.`);
         const startTime = Date.now();
         
         try {
-            console.log(`🚨 Handling error: ${error.message} (${errorId})`);
+            logger.info(`🚨 Handling error: ${error.message} (${errorId})`);
             this.stats.totalErrors++;
             
             // Classify the error
@@ -237,7 +238,7 @@ Human intervention required immediately.`);
                 this.stats.failedRecoveries++;
             }
             
-            console.log(`✅ Error recovery ${recoveryResult.success ? 'successful' : 'failed'}: ${strategy.name}`);
+            logger.info(`✅ Error recovery ${recoveryResult.success ? 'successful' : 'failed'}: ${strategy.name}`);
             
             // Emit recovery event
             this.emit('recovery', {
@@ -251,7 +252,7 @@ Human intervention required immediately.`);
             return recoveryResult;
             
         } catch (recoveryError) {
-            console.error(`❌ Error recovery failed: ${recoveryError.message}`);
+            logger.error(`❌ Error recovery failed: ${recoveryError.message}`);
             this.stats.failedRecoveries++;
             
             // Emit recovery failure event
@@ -413,7 +414,7 @@ Human intervention required immediately.`);
      */
     async executeRecovery(strategy, error, context, errorId) {
         try {
-            console.log(`🔧 Executing recovery strategy: ${strategy.name}`);
+            logger.debug(`Executing recovery strategy: ${strategy.name}`);
             this.stats.strategiesUsed++;
             
             // Check if we've already attempted this strategy too many times
@@ -489,7 +490,7 @@ Human intervention required immediately.`);
             pattern.contexts = pattern.contexts.slice(-10);
         }
         
-        console.log(`📚 Learning from error pattern: ${patternKey} (${pattern.occurrences} occurrences)`);
+        logger.info(`📚 Learning from error pattern: ${patternKey} (${pattern.occurrences} occurrences)`);
     }
     
     /**
@@ -603,7 +604,7 @@ Human intervention required immediately.`);
             averageRecoveryTime: 0
         };
         
-        console.log('🔄 Error recovery system reset');
+        logger.info('🔄 Error recovery system reset');
     }
 }
 
@@ -612,7 +613,7 @@ module.exports = { ErrorRecovery };
 // If run directly, demonstrate the service
 if (require.main === module) {
     (async () => {
-        console.log('🧪 Testing Error Recovery Service...');
+        logger.info('🧪 Testing Error Recovery Service...');
         
         const errorRecovery = new ErrorRecovery({
             maxRetries: 2,
@@ -630,19 +631,19 @@ if (require.main === module) {
             ];
             
             for (const test of testErrors) {
-                console.log(`\n🧪 Testing error: ${test.error.message}`);
+                logger.info(`\n🧪 Testing error: ${test.error.message}`);
                 const result = await errorRecovery.handleError(test.error, test.context);
-                console.log(`Result: ${result.success ? 'Success' : 'Failed'} - ${result.message || result.error}`);
+                logger.info(`Result: ${result.success ? 'Success' : 'Failed'} - ${result.message || result.error}`);
             }
             
             // Show statistics
-            console.log('\n📊 Recovery Statistics:', errorRecovery.getStats());
-            console.log('\n📚 Learned Patterns:', errorRecovery.getLearnedPatterns().length);
+            logger.info('\n📊 Recovery Statistics:', errorRecovery.getStats());
+            logger.info('\n📚 Learned Patterns:', errorRecovery.getLearnedPatterns().length);
             
-            console.log('✅ Error Recovery Service test completed');
+            logger.info('Error Recovery Service test completed');
             
         } catch (error) {
-            console.error('❌ Test failed:', error.message);
+            logger.error('❌ Test failed:', error.message);
         }
     })();
 }

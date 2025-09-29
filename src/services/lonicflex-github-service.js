@@ -673,21 +673,21 @@ if (require.main === module) {
     const service = new LonicFlexGitHubService();
     service.start()
         .then(() => {
-            console.log('✅ LonicFLex GitHub Service started successfully');
+            logger.info('LonicFLex GitHub Service started successfully');
         })
         .catch((error) => {
-            console.error('❌ Failed to start GitHub service:', error.message);
+            logger.error('❌ Failed to start GitHub service:', error.message);
             process.exit(1);
         });
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        console.log('GitHub service shutting down...');
+        logger.info('GitHub service shutting down...');
         process.exit(0);
     });
 
     process.on('SIGINT', () => {
-        console.log('GitHub service shutting down...');
+        logger.info('GitHub service shutting down...');
         process.exit(0);
     });
 }

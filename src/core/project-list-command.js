@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 
 /**
  * Project List Command - LonicFLex Implementation
@@ -101,7 +102,7 @@ class ProjectListCommand {
             // Format and display results
             const displayResult = await this.formatProjectList(enhancedProjects, options);
             
-            console.log(displayResult);
+            info(displayResult);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -112,7 +113,7 @@ class ProjectListCommand {
             };
 
         } catch (error) {
-            console.error('❌ Project list command failed:', error.message);
+            error('❌ Project list command failed:', error.message);
             return {
                 success: false,
                 error: error.message
@@ -494,7 +495,7 @@ module.exports = { ProjectListCommand };
 
 if (require.main === module) {
     main().catch(error => {
-        console.error('❌ Command failed:', error.message);
+        error('❌ Command failed:', error.message);
         process.exit(1);
     });
 }

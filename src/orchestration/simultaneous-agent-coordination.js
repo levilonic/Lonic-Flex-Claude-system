@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Simultaneous Agent Coordination System
  * Enables agents to work concurrently while coordinating through Universal Context
@@ -73,14 +74,14 @@ class CollaborativeAgent extends EventEmitter {
         this.taskCompletions = 0;
         this.collaborationCount = 0;
         
-        console.log(`🤖 Collaborative ${this.agentName} initialized`);
+        info(`🤖 Collaborative ${this.agentName} initialized`);
     }
 
     /**
      * Start collaborative work - agent begins concurrent execution
      */
     async startCollaborativeWork() {
-        console.log(`🚀 ${this.agentName} starting collaborative work...`);
+        info(`${this.agentName} starting collaborative work...`);
         
         this.setState(AGENT_STATES.INITIALIZING);
         this.startTime = Date.now();
@@ -95,14 +96,14 @@ class CollaborativeAgent extends EventEmitter {
         // Start communication processing
         this.startCommunicationProcessing();
         
-        console.log(`   ✅ ${this.agentName} collaborative work started`);
+        info(`   ✅ ${this.agentName} collaborative work started`);
     }
 
     /**
      * Initialize agent with shared workspace context
      */
     async initializeWithWorkspaceContext() {
-        console.log(`🔧 ${this.agentName} loading workspace context...`);
+        logger.debug(`${this.agentName} loading workspace context...`);
         
         // Get shared resources from workspace
         const projectContext = this.workspace.getSharedResource('project_context');
@@ -121,14 +122,14 @@ class CollaborativeAgent extends EventEmitter {
         // Initialize base agent with collaborative context
         await this.baseAgent.initialize(this.workspace.dbManager);
         
-        console.log(`   ✅ ${this.agentName} workspace context loaded`);
+        info(`   ✅ ${this.agentName} workspace context loaded`);
     }
 
     /**
      * Main work loop - processes tasks while coordinating with team
      */
     async startWorkLoop() {
-        console.log(`🔄 ${this.agentName} work loop started`);
+        info(`🔄 ${this.agentName} work loop started`);
         
         // Continue working until all responsibilities are complete
         while (this.state !== AGENT_STATES.COMPLETED && this.state !== AGENT_STATES.ERROR) {
@@ -153,20 +154,20 @@ class CollaborativeAgent extends EventEmitter {
                 await this.sleep(1000);
                 
             } catch (error) {
-                console.error(`❌ ${this.agentName} work loop error:`, error.message);
+                error(`❌ ${this.agentName} work loop error:`, error.message);
                 this.setState(AGENT_STATES.ERROR);
                 await this.reportError(error);
             }
         }
         
-        console.log(`✅ ${this.agentName} work loop completed`);
+        info(`${this.agentName} work loop completed`);
     }
 
     /**
      * Execute task while coordinating with other agents
      */
     async executeTaskWithCoordination(task) {
-        console.log(`⚡ ${this.agentName} executing: ${task.description}`);
+        info(`⚡ ${this.agentName} executing: ${task.description}`);
         
         this.currentTask = task;
         this.updateProgress(0);
@@ -175,7 +176,7 @@ class CollaborativeAgent extends EventEmitter {
         const coordinationNeeded = await this.checkCoordinationNeeds(task);
         
         if (coordinationNeeded.length > 0) {
-            console.log(`   🤝 ${this.agentName} coordinating with: ${coordinationNeeded.join(', ')}`);
+            info(`   🤝 ${this.agentName} coordinating with: ${coordinationNeeded.join(', ')}`);
             await this.coordinateBeforeTask(task, coordinationNeeded);
         }
         
@@ -193,7 +194,7 @@ class CollaborativeAgent extends EventEmitter {
         this.taskCompletions++;
         this.updateProgress(100);
         
-        console.log(`   ✅ ${this.agentName} completed: ${task.description}`);
+        info(`   ✅ ${this.agentName} completed: ${task.description}`);
     }
 
     /**
@@ -404,7 +405,7 @@ class CollaborativeAgent extends EventEmitter {
      * Share task results with relevant team members
      */
     async shareTaskResults(task, result) {
-        console.log(`📢 ${this.agentName} sharing results of: ${task.description}`);
+        info(`📢 ${this.agentName} sharing results of: ${task.description}`);
         
         const insight = {
             agent: this.agentName,
@@ -490,7 +491,7 @@ class CollaborativeAgent extends EventEmitter {
      * Handle incoming message from another agent
      */
     async handleIncomingMessage(message) {
-        console.log(`📨 ${this.agentName} received ${message.type} from ${message.from}`);
+        info(`📨 ${this.agentName} received ${message.type} from ${message.from}`);
         
         switch (message.type) {
             case COORDINATION_MESSAGES.REQUEST_HELP:
@@ -510,7 +511,7 @@ class CollaborativeAgent extends EventEmitter {
                 break;
                 
             default:
-                console.log(`   ⚠️ Unknown message type: ${message.type}`);
+                info(`   ⚠️ Unknown message type: ${message.type}`);
         }
     }
 
@@ -524,7 +525,7 @@ class CollaborativeAgent extends EventEmitter {
         const canHelp = this.canProvideHelp(helpType, details);
         
         if (canHelp) {
-            console.log(`   🤝 ${this.agentName} offering help to ${message.from}`);
+            info(`   🤝 ${this.agentName} offering help to ${message.from}`);
             
             await this.sendMessage(message.from, {
                 type: COORDINATION_MESSAGES.OFFER_HELP,
@@ -540,13 +541,13 @@ class CollaborativeAgent extends EventEmitter {
     async handleSharedInsight(message) {
         const insight = message.insight;
         
-        console.log(`   💡 ${this.agentName} received insight from ${message.from}: ${insight.task}`);
+        info(`   💡 ${this.agentName} received insight from ${message.from}: ${insight.task}`);
         
         // Analyze if insight affects current work
         const impactAnalysis = this.analyzeInsightImpact(insight);
         
         if (impactAnalysis.affectsCurrentWork) {
-            console.log(`   🔄 ${this.agentName} adjusting work based on insight`);
+            info(`   🔄 ${this.agentName} adjusting work based on insight`);
             await this.incorporateInsight(insight, impactAnalysis);
         }
     }
@@ -558,7 +559,7 @@ class CollaborativeAgent extends EventEmitter {
         const oldState = this.state;
         this.state = newState;
         
-        console.log(`🔄 ${this.agentName}: ${oldState} → ${newState}`);
+        info(`🔄 ${this.agentName}: ${oldState} → ${newState}`);
         
         // Notify workspace of state change
         this.workspace.communicationHub.emit(COMMUNICATION_EVENTS.AGENT_STATUS_UPDATE, {
@@ -584,7 +585,7 @@ class CollaborativeAgent extends EventEmitter {
     }
 
     reportStatus(status) {
-        console.log(`📊 ${this.agentName} status: ${status}`);
+        info(`📊 ${this.agentName} status: ${status}`);
     }
 
     /**
@@ -610,7 +611,7 @@ class CollaborativeAgent extends EventEmitter {
     }
 
     async waitForDependencies() {
-        console.log(`⏳ ${this.agentName} waiting for dependencies: ${this.roleAssignment.dependencies.join(', ')}`);
+        info(`⏳ ${this.agentName} waiting for dependencies: ${this.roleAssignment.dependencies.join(', ')}`);
         this.setState(AGENT_STATES.WAITING);
         await this.sleep(5000); // Wait 5 seconds before checking again
     }
@@ -620,7 +621,7 @@ class CollaborativeAgent extends EventEmitter {
         
         if (allResponsibilitiesComplete) {
             this.setState(AGENT_STATES.COMPLETED);
-            console.log(`🎉 ${this.agentName} all responsibilities completed!`);
+            info(`🎉 ${this.agentName} all responsibilities completed!`);
             
             await this.workspace.communicationHub.emit(COMMUNICATION_EVENTS.TASK_COMPLETED, {
                 agent: this.agentName,
@@ -675,13 +676,13 @@ class SimultaneousAgentCoordination {
      * Initialize collaborative agents from team plan
      */
     async initializeCollaborativeAgents(teamPlan, roleAssignments) {
-        console.log('🤖 Initializing collaborative agents for simultaneous work...');
+        info('🤖 Initializing collaborative agents for simultaneous work...');
         
         for (const agentPlan of teamPlan.agents) {
             const roleAssignment = roleAssignments.assignments.find(a => a.agent === agentPlan.agent);
             
             if (!roleAssignment) {
-                console.error(`❌ No role assignment found for agent: ${agentPlan.agent}`);
+                error(`❌ No role assignment found for agent: ${agentPlan.agent}`);
                 continue;
             }
             
@@ -706,7 +707,7 @@ class SimultaneousAgentCoordination {
                     baseAgent = new CommunicationAgent(sessionId, {});
                     break;
                 default:
-                    console.error(`❌ Unknown agent type: ${agentPlan.agent}`);
+                    error(`❌ Unknown agent type: ${agentPlan.agent}`);
                     continue;
             }
             
@@ -718,7 +719,7 @@ class SimultaneousAgentCoordination {
             this.setupAgentCommunicationRouting(collaborativeAgent);
         }
         
-        console.log(`   ✅ ${this.collaborativeAgents.size} collaborative agents initialized`);
+        info(`   ✅ ${this.collaborativeAgents.size} collaborative agents initialized`);
     }
 
     /**
@@ -736,7 +737,7 @@ class SimultaneousAgentCoordination {
      * Start simultaneous execution of all agents
      */
     async startSimultaneousExecution() {
-        console.log('🚀 Starting simultaneous agent execution...');
+        info('Starting simultaneous agent execution...');
         
         this.coordinationActive = true;
         this.startTime = Date.now();
@@ -745,10 +746,10 @@ class SimultaneousAgentCoordination {
         const agentPromises = [];
         
         for (const [agentName, agent] of this.collaborativeAgents) {
-            console.log(`   🏃 Starting ${agentName}...`);
+            info(`   🏃 Starting ${agentName}...`);
             const agentPromise = agent.startCollaborativeWork()
                 .catch(error => {
-                    console.error(`❌ ${agentName} execution error:`, error.message);
+                    error(`❌ ${agentName} execution error:`, error.message);
                     return { agent: agentName, error };
                 });
             
@@ -759,12 +760,12 @@ class SimultaneousAgentCoordination {
         this.startCoordinationMonitoring();
         
         // Wait for all agents to complete or timeout
-        console.log('⏳ Waiting for all agents to complete...');
+        info('⏳ Waiting for all agents to complete...');
         const results = await Promise.allSettled(agentPromises);
         
         this.coordinationActive = false;
         
-        console.log('🏁 Simultaneous execution completed');
+        info('🏁 Simultaneous execution completed');
         this.reportExecutionMetrics();
         
         return results;
@@ -816,12 +817,12 @@ class SimultaneousAgentCoordination {
     reportExecutionMetrics() {
         const totalTime = Date.now() - this.startTime;
         
-        console.log('\n📊 SIMULTANEOUS EXECUTION METRICS:');
-        console.log(`   Total execution time: ${Math.round(totalTime / 1000)} seconds`);
-        console.log(`   Tasks completed: ${this.executionMetrics.completedTasks}/${this.executionMetrics.totalTasks}`);
-        console.log(`   Agent collaborations: ${this.executionMetrics.collaborations}`);
-        console.log(`   Conflicts resolved: ${this.executionMetrics.conflicts}`);
-        console.log(`   Success rate: ${Math.round((this.executionMetrics.completedTasks / this.executionMetrics.totalTasks) * 100)}%`);
+        info('\n📊 SIMULTANEOUS EXECUTION METRICS:');
+        info(`   Total execution time: ${Math.round(totalTime / 1000)} seconds`);
+        info(`   Tasks completed: ${this.executionMetrics.completedTasks}/${this.executionMetrics.totalTasks}`);
+        info(`   Agent collaborations: ${this.executionMetrics.collaborations}`);
+        info(`   Conflicts resolved: ${this.executionMetrics.conflicts}`);
+        info(`   Success rate: ${Math.round((this.executionMetrics.completedTasks / this.executionMetrics.totalTasks) * 100)}%`);
     }
 
     calculateAverageTaskTime() {
@@ -837,7 +838,7 @@ class SimultaneousAgentCoordination {
         const activeAgents = Array.from(this.collaborativeAgents.values())
             .filter(agent => agent.state === AGENT_STATES.WORKING).length;
         
-        console.log(`🔄 Coordination status: ${activeAgents} agents active, ${this.executionMetrics.collaborations} collaborations`);
+        info(`🔄 Coordination status: ${activeAgents} agents active, ${this.executionMetrics.collaborations} collaborations`);
     }
 }
 
@@ -851,7 +852,7 @@ module.exports = {
 // Demo/test functionality
 if (require.main === module) {
     async function demoSimultaneousCoordination() {
-        console.log('🤖 Simultaneous Agent Coordination Demo\n');
+        info('🤖 Simultaneous Agent Coordination Demo\n');
         
         const { CollaborativeWorkspaceInfrastructure } = require('./collaborative-workspace-infrastructure');
         
@@ -876,11 +877,11 @@ if (require.main === module) {
         );
         
         // Start simultaneous execution (this would run agents concurrently)
-        console.log('\n🚀 Starting simultaneous agent execution...');
-        console.log('   (Demo mode - agents would work concurrently in real execution)');
+        info('\n🚀 Starting simultaneous agent execution...');
+        info('   (Demo mode - agents would work concurrently in real execution)');
         
-        console.log('\n✅ Simultaneous coordination demo complete');
-        console.log('   Ready for full collaborative agent execution');
+        info('\n✅ Simultaneous coordination demo complete');
+        info('   Ready for full collaborative agent execution');
     }
     
     demoSimultaneousCoordination().catch(console.error);

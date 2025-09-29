@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 
 /**
  * Universal Context Command System - Phase 3B
@@ -129,9 +130,9 @@ class UniversalContextCommands {
             scopeType = detection.suggested_scope;
             
             if (detection.confidence !== 'high') {
-                console.log(`🤖 Auto-detected scope: ${scopeType} (confidence: ${detection.confidence})`);
-                console.log(`💡 Reasons: ${detection.reasons.join(', ')}`);
-                console.log(`⚡ Use --session or --project to override`);
+                info(`🤖 Auto-detected scope: ${scopeType} (confidence: ${detection.confidence})`);
+                info(`💡 Reasons: ${detection.reasons.join(', ')}`);
+                info(`⚡ Use --session or --project to override`);
             }
         }
 
@@ -151,14 +152,14 @@ class UniversalContextCommands {
 
         // Phase 3A: Initialize external system coordination
         if (!this.externalCoordinator) {
-            console.log('🚀 Initializing external system integration...');
+            info('Initializing external system integration...');
             this.externalCoordinator = new SimplifiedExternalCoordinator(this.externalIntegrationConfig);
             await this.externalCoordinator.initialize();
         }
 
         // Phase 3B: Initialize long-term persistence system
         if (!this.longTermPersistence && this.persistenceConfig.enableLongTerm) {
-            console.log('📦 Initializing long-term persistence system...');
+            info('📦 Initializing long-term persistence system...');
             this.longTermPersistence = new LongTermPersistence({
                 archiveDir: path.join(this.baseDir, 'contexts', 'long-term')
             });
@@ -166,7 +167,7 @@ class UniversalContextCommands {
 
         // Phase 3B: Initialize health monitoring system
         if (!this.healthMonitor && this.persistenceConfig.enableHealthMonitoring) {
-            console.log('🏥 Initializing context health monitoring...');
+            info('🏥 Initializing context health monitoring...');
             this.healthMonitor = new ContextHealthMonitor({
                 backgroundMaintenance: this.persistenceConfig.backgroundMaintenance,
                 persistence: { archiveDir: path.join(this.baseDir, 'contexts', 'long-term') }
@@ -208,24 +209,24 @@ class UniversalContextCommands {
         };
 
         try {
-            console.log('🔧 Setting up external systems...');
+            logger.debug('Setting up external systems...');
             const externalResult = await this.externalCoordinator.onContextCreated(contextData);
             
             // Log external system setup results
             if (externalResult.github?.githubResources?.length > 0) {
-                console.log(`✅ GitHub resources created: ${externalResult.github.githubResources.length}`);
+                info(`GitHub resources created: ${externalResult.github.githubResources.length}`);
                 externalResult.github.githubResources.forEach(resource => {
-                    console.log(`   ${resource.type}: ${resource.name || resource.number} - ${resource.url}`);
+                    info(`   ${resource.type}: ${resource.name || resource.number} - ${resource.url}`);
                 });
             }
             
             if (externalResult.slack?.notifications?.length > 0) {
-                console.log(`📢 Slack notifications sent: ${externalResult.slack.notifications.length}`);
+                info(`📢 Slack notifications sent: ${externalResult.slack.notifications.length}`);
             }
             
             if (externalResult.summary.errors.length > 0) {
-                console.log(`⚠️ External system errors: ${externalResult.summary.errors.length}`);
-                externalResult.summary.errors.forEach(error => console.log(`   ${error}`));
+                warn(`External system errors: ${externalResult.summary.errors.length}`);
+                externalResult.summary.errors.forEach(error => info(`   ${error}`));
             }
             
             // Store external resources in context
@@ -237,7 +238,7 @@ class UniversalContextCommands {
             });
             
         } catch (error) {
-            console.error('❌ External system setup failed:', error.message);
+            error('❌ External system setup failed:', error.message);
             // Continue without external systems - not a blocking error
             context.addEvent('external_systems_error', {
                 error: error.message,
@@ -291,7 +292,7 @@ class UniversalContextCommands {
         }
 
         // If not in active registry, try to load from disk
-        console.log('🔍 Context not in active registry, scanning disk...');
+        info('🔍 Context not in active registry, scanning disk...');
         context = await this.loadContextFromDisk(contextName);
         if (context) {
             // Context loaded from disk, proceed with resumption
@@ -314,7 +315,7 @@ class UniversalContextCommands {
 
         // Phase 3B: Check long-term archives if context not active
         if (this.longTermPersistence) {
-            console.log('🔍 Context not active, checking long-term archives...');
+            info('🔍 Context not active, checking long-term archives...');
             
             // Try both session and project scopes
             for (const scope of ['session', 'project']) {
@@ -322,9 +323,9 @@ class UniversalContextCommands {
                     const restoreResult = await this.longTermPersistence.restoreContext(contextName, scope);
                     
                     if (restoreResult.success) {
-                        console.log(`✅ Context restored from long-term archive (${scope})`);
-                        console.log(`⚡ Time gap: ${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`);
-                        console.log(`🚀 Restore time: ${restoreResult.restoreTime}ms`);
+                        info(`Context restored from long-term archive (${scope})`);
+                        info(`⚡ Time gap: ${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`);
+                        info(`Restore time: ${restoreResult.restoreTime}ms`);
                         
                         // Recreate active context from restored data
                         const restoredContext = Factor3ContextManager.createContext({
@@ -376,7 +377,7 @@ class UniversalContextCommands {
         let context = Factor3ContextManager.getContextById(targetContextId);
         if (!context) {
             // If not in active registry, try to load from disk
-            console.log('🔍 Context not in active registry, loading from disk...');
+            info('🔍 Context not in active registry, loading from disk...');
             context = await this.loadContextFromDisk(targetContextId);
             if (!context) {
                 throw new Error(`Context '${targetContextId}' not found`);
@@ -693,11 +694,11 @@ class UniversalContextCommands {
                 }
                 global.LONICFLEX_CONTEXT_REGISTRY.set(contextName, context);
                 
-                console.log(`✅ Context '${contextName}' loaded from disk (${scopeType} scope)`);
+                info(`✅ Context '${contextName}' loaded from disk (${scopeType} scope)`);
                 return context;
                 
             } catch (error) {
-                console.log(`⚠️ Could not load context '${contextName}' from ${scopeType} scope: ${error.message}`);
+                info(`⚠️ Could not load context '${contextName}' from ${scopeType} scope: ${error.message}`);
                 continue;
             }
         }
@@ -1047,19 +1048,19 @@ if (require.main === module) {
     const args = process.argv.slice(2);
     
     if (args.length === 0) {
-        console.log('Universal Context Command System');
-        console.log('Usage: node universal-context-commands.js <command> [args...]');
-        console.log(JSON.stringify(commands.getUsageHelp(), null, 2));
+        info('Universal Context Command System');
+        info('Usage: node universal-context-commands.js <command> [args...]');
+        info(JSON.stringify(commands.getUsageHelp(), null, 2));
         process.exit(0);
     }
 
     commands.executeCommand(args)
         .then(result => {
-            console.log(JSON.stringify(result, null, 2));
+            info(JSON.stringify(result, null, 2));
             process.exit(result.error ? 1 : 0);
         })
         .catch(error => {
-            console.error('Command execution failed:', error.message);
+            error('Command execution failed:', error.message);
             process.exit(1);
         });
 }

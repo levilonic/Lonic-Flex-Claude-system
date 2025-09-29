@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Enhanced GitHub Agent - Phase 3 ServiceContainer Migration
  * Migrated from Heavy Agent Anti-Pattern to ServiceContainer dependency injection
@@ -65,9 +66,9 @@ class EnhancedGitHubAgent extends ValidatedAgent {
             const githubConfig = this.authManager.getGitHubConfig();
             this.githubConfig = { ...this.githubConfig, ...githubConfig };
 
-            console.log(`✅ Enhanced GitHub Agent authenticated for ${this.githubConfig.owner}/${this.githubConfig.repo}`);
+            info(`Enhanced GitHub Agent authenticated for ${this.githubConfig.owner}/${this.githubConfig.repo}`);
         } catch (error) {
-            console.error(`❌ Enhanced GitHub Agent authentication failed: ${error.message}`);
+            error(`❌ Enhanced GitHub Agent authentication failed: ${error.message}`);
             // Don't throw here - let the execute method handle it gracefully
         }
 

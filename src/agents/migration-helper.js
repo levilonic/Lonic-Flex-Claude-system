@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Agent Migration Helper - Phase 3 Migration Framework
  * Provides utilities for safely migrating agents from Heavy Agent Anti-Pattern
@@ -19,7 +20,7 @@ class AgentMigrationHelper {
      * Compare functionality between original and enhanced agent
      */
     async compareFunctionality(originalAgent, enhancedAgent, testScenarios) {
-        console.log(`🔍 Comparing functionality: ${originalAgent.agentName} vs Enhanced`);
+        info(`🔍 Comparing functionality: ${originalAgent.agentName} vs Enhanced`);
 
         const results = {
             agent: originalAgent.agentName,
@@ -34,7 +35,7 @@ class AgentMigrationHelper {
 
         for (let i = 0; i < testScenarios.length; i++) {
             const scenario = testScenarios[i];
-            console.log(`   Testing scenario ${i + 1}: ${scenario.name}`);
+            info(`   Testing scenario ${i + 1}: ${scenario.name}`);
 
             const scenarioResult = {
                 name: scenario.name,
@@ -46,13 +47,13 @@ class AgentMigrationHelper {
 
             try {
                 // Test original agent
-                console.log(`     → Testing original agent...`);
+                info(`     → Testing original agent...`);
                 const originalStart = Date.now();
                 scenarioResult.original = await scenario.testFunction(originalAgent);
                 const originalTime = Date.now() - originalStart;
 
                 // Test enhanced agent
-                console.log(`     → Testing enhanced agent...`);
+                info(`     → Testing enhanced agent...`);
                 const enhancedStart = Date.now();
                 scenarioResult.enhanced = await scenario.testFunction(enhancedAgent);
                 const enhancedTime = Date.now() - enhancedStart;
@@ -69,26 +70,26 @@ class AgentMigrationHelper {
 
                 if (scenarioResult.match) {
                     results.summary.passed++;
-                    console.log(`     ✅ PASS - Results match`);
+                    info(`     ✅ PASS - Results match`);
                     if (scenarioResult.performanceImprovement > 0) {
-                        console.log(`        Performance: ${scenarioResult.performanceImprovement}ms improvement`);
+                        info(`        Performance: ${scenarioResult.performanceImprovement}ms improvement`);
                     }
                 } else {
                     results.summary.failed++;
-                    console.log(`     ❌ FAIL - Results don't match`);
+                    info(`     ❌ FAIL - Results don't match`);
                 }
 
             } catch (error) {
                 results.summary.failed++;
                 scenarioResult.error = error.message;
-                console.log(`     💥 ERROR: ${error.message}`);
+                info(`     💥 ERROR: ${error.message}`);
             }
 
             results.scenarios.push(scenarioResult);
         }
 
         const successRate = (results.summary.passed / results.summary.total) * 100;
-        console.log(`📊 Functionality Comparison Results: ${successRate}% success rate`);
+        info(`📊 Functionality Comparison Results: ${successRate}% success rate`);
 
         this.migrationResults.set(originalAgent.agentName, results);
         return results;
@@ -139,7 +140,7 @@ class AgentMigrationHelper {
      * Performance comparison between original and enhanced agents
      */
     async comparePerformance(originalAgent, enhancedAgent, workloadTests) {
-        console.log(`⚡ Performance comparison: ${originalAgent.agentName}`);
+        info(`⚡ Performance comparison: ${originalAgent.agentName}`);
 
         const metrics = {
             agent: originalAgent.agentName,
@@ -154,7 +155,7 @@ class AgentMigrationHelper {
         };
 
         for (const test of workloadTests) {
-            console.log(`   Running performance test: ${test.name}`);
+            info(`   Running performance test: ${test.name}`);
 
             // Measure original agent performance
             const originalMetrics = await this.measureAgentPerformance(originalAgent, test);
@@ -176,8 +177,8 @@ class AgentMigrationHelper {
             metrics.tests.push(improvement);
             metrics.summary.totalImprovement += improvement.improvements.executionTime;
 
-            console.log(`     Original: ${originalMetrics.executionTime}ms, Enhanced: ${enhancedMetrics.executionTime}ms`);
-            console.log(`     Improvement: ${improvement.improvements.executionTime}ms`);
+            info(`     Original: ${originalMetrics.executionTime}ms, Enhanced: ${enhancedMetrics.executionTime}ms`);
+            info(`     Improvement: ${improvement.improvements.executionTime}ms`);
         }
 
         metrics.summary.averageImprovement = metrics.summary.totalImprovement / workloadTests.length;
@@ -322,7 +323,7 @@ class AgentMigrationHelper {
         this.migrationResults.clear();
         this.performanceMetrics.clear();
 
-        console.log('🧹 Migration testing resources cleaned up');
+        info('🧹 Migration testing resources cleaned up');
     }
 
     /**

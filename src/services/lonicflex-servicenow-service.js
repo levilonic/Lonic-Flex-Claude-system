@@ -1074,7 +1074,7 @@ class LonicFlexServiceNowService {
 if (require.main === module) {
     const service = new LonicFlexServiceNowService();
     service.start().catch(error => {
-        console.error('Failed to start ServiceNow Service:', error.message);
+        logger.error('Failed to start ServiceNow Service:', error.message);
         process.exit(1);
     });
 }

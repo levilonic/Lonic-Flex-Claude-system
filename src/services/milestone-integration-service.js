@@ -1,3 +1,4 @@
+const { logger } = require('./logger');
 const { Octokit } = require('@octokit/rest');
 const { getAuthManager } = require('../auth/auth-manager');
 const { SQLiteManager } = require('../database/sqlite-manager');
@@ -60,7 +61,7 @@ class MilestoneIntegrationService {
         await this.createMilestoneIntegrationDatabase();
 
         const { data: user } = await this.octokit.rest.users.getAuthenticated();
-        console.log(`✅ Milestone Integration Service authenticated as: ${user.login}`);
+        logger.info(`Milestone Integration Service authenticated as: ${user.login}`);
 
         this.initialized = true;
     }
@@ -135,7 +136,7 @@ class MilestoneIntegrationService {
             // Check if milestone already exists for this branch/session
             const existing = await this.findExistingMilestone(owner, repo, branchName, sessionId);
             if (existing) {
-                console.log(`✅ Using existing milestone: ${existing.title}`);
+                logger.info(`Using existing milestone: ${existing.title}`);
                 return existing;
             }
 
@@ -166,11 +167,11 @@ class MilestoneIntegrationService {
             this.milestonesCache.set(milestone.id, milestone);
             this.branchMilestoneMap.set(`${branchName}_${sessionId}`, milestone);
 
-            console.log(`✅ Created branch milestone: ${milestone.title} (Due: ${dueDate.toDateString()})`);
+            logger.info(`Created branch milestone: ${milestone.title} (Due: ${dueDate.toDateString()})`);
             return milestone;
 
         } catch (error) {
-            console.error(`❌ Failed to create branch milestone: ${error.message}`);
+            logger.error(`❌ Failed to create branch milestone: ${error.message}`);
             return null;
         }
     }
@@ -225,11 +226,11 @@ class MilestoneIntegrationService {
                 await this.completeMilestone(milestoneId, branchName, sessionId);
             }
 
-            console.log(`✅ Updated milestone progress: ${agentType} -> ${status} (${overallProgress.completionPercentage}% overall)`);
+            logger.info(`Updated milestone progress: ${agentType} -> ${status} (${overallProgress.completionPercentage}% overall)`);
             return overallProgress;
 
         } catch (error) {
-            console.error(`❌ Failed to update milestone progress: ${error.message}`);
+            logger.error(`❌ Failed to update milestone progress: ${error.message}`);
             return null;
         }
     }
@@ -310,10 +311,10 @@ class MilestoneIntegrationService {
                 completedAt: new Date().toISOString()
             });
 
-            console.log(`✅ Milestone completed: ${milestone.title}`);
+            logger.info(`Milestone completed: ${milestone.title}`);
 
         } catch (error) {
-            console.error(`❌ Failed to complete milestone: ${error.message}`);
+            logger.error(`❌ Failed to complete milestone: ${error.message}`);
         }
     }
 
@@ -392,7 +393,7 @@ ${progressBar}
             });
 
         } catch (error) {
-            console.error(`❌ Failed to update milestone description: ${error.message}`);
+            logger.error(`❌ Failed to update milestone description: ${error.message}`);
         }
     }
 
@@ -565,7 +566,7 @@ module.exports = { MilestoneIntegrationService };
 
 // Demo/testing function
 async function demoMilestoneIntegration() {
-    console.log('🎯 Milestone Integration Service Demo');
+    logger.info('Milestone Integration Service Demo');
     
     const milestoneService = new MilestoneIntegrationService();
     
@@ -583,7 +584,7 @@ async function demoMilestoneIntegration() {
         );
         
         if (milestone) {
-            console.log(`✅ Created milestone: ${milestone.title}`);
+            logger.info(`Created milestone: ${milestone.title}`);
             
             // Simulate agent progress
             await milestoneService.updateMilestoneProgress(
@@ -597,7 +598,7 @@ async function demoMilestoneIntegration() {
         }
         
     } catch (error) {
-        console.error(`❌ Error: ${error.message}`);
+        logger.error(`❌ Error: ${error.message}`);
     }
 }
 

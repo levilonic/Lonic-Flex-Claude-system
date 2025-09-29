@@ -732,7 +732,7 @@ module.exports = { LonicFlexBillingService };
 if (require.main === module) {
     const service = new LonicFlexBillingService();
     service.start().catch(error => {
-        console.error('Failed to start billing service:', error);
+        logger.error('Failed to start billing service:', error);
         process.exit(1);
     });
 }

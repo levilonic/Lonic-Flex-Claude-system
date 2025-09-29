@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Workflow Enhanced Universal Context Commands
  * Extends Universal Context System with structured workflow capabilities
@@ -24,7 +25,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         // Active workflows tracking
         this.activeWorkflows = new Map();
         
-        console.log('🔧 Workflow Enhanced Context Commands initialized');
+        logger.debug('Workflow Enhanced Context Commands initialized');
     }
 
     /**
@@ -49,8 +50,8 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
      * Start context with structured workflow
      */
     async startWorkflowContext(contextName, workflowTemplate, flags) {
-        console.log(`🔧 Starting structured workflow context: ${contextName}`);
-        console.log(`📋 Workflow Template: ${workflowTemplate}`);
+        logger.debug(`Starting structured workflow context: ${contextName}`);
+        info(`Workflow Template: ${workflowTemplate}`);
         
         // Create the context first using parent method
         const contextResult = await this.createNewContext(contextName, flags.project ? 'project' : 'session', flags);
@@ -87,8 +88,8 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
                 contextType: flags.project ? 'project' : 'session'
             });
             
-            console.log(`✅ Workflow context started: ${contextName}`);
-            console.log(`🎯 Current Phase: ${workflowEngine.workflow.currentPhase.name}`);
+            info(`Workflow context started: ${contextName}`);
+            info(`Current Phase: ${workflowEngine.workflow.currentPhase.name}`);
             
             // Display current phase information
             this.displayCurrentPhase(workflowEngine);
@@ -105,7 +106,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             };
             
         } catch (error) {
-            console.error('❌ Failed to start workflow:', error.message);
+            error('❌ Failed to start workflow:', error.message);
             // Clean up on failure
             this.activeWorkflows.delete(contextName);
             throw error;
@@ -120,18 +121,18 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         
         // Add workflow status to all active workflows
         if (this.activeWorkflows.size > 0) {
-            console.log(`\n📋 Active Workflows (${this.activeWorkflows.size}):`);
+            info(`\n📋 Active Workflows (${this.activeWorkflows.size}):`);
             
             for (const [contextId, workflowEngine] of this.activeWorkflows) {
                 const workflowStatus = workflowEngine.getWorkflowStatus();
                 
-                console.log(`\n🔧 Context: ${contextId}`);
-                console.log(`   Template: ${workflowStatus.template}`);
-                console.log(`   Phase: ${workflowStatus.currentPhase} (${workflowStatus.currentPhaseIndex + 1}/${workflowStatus.totalPhases})`);
-                console.log(`   Progress: ${workflowStatus.progress}%`);
-                console.log(`   Duration: ${Math.round(workflowStatus.duration / 1000)}s`);
-                console.log(`   Tasks: ${workflowStatus.metrics.tasksCompleted}/${workflowEngine.workflow.tasks.size} completed`);
-                console.log(`   Quality Gates: ${workflowStatus.metrics.qualityGatesPassed}/${workflowEngine.workflow.qualityGates.size} passed`);
+                info(`\n🔧 Context: ${contextId}`);
+                info(`   Template: ${workflowStatus.template}`);
+                info(`   Phase: ${workflowStatus.currentPhase} (${workflowStatus.currentPhaseIndex + 1}/${workflowStatus.totalPhases})`);
+                info(`   Progress: ${workflowStatus.progress}%`);
+                info(`   Duration: ${Math.round(workflowStatus.duration / 1000)}s`);
+                info(`   Tasks: ${workflowStatus.metrics.tasksCompleted}/${workflowEngine.workflow.tasks.size} completed`);
+                info(`   Quality Gates: ${workflowStatus.metrics.qualityGatesPassed}/${workflowEngine.workflow.qualityGates.size} passed`);
             }
         }
         
@@ -161,13 +162,13 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         
         try {
             await workflowEngine.completeTask(taskId, evidence, agent);
-            console.log(`✅ Task completed: ${taskId}`);
+            info(`Task completed: ${taskId}`);
             
             // Display updated phase status
             this.displayCurrentPhase(workflowEngine);
             
         } catch (error) {
-            console.error('❌ Failed to complete task:', error.message);
+            error('❌ Failed to complete task:', error.message);
             throw error;
         }
     }
@@ -191,9 +192,9 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             const result = await workflowEngine.evaluateQualityGate(gateId, passed === 'passed', evaluationData);
             
             if (result) {
-                console.log(`✅ Quality Gate PASSED: ${gateId}`);
+                info(`Quality Gate PASSED: ${gateId}`);
             } else {
-                console.log(`❌ Quality Gate FAILED: ${gateId}`);
+                error(`);
             }
             
             // Display updated phase status
@@ -202,7 +203,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             return result;
             
         } catch (error) {
-            console.error('❌ Failed to evaluate quality gate:', error.message);
+            error('❌ Failed to evaluate quality gate:', error.message);
             throw error;
         }
     }
@@ -213,16 +214,16 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
     setupWorkflowEventHandlers(workflowEngine, contextId) {
         // Handle agent switching requirements
         workflowEngine.on('agent-switch-required', (data) => {
-            console.log(`\n🤖 Agent Switch Required:`);
-            console.log(`   Current: ${data.currentAgent}`);
-            console.log(`   Required: ${data.requiredAgent}`);
-            console.log(`   Phase: ${data.phase}`);
-            console.log(`   Action: Switch to ${data.requiredAgent} persona to continue workflow`);
+            info(`\n🤖 Agent Switch Required:`);
+            info(`   Current: ${data.currentAgent}`);
+            info(`   Required: ${data.requiredAgent}`);
+            info(`   Phase: ${data.phase}`);
+            info(`   Action: Switch to ${data.requiredAgent} persona to continue workflow`);
         });
         
         // Handle phase transitions
         workflowEngine.on('phase-started', (data) => {
-            console.log(`\n🎯 Phase Started: ${data.phase.name}`);
+            info(`\n🎯 Phase Started: ${data.phase.name}`);
             
             // Log to context
             const context = Factor3ContextManager.getContextById(contextId);
@@ -238,8 +239,8 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         
         // Handle phase completion
         workflowEngine.on('phase-completed', (data) => {
-            console.log(`\n✅ Phase Completed: ${data.phase.name}`);
-            console.log(`   Duration: ${Math.round(data.phase.duration / 1000)}s`);
+            info(`\n✅ Phase Completed: ${data.phase.name}`);
+            info(`   Duration: ${Math.round(data.phase.duration / 1000)}s`);
             
             // Log to context
             const context = Factor3ContextManager.getContextById(contextId);
@@ -254,9 +255,9 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         
         // Handle workflow completion
         workflowEngine.on('workflow-completed', (data) => {
-            console.log(`\n🎉 Workflow Completed: ${data.summary.template}`);
-            console.log(`   Total Duration: ${Math.round(data.summary.totalDuration / 1000)}s`);
-            console.log(`   Success: ${data.summary.success}`);
+            info(`\n🎉 Workflow Completed: ${data.summary.template}`);
+            info(`   Total Duration: ${Math.round(data.summary.totalDuration / 1000)}s`);
+            info(`   Success: ${data.summary.success}`);
             
             // Remove from active workflows
             this.activeWorkflows.delete(contextId);
@@ -289,9 +290,9 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         const status = workflowEngine.getWorkflowStatus();
         const currentPhase = workflowEngine.workflow.currentPhase;
         
-        console.log(`\n📊 Current Phase Status:`);
-        console.log(`   Phase: ${currentPhase.name} (${status.currentPhaseIndex + 1}/${status.totalPhases})`);
-        console.log(`   Progress: ${status.progress}%`);
+        info(`\n📊 Current Phase Status:`);
+        info(`   Phase: ${currentPhase.name} (${status.currentPhaseIndex + 1}/${status.totalPhases})`);
+        info(`   Progress: ${status.progress}%`);
         
         // Show pending tasks
         if (currentPhase.tasks) {
@@ -301,11 +302,11 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             });
             
             if (pendingTasks.length > 0) {
-                console.log(`\n📋 Pending Tasks (${pendingTasks.length}):`);
+                info(`\n📋 Pending Tasks (${pendingTasks.length}):`);
                 for (const task of pendingTasks) {
-                    console.log(`   • ${task.name}`);
+                    info(`   • ${task.name}`);
                     if (task.verificationCommand) {
-                        console.log(`     Verification: ${task.verificationCommand}`);
+                        info(`     Verification: ${task.verificationCommand}`);
                     }
                 }
             }
@@ -319,10 +320,10 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             });
             
             if (pendingGates.length > 0) {
-                console.log(`\n🚪 Pending Quality Gates (${pendingGates.length}):`);
+                info(`\n🚪 Pending Quality Gates (${pendingGates.length}):`);
                 for (const gate of pendingGates) {
-                    console.log(`   • ${gate.name}`);
-                    console.log(`     Criteria: ${gate.criteria}`);
+                    info(`   • ${gate.name}`);
+                    info(`     Criteria: ${gate.criteria}`);
                 }
             }
         }

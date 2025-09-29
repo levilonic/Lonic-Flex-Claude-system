@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Authentication Manager
  * Centralized token and secret management for LonicFLex agents
@@ -43,7 +44,7 @@ class AuthManager {
         await this.loadEncryptedConfig();
 
         this.isInitialized = true;
-        console.log('✅ Authentication Manager initialized');
+        info('Authentication Manager initialized');
     }
 
     /**
@@ -67,7 +68,7 @@ class AuthManager {
             }
         }
 
-        console.log(`✅ Loaded ${tokensLoaded} tokens from environment variables`);
+        info(`Loaded ${tokensLoaded} tokens from environment variables`);
     }
 
     /**
@@ -84,7 +85,7 @@ class AuthManager {
         
         // Derive key using PBKDF2
         this.masterKey = crypto.pbkdf2Sync(passphrase, salt, this.keyDerivationIterations, 32, 'sha256');
-        console.log('🔐 Master key derived successfully');
+        info('🔐 Master key derived successfully');
     }
 
     /**
@@ -136,7 +137,7 @@ class AuthManager {
         try {
             const configExists = await fs.access(this.configFile).then(() => true).catch(() => false);
             if (!configExists) {
-                console.log('📝 No encrypted config file found - using environment only');
+                info('📝 No encrypted config file found - using environment only');
                 return;
             }
 
@@ -153,7 +154,7 @@ class AuthManager {
                 }
             }
             
-            console.log(`✅ Loaded ${this.secrets.size} encrypted secrets`);
+            info(`Loaded ${this.secrets.size} encrypted secrets`);
         } catch (error) {
             console.warn('⚠️  Error loading encrypted config:', error.message);
         }
@@ -284,7 +285,7 @@ class AuthManager {
      */
     setToken(service, token) {
         this.tokens.set(`${service.toLowerCase()}_token`, token);
-        console.log(`✅ ${service} token configured`);
+        info(`${service} token configured`);
     }
 
     /**
@@ -300,7 +301,7 @@ class AuthManager {
         
         // Save to encrypted file
         await this.saveEncryptedSecrets(key, encrypted);
-        console.log(`🔐 Secret stored and encrypted: ${key}`);
+        info(`🔐 Secret stored and encrypted: ${key}`);
     }
 
     /**
@@ -327,7 +328,7 @@ class AuthManager {
             // Write back to file
             await fs.writeFile(this.configFile, JSON.stringify(existingSecrets, null, 2));
         } catch (error) {
-            console.error('❌ Failed to save encrypted secrets:', error.message);
+            error('❌ Failed to save encrypted secrets:', error.message);
             throw error;
         }
     }
@@ -336,7 +337,7 @@ class AuthManager {
      * Rotate all API keys
      */
     async rotateApiKeys() {
-        console.log('🔄 Starting API key rotation...');
+        info('🔄 Starting API key rotation...');
         const rotationResults = [];
         
         // GitHub token rotation (if configured)
@@ -367,7 +368,7 @@ class AuthManager {
             }
         }
         
-        console.log('🔄 API key rotation completed');
+        info('🔄 API key rotation completed');
         return rotationResults;
     }
 
@@ -375,7 +376,7 @@ class AuthManager {
      * Rotate GitHub token (placeholder - requires GitHub App)
      */
     async rotateGitHubToken() {
-        console.log('🔄 Rotating GitHub token...');
+        info('🔄 Rotating GitHub token...');
         
         // In a real implementation, this would:
         // 1. Generate new token via GitHub API
@@ -395,7 +396,7 @@ class AuthManager {
      * Rotate Slack token (placeholder - requires Slack App refresh)
      */
     async rotateSlackToken() {
-        console.log('🔄 Rotating Slack token...');
+        info('🔄 Rotating Slack token...');
         
         // In a real implementation, this would:
         // 1. Use refresh token to get new access token
@@ -454,28 +455,28 @@ function getAuthManager() {
  * Demo function
  */
 async function demoAuthManager() {
-    console.log('🔐 Authentication Manager Demo\n');
+    info('🔐 Authentication Manager Demo\n');
 
     const auth = getAuthManager();
     await auth.initialize();
 
-    console.log('📊 Authentication Status:');
+    info('📊 Authentication Status:');
     const status = auth.getAuthStatus();
-    console.log(JSON.stringify(status, null, 2));
+    info(JSON.stringify(status, null, 2));
 
-    console.log('\n🧪 Testing agent validations:');
+    info('\n🧪 Testing agent validations:');
     const agents = ['github', 'security', 'slack', 'deploy'];
     
     for (const agent of agents) {
         const validation = await auth.validateAgentAuth(agent);
         const icon = validation.valid ? '✅' : '❌';
-        console.log(`${icon} ${agent}: ${validation.valid ? 'Ready' : validation.error}`);
+        info(`${icon} ${agent}: ${validation.valid ? 'Ready' : validation.error}`);
         if (!validation.valid && validation.suggestion) {
-            console.log(`   💡 ${validation.suggestion}`);
+            info(`   💡 ${validation.suggestion}`);
         }
     }
 
-    console.log('\n✅ Authentication Manager demo completed!');
+    info('\n✅ Authentication Manager demo completed!');
 }
 
 module.exports = {

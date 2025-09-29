@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Real Natural Language Processor (Fixed Version)
  *
@@ -40,7 +41,7 @@ class RealNaturalLanguageProcessor {
     }
 
     async analyzeRequirements(input) {
-        console.log(`🧠 Real NL Processor: Analyzing "${input.substring(0, 50)}..."`);
+        info(`🧠 Real NL Processor: Analyzing "${input.substring(0, 50)}..."`);
 
         const projectType = this.detectProjectType(input);
         const complexity = this.assessComplexity(input);
@@ -75,7 +76,7 @@ class RealNaturalLanguageProcessor {
     }
 
     async decomposeProject(requirements) {
-        console.log(`🔄 Real NL Processor: Decomposing ${requirements.projectType} project`);
+        info(`🔄 Real NL Processor: Decomposing ${requirements.projectType} project`);
 
         const phases = this.generatePhases(requirements.projectType, requirements.overallComplexity);
         const components = this.identifyComponents(requirements.projectType);
@@ -393,7 +394,7 @@ class RealNaturalLanguageProcessor {
     generateTemplate(fileName) {
         const templates = {
             'package.json': '{"name": "generated-app", "version": "1.0.0"}',
-            'index.js': '// Generated entry point\nconsole.log("Hello World");',
+            'index.js': '// Generated entry point\ninfo("Hello World");',
             'App.js': '// Generated App component\nfunction App() { return <div>Hello World</div>; }',
             'server.js': '// Generated server\nconst express = require("express");\nconst app = express();',
             'README.md': '# Generated Project\n\nThis is an auto-generated project.'

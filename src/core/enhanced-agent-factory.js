@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Enhanced Agent Factory - Production Deployment Ready
  * Provides seamless switching between Original and Enhanced agents
@@ -26,7 +27,7 @@ class EnhancedAgentFactory {
         // Track created agents for cleanup
         this.activeAgents = new Map();
 
-        console.log(`🏭 Enhanced Agent Factory created (Enhanced: ${this.config.useEnhancedAgents})`);
+        info(`🏭 Enhanced Agent Factory created (Enhanced: ${this.config.useEnhancedAgents})`);
     }
 
     /**
@@ -39,7 +40,7 @@ class EnhancedAgentFactory {
             try {
                 this.serviceContainer = new ServiceContainer();
                 await this.serviceContainer.initialize();
-                console.log('🏭 Agent Factory initialized with ServiceContainer');
+                info('🏭 Agent Factory initialized with ServiceContainer');
             } catch (error) {
                 console.warn('⚠️ ServiceContainer initialization failed, falling back to original agents');
                 this.config.useEnhancedAgents = false;
@@ -63,7 +64,7 @@ class EnhancedAgentFactory {
                 await agent.initialize();
 
                 this.activeAgents.set(`security-${agentSessionId}`, agent);
-                console.log('🔒 Enhanced SecurityAgent created');
+                info('🔒 Enhanced SecurityAgent created');
                 return agent;
             }
         } catch (error) {
@@ -75,7 +76,7 @@ class EnhancedAgentFactory {
         const { SecurityAgent } = require('./agents/security-agent');
         const agent = new SecurityAgent(agentSessionId, config);
         this.activeAgents.set(`security-${agentSessionId}`, agent);
-        console.log('🔒 Original SecurityAgent created (fallback)');
+        info('🔒 Original SecurityAgent created (fallback)');
         return agent;
     }
 
@@ -92,7 +93,7 @@ class EnhancedAgentFactory {
                 await agent.initialize();
 
                 this.activeAgents.set(`code-${agentSessionId}`, agent);
-                console.log('💻 Enhanced CodeAgent created');
+                info('💻 Enhanced CodeAgent created');
                 return agent;
             }
         } catch (error) {
@@ -104,7 +105,7 @@ class EnhancedAgentFactory {
         const { CodeAgent } = require('./agents/code-agent');
         const agent = new CodeAgent(agentSessionId, config);
         this.activeAgents.set(`code-${agentSessionId}`, agent);
-        console.log('💻 Original CodeAgent created (fallback)');
+        info('💻 Original CodeAgent created (fallback)');
         return agent;
     }
 
@@ -121,7 +122,7 @@ class EnhancedAgentFactory {
                 await agent.initialize();
 
                 this.activeAgents.set(`deploy-${agentSessionId}`, agent);
-                console.log('🚀 Enhanced DeployAgent created');
+                info('Enhanced DeployAgent created');
                 return agent;
             }
         } catch (error) {
@@ -133,7 +134,7 @@ class EnhancedAgentFactory {
         const { DeployAgent } = require('./agents/deploy-agent');
         const agent = new DeployAgent(agentSessionId, config);
         this.activeAgents.set(`deploy-${agentSessionId}`, agent);
-        console.log('🚀 Original DeployAgent created (fallback)');
+        info('Original DeployAgent created (fallback)');
         return agent;
     }
 
@@ -150,7 +151,7 @@ class EnhancedAgentFactory {
                 await agent.initialize();
 
                 this.activeAgents.set(`comm-${agentSessionId}`, agent);
-                console.log('💬 Enhanced CommunicationAgent created');
+                info('💬 Enhanced CommunicationAgent created');
                 return agent;
             }
         } catch (error) {
@@ -162,7 +163,7 @@ class EnhancedAgentFactory {
         const { CommunicationAgent } = require('./agents/comm-agent');
         const agent = new CommunicationAgent(agentSessionId, config);
         this.activeAgents.set(`comm-${agentSessionId}`, agent);
-        console.log('💬 Original CommunicationAgent created (fallback)');
+        info('💬 Original CommunicationAgent created (fallback)');
         return agent;
     }
 
@@ -179,7 +180,7 @@ class EnhancedAgentFactory {
                 await agent.initialize();
 
                 this.activeAgents.set(`github-${agentSessionId}`, agent);
-                console.log('🔗 Enhanced GitHubAgent created');
+                info('🔗 Enhanced GitHubAgent created');
                 return agent;
             }
         } catch (error) {
@@ -191,7 +192,7 @@ class EnhancedAgentFactory {
         const { GitHubAgent } = require('./agents/github-agent');
         const agent = new GitHubAgent(agentSessionId, config);
         this.activeAgents.set(`github-${agentSessionId}`, agent);
-        console.log('🔗 Original GitHubAgent created (fallback)');
+        info('🔗 Original GitHubAgent created (fallback)');
         return agent;
     }
 
@@ -257,7 +258,7 @@ class EnhancedAgentFactory {
      * Cleanup factory and all active agents
      */
     async cleanup() {
-        console.log(`🧹 Cleaning up Agent Factory (${this.activeAgents.size} active agents)`);
+        info(`🧹 Cleaning up Agent Factory (${this.activeAgents.size} active agents)`);
 
         // Cleanup all active agents
         for (const [key, agent] of this.activeAgents) {
@@ -285,7 +286,7 @@ class EnhancedAgentFactory {
         }
 
         this.isInitialized = false;
-        console.log('✅ Agent Factory cleanup completed');
+        info('Agent Factory cleanup completed');
     }
 }
 

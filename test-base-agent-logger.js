@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { logger } = require('./src/services/logger');
 /**
  * Test BaseAgent with Logger Integration - Phase 3
  * Verify that BaseAgent uses structured logging correctly
@@ -22,53 +23,53 @@ class TestAgent extends BaseAgent {
 }
 
 async function testBaseAgentLogger() {
-    console.log('🧪 Testing BaseAgent with Logger Integration - Phase 3');
-    console.log('='.repeat(60));
+    logger.info('🧪 Testing BaseAgent with Logger Integration - Phase 3');
+    logger.info('='.repeat(60));
 
     let serviceContainer = null;
 
     try {
-        console.log('\n📋 1. Initialize ServiceContainer with logger...');
+        logger.info('\n📋 1. Initialize ServiceContainer with logger...');
         serviceContainer = new ServiceContainer();
         await serviceContainer.initialize();
-        console.log('✅ ServiceContainer initialized');
+        logger.info('ServiceContainer initialized');
 
-        console.log('\n📋 2. Create BaseAgent with logger integration...');
+        logger.info('\n📋 2. Create BaseAgent with logger integration...');
         const agent = new TestAgent('test-agent', 'test-session-123', serviceContainer, {
             workflowId: 'test-workflow-456'
         });
-        console.log('✅ BaseAgent created (should show structured logging)');
+        logger.info('BaseAgent created (should show structured logging)');
 
-        console.log('\n📋 3. Initialize agent...');
+        logger.info('\n📋 3. Initialize agent...');
         await agent.initialize();
-        console.log('✅ Agent initialized (should show structured logging)');
+        logger.info('Agent initialized (should show structured logging)');
 
-        console.log('\n📋 4. Execute workflow...');
+        logger.info('\n📋 4. Execute workflow...');
         const result = await agent.execute({});
-        console.log('✅ Workflow executed successfully');
-        console.log('Result:', result);
+        logger.info('Workflow executed successfully');
+        logger.info('Result:', result);
 
-        console.log('\n📋 5. Test agent cleanup...');
+        logger.info('\n📋 5. Test agent cleanup...');
         await agent.cleanup();
-        console.log('✅ Agent cleanup completed (should show structured logging)');
+        logger.info('Agent cleanup completed (should show structured logging)');
 
-        console.log('\n📋 6. Shutdown ServiceContainer...');
+        logger.info('\n📋 6. Shutdown ServiceContainer...');
         await serviceContainer.shutdown();
-        console.log('✅ ServiceContainer shutdown');
+        logger.info('ServiceContainer shutdown');
 
-        console.log('\n✅ All BaseAgent logger integration tests passed!');
-        console.log('📄 Check logs/lonicflex.log for structured agent logs');
+        logger.info('\n✅ All BaseAgent logger integration tests passed!');
+        logger.info('📄 Check logs/lonicflex.log for structured agent logs');
         return true;
 
     } catch (error) {
-        console.error('❌ BaseAgent logger test failed:', error.message);
-        console.error('Stack trace:', error.stack);
+        logger.error('❌ BaseAgent logger test failed:', error.message);
+        logger.error('Stack trace:', error.stack);
 
         if (serviceContainer) {
             try {
                 await serviceContainer.shutdown();
             } catch (shutdownError) {
-                console.error('Failed to shutdown ServiceContainer:', shutdownError.message);
+                logger.error('Failed to shutdown ServiceContainer:', shutdownError.message);
             }
         }
 
@@ -83,7 +84,7 @@ if (require.main === module) {
             process.exit(success ? 0 : 1);
         })
         .catch(error => {
-            console.error('Test suite failed:', error);
+            logger.error('Test suite failed:', error);
             process.exit(1);
         });
 }

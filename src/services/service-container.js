@@ -146,7 +146,7 @@ class ServiceContainer {
             });
         } else {
             // Fallback for logger service registration itself
-            console.log(`🔧 Service registered: ${name} (${this.services.size} total services)`);
+            console.log(`Service registered: ${name} (${this.services.size} total services)`);
         }
     }
 
@@ -356,7 +356,7 @@ class ServiceContainer {
                 services: this.services.size
             });
         } else {
-            console.log('🔧 ServiceContainer shutting down...');
+            console.log('ServiceContainer shutting down...');
         }
 
         // Cleanup all workflow partitions
@@ -372,8 +372,8 @@ class ServiceContainer {
 
         // Shutdown logger last
         const logger = this.services.get('logger');
-        if (logger && typeof logger.shutdown === 'function') {
-            await logger.shutdown();
+        if (this.logger && typeof this.logger.shutdown === 'function') {
+            await this.logger.shutdown();
         }
 
         this.services.clear();
@@ -381,7 +381,7 @@ class ServiceContainer {
         this.initialized = false;
         this.logger = null;
 
-        console.log('✅ ServiceContainer shutdown complete');
+        console.log('ServiceContainer shutdown complete');
     }
 
     /**

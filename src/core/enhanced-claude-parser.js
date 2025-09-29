@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Enhanced @claude Command Parser - LonicFLex Foundation v0
  * Advanced command parsing and workflow template integration
@@ -65,7 +66,7 @@ class EnhancedClaudeParser {
             return enhancedResult;
 
         } catch (error) {
-            console.error('Command parsing error:', error.message);
+            error('Command parsing error:', error.message);
             return null;
         }
     }
@@ -308,7 +309,7 @@ class EnhancedClaudeParser {
             return parseResult;
 
         } catch (error) {
-            console.error('Template enhancement error:', error.message);
+            error('Template enhancement error:', error.message);
             return parseResult;
         }
     }
@@ -396,7 +397,7 @@ class EnhancedClaudeParser {
 
 // Demo and testing
 async function demoEnhancedClaudeParser() {
-    console.log('🎯 Enhanced @claude Command Parser Demo\n');
+    info('Enhanced @claude Command Parser Demo\n');
 
     const parser = new EnhancedClaudeParser();
 
@@ -447,35 +448,35 @@ async function demoEnhancedClaudeParser() {
         }
     ];
 
-    console.log('📋 Command Parsing Tests:\n');
+    info('Command Parsing Tests:\n');
 
     for (let i = 0; i < testCases.length; i++) {
         const testCase = testCases[i];
-        console.log(`${i + 1}. Input: "${testCase.text}"`);
+        info(`${i + 1}. Input: "${testCase.text}"`);
 
         const result = parser.parseClaudeCommand(testCase.text, testCase.context);
 
         if (result) {
-            console.log(`   ✅ Parsed successfully (${Math.round(result.confidence * 100)}% confidence)`);
-            console.log(`   Command: ${result.command}`);
+            info(`   ✅ Parsed successfully (${Math.round(result.confidence * 100)}% confidence)`);
+            info(`   Command: ${result.command}`);
 
             if (result.template) {
-                console.log(`   Template: ${result.template.name}`);
-                console.log(`   Duration: ${Math.round(result.template.estimatedDuration / 1000)}s`);
+                info(`   Template: ${result.template.name}`);
+                info(`   Duration: ${Math.round(result.template.estimatedDuration / 1000)}s`);
             }
 
             const validation = parser.validateCommand(result);
             if (validation.warnings.length > 0) {
-                console.log(`   ⚠️  Warnings: ${validation.warnings.join(', ')}`);
+                info(`   ⚠️  Warnings: ${validation.warnings.join(', ')}`);
             }
         } else {
-            console.log('   ❌ Parsing failed');
+            info('   ❌ Parsing failed');
         }
 
-        console.log();
+        info();
     }
 
-    console.log('✅ Enhanced @claude Command Parser Demo Complete!');
+    info('Enhanced @claude Command Parser Demo Complete!');
 }
 
 module.exports = { EnhancedClaudeParser };

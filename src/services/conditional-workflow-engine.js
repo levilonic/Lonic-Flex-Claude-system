@@ -944,7 +944,7 @@ class ExpressionEvaluator {
             return false;
 
         } catch (error) {
-            console.error('Expression evaluation error', { expression, error: error.message });
+            logger.error('Expression evaluation error', { expression, error: error.message });
             return false;
         }
     }

@@ -110,4 +110,3 @@ Which persona should I adopt? (Enter 1-5):
 **ENHANCED CONTEXT AWARENESS**:
 - If Phase 1 Research Complete → Highlight Developer Agent for Phase 2 Implementation
 - If PHASE1-RESEARCH-COMPLETE.md exists → Mention implementation plan ready
-- Always report Foundation v0 specific status and next steps

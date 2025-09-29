@@ -958,10 +958,10 @@ class LonicFlexWebhookService {
         await this.initialize();
 
         this.server = this.app.listen(this.config.port, () => {
-            console.log(`🔗 LonicFLex Webhook Service running on port ${this.config.port}`);
-            console.log(`📡 GitHub webhooks: http://localhost:${this.config.port}/webhook/github`);
-            console.log(`💬 Slack webhooks: http://localhost:${this.config.port}/webhook/slack`);
-            console.log(`🏥 Health check: http://localhost:${this.config.port}/health`);
+            logger.info(`🔗 LonicFLex Webhook Service running on port ${this.config.port}`);
+            logger.info(`📡 GitHub webhooks: http://localhost:${this.config.port}/webhook/github`);
+            logger.info(`💬 Slack webhooks: http://localhost:${this.config.port}/webhook/slack`);
+            logger.info(`🏥 Health check: http://localhost:${this.config.port}/health`);
 
             this.logger.info('Webhook service started', { port: this.config.port });
         });
@@ -990,7 +990,7 @@ class LonicFlexWebhookService {
 if (require.main === module) {
     const service = new LonicFlexWebhookService();
     service.start().catch(error => {
-        console.error('Failed to start LonicFLex Webhook Service:', error);
+        logger.error('Failed to start LonicFLex Webhook Service:', error);
         process.exit(1);
     });
 }

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Team Coordination Integration - Git/Slack with Universal Context Hub
  * Connects external team coordination tools with collaborative agent workspace
@@ -94,14 +95,14 @@ class TeamCoordinationIntegration {
         this.teamMilestones = new Map(); // milestone -> status
         this.escalationPaths = new Map(); // issue type -> escalation
         
-        console.log('🔗 Team Coordination Integration initialized');
+        info('🔗 Team Coordination Integration initialized');
     }
 
     /**
      * Initialize team coordination with external systems
      */
     async initialize() {
-        console.log('🚀 Initializing team coordination integration...');
+        info('Initializing team coordination integration...');
         
         // Initialize external coordinator
         await this.externalCoordinator.initialize();
@@ -113,14 +114,14 @@ class TeamCoordinationIntegration {
         await this.setupExternalResourceTracking();
         
         this.integrationActive = true;
-        console.log('   ✅ Team coordination integration active');
+        info('   ✅ Team coordination integration active');
     }
 
     /**
      * Setup event listeners for workspace events that need external coordination
      */
     setupWorkspaceEventListeners() {
-        console.log('📡 Setting up workspace event listeners...');
+        info('📡 Setting up workspace event listeners...');
         
         // Agent status updates
         this.workspace.communicationHub.on(COMMUNICATION_EVENTS.AGENT_STATUS_UPDATE, (data) => {
@@ -157,14 +158,14 @@ class TeamCoordinationIntegration {
             this.handleAgentCollaborationForTeam(data);
         });
         
-        console.log('   ✅ Workspace event listeners configured');
+        info('   ✅ Workspace event listeners configured');
     }
 
     /**
      * Setup external resource tracking for the team
      */
     async setupExternalResourceTracking() {
-        console.log('📚 Setting up external resource tracking...');
+        info('📚 Setting up external resource tracking...');
         
         const projectContext = this.workspace.getSharedResource('project_context');
         
@@ -181,7 +182,7 @@ class TeamCoordinationIntegration {
             
             if (mainBranchResult.success) {
                 this.externalResources.set('main_branch', mainBranchResult.resources.branches[0]);
-                console.log(`   ✅ Main project branch created: ${mainBranchResult.resources.branches[0].name}`);
+                info(`   ✅ Main project branch created: ${mainBranchResult.resources.branches[0].name}`);
             }
         }
         
@@ -198,7 +199,7 @@ class TeamCoordinationIntegration {
             });
             
             if (channelResult.success) {
-                console.log('   ✅ Team coordination channel configured');
+                info('   ✅ Team coordination channel configured');
             }
         }
     }
@@ -248,7 +249,7 @@ class TeamCoordinationIntegration {
         
         if (branchResult.success && branchResult.resources.branches.length > 0) {
             this.teamBranches.set(branchKey, branchResult.resources.branches[0]);
-            console.log(`🌿 Created branch for ${agent}: ${branchName}`);
+            info(`🌿 Created branch for ${agent}: ${branchName}`);
         }
     }
 
@@ -269,7 +270,7 @@ class TeamCoordinationIntegration {
         });
         
         if (result.success) {
-            console.log(`📢 Slack status update sent for ${agent}`);
+            info(`📢 Slack status update sent for ${agent}`);
         }
     }
 
@@ -392,7 +393,7 @@ class TeamCoordinationIntegration {
         const agentBranch = this.teamBranches.get(branchKey);
         
         if (!agentBranch) {
-            console.log(`⚠️ No branch found for ${agent} - cannot create PR`);
+            warn(`No branch found for ${agent} - cannot create PR`);
             return;
         }
         
@@ -406,7 +407,7 @@ class TeamCoordinationIntegration {
         });
         
         // This would create actual PR through GitHub API
-        console.log(`📋 Would create PR: ${prTitle} from ${agentBranch.name}`);
+        info(`Would create PR: ${prTitle} from ${agentBranch.name}`);
     }
 
     /**
@@ -521,14 +522,14 @@ class TeamCoordinationIntegration {
      * Cleanup team coordination resources
      */
     async cleanup() {
-        console.log('🧹 Cleaning up team coordination resources...');
+        info('🧹 Cleaning up team coordination resources...');
         
         this.integrationActive = false;
         
         // Clean up GitHub resources if needed
         if (this.externalCoordinator.config.enableGitHub) {
             // This would clean up temporary branches, close issues, etc.
-            console.log('   🌿 GitHub resources cleanup (would be implemented)');
+            info('   🌿 GitHub resources cleanup (would be implemented)');
         }
         
         // Send final Slack notification
@@ -540,7 +541,7 @@ class TeamCoordinationIntegration {
             });
         }
         
-        console.log('   ✅ Team coordination cleanup complete');
+        info('   ✅ Team coordination cleanup complete');
     }
 }
 
@@ -553,7 +554,7 @@ module.exports = {
 // Demo/test functionality
 if (require.main === module) {
     async function demoTeamCoordination() {
-        console.log('🔗 Team Coordination Integration Demo\n');
+        info('🔗 Team Coordination Integration Demo\n');
         
         const { CollaborativeWorkspaceInfrastructure } = require('./collaborative-workspace-infrastructure');
         
@@ -579,7 +580,7 @@ if (require.main === module) {
         await teamCoordination.initialize();
         
         // Simulate some team coordination events
-        console.log('\n🎭 Simulating team coordination events...');
+        info('\n🎭 Simulating team coordination events...');
         
         // Agent status update
         workspace.communicationHub.emit(COMMUNICATION_EVENTS.AGENT_STATUS_UPDATE, {
@@ -609,16 +610,16 @@ if (require.main === module) {
         // Get coordination summary
         const summary = teamCoordination.getCoordinationSummary();
         
-        console.log('\n📊 TEAM COORDINATION SUMMARY:');
-        console.log(`   Integration active: ${summary.integration_active}`);
-        console.log(`   External resources: ${Object.keys(summary.external_resources).length}`);
-        console.log(`   Coordination events: ${summary.coordination_events}`);
-        console.log(`   GitHub enabled: ${summary.github_enabled}`);
-        console.log(`   Slack enabled: ${summary.slack_enabled}`);
+        info('\n📊 TEAM COORDINATION SUMMARY:');
+        info(`   Integration active: ${summary.integration_active}`);
+        info(`   External resources: ${Object.keys(summary.external_resources).length}`);
+        info(`   Coordination events: ${summary.coordination_events}`);
+        info(`   GitHub enabled: ${summary.github_enabled}`);
+        info(`   Slack enabled: ${summary.slack_enabled}`);
         
         await teamCoordination.cleanup();
         
-        console.log('\n✅ Team coordination integration demo complete');
+        info('\n✅ Team coordination integration demo complete');
     }
     
     demoTeamCoordination().catch(console.error);

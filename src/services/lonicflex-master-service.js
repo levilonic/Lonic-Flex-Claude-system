@@ -647,9 +647,9 @@ ${runState.brief || 'No brief provided'}
         await this.initialize();
 
         this.server = this.app.listen(this.config.port, () => {
-            console.log(`🚀 LonicFLex Master Service running on port ${this.config.port}`);
-            console.log(`📊 Health check: http://localhost:${this.config.port}/health`);
-            console.log(`⚡ Ready to process /lx run commands`);
+            logger.info(`LonicFLex Master Service running on port ${this.config.port}`);
+            logger.info(`📊 Health check: http://localhost:${this.config.port}/health`);
+            logger.info(`⚡ Ready to process /lx run commands`);
 
             this.logger.info('Master service started', {
                 port: this.config.port,
@@ -681,7 +681,7 @@ ${runState.brief || 'No brief provided'}
 if (require.main === module) {
     const service = new LonicFlexMasterService();
     service.start().catch(error => {
-        console.error('Failed to start LonicFLex Master Service:', error);
+        logger.error('Failed to start LonicFLex Master Service:', error);
         process.exit(1);
     });
 }

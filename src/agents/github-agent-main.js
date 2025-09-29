@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * GitHub Agent - Phase 3.1
  * Specialized agent for GitHub PR/issue management following Factor 10
@@ -68,9 +69,9 @@ class GitHubAgent extends ValidatedAgent {
             const githubConfig = this.authManager.getGitHubConfig();
             this.githubConfig = { ...this.githubConfig, ...githubConfig };
 
-            console.log(`✅ GitHub Agent authenticated for ${this.githubConfig.owner}/${this.githubConfig.repo}`);
+            info(`GitHub Agent authenticated for ${this.githubConfig.owner}/${this.githubConfig.repo}`);
         } catch (error) {
-            console.error(`❌ GitHub Agent authentication failed: ${error.message}`);
+            error(`❌ GitHub Agent authentication failed: ${error.message}`);
             // Don't throw here - let the execute method handle it gracefully
         }
 
@@ -962,7 +963,7 @@ class GitHubAgent extends ValidatedAgent {
  * GitHub Agent execution function
  */
 async function runGitHubAgent() {
-    console.log('🐙 GitHub Agent - Real Execution Mode\n');
+    info('🐙 GitHub Agent - Real Execution Mode\n');
     
     const { SQLiteManager } = require('../database/sqlite-manager');
     const dbManager = new SQLiteManager(':memory:');
@@ -984,12 +985,12 @@ async function runGitHubAgent() {
         
         await agent.initialize(dbManager);
         
-        console.log(`✅ Created GitHub agent: ${agent.agentName}`);
-        console.log(`   Steps: ${agent.executionSteps.length} (Factor 10 compliant)`);
-        console.log(`   Repository: ${agent.githubConfig.owner}/${agent.githubConfig.repo}`);
+        info(`Created GitHub agent: ${agent.agentName}`);
+        info(`   Steps: ${agent.executionSteps.length} (Factor 10 compliant)`);
+        info(`   Repository: ${agent.githubConfig.owner}/${agent.githubConfig.repo}`);
         
         // Test context analysis without actual GitHub API calls
-        console.log('\n🔍 Testing context analysis...');
+        info('\n🔍 Testing context analysis...');
         
         const testContexts = [
             { pull_request: { number: 123 }, pr_action: 'analyze' },
@@ -1000,26 +1001,26 @@ async function runGitHubAgent() {
         
         for (const context of testContexts) {
             const action = agent.determineAction(context);
-            console.log(`   Context: ${Object.keys(context)[0]} → Action: ${action.type}`);
+            info(`   Context: ${Object.keys(context)[0]} → Action: ${action.type}`);
         }
         
         // Show status
         const status = agent.getStatus();
-        console.log(`\n📊 Agent Status:`);
-        console.log(`   State: ${status.state}`);
-        console.log(`   Execution steps defined: ${status.executionSteps.length}`);
+        info(`\n📊 Agent Status:`);
+        info(`   State: ${status.state}`);
+        info(`   Execution steps defined: ${status.executionSteps.length}`);
         
-        console.log('\n✅ GitHub Agent execution completed successfully!');
-        console.log('   ✓ Factor 10: 8 execution steps (≤8 max)');
-        console.log('   ✓ Extends BaseAgent with GitHub-specific functionality');
-        console.log('   ✓ Supports PR, Issue, Branch, and Repository analysis');
-        console.log('   ✓ Includes rate limiting and validation');
+        info('\n✅ GitHub Agent execution completed successfully!');
+        info('   ✓ Factor 10: 8 execution steps (≤8 max)');
+        info('   ✓ Extends BaseAgent with GitHub-specific functionality');
+        info('   ✓ Supports PR, Issue, Branch, and Repository analysis');
+        info('   ✓ Includes rate limiting and validation');
         
-        console.log('\n📝 Note: Full GitHub API integration requires valid token');
-        console.log('   Set GITHUB_TOKEN environment variable for production use');
+        info('\n📝 Note: Full GitHub API integration requires valid token');
+        info('   Set GITHUB_TOKEN environment variable for production use');
         
     } catch (error) {
-        console.error('❌ Execution failed:', error.message);
+        error('❌ Execution failed:', error.message);
     } finally {
         await dbManager.close();
     }

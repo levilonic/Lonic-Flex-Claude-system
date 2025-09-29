@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Collaborative Workspace Infrastructure
  * Shared Universal Context hub for simultaneous multi-agent coordination
@@ -89,14 +90,14 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
         // Setup communication hub event handlers
         this.setupCommunicationHub();
         
-        console.log(`🏢 Collaborative Workspace "${this.workspaceId}" initializing...`);
+        info(`🏢 Collaborative Workspace "${this.workspaceId}" initializing...`);
     }
 
     /**
      * Initialize the collaborative workspace
      */
     async initialize() {
-        console.log('🚀 Initializing Collaborative Workspace Infrastructure...');
+        info('Initializing Collaborative Workspace Infrastructure...');
         
         // Initialize core systems
         await this.dbManager.initialize();
@@ -111,7 +112,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
         });
         
         this.updateState(WORKSPACE_STATES.READY);
-        console.log('   ✅ Workspace infrastructure ready');
+        info('   ✅ Workspace infrastructure ready');
         
         return this;
     }
@@ -120,13 +121,13 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
      * Start collaborative project workflow (Phase 1: Planning + Phase 2: Execution)
      */
     async startCollaborativeProject(projectGoal, projectContext = {}) {
-        console.log(`\n🎯 STARTING COLLABORATIVE PROJECT: "${projectGoal}"`);
+        info(`\n🎯 STARTING COLLABORATIVE PROJECT: "${projectGoal}"`);
         
         this.projectGoal = projectGoal;
         this.projectContext = projectContext;
         
         // === PHASE 1: TEAM HUDDLE & PLANNING ===
-        console.log('\n📋 PHASE 1: TEAM HUDDLE & PLANNING');
+        info('\n📋 PHASE 1: TEAM HUDDLE & PLANNING');
         this.updateState(WORKSPACE_STATES.PLANNING);
         
         // Step 1: Multi-agent planning session
@@ -146,16 +147,16 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
         await this.savePlanningToContext();
         
         // === PHASE 2: COLLABORATIVE EXECUTION ===
-        console.log('\n🏭 PHASE 2: COLLABORATIVE EXECUTION SETUP');
+        info('\n🏭 PHASE 2: COLLABORATIVE EXECUTION SETUP');
         this.updateState(WORKSPACE_STATES.READY);
         
         // Step 4: Initialize collaborative workspace for execution
         await this.initializeCollaborativeExecution();
         
-        console.log('\n✅ COLLABORATIVE PROJECT READY FOR EXECUTION');
-        console.log(`   Workspace: ${this.workspaceId}`);
-        console.log(`   Agents: ${this.teamPlan.agents.length}`);
-        console.log(`   Phases: ${this.teamPlan.phases.length}`);
+        info('\n✅ COLLABORATIVE PROJECT READY FOR EXECUTION');
+        info(`   Workspace: ${this.workspaceId}`);
+        info(`   Agents: ${this.teamPlan.agents.length}`);
+        info(`   Phases: ${this.teamPlan.phases.length}`);
         
         return {
             workspaceId: this.workspaceId,
@@ -169,10 +170,10 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
      * Initialize collaborative execution environment
      */
     async initializeCollaborativeExecution() {
-        console.log('🔧 Setting up collaborative execution environment...');
+        logger.debug('Setting up collaborative execution environment...');
         
         // Create shared workspace in Universal Context
-        console.log('   🎯 Setting up shared Universal Context workspace...');
+        info('   🎯 Setting up shared Universal Context workspace...');
         await this.contextManager.addEvent('workspace_execution_start', {
             workspaceId: this.workspaceId,
             goal: this.projectGoal,
@@ -193,14 +194,14 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
         // Initialize status dashboard
         this.updateStatusDashboard();
         
-        console.log('   ✅ Collaborative execution environment ready');
+        info('   ✅ Collaborative execution environment ready');
     }
 
     /**
      * Initialize shared resources for agent coordination
      */
     async initializeSharedResources() {
-        console.log('📚 Initializing shared resources...');
+        info('📚 Initializing shared resources...');
         
         // Project context resource
         this.sharedResources.set('project_context', {
@@ -235,7 +236,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
             resolution_history: []
         });
         
-        console.log(`   ✅ ${this.sharedResources.size} shared resources initialized`);
+        info(`   ✅ ${this.sharedResources.size} shared resources initialized`);
     }
 
     /**
@@ -277,7 +278,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
      * Setup agent status tracking
      */
     setupAgentStatusTracking() {
-        console.log('📊 Setting up agent status tracking...');
+        info('📊 Setting up agent status tracking...');
         
         for (const agentPlan of this.teamPlan.agents) {
             this.agentStatuses.set(agentPlan.agent, {
@@ -294,14 +295,14 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
             });
         }
         
-        console.log(`   ✅ Status tracking for ${this.agentStatuses.size} agents`);
+        info(`   ✅ Status tracking for ${this.agentStatuses.size} agents`);
     }
 
     /**
      * Setup conflict detection and management
      */
     setupConflictManagement() {
-        console.log('⚖️ Setting up conflict detection and management...');
+        info('⚖️ Setting up conflict detection and management...');
         
         // Automatic conflict detection patterns
         this.conflictDetectors = new Map([
@@ -314,7 +315,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
         // Start conflict monitoring
         setInterval(() => this.runConflictDetection(), 30000); // Every 30 seconds
         
-        console.log('   ✅ Conflict detection and management active');
+        info('   ✅ Conflict detection and management active');
     }
 
     /**
@@ -340,13 +341,13 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
         // Save to Universal Context
         await this.contextManager.addEvent('agent_status_update', data);
         
-        console.log(`📊 Status update: ${agent} - ${status} (${progress}%)`);
+        info(`📊 Status update: ${agent} - ${status} (${progress}%)`);
     }
 
     async handleResourceRequest(data) {
         const { requesting_agent, resource, purpose, priority } = data;
         
-        console.log(`🔄 Resource request: ${requesting_agent} needs ${resource} for ${purpose}`);
+        info(`🔄 Resource request: ${requesting_agent} needs ${resource} for ${purpose}`);
         
         const resourceRegistry = this.sharedResources.get('resource_registry');
         
@@ -363,7 +364,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
                 timestamp: new Date().toISOString()
             });
             
-            console.log(`   ⏳ Resource queued - locked by ${resourceRegistry.locked.get(resource)}`);
+            info(`   ⏳ Resource queued - locked by ${resourceRegistry.locked.get(resource)}`);
         } else {
             // Grant resource access
             resourceRegistry.locked.set(resource, requesting_agent);
@@ -376,7 +377,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
                 granted: true
             });
             
-            console.log(`   ✅ Resource granted to ${requesting_agent}`);
+            info(`   ✅ Resource granted to ${requesting_agent}`);
         }
         
         await this.contextManager.addEvent('resource_request', data);
@@ -385,7 +386,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
     async handleCoordinationRequest(data) {
         const { requesting_agent, coordination_type, target_agents, details } = data;
         
-        console.log(`🤝 Coordination request: ${requesting_agent} needs ${coordination_type} with ${target_agents?.join(', ')}`);
+        info(`🤝 Coordination request: ${requesting_agent} needs ${coordination_type} with ${target_agents?.join(', ')}`);
         
         // Route coordination request to target agents
         if (target_agents) {
@@ -406,7 +407,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
         const { conflict_type, involved_agents, description, severity } = data;
         const conflictId = `conflict_${Date.now()}`;
         
-        console.log(`⚠️ Conflict detected: ${conflict_type} between ${involved_agents?.join(', ')}`);
+        info(`⚠️ Conflict detected: ${conflict_type} between ${involved_agents?.join(', ')}`);
         
         const conflict = {
             id: conflictId,
@@ -430,7 +431,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
     async handleTaskCompletion(data) {
         const { agent, task, result, next_task } = data;
         
-        console.log(`✅ Task completed: ${agent} finished ${task}`);
+        info(`Task completed: ${agent} finished ${task}`);
         
         // Update agent status
         if (this.agentStatuses.has(agent)) {
@@ -449,7 +450,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
     async handleHelpRequest(data) {
         const { requesting_agent, help_type, details } = data;
         
-        console.log(`🆘 Help requested: ${requesting_agent} needs help with ${help_type}`);
+        info(`🆘 Help requested: ${requesting_agent} needs help with ${help_type}`);
         
         // Route to appropriate helper agent based on help type
         const helperAgent = this.findHelperAgent(help_type);
@@ -472,7 +473,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
         const oldState = this.state;
         this.state = newState;
         
-        console.log(`🔄 Workspace state: ${oldState} → ${newState}`);
+        info(`🔄 Workspace state: ${oldState} → ${newState}`);
         
         this.emit('state_changed', {
             workspaceId: this.workspaceId,
@@ -516,7 +517,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
      * Save planning results to Universal Context
      */
     async savePlanningToContext() {
-        console.log('💾 Saving complete planning results to Universal Context...');
+        info('💾 Saving complete planning results to Universal Context...');
         
         await this.contextManager.addEvent('collaborative_planning_complete', {
             workspaceId: this.workspaceId,
@@ -527,7 +528,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
             timestamp: new Date().toISOString()
         });
         
-        console.log('   ✅ Planning results saved');
+        info('   ✅ Planning results saved');
     }
 
     /**
@@ -538,7 +539,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
             try {
                 await detector();
             } catch (error) {
-                console.error(`Conflict detection error (${conflictType}):`, error.message);
+                error(`Conflict detection error (${conflictType}):`, error.message);
             }
         }
     }
@@ -585,7 +586,7 @@ class CollaborativeWorkspaceInfrastructure extends EventEmitter {
             timestamp: new Date().toISOString()
         });
         
-        console.log(`📝 Shared resource updated: ${resourceName} by ${updatingAgent}`);
+        info(`📝 Shared resource updated: ${resourceName} by ${updatingAgent}`);
     }
 }
 
@@ -598,7 +599,7 @@ module.exports = {
 // Demo/test functionality
 if (require.main === module) {
     async function demoCollaborativeWorkspace() {
-        console.log('🏢 Collaborative Workspace Infrastructure Demo\n');
+        info('🏢 Collaborative Workspace Infrastructure Demo\n');
         
         const workspace = new CollaborativeWorkspaceInfrastructure({
             workspaceId: 'demo_collaborative_project'
@@ -616,15 +617,15 @@ if (require.main === module) {
             }
         );
         
-        console.log('\n📊 WORKSPACE STATUS:');
+        info('\n📊 WORKSPACE STATUS:');
         const status = workspace.getWorkspaceStatus();
-        console.log(`   State: ${status.state}`);
-        console.log(`   Agents: ${Object.keys(status.agents).length}`);
-        console.log(`   Resources: ${Object.keys(status.resources).length}`);
-        console.log(`   Progress: ${status.progress}%`);
+        info(`   State: ${status.state}`);
+        info(`   Agents: ${Object.keys(status.agents).length}`);
+        info(`   Resources: ${Object.keys(status.resources).length}`);
+        info(`   Progress: ${status.progress}%`);
         
-        console.log('\n✅ Collaborative workspace demo complete');
-        console.log(`   Ready for agent execution phase`);
+        info('\n✅ Collaborative workspace demo complete');
+        info(`   Ready for agent execution phase`);
         
         return projectResult;
     }

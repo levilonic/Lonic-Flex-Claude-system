@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * EnhancedCommunicationAgent - ServiceContainer Migration
  * Migrated from Heavy Agent Anti-Pattern to ServiceContainer dependency injection
@@ -69,7 +70,7 @@ class EnhancedCommunicationAgent extends ValidatedAgent {
             'finalize_communication'
         ];
 
-        console.log(`✅ Enhanced CommunicationAgent created with ServiceContainer`);
+        info(`Enhanced CommunicationAgent created with ServiceContainer`);
     }
 
     /**
@@ -83,7 +84,7 @@ class EnhancedCommunicationAgent extends ValidatedAgent {
         if (this.slackClient) {
             try {
                 // Test Slack connection (demo mode - don't actually call API)
-                console.log('📱 Slack client ready (demo mode)');
+                info('📱 Slack client ready (demo mode)');
             } catch (error) {
                 console.warn('⚠️ Slack connection test failed:', error.message);
             }
@@ -102,7 +103,7 @@ class EnhancedCommunicationAgent extends ValidatedAgent {
             }
         });
 
-        console.log(`✅ Enhanced CommunicationAgent initialized with ServiceContainer`);
+        info(`Enhanced CommunicationAgent initialized with ServiceContainer`);
         return this;
     }
 

@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Workflow Engine - Structured Phase Management for Universal Context System
  * Enables complex multi-phase tasks with quality gates, agent coordination, and learning
@@ -46,14 +47,14 @@ class WorkflowEngine extends EventEmitter {
             optimizations: []
         };
         
-        console.log('🔧 Workflow Engine initialized for context:', this.context.contextId);
+        logger.debug('Workflow Engine initialized for context:', this.context.contextId);
     }
 
     /**
      * Load workflow template and initialize phases
      */
     async loadWorkflowTemplate(templateName, workflowGoal = null) {
-        console.log(`📋 Loading workflow template: ${templateName}`);
+        info(`Loading workflow template: ${templateName}`);
         
         try {
             // Try to load from templates directory first
@@ -65,7 +66,7 @@ class WorkflowEngine extends EventEmitter {
                 template = typeof templateModule === 'function' ? templateModule() : templateModule;
             } catch (error) {
                 // If template doesn't exist, create basic structure
-                console.log(`⚠️ Template ${templateName} not found, creating basic structure`);
+                warn(`Template ${templateName} not found, creating basic structure`);
                 template = this.createBasicWorkflowTemplate(templateName, workflowGoal);
             }
             
@@ -111,11 +112,11 @@ class WorkflowEngine extends EventEmitter {
                 goal: workflowGoal
             });
             
-            console.log(`✅ Workflow loaded: ${template.phases.length} phases, ${this.workflow.tasks.size} tasks`);
+            info(`Workflow loaded: ${template.phases.length} phases, ${this.workflow.tasks.size} tasks`);
             return template;
             
         } catch (error) {
-            console.error('❌ Failed to load workflow template:', error);
+            error('❌ Failed to load workflow template:', error);
             throw new Error(`Workflow template loading failed: ${error.message}`);
         }
     }
@@ -222,8 +223,8 @@ class WorkflowEngine extends EventEmitter {
             throw new Error('No workflow template loaded. Call loadWorkflowTemplate() first.');
         }
         
-        console.log(`🚀 Starting workflow: ${this.workflow.template.name}`);
-        console.log(`📋 Current Phase: ${this.workflow.currentPhase.name}`);
+        info(`Starting workflow: ${this.workflow.template.name}`);
+        info(`Current Phase: ${this.workflow.currentPhase.name}`);
         
         // Log workflow start
         this.context.addEvent('workflow_started', {
@@ -245,14 +246,14 @@ class WorkflowEngine extends EventEmitter {
      * Start a specific phase
      */
     async startPhase(phase) {
-        console.log(`\n🎯 Starting Phase: ${phase.name}`);
-        console.log(`📝 Description: ${phase.description}`);
+        info(`\n🎯 Starting Phase: ${phase.name}`);
+        info(`📝 Description: ${phase.description}`);
         
         phase.startTime = Date.now();
         
         // Agent coordination - switch to required agent if specified
         if (phase.requiredAgent && phase.requiredAgent !== 'auto-detect' && this.options.enableAgentCoordination) {
-            console.log(`🤖 Phase requires: ${phase.requiredAgent}`);
+            info(`🤖 Phase requires: ${phase.requiredAgent}`);
             // This would trigger agent switching in the persona system
             this.emit('agent-switch-required', {
                 currentAgent: 'Code Reviewer Agent', // Current persona
@@ -263,20 +264,20 @@ class WorkflowEngine extends EventEmitter {
         
         // Display phase tasks
         if (phase.tasks) {
-            console.log(`📋 Phase Tasks (${phase.tasks.length}):`);
+            info(`Phase Tasks (${phase.tasks.length}):`);
             for (const task of phase.tasks) {
                 const taskData = this.workflow.tasks.get(task.id);
-                console.log(`  • ${task.name} [${taskData.status.toUpperCase()}]`);
-                console.log(`    ${task.description}`);
+                info(`  • ${task.name} [${taskData.status.toUpperCase()}]`);
+                info(`    ${task.description}`);
             }
         }
         
         // Display quality gates
         if (phase.qualityGates) {
-            console.log(`🚪 Quality Gates (${phase.qualityGates.length}):`);
+            info(`🚪 Quality Gates (${phase.qualityGates.length}):`);
             for (const gate of phase.qualityGates) {
-                console.log(`  • ${gate.name}`);
-                console.log(`    Criteria: ${gate.criteria}`);
+                info(`  • ${gate.name}`);
+                info(`    Criteria: ${gate.criteria}`);
             }
         }
         
@@ -307,9 +308,9 @@ class WorkflowEngine extends EventEmitter {
         
         this.workflow.metrics.tasksCompleted++;
         
-        console.log(`✅ Task completed: ${task.name}`);
+        info(`Task completed: ${task.name}`);
         if (evidence) {
-            console.log(`📊 Evidence: ${evidence}`);
+            info(`📊 Evidence: ${evidence}`);
         }
         
         // Log to context
@@ -343,10 +344,10 @@ class WorkflowEngine extends EventEmitter {
         
         if (passed) {
             this.workflow.metrics.qualityGatesPassed++;
-            console.log(`✅ Quality Gate PASSED: ${gate.name}`);
+            info(`Quality Gate PASSED: ${gate.name}`);
         } else {
-            console.log(`❌ Quality Gate FAILED: ${gate.name}`);
-            console.log(`   Criteria: ${gate.criteria}`);
+            error(`);
+            info(`   Criteria: ${gate.criteria}`);
         }
         
         // Log to context
@@ -386,14 +387,14 @@ class WorkflowEngine extends EventEmitter {
         const tasksComplete = completedTasks.length === phaseTasks.length;
         const gatesComplete = passedGates.length === phaseGates.length;
         
-        console.log(`\n📊 Phase Completion Check:`);
-        console.log(`   Tasks: ${completedTasks.length}/${phaseTasks.length} completed`);
-        console.log(`   Quality Gates: ${passedGates.length}/${phaseGates.length} passed`);
+        info(`\n📊 Phase Completion Check:`);
+        info(`   Tasks: ${completedTasks.length}/${phaseTasks.length} completed`);
+        info(`   Quality Gates: ${passedGates.length}/${phaseGates.length} passed`);
         
         if (tasksComplete && gatesComplete) {
             await this.completePhase(currentPhase);
         } else {
-            console.log(`⏳ Phase not ready for completion yet`);
+            info(`⏳ Phase not ready for completion yet`);
         }
     }
 
@@ -406,8 +407,8 @@ class WorkflowEngine extends EventEmitter {
         
         this.workflow.metrics.phasesCompleted++;
         
-        console.log(`✅ Phase Complete: ${phase.name}`);
-        console.log(`⏱️ Duration: ${Math.round(phase.duration / 1000)}s`);
+        info(`Phase Complete: ${phase.name}`);
+        info(`⏱️ Duration: ${Math.round(phase.duration / 1000)}s`);
         
         // Log phase completion
         this.context.addEvent('phase_completed', {
@@ -423,7 +424,7 @@ class WorkflowEngine extends EventEmitter {
         
         if (nextPhaseIndex < this.workflow.phases.length) {
             this.workflow.currentPhase = this.workflow.phases[nextPhaseIndex];
-            console.log(`\n➡️ Moving to next phase: ${this.workflow.currentPhase.name}`);
+            info(`\n➡️ Moving to next phase: ${this.workflow.currentPhase.name}`);
             await this.startPhase(this.workflow.currentPhase);
         } else {
             await this.completeWorkflow();
@@ -438,12 +439,12 @@ class WorkflowEngine extends EventEmitter {
     async completeWorkflow() {
         const totalDuration = Date.now() - this.workflow.startTime;
         
-        console.log(`\n🎉 Workflow Complete: ${this.workflow.template.name}`);
-        console.log(`⏱️ Total Duration: ${Math.round(totalDuration / 1000)}s`);
-        console.log(`📊 Metrics:`);
-        console.log(`   Phases: ${this.workflow.metrics.phasesCompleted}/${this.workflow.phases.length}`);
-        console.log(`   Tasks: ${this.workflow.metrics.tasksCompleted}/${this.workflow.tasks.size}`);
-        console.log(`   Quality Gates: ${this.workflow.metrics.qualityGatesPassed}/${this.workflow.qualityGates.size}`);
+        info(`\n🎉 Workflow Complete: ${this.workflow.template.name}`);
+        info(`⏱️ Total Duration: ${Math.round(totalDuration / 1000)}s`);
+        info(`📊 Metrics:`);
+        info(`   Phases: ${this.workflow.metrics.phasesCompleted}/${this.workflow.phases.length}`);
+        info(`   Tasks: ${this.workflow.metrics.tasksCompleted}/${this.workflow.tasks.size}`);
+        info(`   Quality Gates: ${this.workflow.metrics.qualityGatesPassed}/${this.workflow.qualityGates.size}`);
         
         // Generate workflow summary
         const summary = {
@@ -494,7 +495,7 @@ class WorkflowEngine extends EventEmitter {
      * Record learnings for future workflow improvement
      */
     async recordLearnings() {
-        console.log(`🧠 Recording workflow learnings...`);
+        info(`🧠 Recording workflow learnings...`);
         
         const learningData = {
             template: this.workflow.template.name,
@@ -508,7 +509,7 @@ class WorkflowEngine extends EventEmitter {
         // This would integrate with the MemoryManager to record patterns
         this.context.addEvent('workflow_learning_recorded', learningData);
         
-        console.log(`✅ Learnings recorded for template: ${this.workflow.template.name}`);
+        info(`Learnings recorded for template: ${this.workflow.template.name}`);
     }
 }
 

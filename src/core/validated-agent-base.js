@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Validated Agent Base Class
  * REPLACES: Theater/simulation code in BaseAgent with real validation
@@ -50,7 +51,7 @@ class ValidatedAgent {
         this.realSuccesses = new Map();
         this.detectedFailures = new Map();
 
-        console.log(`🔍 ValidatedAgent created: ${agentName} (No more bullshit code!)`);
+        info(`🔍 ValidatedAgent created: ${agentName} (No more bullshit code!)`);
     }
 
     /**
@@ -69,13 +70,13 @@ class ValidatedAgent {
         const results = {};
         const stepValidations = [];
 
-        console.log(`🔍 Starting VALIDATED workflow: ${this.agentName} (${workflowSteps.length} steps)`);
+        info(`🔍 Starting VALIDATED workflow: ${this.agentName} (${workflowSteps.length} steps)`);
 
         for (let i = 0; i < workflowSteps.length; i++) {
             const step = workflowSteps[i];
             const stepName = step.name;
 
-            console.log(`🔄 Step ${i + 1}/${workflowSteps.length}: ${stepName}`);
+            info(`🔄 Step ${i + 1}/${workflowSteps.length}: ${stepName}`);
 
             try {
                 // Execute step with validation requirement
@@ -96,10 +97,10 @@ class ValidatedAgent {
                     confidence: stepResult.confidence
                 });
 
-                console.log(`✅ Step validated: ${stepName} (${stepResult.confidence}% confidence)`);
+                info(`Step validated: ${stepName} (${stepResult.confidence}% confidence)`);
 
             } catch (error) {
-                console.log(`❌ Step failed validation: ${stepName} - ${error.message}`);
+                error(`);
 
                 stepValidations.push({
                     step: stepName,
@@ -154,12 +155,12 @@ class ValidatedAgent {
 
         await this.updateProgress(progress, stepName);
 
-        console.log(`🔍 Executing step with validation: ${stepName}`);
+        info(`🔍 Executing step with validation: ${stepName}`);
 
         try {
             // 1. Execute the step function
             const executionResult = await stepFunction();
-            console.log(`⚡ Step executed: ${stepName}`);
+            info(`⚡ Step executed: ${stepName}`);
 
             // 2. MANDATORY VALIDATION - No success without proof
             const validationResult = await this.validateStepResult(
@@ -200,7 +201,7 @@ class ValidatedAgent {
                 timestamp: Date.now()
             });
 
-            console.log(`❌ Step failed: ${stepName} - ${error.message}`);
+            error(`);
             throw error;
         }
     }
@@ -209,7 +210,7 @@ class ValidatedAgent {
      * Validate step result - NO SUCCESS WITHOUT VERIFICATION
      */
     async validateStepResult(stepName, result, validationConfig, context) {
-        console.log(`🔬 Validating step result: ${stepName}`);
+        info(`🔬 Validating step result: ${stepName}`);
 
         // If no validation config provided, create basic validation
         if (!validationConfig) {
@@ -404,7 +405,7 @@ class ValidatedAgent {
      * Self-correct using ReAct engine when validation fails
      */
     async selfCorrect(task, context, previousError) {
-        console.log(`🔄 Initiating self-correction for: ${task}`);
+        info(`🔄 Initiating self-correction for: ${task}`);
 
         try {
             const correctionResult = await this.reactEngine.executeWithSelfCorrection(
@@ -417,11 +418,11 @@ class ValidatedAgent {
                 }
             );
 
-            console.log(`✅ Self-correction completed in ${correctionResult.attempts} attempts`);
+            info(`Self-correction completed in ${correctionResult.attempts} attempts`);
             return correctionResult;
 
         } catch (error) {
-            console.log(`❌ Self-correction failed: ${error.message}`);
+            error(`);
             throw new Error(`Self-correction failed after maximum attempts: ${error.message}`);
         }
     }
@@ -461,7 +462,7 @@ class ValidatedAgent {
         this.realSuccesses.clear();
         this.detectedFailures.clear();
 
-        console.log(`🧹 ValidatedAgent cleanup complete: ${this.agentName}`);
+        info(`🧹 ValidatedAgent cleanup complete: ${this.agentName}`);
     }
 }
 
@@ -483,7 +484,7 @@ class ValidatedWorkAgent extends ValidatedAgent {
             'finalize_with_proof'
         ];
 
-        console.log(`✅ ValidatedWorkAgent created with ${this.executionSteps.length} validated steps`);
+        info(`ValidatedWorkAgent created with ${this.executionSteps.length} validated steps`);
     }
 
     /**
@@ -592,7 +593,7 @@ class ValidatedWorkAgent extends ValidatedAgent {
                 await dbManager.getStats();
             }
         } catch (error) {
-            console.log('⚠️ Database validation failed (continuing with degraded functionality)');
+            warn('Database validation failed (continuing with degraded functionality)');
         }
 
         return {
@@ -710,7 +711,7 @@ class ValidatedWorkAgent extends ValidatedAgent {
         try {
             fs.writeFileSync(proofFile, JSON.stringify(proof, null, 2));
         } catch (error) {
-            console.log('⚠️ Could not write proof file, continuing with in-memory proof');
+            warn('Could not write proof file, continuing with in-memory proof');
         }
 
         return {
@@ -729,13 +730,13 @@ module.exports = {
 
 // Demo execution
 async function demoValidatedAgent() {
-    console.log('🔍 ValidatedAgent Demo - No More Bullshit Code!\n');
+    info('🔍 ValidatedAgent Demo - No More Bullshit Code!\n');
 
     const { initializeGlobalServiceContainer } = require('../services/service-container');
 
     try {
         // Initialize ServiceContainer
-        console.log('🔧 Initializing ServiceContainer...');
+        logger.debug('Initializing ServiceContainer...');
         const serviceContainer = await initializeGlobalServiceContainer();
 
         const sessionId = `validated_demo_${Date.now()}`;
@@ -750,48 +751,48 @@ async function demoValidatedAgent() {
 
         await agent.initialize(`validated_workflow_${sessionId}`);
 
-        console.log(`✅ Created ValidatedAgent: ${agent.agentName}`);
-        console.log(`   Validation enabled: true`);
-        console.log(`   Confidence threshold: ${agent.config.confidenceThreshold}%`);
+        info(`Created ValidatedAgent: ${agent.agentName}`);
+        info(`   Validation enabled: true`);
+        info(`   Confidence threshold: ${agent.config.confidenceThreshold}%`);
 
         // Execute with REAL validation
-        console.log('\n🔍 Executing validated workflow...');
+        info('\n🔍 Executing validated workflow...');
 
         const result = await agent.execute({
             task: 'validated_work_demo',
             timestamp: Date.now(),
             environment: 'production'
         }, (progress, step) => {
-            console.log(`   ${progress}% - ${step}`);
+            info(`   ${progress}% - ${step}`);
         });
 
-        console.log('\n✅ Validated execution completed!');
-        console.log(`   Validated: ${result.validated}`);
-        console.log(`   Confidence: ${result.confidence}%`);
-        console.log(`   Evidence collected: ${result.evidence ? Object.keys(result.evidence).length : 0} items`);
-        console.log(`   Real successes: ${result.validation_report?.evidence?.real_successes || 0}`);
-        console.log(`   Detected failures: ${result.validation_report?.evidence?.detected_failures || 0}`);
+        info('\n✅ Validated execution completed!');
+        info(`   Validated: ${result.validated}`);
+        info(`   Confidence: ${result.confidence}%`);
+        info(`   Evidence collected: ${result.evidence ? Object.keys(result.evidence).length : 0} items`);
+        info(`   Real successes: ${result.validation_report?.evidence?.real_successes || 0}`);
+        info(`   Detected failures: ${result.validation_report?.evidence?.detected_failures || 0}`);
 
         // Show validation status
         const status = agent.getValidationStatus();
-        console.log('\n📊 Validation Status:');
-        console.log(`   Success rate: ${status.success_rate}%`);
-        console.log(`   Evidence collected: ${status.evidence_collected} items`);
-        console.log(`   Unvalidated claims: ${status.has_unvalidated_claims ? 'YES' : 'NO'}`);
+        info('\n📊 Validation Status:');
+        info(`   Success rate: ${status.success_rate}%`);
+        info(`   Evidence collected: ${status.evidence_collected} items`);
+        info(`   Unvalidated claims: ${status.has_unvalidated_claims ? 'YES' : 'NO'}`);
 
-        console.log('\n🎉 ValidatedAgent Demo Complete!');
-        console.log('Key improvements:');
-        console.log('  ❌ No more hardcoded "success: this.validateSuccess()"');
-        console.log('  ❌ No more theater logging without proof');
-        console.log('  ✅ Real validation for every claimed success');
-        console.log('  ✅ Evidence collection and audit trails');
-        console.log('  ✅ Self-correction cycles when validation fails');
-        console.log('  ✅ Confidence scoring based on actual verification');
+        info('\n🎉 ValidatedAgent Demo Complete!');
+        info('Key improvements:');
+        info('  ❌ No more hardcoded "success: this.validateSuccess()"');
+        info('  ❌ No more theater logging without proof');
+        info('  ✅ Real validation for every claimed success');
+        info('  ✅ Evidence collection and audit trails');
+        info('  ✅ Self-correction cycles when validation fails');
+        info('  ✅ Confidence scoring based on actual verification');
 
         await agent.cleanup();
 
     } catch (error) {
-        console.error('❌ Demo failed:', error.message);
+        error('❌ Demo failed:', error.message);
         throw error;
     }
 }

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Context Auto Manager - Intelligent cleanup at 40% threshold
  * Automatically cleans context when reaching 40% usage
@@ -48,7 +49,7 @@ class ContextAutoManager extends EventEmitter {
         };
         
         this.setupEventHandlers();
-        console.log(`✅ ContextAutoManager initialized (${this.autoCleanupThreshold}% threshold)`);
+        info(`ContextAutoManager initialized (${this.autoCleanupThreshold}% threshold)`);
     }
     
     /**
@@ -57,20 +58,20 @@ class ContextAutoManager extends EventEmitter {
     setupEventHandlers() {
         this.monitor.on('threshold_warning', (state) => {
             if (state.percentage >= this.autoCleanupThreshold && this.enableAutoCleanup) {
-                console.log(`🟡 AUTO-CLEANUP TRIGGERED: ${state.percentage}% usage reached`);
+                info(`🟡 AUTO-CLEANUP TRIGGERED: ${state.percentage}% usage reached`);
                 this.performAutoCleanup(state);
             }
         });
         
         this.monitor.on('threshold_critical', (state) => {
-            console.log(`🟠 CRITICAL: ${state.percentage}% usage - aggressive cleanup needed`);
+            info(`🟠 CRITICAL: ${state.percentage}% usage - aggressive cleanup needed`);
             if (this.enableAutoCleanup) {
                 this.performAutoCleanup(state, true); // Aggressive mode
             }
         });
         
         this.monitor.on('threshold_emergency', (state) => {
-            console.log(`🔴 EMERGENCY: ${state.percentage}% usage - emergency cleanup!`);
+            info(`🔴 EMERGENCY: ${state.percentage}% usage - emergency cleanup!`);
             this.performAutoCleanup(state, true, 0.5); // Emergency - 50% reduction
         });
     }
@@ -80,12 +81,12 @@ class ContextAutoManager extends EventEmitter {
      */
     async start() {
         if (this.isRunning) {
-            console.log('⚠️ Context auto-manager already running');
+            warn('Context auto-manager already running');
             return;
         }
         
         this.isRunning = true;
-        console.log('🎯 Starting context auto-manager...');
+        info('Starting context auto-manager...');
         
         // Initialize archive manager
         await this.archiveManager.initialize();
@@ -94,7 +95,7 @@ class ContextAutoManager extends EventEmitter {
         try {
             await fs.mkdir(this.archiveDir, { recursive: true });
         } catch (error) {
-            console.log(`📁 Archive directory exists: ${this.archiveDir}`);
+            info(`📁 Archive directory exists: ${this.archiveDir}`);
         }
         
         // Start monitoring
@@ -103,7 +104,7 @@ class ContextAutoManager extends EventEmitter {
         // Initial context check
         await this.checkCurrentContext();
         
-        console.log('✅ Context auto-manager started successfully');
+        info('Context auto-manager started successfully');
         this.emit('manager_started');
     }
     
@@ -116,7 +117,7 @@ class ContextAutoManager extends EventEmitter {
         this.isRunning = false;
         this.monitor.stopMonitoring();
         
-        console.log('🛑 Context auto-manager stopped');
+        info('🛑 Context auto-manager stopped');
         this.emit('manager_stopped');
     }
     
@@ -130,7 +131,7 @@ class ContextAutoManager extends EventEmitter {
             const percentage = (tokenData.total_tokens / 200000) * 100;
             
             if (percentage >= this.autoCleanupThreshold && this.enableAutoCleanup && !this.cleanupInProgress) {
-                console.log(`🔍 Context check: ${percentage.toFixed(1)}% usage - cleanup needed`);
+                info(`🔍 Context check: ${percentage.toFixed(1)}% usage - cleanup needed`);
                 await this.performAutoCleanup({ 
                     tokens: tokenData.total_tokens, 
                     percentage,
@@ -141,7 +142,7 @@ class ContextAutoManager extends EventEmitter {
             return { tokens: tokenData.total_tokens, percentage };
             
         } catch (error) {
-            console.error('❌ Context check failed:', error.message);
+            error('❌ Context check failed:', error.message);
             return null;
         }
     }
@@ -169,7 +170,7 @@ class ContextAutoManager extends EventEmitter {
      */
     async performAutoCleanup(state, aggressive = false, targetReduction = null) {
         if (this.cleanupInProgress) {
-            console.log('⚠️ Cleanup already in progress, skipping...');
+            warn('Cleanup already in progress, skipping...');
             return;
         }
         
@@ -177,7 +178,7 @@ class ContextAutoManager extends EventEmitter {
         const cleanupStart = Date.now();
         
         try {
-            console.log(`🧹 Starting ${aggressive ? 'aggressive' : 'standard'} auto-cleanup...`);
+            info(`🧹 Starting ${aggressive ? 'aggressive' : 'standard'} auto-cleanup...`);
             
             const originalTokens = state.tokens;
             const originalPercentage = state.percentage;
@@ -216,11 +217,11 @@ class ContextAutoManager extends EventEmitter {
             
             const cleanupTime = Date.now() - cleanupStart;
             
-            console.log(`✅ Auto-cleanup completed in ${cleanupTime}ms:`);
-            console.log(`   Before: ${originalTokens.toLocaleString()} tokens (${originalPercentage.toFixed(1)}%)`);
-            console.log(`   After:  ${cleanedTokens.total_tokens.toLocaleString()} tokens (${newPercentage.toFixed(1)}%)`);
-            console.log(`   Saved:  ${savedTokens.toLocaleString()} tokens (${((savedTokens/originalTokens)*100).toFixed(1)}% reduction)`);
-            console.log(`   Archive ID: ${archiveId}`);
+            info(`Auto-cleanup completed in ${cleanupTime}ms:`);
+            info(`   Before: ${originalTokens.toLocaleString()} tokens (${originalPercentage.toFixed(1)}%)`);
+            info(`   After:  ${cleanedTokens.total_tokens.toLocaleString()} tokens (${newPercentage.toFixed(1)}%)`);
+            info(`   Saved:  ${savedTokens.toLocaleString()} tokens (${((savedTokens/originalTokens)*100).toFixed(1)}% reduction)`);
+            info(`   Archive ID: ${archiveId}`);
             
             this.emit('cleanup_completed', {
                 originalTokens,
@@ -233,7 +234,7 @@ class ContextAutoManager extends EventEmitter {
             });
             
         } catch (error) {
-            console.error('❌ Auto-cleanup failed:', error.message);
+            error('❌ Auto-cleanup failed:', error.message);
             this.emit('cleanup_failed', error);
         } finally {
             this.cleanupInProgress = false;
@@ -244,7 +245,7 @@ class ContextAutoManager extends EventEmitter {
      * Perform smart context cleanup (less aggressive than emergency)
      */
     async performSmartCleanup(contextContent, targetReduction) {
-        console.log('🤖 Performing smart context cleanup...');
+        info('🤖 Performing smart context cleanup...');
         
         // Parse context to identify different content types
         const events = this.pruner.parseContextXml(contextContent);
@@ -291,7 +292,7 @@ class ContextAutoManager extends EventEmitter {
         await fs.writeFile(metaFile, JSON.stringify(metadata, null, 2), 'utf8');
         
         this.stats.archivedItems++;
-        console.log(`📦 Archived context: ${archiveId}`);
+        info(`📦 Archived context: ${archiveId}`);
         
         return archiveId;
     }
@@ -306,9 +307,9 @@ class ContextAutoManager extends EventEmitter {
             
             // Write cleaned context
             await fs.writeFile(this.contextFile, cleanedContent, 'utf8');
-            console.log('💾 Cleaned context saved successfully');
+            info('💾 Cleaned context saved successfully');
         } catch (error) {
-            console.error('❌ Failed to save cleaned context:', error.message);
+            error('❌ Failed to save cleaned context:', error.message);
         }
     }
     
@@ -355,7 +356,7 @@ class ContextAutoManager extends EventEmitter {
             
             return archives.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         } catch (error) {
-            console.error('❌ Failed to list archive:', error.message);
+            error('❌ Failed to list archive:', error.message);
             return [];
         }
     }
@@ -373,7 +374,7 @@ class ContextAutoManager extends EventEmitter {
             
             return { content, metadata };
         } catch (error) {
-            console.error(`❌ Failed to retrieve archive ${archiveId}:`, error.message);
+            error(`❌ Failed to retrieve archive ${archiveId}:`, error.message);
             return null;
         }
     }
@@ -381,7 +382,7 @@ class ContextAutoManager extends EventEmitter {
 
 // Demo/test function
 async function testAutoManager() {
-    console.log('🧪 Testing Context Auto Manager...\n');
+    info('🧪 Testing Context Auto Manager...\n');
     
     const manager = new ContextAutoManager({
         cleanupThreshold: 5, // Lower threshold for testing
@@ -390,24 +391,24 @@ async function testAutoManager() {
     
     // Setup event listeners
     manager.on('cleanup_completed', (data) => {
-        console.log('✅ Cleanup event received:', data);
+        info('Cleanup event received:', data);
     });
     
     await manager.start();
     
     // Simulate high context usage
-    console.log('📈 Simulating context growth...');
+    info('📈 Simulating context growth...');
     await manager.checkCurrentContext();
     
     // Show stats
-    console.log('\n📊 Manager stats:', JSON.stringify(manager.getStats(), null, 2));
+    info('\n📊 Manager stats:', JSON.stringify(manager.getStats(), null, 2));
     
     // List archive
     const archives = await manager.listArchive();
-    console.log('\n📦 Archives:', archives.length);
+    info('\n📦 Archives:', archives.length);
     
     manager.stop();
-    console.log('\n✅ Auto-manager test completed!');
+    info('\n✅ Auto-manager test completed!');
 }
 
 // CLI interface
@@ -422,7 +423,7 @@ if (require.main === module) {
         
         // Handle graceful shutdown
         process.on('SIGINT', () => {
-            console.log('\n👋 Shutting down auto-manager...');
+            info('\n👋 Shutting down auto-manager...');
             manager.stop();
             process.exit(0);
         });

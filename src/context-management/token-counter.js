@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * TokenCounter - Accurate token counting for context window management
  * Prevents auto-compact by monitoring actual token usage vs character estimates
@@ -36,13 +37,13 @@ class TokenCounter {
                 this.anthropicClient = new Anthropic({
                     apiKey: process.env.ANTHROPIC_API_KEY || 'sk-placeholder'
                 });
-                console.log('✅ TokenCounter: Anthropic SDK initialized');
+                info('TokenCounter: Anthropic SDK initialized');
             } else {
-                console.log('ℹ️ TokenCounter: Using optimized estimation (API disabled)');
+                info('ℹ️ TokenCounter: Using optimized estimation (API disabled)');
                 this.anthropicClient = null;
             }
         } catch (error) {
-            console.log('⚠️ TokenCounter: Anthropic SDK not available, using fallback estimation');
+            warn('TokenCounter: Anthropic SDK not available, using fallback estimation');
             this.anthropicClient = null;
         }
     }
@@ -175,7 +176,7 @@ class TokenCounter {
                 try {
                     tokenData = await this.countTokensAPI(content);
                 } catch (error) {
-                    console.log('TokenCounter: API failed, using fallback estimation');
+                    info('TokenCounter: API failed, using fallback estimation');
                     tokenData = this.estimateTokensFallback(content);
                 }
             } else {
@@ -273,14 +274,14 @@ class TokenCounter {
      */
     clearCache() {
         this.cache.clear();
-        console.log('TokenCounter: Cache cleared');
+        info('TokenCounter: Cache cleared');
     }
 
     /**
      * Demo function showing token counting capabilities
      */
     async demo() {
-        console.log('🔢 TokenCounter Demo - Accurate Context Monitoring\n');
+        info('🔢 TokenCounter Demo - Accurate Context Monitoring\n');
         
         const testContent = `
         <workflow_context>
@@ -304,46 +305,46 @@ class TokenCounter {
         </workflow_context>
         `;
 
-        console.log('📄 Test Context (Factor 3 XML format):');
-        console.log(testContent.substring(0, 200) + '...\n');
+        info('📄 Test Context (Factor 3 XML format):');
+        info(testContent.substring(0, 200) + '...\n');
 
         // Count tokens different ways
-        console.log('🔍 Token Counting Methods:');
+        info('🔍 Token Counting Methods:');
         
         // Estimation method
         const estimated = await this.countTokens(testContent, { forceEstimate: true });
-        console.log(`📊 Estimation (${this.fallbackRatio} chars/token): ${estimated.total_tokens} tokens`);
+        info(`📊 Estimation (${this.fallbackRatio} chars/token): ${estimated.total_tokens} tokens`);
         
         // API method (if available)
         if (this.anthropicClient) {
             try {
                 const apiResult = await this.countTokens(testContent, { forceAPI: true });
-                console.log(`🎯 API Count: ${apiResult.total_tokens} tokens`);
+                info(`API Count: ${apiResult.total_tokens} tokens`);
                 
                 const accuracy = (1 - Math.abs(estimated.total_tokens - apiResult.total_tokens) / apiResult.total_tokens) * 100;
-                console.log(`📈 Estimation Accuracy: ${accuracy.toFixed(1)}%`);
+                info(`📈 Estimation Accuracy: ${accuracy.toFixed(1)}%`);
             } catch (error) {
-                console.log(`❌ API Count: Failed (${error.message})`);
+                error('Failed to get API token count:', error.message);
             }
         } else {
-            console.log('⚠️ API Count: Not available (no Anthropic SDK)');
+            warn('API Count: Not available (no Anthropic SDK)');
         }
 
         // Context percentage analysis
-        console.log('\n📊 Context Window Analysis:');
+        info('\n📊 Context Window Analysis:');
         const tokenCount = estimated.total_tokens;
         const percentage = this.calculatePercentageUntilCompact(tokenCount);
         
-        console.log(`Current usage: ${tokenCount}/${percentage.limitTokens} tokens (${percentage.usedPercentage.toFixed(1)}%)`);
-        console.log(`Remaining until auto-compact: ${percentage.remainingPercentage.toFixed(1)}%`);
-        console.log(`Status: ${percentage.isCritical ? '🔴 CRITICAL' : percentage.isNearLimit ? '🟡 WARNING' : '🟢 SAFE'}`);
+        info(`Current usage: ${tokenCount}/${percentage.limitTokens} tokens (${percentage.usedPercentage.toFixed(1)}%)`);
+        info(`Remaining until auto-compact: ${percentage.remainingPercentage.toFixed(1)}%`);
+        info(`Status: ${percentage.isCritical ? '🔴 CRITICAL' : percentage.isNearLimit ? '🟡 WARNING' : '🟢 SAFE'}`);
         
         // Cache statistics
-        console.log('\n💾 Cache Performance:');
+        info('\n💾 Cache Performance:');
         const cacheStats = this.getCacheStats();
-        console.log(`Cache size: ${cacheStats.size}/${cacheStats.maxSize} entries`);
+        info(`Cache size: ${cacheStats.size}/${cacheStats.maxSize} entries`);
         
-        console.log('\n✅ TokenCounter demo completed!');
+        info('\n✅ TokenCounter demo completed!');
     }
 }
 

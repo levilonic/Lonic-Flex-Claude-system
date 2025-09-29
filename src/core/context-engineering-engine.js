@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * 12-Factor-Agents Context Engineering Engine
  * IMPLEMENTS: Production-grade context management and engineering principles
@@ -114,7 +115,7 @@ class ContextEngineeringEngine extends EventEmitter {
         };
 
         this.initializeDefaultRules();
-        console.log('🧠 Context Engineering Engine initialized with 12-factor principles');
+        info('🧠 Context Engineering Engine initialized with 12-factor principles');
     }
 
     /**
@@ -186,7 +187,7 @@ class ContextEngineeringEngine extends EventEmitter {
      * Main entry point for context engineering
      */
     async createEngineeredContext(contextId, initialContent = '', contextMeta = {}) {
-        console.log(`🧠 Creating engineered context: ${contextId}`);
+        info(`🧠 Creating engineered context: ${contextId}`);
 
         const contextPartition = {
             id: contextId,
@@ -227,7 +228,7 @@ class ContextEngineeringEngine extends EventEmitter {
         // Create initial version
         this.saveContextVersion(contextPartition);
 
-        console.log(`✅ Engineered context created: ${contextId} (quality: ${this.getOverallQuality(contextPartition)}%)`);
+        info(`Engineered context created: ${contextId} (quality: ${this.getOverallQuality(contextPartition)}%)`);
 
         return contextPartition;
     }
@@ -237,7 +238,7 @@ class ContextEngineeringEngine extends EventEmitter {
      */
     async engineerContext(contextPartition) {
         const startTime = Date.now();
-        console.log(`🔧 Engineering context: ${contextPartition.id}`);
+        logger.debug(`Engineering context: ${contextPartition.id}`);
 
         try {
             // 1. Relevance Filtering
@@ -268,7 +269,7 @@ class ContextEngineeringEngine extends EventEmitter {
             this.validateQualityGates(contextPartition);
 
             const engineeringTime = Date.now() - startTime;
-            console.log(`✅ Context engineering complete: ${contextPartition.id} (${engineeringTime}ms)`);
+            info(`Context engineering complete: ${contextPartition.id} (${engineeringTime}ms)`);
 
             // Emit engineering event
             this.emit('contextEngineered', {
@@ -279,7 +280,7 @@ class ContextEngineeringEngine extends EventEmitter {
             });
 
         } catch (error) {
-            console.error(`❌ Context engineering failed: ${contextPartition.id} - ${error.message}`);
+            error(`❌ Context engineering failed: ${contextPartition.id} - ${error.message}`);
             throw error;
         }
     }
@@ -318,7 +319,7 @@ class ContextEngineeringEngine extends EventEmitter {
         contextPartition.engineeringState.relevanceScore = Math.round(averageRelevance * 100);
         contextPartition.qualityGates.relevanceCheck = averageRelevance >= (this.config.targetRelevanceScore / 100);
 
-        console.log(`   Relevance score: ${contextPartition.engineeringState.relevanceScore}%`);
+        info(`   Relevance score: ${contextPartition.engineeringState.relevanceScore}%`);
     }
 
     /**
@@ -355,13 +356,13 @@ class ContextEngineeringEngine extends EventEmitter {
         contextPartition.qualityGates.poisoningCheck = averagePoisoning <= this.config.poisoningThreshold;
 
         if (averagePoisoning > this.config.poisoningThreshold) {
-            console.log(`   ⚠️ Context poisoning detected: ${contextPartition.engineeringState.poisoningRisk}% risk`);
+            info(`   ⚠️ Context poisoning detected: ${contextPartition.engineeringState.poisoningRisk}% risk`);
             this.stats.poisoningDetections++;
 
             // Apply poisoning removal (simplified)
             contextPartition.content = this.removePoisoningContent(content, context);
         } else {
-            console.log(`   Poisoning risk: ${contextPartition.engineeringState.poisoningRisk}%`);
+            info(`   Poisoning risk: ${contextPartition.engineeringState.poisoningRisk}%`);
         }
     }
 
@@ -401,7 +402,7 @@ class ContextEngineeringEngine extends EventEmitter {
         }
 
         contextPartition.engineeringState.freshnessScore = freshnessScore;
-        console.log(`   Freshness score: ${freshnessScore}%`);
+        info(`   Freshness score: ${freshnessScore}%`);
     }
 
     /**
@@ -418,7 +419,7 @@ class ContextEngineeringEngine extends EventEmitter {
         const originalSize = contextPartition.content.length;
         const targetSize = Math.floor(this.config.maxContextSize * 0.8); // Compress to 80% of max
 
-        console.log(`   Compressing context: ${originalSize} chars -> ${targetSize} chars`);
+        info(`   Compressing context: ${originalSize} chars -> ${targetSize} chars`);
 
         // Use first available compression strategy
         let compressed = contextPartition.content;
@@ -438,7 +439,7 @@ class ContextEngineeringEngine extends EventEmitter {
         contextPartition.engineeringState.compressionRatio = Math.round(compressionRatio * 100) / 100;
         contextPartition.qualityGates.compressionCheck = compressionRatio >= this.config.targetCompressionRatio;
 
-        console.log(`   Compression ratio: ${compressionRatio}x`);
+        info(`   Compression ratio: ${compressionRatio}x`);
         this.stats.compressedContexts++;
     }
 
@@ -485,7 +486,7 @@ class ContextEngineeringEngine extends EventEmitter {
         contextPartition.engineeringState.coherenceScore = Math.max(0, Math.round(coherenceScore));
         contextPartition.qualityGates.coherenceCheck = coherenceScore >= 70;
 
-        console.log(`   Coherence score: ${contextPartition.engineeringState.coherenceScore}%`);
+        info(`   Coherence score: ${contextPartition.engineeringState.coherenceScore}%`);
     }
 
     /**
@@ -511,9 +512,9 @@ class ContextEngineeringEngine extends EventEmitter {
         const qualityPercentage = Math.round((passedGates / totalGates) * 100);
 
         if (qualityPercentage < 75) {
-            console.log(`   ⚠️ Quality gates: ${passedGates}/${totalGates} passed (${qualityPercentage}%)`);
+            info(`   ⚠️ Quality gates: ${passedGates}/${totalGates} passed (${qualityPercentage}%)`);
         } else {
-            console.log(`   Quality gates: ${passedGates}/${totalGates} passed (${qualityPercentage}%)`);
+            info(`   Quality gates: ${passedGates}/${totalGates} passed (${qualityPercentage}%)`);
         }
 
         return qualityPercentage >= 75;
@@ -545,7 +546,7 @@ class ContextEngineeringEngine extends EventEmitter {
      */
     addRelevanceFilter(name, filterFunction) {
         this.relevanceFilters.set(name, filterFunction);
-        console.log(`📝 Added relevance filter: ${name}`);
+        info(`📝 Added relevance filter: ${name}`);
     }
 
     /**
@@ -553,7 +554,7 @@ class ContextEngineeringEngine extends EventEmitter {
      */
     addCompressionStrategy(name, strategyFunction) {
         this.compressionStrategies.set(name, strategyFunction);
-        console.log(`📦 Added compression strategy: ${name}`);
+        info(`📦 Added compression strategy: ${name}`);
     }
 
     /**
@@ -561,7 +562,7 @@ class ContextEngineeringEngine extends EventEmitter {
      */
     addPoisoningDetector(detectorFunction) {
         this.poisoningDetectors.add(detectorFunction);
-        console.log(`🛡️ Added poisoning detector`);
+        info(`🛡️ Added poisoning detector`);
     }
 
     /**
@@ -584,7 +585,7 @@ class ContextEngineeringEngine extends EventEmitter {
         // Re-engineer the context
         await this.engineerContext(contextPartition);
 
-        console.log(`🔄 Context updated and re-engineered: ${contextId}`);
+        info(`🔄 Context updated and re-engineered: ${contextId}`);
 
         return contextPartition;
     }
@@ -715,7 +716,7 @@ class ContextEngineeringEngine extends EventEmitter {
                 }
                 fs.appendFileSync(this.config.contextLogPath, JSON.stringify(logEntry) + '\n');
             } catch (error) {
-                console.error('Failed to write context engineering log:', error.message);
+                error('Failed to write context engineering log:', error.message);
             }
         }
 
@@ -724,7 +725,7 @@ class ContextEngineeringEngine extends EventEmitter {
         this.qualityMetrics.clear();
         this.removeAllListeners();
 
-        console.log('🧠 Context Engineering Engine cleanup complete');
+        info('🧠 Context Engineering Engine cleanup complete');
     }
 }
 
@@ -736,7 +737,7 @@ module.exports = {
 
 // Demo execution
 async function demoContextEngineering() {
-    console.log('🧠 Context Engineering Engine Demo\n');
+    info('🧠 Context Engineering Engine Demo\n');
 
     const engine = new ContextEngineeringEngine({
         maxContextSize: 1000, // Small for demo
@@ -746,10 +747,10 @@ async function demoContextEngineering() {
     });
 
     try {
-        console.log('📝 Testing context engineering principles...\n');
+        info('📝 Testing context engineering principles...\n');
 
         // Test 1: Create context with relevant content
-        console.log('🔹 Test 1: High-quality relevant context');
+        info('🔹 Test 1: High-quality relevant context');
         const relevantContent = `
 Task: Fix authentication bug in login system
 Error: Authentication timeout after 30 seconds
@@ -764,10 +765,10 @@ Priority: High - affects user experience
             session: 'debug-session-1'
         });
 
-        console.log(`   Quality: ${engine.getOverallQuality(context1)}%`);
+        info(`   Quality: ${engine.getOverallQuality(context1)}%`);
 
         // Test 2: Create context with poisoned content
-        console.log('\n🔸 Test 2: Context with poisoning (debug logs)');
+        info('\n🔸 Test 2: Context with poisoning (debug logs)');
         const poisonedContent = `
 DEBUG 2025-09-19T10:30:00.123Z Method entry: validateUser
 TRACE 2025-09-19T10:30:00.124Z Parameters: username, password
@@ -787,10 +788,10 @@ DEBUG 2025-09-19T10:30:00.129Z Method exit: updateProfile
             session: 'dev-session-2'
         });
 
-        console.log(`   Quality: ${engine.getOverallQuality(context2)}%`);
+        info(`   Quality: ${engine.getOverallQuality(context2)}%`);
 
         // Test 3: Large context requiring compression
-        console.log('\n🔺 Test 3: Large context requiring compression');
+        info('\n🔺 Test 3: Large context requiring compression');
         let largeContent = 'Task: Deploy application to production\n\n';
         for (let i = 0; i < 50; i++) {
             largeContent += `Step ${i + 1}: Configure deployment parameter ${i + 1}\n`;
@@ -804,34 +805,34 @@ DEBUG 2025-09-19T10:30:00.129Z Method exit: updateProfile
             session: 'prod-deploy-1'
         });
 
-        console.log(`   Quality: ${engine.getOverallQuality(context3)}%`);
-        console.log(`   Size: ${context3.content.length} chars (compressed: ${context3.engineeringState.compressionRatio}x)`);
+        info(`   Quality: ${engine.getOverallQuality(context3)}%`);
+        info(`   Size: ${context3.content.length} chars (compressed: ${context3.engineeringState.compressionRatio}x)`);
 
         // Show engineering statistics
         const stats = engine.getStats();
-        console.log('\n📊 Context Engineering Statistics:');
-        console.log(`   Active contexts: ${stats.activeContexts}`);
-        console.log(`   Average relevance: ${stats.averageRelevanceScore}%`);
-        console.log(`   Average freshness: ${stats.averageFreshnessScore}%`);
-        console.log(`   Compressed contexts: ${stats.compressedContexts}`);
-        console.log(`   Poisoning detections: ${stats.poisoningDetections}`);
+        info('\n📊 Context Engineering Statistics:');
+        info(`   Active contexts: ${stats.activeContexts}`);
+        info(`   Average relevance: ${stats.averageRelevanceScore}%`);
+        info(`   Average freshness: ${stats.averageFreshnessScore}%`);
+        info(`   Compressed contexts: ${stats.compressedContexts}`);
+        info(`   Poisoning detections: ${stats.poisoningDetections}`);
 
         // Generate system report
         const report = engine.generateEngineeringReport();
-        console.log('\n📋 Context Engineering Report:');
-        console.log(`   Principles applied: ${report.principles.length}`);
-        console.log(`   Quality metrics tracked: ${report.qualityMetrics.length}`);
+        info('\n📋 Context Engineering Report:');
+        info(`   Principles applied: ${report.principles.length}`);
+        info(`   Quality metrics tracked: ${report.qualityMetrics.length}`);
 
-        console.log('\n🎉 Context Engineering Demo Complete!');
-        console.log('Key features demonstrated:');
-        console.log('  ✅ Relevance filtering and scoring');
-        console.log('  ✅ Context poisoning detection and removal');
-        console.log('  ✅ Intelligent compression for large contexts');
-        console.log('  ✅ Quality gate validation');
-        console.log('  ✅ 12-factor engineering principles');
+        info('\n🎉 Context Engineering Demo Complete!');
+        info('Key features demonstrated:');
+        info('  ✅ Relevance filtering and scoring');
+        info('  ✅ Context poisoning detection and removal');
+        info('  ✅ Intelligent compression for large contexts');
+        info('  ✅ Quality gate validation');
+        info('  ✅ 12-factor engineering principles');
 
     } catch (error) {
-        console.error('❌ Demo failed:', error.message);
+        error('❌ Demo failed:', error.message);
     } finally {
         await engine.cleanup();
     }

@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Enhanced Security Agent - ServiceContainer Migration
  * Migrated from Heavy Agent Anti-Pattern to ServiceContainer dependency injection
@@ -49,7 +50,7 @@ class EnhancedSecurityAgent extends BaseAgent {
         // Security patterns for vulnerability detection (preserved from original)
         this.securityPatterns = this.initializeSecurityPatterns();
 
-        console.log(`✅ Enhanced SecurityAgent created with ServiceContainer`);
+        info(`Enhanced SecurityAgent created with ServiceContainer`);
     }
 
     /**
@@ -67,7 +68,7 @@ class EnhancedSecurityAgent extends BaseAgent {
             enhanced_architecture: true
         });
 
-        console.log(`✅ Enhanced SecurityAgent initialized with ServiceContainer`);
+        info(`Enhanced SecurityAgent initialized with ServiceContainer`);
         return this;
     }
 

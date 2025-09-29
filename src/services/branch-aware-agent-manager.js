@@ -1,3 +1,4 @@
+const { logger } = require('./logger');
 const { Octokit } = require('@octokit/rest');
 const { GitHubAgent } = require('../agents/github-agent');
 const { SecurityAgent } = require('../agents/security-agent');
@@ -45,8 +46,8 @@ class BranchAwareAgentManager {
 
         // Implement graceful degradation for missing GitHub token
         if (!this.githubConfig.token) {
-            console.log('⚠️ No GitHub token available - operating in degraded mode');
-            console.log('   GitHub operations will be disabled');
+            logger.warn('No GitHub token available - operating in degraded mode');
+            logger.info('   GitHub operations will be disabled');
             this.octokit = null;
         } else {
             try {
@@ -58,10 +59,10 @@ class BranchAwareAgentManager {
 
                 // Test GitHub connectivity
                 const { data: user } = await this.octokit.rest.users.getAuthenticated();
-                console.log(`✅ BranchAwareAgentManager authenticated as: ${user.login}`);
+                logger.info(`BranchAwareAgentManager authenticated as: ${user.login}`);
             } catch (error) {
-                console.log('⚠️ GitHub authentication failed - operating in degraded mode');
-                console.log(`   Error: ${error.message}`);
+                logger.warn('GitHub authentication failed - operating in degraded mode');
+                logger.info(`   Error: ${error.message}`);
                 this.octokit = null;
             }
         }
@@ -79,7 +80,7 @@ class BranchAwareAgentManager {
             this.commAgent = new CommunicationAgent(`branch-manager-${Date.now()}`);
             await this.commAgent.initialize(); // No workflowId needed for branch manager comm agent
         } catch (error) {
-            console.log(`⚠️ ServiceContainer not initialized during comm agent setup - this is expected during system bootstrap`);
+            logger.warn(`ServiceContainer not initialized during comm agent setup - this is expected during system bootstrap`);
             this.commAgent = null; // Will be initialized later when needed
         }
 
@@ -141,8 +142,8 @@ class BranchAwareAgentManager {
 
         // Graceful degradation when GitHub API not available
         if (!this.octokit) {
-            console.log(`⚠️ GitHub API not available - simulating branch creation: ${branchName}`);
-            console.log('   Branch operations will be tracked locally only');
+            logger.warn(`GitHub API not available - simulating branch creation: ${branchName}`);
+            logger.info('   Branch operations will be tracked locally only');
 
             // Store branch metadata in database even without GitHub API
             await this.storeBranchMetadata(sessionId, branchName, repository || 'local', {
@@ -161,7 +162,7 @@ class BranchAwareAgentManager {
                 simulatedMode: true
             });
 
-            console.log(`✅ Local branch ${branchName} simulated with ${agents.size} agents`);
+            logger.info(`Local branch ${branchName} simulated with ${agents.size} agents`);
 
             return {
                 branchName,
@@ -174,7 +175,7 @@ class BranchAwareAgentManager {
         }
 
         try {
-            console.log(`🌿 Creating branch: ${branchName} from ${baseBranch}`);
+            logger.info(`🌿 Creating branch: ${branchName} from ${baseBranch}`);
 
             // Get base branch reference
             const { data: baseRef } = await this.octokit.rest.git.getRef({
@@ -206,7 +207,7 @@ class BranchAwareAgentManager {
                 branch: branchName
             });
 
-            console.log(`✅ Branch ${branchName} created with ${agents.size} agents`);
+            logger.info(`Branch ${branchName} created with ${agents.size} agents`);
             
             // Send Slack notification for branch creation
             try {
@@ -217,7 +218,7 @@ class BranchAwareAgentManager {
                     sha: baseRef.object.sha
                 });
             } catch (error) {
-                console.log(`📱 Slack notification failed: ${error.message}`);
+                logger.info(`📱 Slack notification failed: ${error.message}`);
             }
             
             return {
@@ -229,7 +230,7 @@ class BranchAwareAgentManager {
 
         } catch (error) {
             if (error.status === 422 && error.message.includes('Reference already exists')) {
-                console.log(`⚠️  Branch ${branchName} already exists, creating agents only`);
+                logger.warn(`Branch ${branchName} already exists, creating agents only`);
                 const agents = await this.createAgentsForBranch(sessionId, branchName, agentTypes, {
                     owner,
                     repo: repository,
@@ -293,7 +294,7 @@ class BranchAwareAgentManager {
                     agentConfig
                 });
 
-                console.log(`   ✅ Created ${agentType} agent for branch ${branchName}`);
+                logger.info(`   ✅ Created ${agentType} agent for branch ${branchName}`);
             }
         }
 
@@ -326,7 +327,7 @@ class BranchAwareAgentManager {
             crossBranchContext: this.crossBranchContext.get(branchName) || {}
         };
 
-        console.log(`⚡ Executing ${workflowType} workflow on branch: ${branchName}`);
+        logger.info(`⚡ Executing ${workflowType} workflow on branch: ${branchName}`);
 
         const results = new Map();
         
@@ -334,10 +335,10 @@ class BranchAwareAgentManager {
         for (const [agentType, agent] of agents) {
             if (this.shouldRunAgentForWorkflow(agentType, workflowType)) {
                 try {
-                    console.log(`   🤖 Running ${agentType} agent on ${branchName}`);
+                    logger.info(`   🤖 Running ${agentType} agent on ${branchName}`);
                     
                     const result = await agent.executeWorkflow(branchContext, (progress, message) => {
-                        console.log(`      ${progress}% - ${message}`);
+                        logger.info(`      ${progress}% - ${message}`);
                     });
 
                     results.set(agentType, result);
@@ -346,7 +347,7 @@ class BranchAwareAgentManager {
                     this.updateCrossBranchContext(branchName, agentType, result);
 
                 } catch (error) {
-                    console.error(`❌ ${agentType} agent failed on ${branchName}: ${error.message}`);
+                    logger.error(`❌ ${agentType} agent failed on ${branchName}: ${error.message}`);
                     results.set(agentType, { error: error.message });
                 }
             }
@@ -377,7 +378,7 @@ class BranchAwareAgentManager {
 
         // Graceful degradation when GitHub API not available
         if (!this.octokit) {
-            console.log(`⚠️ GitHub API not available - simulating PR creation for: ${branchName}`);
+            logger.warn(`GitHub API not available - simulating PR creation for: ${branchName}`);
             const simulatedPR = {
                 number: Math.floor(Math.random() * 1000) + 1,
                 url: `https://github.com/${owner || 'local'}/${repo || 'local'}/pull/simulated`,
@@ -386,7 +387,7 @@ class BranchAwareAgentManager {
                 base,
                 simulated: true
             };
-            console.log(`📝 Simulated PR #${simulatedPR.number}: ${simulatedPR.title}`);
+            logger.info(`📝 Simulated PR #${simulatedPR.number}: ${simulatedPR.title}`);
             return simulatedPR;
         }
 
@@ -400,8 +401,8 @@ class BranchAwareAgentManager {
                 base
             });
 
-            console.log(`📝 Created PR #${pr.number}: ${pr.title}`);
-            console.log(`   URL: ${pr.html_url}`);
+            logger.info(`📝 Created PR #${pr.number}: ${pr.title}`);
+            logger.info(`   URL: ${pr.html_url}`);
 
             return {
                 number: pr.number,
@@ -424,7 +425,7 @@ class BranchAwareAgentManager {
 
         // Graceful degradation when GitHub API not available
         if (!this.octokit) {
-            console.log(`⚠️ GitHub API not available - returning simulated status for: ${branchName}`);
+            logger.warn(`GitHub API not available - returning simulated status for: ${branchName}`);
             return {
                 name: branchName,
                 sha: 'simulated-' + Date.now(),
@@ -480,7 +481,7 @@ class BranchAwareAgentManager {
      * Coordinate agents across multiple branches
      */
     async coordinateAcrossBranches(sessionId, branches, coordinationTask) {
-        console.log(`🔄 Coordinating across branches: ${branches.join(', ')}`);
+        logger.info(`🔄 Coordinating across branches: ${branches.join(', ')}`);
 
         const branchResults = new Map();
         
@@ -518,7 +519,7 @@ class BranchAwareAgentManager {
                 resolved: successCount
             });
         } catch (error) {
-            console.log(`📱 Cross-branch coordination Slack notification failed: ${error.message}`);
+            logger.info(`📱 Cross-branch coordination Slack notification failed: ${error.message}`);
         }
 
         return coordinationResult;

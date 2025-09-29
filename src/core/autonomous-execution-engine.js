@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Autonomous Execution Engine - Phase 2 Week 2 Integration Layer
  * Integrates Project Lifecycle Manager with Advanced Agent Coordinator
@@ -66,7 +67,7 @@ class AutonomousExecutionEngine extends EventEmitter {
         // Event bindings
         this.bindComponentEvents();
 
-        console.log(`🚀 Autonomous Execution Engine initialized: ${this.engineId}`);
+        info(`Autonomous Execution Engine initialized: ${this.engineId}`);
     }
 
     bindComponentEvents() {
@@ -84,7 +85,7 @@ class AutonomousExecutionEngine extends EventEmitter {
                 this.handleResourceAllocation(event);
             });
         } else {
-            console.log('ℹ️ Lifecycle Manager event binding deferred (BaseAgent pattern)');
+            info('ℹ️ Lifecycle Manager event binding deferred (BaseAgent pattern)');
         }
 
         // Agent Coordinator Events
@@ -106,7 +107,7 @@ class AutonomousExecutionEngine extends EventEmitter {
                 this.handleOrganizationUpdated(event);
             });
         } else {
-            console.log('ℹ️ Organization Manager event binding deferred (BaseAgent pattern)');
+            info('ℹ️ Organization Manager event binding deferred (BaseAgent pattern)');
         }
     }
 
@@ -115,7 +116,7 @@ class AutonomousExecutionEngine extends EventEmitter {
      * This is the main entry point that orchestrates the entire process
      */
     async executeAutonomousProject(projectDefinition, options = {}) {
-        console.log(`🎯 Starting autonomous execution for project: ${projectDefinition.name}`);
+        info(`Starting autonomous execution for project: ${projectDefinition.name}`);
 
         const executionId = `exec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const startTime = Date.now();
@@ -143,26 +144,26 @@ class AutonomousExecutionEngine extends EventEmitter {
             this.activeExecutions.set(executionId, executionState);
 
             // Phase 1: Project Initialization
-            console.log(`📋 Phase 1: Initializing project ${projectDefinition.name}`);
+            info(`Phase 1: Initializing project ${projectDefinition.name}`);
             executionState.status = 'initializing';
 
             // Analyze project requirements and determine optimal team composition
             const teamRequirements = await this.analyzeProjectRequirements(projectDefinition);
             const optimalTeam = await this.specializationPlatform.formOptimalTeam(teamRequirements);
 
-            console.log(`👥 Optimal team formed: ${optimalTeam.members.length} specialized agents`);
+            info(`👥 Optimal team formed: ${optimalTeam.members.length} specialized agents`);
             executionState.team = optimalTeam;
             executionState.metrics.agentsUtilized = optimalTeam.members.length;
 
             // Phase 2: Lifecycle Management Setup
-            console.log(`🔄 Phase 2: Setting up project lifecycle management`);
+            info(`🔄 Phase 2: Setting up project lifecycle management`);
             const lifecycleConfig = await this.createLifecycleConfiguration(projectDefinition, optimalTeam);
             const lifecycleState = await this.lifecycleManager.initializeProject(projectDefinition, lifecycleConfig);
 
             executionState.currentPhase = lifecycleState.currentPhase;
 
             // Phase 3: Agent Coordination Setup
-            console.log(`🤖 Phase 3: Initializing multi-agent coordination`);
+            info(`🤖 Phase 3: Initializing multi-agent coordination`);
             const coordinationPlan = await this.createCoordinationPlan(projectDefinition, optimalTeam, lifecycleState);
             const coordinationState = await this.agentCoordinator.initializeCoordination(
                 projectDefinition,
@@ -173,13 +174,13 @@ class AutonomousExecutionEngine extends EventEmitter {
             executionState.coordinationState = coordinationState;
 
             // Phase 4: Autonomous Execution Loop
-            console.log(`⚙️ Phase 4: Starting autonomous execution loop`);
+            info(`⚙️ Phase 4: Starting autonomous execution loop`);
             executionState.status = 'executing';
 
             const executionResult = await this.runAutonomousExecutionLoop(executionState);
 
             // Phase 5: Completion and Metrics
-            console.log(`📊 Phase 5: Finalizing execution and collecting metrics`);
+            info(`📊 Phase 5: Finalizing execution and collecting metrics`);
             const finalMetrics = await this.finalizeExecution(executionState, executionResult);
 
             // Update global metrics
@@ -189,9 +190,9 @@ class AutonomousExecutionEngine extends EventEmitter {
             executionState.endTime = Date.now();
             executionState.duration = executionState.endTime - startTime;
 
-            console.log(`✅ Autonomous execution completed: ${projectDefinition.name}`);
-            console.log(`⏱️ Total execution time: ${executionState.duration}ms`);
-            console.log(`📈 Success rate: ${((finalMetrics.successfulTasks / finalMetrics.totalTasks) * 100).toFixed(1)}%`);
+            info(`Autonomous execution completed: ${projectDefinition.name}`);
+            info(`⏱️ Total execution time: ${executionState.duration}ms`);
+            info(`📈 Success rate: ${((finalMetrics.successfulTasks / finalMetrics.totalTasks) * 100).toFixed(1)}%`);
 
             this.emit('executionCompleted', {
                 executionId,
@@ -211,7 +212,7 @@ class AutonomousExecutionEngine extends EventEmitter {
             };
 
         } catch (error) {
-            console.error(`❌ Autonomous execution failed for ${projectDefinition.name}:`, error.message);
+            error(`❌ Autonomous execution failed for ${projectDefinition.name}:`, error.message);
 
             const executionState = this.activeExecutions.get(executionId);
             if (executionState) {
@@ -281,7 +282,7 @@ class AutonomousExecutionEngine extends EventEmitter {
             requirements.preferredAgentTypes.push('comm');
         }
 
-        console.log(`📋 Project requirements analyzed: ${requirements.requiredCapabilities.length} capabilities needed`);
+        info(`Project requirements analyzed: ${requirements.requiredCapabilities.length} capabilities needed`);
         return requirements;
     }
 
@@ -401,13 +402,13 @@ class AutonomousExecutionEngine extends EventEmitter {
             totalTasks: 0
         };
 
-        console.log(`🔄 Starting autonomous execution loop for ${executionState.project.name}`);
+        info(`🔄 Starting autonomous execution loop for ${executionState.project.name}`);
 
         // Get lifecycle phases
         const lifecyclePhases = await this.lifecycleManager.getProjectPhases(executionState.project.id);
 
         for (const phase of lifecyclePhases) {
-            console.log(`📅 Executing lifecycle phase: ${phase.name}`);
+            info(`📅 Executing lifecycle phase: ${phase.name}`);
 
             // Start lifecycle phase
             const phaseResult = await this.lifecycleManager.progressToPhase(
@@ -425,7 +426,7 @@ class AutonomousExecutionEngine extends EventEmitter {
                 : [];
 
             if (phaseTasks.length > 0) {
-                console.log(`🎯 Coordinating ${phaseTasks.length} tasks for phase: ${phase.name}`);
+                info(`Coordinating ${phaseTasks.length} tasks for phase: ${phase.name}`);
 
                 // Execute tasks through agent coordinator
                 const coordinationResult = await this.agentCoordinator.coordinateExecution(
@@ -453,8 +454,8 @@ class AutonomousExecutionEngine extends EventEmitter {
             executionState.phases.push(phase.name);
         }
 
-        console.log(`✅ Autonomous execution loop completed`);
-        console.log(`📊 Results: ${results.successfulTasks}/${results.totalTasks} tasks successful`);
+        info(`Autonomous execution loop completed`);
+        info(`📊 Results: ${results.successfulTasks}/${results.totalTasks} tasks successful`);
 
         return results;
     }
@@ -463,7 +464,7 @@ class AutonomousExecutionEngine extends EventEmitter {
      * Event handlers for component integration
      */
     async handlePhaseTransition(event) {
-        console.log(`🔄 Lifecycle phase transition: ${event.fromPhase} → ${event.toPhase}`);
+        info(`🔄 Lifecycle phase transition: ${event.fromPhase} → ${event.toPhase}`);
 
         // Update coordination patterns based on phase
         const executionState = Array.from(this.activeExecutions.values())
@@ -474,7 +475,7 @@ class AutonomousExecutionEngine extends EventEmitter {
             const newPattern = this.selectCoordinationPatternForPhase(event.toPhase, executionState.team);
 
             if (newPattern !== executionState.coordinationState.pattern) {
-                console.log(`🔄 Adjusting coordination pattern: ${executionState.coordinationState.pattern} → ${newPattern}`);
+                info(`🔄 Adjusting coordination pattern: ${executionState.coordinationState.pattern} → ${newPattern}`);
                 executionState.metrics.coordinationChanges++;
             }
         }
@@ -483,7 +484,7 @@ class AutonomousExecutionEngine extends EventEmitter {
     }
 
     async handleMilestoneAchieved(event) {
-        console.log(`🎯 Milestone achieved: ${event.milestone.name} in ${event.phase}`);
+        info(`Milestone achieved: ${event.milestone.name} in ${event.phase}`);
 
         const executionState = Array.from(this.activeExecutions.values())
             .find(state => state.project.id === event.projectId);
@@ -496,16 +497,16 @@ class AutonomousExecutionEngine extends EventEmitter {
     }
 
     async handleCoordinationInitialized(event) {
-        console.log(`🤖 Agent coordination initialized: ${event.pattern} pattern for ${event.projectId}`);
+        info(`🤖 Agent coordination initialized: ${event.pattern} pattern for ${event.projectId}`);
         this.emit('coordinationReady', event);
     }
 
     async handleExecutionCoordinated(event) {
-        console.log(`⚙️ Execution coordinated: ${event.tasksCoordinated} tasks, pattern: ${event.pattern}`);
+        info(`⚙️ Execution coordinated: ${event.tasksCoordinated} tasks, pattern: ${event.pattern}`);
     }
 
     async handleConflictResolved(event) {
-        console.log(`⚡ Conflict resolved: ${event.conflict.type} using ${event.resolution.strategy}`);
+        info(`⚡ Conflict resolved: ${event.conflict.type} using ${event.resolution.strategy}`);
 
         const executionState = Array.from(this.activeExecutions.values())
             .find(state => state.project.id === event.projectId);
@@ -516,11 +517,11 @@ class AutonomousExecutionEngine extends EventEmitter {
     }
 
     async handleResourceAllocation(event) {
-        console.log(`💾 Resource allocation updated for ${event.projectId}`);
+        info(`💾 Resource allocation updated for ${event.projectId}`);
     }
 
     async handleOrganizationUpdated(event) {
-        console.log(`🏢 Organization structure updated: ${event.changeType}`);
+        info(`🏢 Organization structure updated: ${event.changeType}`);
     }
 
     /**
@@ -647,7 +648,7 @@ class AutonomousExecutionEngine extends EventEmitter {
             executionDuration: Date.now() - executionState.startTime
         };
 
-        console.log(`📊 Execution metrics finalized: ${metrics.successRate * 100}% success rate`);
+        info(`📊 Execution metrics finalized: ${metrics.successRate * 100}% success rate`);
         return metrics;
     }
 
@@ -691,14 +692,14 @@ class AutonomousExecutionEngine extends EventEmitter {
      * Shutdown the autonomous execution engine
      */
     async shutdown() {
-        console.log(`🛑 Shutting down Autonomous Execution Engine: ${this.engineId}`);
+        info(`🛑 Shutting down Autonomous Execution Engine: ${this.engineId}`);
 
         this.status = 'shutting_down';
 
         // Complete any active executions
         for (const [executionId, executionState] of this.activeExecutions) {
             if (executionState.status === 'executing') {
-                console.log(`⏸️ Gracefully stopping execution: ${executionId}`);
+                info(`⏸️ Gracefully stopping execution: ${executionId}`);
                 executionState.status = 'interrupted';
             }
         }
@@ -709,7 +710,7 @@ class AutonomousExecutionEngine extends EventEmitter {
         }
 
         this.status = 'stopped';
-        console.log(`✅ Autonomous Execution Engine shutdown complete`);
+        info(`Autonomous Execution Engine shutdown complete`);
     }
 }
 
@@ -718,7 +719,7 @@ module.exports = { AutonomousExecutionEngine };
 
 // CLI execution for testing
 if (require.main === module) {
-    console.log('🧪 Testing Autonomous Execution Engine...');
+    info('🧪 Testing Autonomous Execution Engine...');
 
     const engine = new AutonomousExecutionEngine();
 
@@ -735,19 +736,19 @@ if (require.main === module) {
 
     engine.executeAutonomousProject(testProject)
         .then(result => {
-            console.log('\n🎉 Autonomous execution test completed!');
-            console.log(`Success: ${result.success}`);
-            console.log(`Duration: ${result.duration}ms`);
-            console.log(`Metrics:`, result.metrics);
+            info('\n🎉 Autonomous execution test completed!');
+            info(`Success: ${result.success}`);
+            info(`Duration: ${result.duration}ms`);
+            info(`Metrics:`, result.metrics);
 
             return engine.shutdown();
         })
         .then(() => {
-            console.log('✅ Test completed successfully');
+            info('Test completed successfully');
             process.exit(0);
         })
         .catch(error => {
-            console.error('❌ Test failed:', error.message);
+            error('❌ Test failed:', error.message);
             process.exit(1);
         });
 }

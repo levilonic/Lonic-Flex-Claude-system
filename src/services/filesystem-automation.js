@@ -1,3 +1,4 @@
+const { logger } = require('./logger');
 /**
  * File System Automation Service
  * Provides safe file operations with atomic operations and rollback capability
@@ -33,9 +34,9 @@ class FileSystemAutomation {
     async initializeBackupDirectory() {
         try {
             await fs.mkdir(this.config.backupDir, { recursive: true });
-            console.log(`📁 Backup directory initialized: ${this.config.backupDir}`);
+            logger.info(`📁 Backup directory initialized: ${this.config.backupDir}`);
         } catch (error) {
-            console.error('❌ Failed to initialize backup directory:', error.message);
+            logger.error('❌ Failed to initialize backup directory:', error.message);
             throw error;
         }
     }
@@ -56,7 +57,7 @@ class FileSystemAutomation {
         };
         
         try {
-            console.log(`📝 Starting atomic write: ${filePath} (${operationId})`);
+            logger.info(`📝 Starting atomic write: ${filePath} (${operationId})`);
             
             // Step 1: Check if original file exists
             operation.originalExists = await this.fileExists(filePath);
@@ -64,7 +65,7 @@ class FileSystemAutomation {
             // Step 2: Create backup if original exists
             if (operation.originalExists && this.config.enableBackups) {
                 operation.backupPath = await this.createBackup(filePath, operationId);
-                console.log(`💾 Backup created: ${operation.backupPath}`);
+                logger.info(`💾 Backup created: ${operation.backupPath}`);
             }
             
             // Step 3: Write to temporary file first (atomic operation)
@@ -85,7 +86,7 @@ class FileSystemAutomation {
             
             // Step 6: Log successful operation
             this.operations.set(operationId, operation);
-            console.log(`✅ Atomic write completed: ${filePath}`);
+            logger.info(`Atomic write completed: ${filePath}`);
             
             const bytesWritten = Buffer.byteLength(content, options.encoding || 'utf8');
             const evidence = {
@@ -114,7 +115,7 @@ class FileSystemAutomation {
             // Cleanup on failure
             await this.cleanupFailedOperation(operation);
             
-            console.error(`❌ Atomic write failed for ${filePath}:`, error.message);
+            logger.error(`❌ Atomic write failed for ${filePath}:`, error.message);
             throw new Error(`File write operation failed: ${error.message}`);
         }
     }
@@ -154,7 +155,7 @@ class FileSystemAutomation {
         try {
             await fs.mkdir(dirPath, { recursive: true, ...options });
             
-            console.log(`📁 Directory created: ${dirPath}`);
+            logger.info(`📁 Directory created: ${dirPath}`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -164,7 +165,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            console.error(`❌ Directory creation failed: ${dirPath}`, error.message);
+            logger.error(`❌ Directory creation failed: ${dirPath}`, error.message);
             throw error;
         }
     }
@@ -176,7 +177,7 @@ class FileSystemAutomation {
         const operationId = uuidv4();
         
         try {
-            console.log(`📋 Copying file: ${sourcePath} -> ${destPath}`);
+            logger.info(`Copying file: ${sourcePath} -> ${destPath}`);
             
             // Read source file
             const sourceContent = await fs.readFile(sourcePath);
@@ -198,7 +199,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            console.error(`❌ File copy failed: ${sourcePath} -> ${destPath}`, error.message);
+            logger.error(`❌ File copy failed: ${sourcePath} -> ${destPath}`, error.message);
             throw error;
         }
     }
@@ -217,7 +218,7 @@ class FileSystemAutomation {
         };
         
         try {
-            console.log(`🗑️ Deleting file: ${filePath} (${operationId})`);
+            logger.info(`🗑️ Deleting file: ${filePath} (${operationId})`);
             
             // Check if file exists
             if (!await this.fileExists(filePath)) {
@@ -234,7 +235,7 @@ class FileSystemAutomation {
             // Create backup before deletion
             if (this.config.enableBackups && !options.skipBackup) {
                 operation.backupPath = await this.createBackup(filePath, operationId);
-                console.log(`💾 Backup before deletion: ${operation.backupPath}`);
+                logger.info(`💾 Backup before deletion: ${operation.backupPath}`);
             }
             
             // Delete the file
@@ -242,7 +243,7 @@ class FileSystemAutomation {
             
             // Log operation
             this.operations.set(operationId, operation);
-            console.log(`✅ File deleted: ${filePath}`);
+            logger.info(`File deleted: ${filePath}`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -253,7 +254,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            console.error(`❌ File deletion failed: ${filePath}`, error.message);
+            logger.error(`❌ File deletion failed: ${filePath}`, error.message);
             throw error;
         }
     }
@@ -268,7 +269,7 @@ class FileSystemAutomation {
         }
         
         try {
-            console.log(`🔄 Rolling back operation: ${operationId}`);
+            logger.info(`🔄 Rolling back operation: ${operationId}`);
             
             switch (operation.type) {
                 case 'writeFile':
@@ -291,7 +292,7 @@ class FileSystemAutomation {
             // Remove from active operations
             this.operations.delete(operationId);
             
-            console.log(`✅ Rollback completed: ${operationId}`);
+            logger.info(`Rollback completed: ${operationId}`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -301,7 +302,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            console.error(`❌ Rollback failed for ${operationId}:`, error.message);
+            logger.error(`❌ Rollback failed for ${operationId}:`, error.message);
             throw error;
         }
     }
@@ -313,12 +314,12 @@ class FileSystemAutomation {
         if (operation.originalExists && operation.backupPath) {
             // Restore from backup
             await fs.copyFile(operation.backupPath, operation.filePath);
-            console.log(`🔄 File restored from backup: ${operation.filePath}`);
+            logger.info(`🔄 File restored from backup: ${operation.filePath}`);
         } else {
             // File didn't exist originally, so delete it
             if (await this.fileExists(operation.filePath)) {
                 await fs.unlink(operation.filePath);
-                console.log(`🔄 New file deleted: ${operation.filePath}`);
+                logger.info(`🔄 New file deleted: ${operation.filePath}`);
             }
         }
     }
@@ -330,7 +331,7 @@ class FileSystemAutomation {
         if (operation.backupPath && await this.fileExists(operation.backupPath)) {
             // Restore from backup
             await fs.copyFile(operation.backupPath, operation.filePath);
-            console.log(`🔄 Deleted file restored: ${operation.filePath}`);
+            logger.info(`🔄 Deleted file restored: ${operation.filePath}`);
         } else {
             throw new Error(`Cannot rollback deletion: no backup found for ${operation.filePath}`);
         }
@@ -344,7 +345,7 @@ class FileSystemAutomation {
         const createdItems = [];
         
         try {
-            console.log(`🏗️ Creating project structure: ${projectPath} (template: ${template})`);
+            logger.info(`Creating project structure: ${projectPath} (template: ${template})`);
             
             // Load template configuration
             const templateConfig = await this.loadTemplate(template);
@@ -373,7 +374,7 @@ class FileSystemAutomation {
                 });
             }
             
-            console.log(`✅ Project structure created: ${createdItems.length} items`);
+            logger.info(`Project structure created: ${createdItems.length} items`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -385,7 +386,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            console.error(`❌ Project structure creation failed:`, error.message);
+            logger.error(`❌ Project structure creation failed:`, error.message);
             
             // Cleanup created items on failure
             await this.cleanupProjectStructure(createdItems);
@@ -408,7 +409,7 @@ class FileSystemAutomation {
                     },
                     {
                         path: 'src/index.js',
-                        template: '// {{projectName}} main entry point\nconsole.log("Hello from {{projectName}}");\n'
+                        template: '// {{projectName}} main entry point\nlogger.info("Hello from {{projectName}}");\n'
                     },
                     {
                         path: 'README.md',
@@ -491,12 +492,12 @@ class FileSystemAutomation {
                 await fs.unlink(operation.tempPath);
             }
         } catch (error) {
-            console.error('Cleanup error:', error.message);
+            logger.error('Cleanup error:', error.message);
         }
     }
     
     async cleanupProjectStructure(createdItems) {
-        console.log('🧹 Cleaning up failed project structure...');
+        logger.info('🧹 Cleaning up failed project structure...');
         
         // Delete in reverse order (files first, then directories)
         const sortedItems = [...createdItems].reverse();
@@ -518,7 +519,7 @@ class FileSystemAutomation {
                     }
                 }
             } catch (error) {
-                console.error(`Cleanup error for ${item.path}:`, error.message);
+                logger.error(`Cleanup error for ${item.path}:`, error.message);
             }
         }
     }
@@ -570,11 +571,11 @@ class FileSystemAutomation {
                 }
             }
             
-            console.log(`🧹 Cleaned up ${cleanedCount} old backup files`);
+            logger.info(`🧹 Cleaned up ${cleanedCount} old backup files`);
             return { cleanedCount };
             
         } catch (error) {
-            console.error('❌ Backup cleanup failed:', error.message);
+            logger.error('❌ Backup cleanup failed:', error.message);
             throw error;
         }
     }
@@ -585,7 +586,7 @@ module.exports = { FileSystemAutomation };
 // If run directly, demonstrate the service
 if (require.main === module) {
     (async () => {
-        console.log('🧪 Testing File System Automation Service...');
+        logger.info('🧪 Testing File System Automation Service...');
         
         const fsService = new FileSystemAutomation({
             backupDir: path.join(__dirname, '..', '.test-backups')
@@ -597,23 +598,23 @@ if (require.main === module) {
                 path.join(__dirname, '..', 'test-file.txt'),
                 'Hello from File System Automation!'
             );
-            console.log('Write result:', writeResult);
+            logger.info('Write result:', writeResult);
             
             // Test file read
             const readResult = await fsService.readFile(writeResult.filePath);
-            console.log('Read result:', readResult.content);
+            logger.info('Read result:', readResult.content);
             
             // Test project structure creation
             const projectResult = await fsService.createProjectStructure(
                 path.join(__dirname, '..', 'test-project'),
                 'basic-node'
             );
-            console.log('Project structure created:', projectResult.createdItems.length, 'items');
+            logger.info('Project structure created:', projectResult.createdItems.length, 'items');
             
-            console.log('✅ File System Automation Service test completed');
+            logger.info('File System Automation Service test completed');
             
         } catch (error) {
-            console.error('❌ Test failed:', error.message);
+            logger.error('❌ Test failed:', error.message);
         }
     })();
 }

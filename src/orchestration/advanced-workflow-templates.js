@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Advanced Workflow Templates - LonicFLex Foundation v0
  * Enhanced @claude integration workflow templates for real-world development scenarios
@@ -503,7 +504,7 @@ class AdvancedWorkflowTemplates {
             }
         });
 
-        console.log(`✅ Advanced Workflow Templates initialized: ${this.templates.size} templates`);
+        info(`Advanced Workflow Templates initialized: ${this.templates.size} templates`);
     }
 
     /**
@@ -540,7 +541,7 @@ class AdvancedWorkflowTemplates {
      */
     async registerWithWorkflowService() {
         try {
-            console.log('🔄 Registering advanced templates with workflow service...');
+            info('🔄 Registering advanced templates with workflow service...');
 
             for (const [templateId, template] of this.templates.entries()) {
                 // Convert to workflow service format
@@ -563,13 +564,13 @@ class AdvancedWorkflowTemplates {
                     }
                 };
 
-                console.log(`  ✅ Registered: ${template.name} (${templateId})`);
+                info(`  ✅ Registered: ${template.name} (${templateId})`);
             }
 
-            console.log('🎉 All advanced templates registered successfully');
+            info('🎉 All advanced templates registered successfully');
 
         } catch (error) {
-            console.error('❌ Failed to register templates:', error.message);
+            error('❌ Failed to register templates:', error.message);
             throw error;
         }
     }
@@ -621,23 +622,23 @@ class AdvancedWorkflowTemplates {
 
 // Demo function
 async function demoAdvancedWorkflowTemplates() {
-    console.log('🎯 Advanced Workflow Templates Demo\n');
+    info('Advanced Workflow Templates Demo\n');
 
     const templates = new AdvancedWorkflowTemplates();
 
-    console.log('📋 Available Advanced Templates:');
+    info('Available Advanced Templates:');
     const allTemplates = templates.getAllTemplates();
 
     for (const template of allTemplates) {
-        console.log(`\n• ${template.name} (${template.id})`);
-        console.log(`  Description: ${template.description}`);
-        console.log(`  Category: ${template.category}`);
-        console.log(`  Trigger: ${template.trigger}`);
-        console.log(`  Duration: ${Math.round(template.estimatedDuration / 1000)}s`);
-        console.log(`  Steps: ${template.steps}`);
+        info(`\n• ${template.name} (${template.id})`);
+        info(`  Description: ${template.description}`);
+        info(`  Category: ${template.category}`);
+        info(`  Trigger: ${template.trigger}`);
+        info(`  Duration: ${Math.round(template.estimatedDuration / 1000)}s`);
+        info(`  Steps: ${template.steps}`);
     }
 
-    console.log('\n🧪 Command Matching Tests:');
+    info('\n🧪 Command Matching Tests:');
     const testCommands = [
         { command: 'review', parameters: {} },
         { command: 'fix', parameters: { issue: '123' } },
@@ -652,13 +653,13 @@ async function demoAdvancedWorkflowTemplates() {
             ` ${JSON.stringify(test.parameters)}` : '';
 
         if (template) {
-            console.log(`✅ "@claude ${test.command}${paramStr}" → ${template.name}`);
+            info(`✅ "@claude ${test.command}${paramStr}" → ${template.name}`);
         } else {
-            console.log(`❌ "@claude ${test.command}${paramStr}" → No matching template`);
+            info(`❌ "@claude ${test.command}${paramStr}" → No matching template`);
         }
     }
 
-    console.log('\n✅ Advanced Workflow Templates Demo Complete!');
+    info('\n✅ Advanced Workflow Templates Demo Complete!');
 }
 
 module.exports = { AdvancedWorkflowTemplates };

@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Human-in-the-Loop Manager
  * IMPLEMENTS: HumanLayer SDK patterns for deterministic human oversight
@@ -88,7 +89,7 @@ class HumanInTheLoopManager extends EventEmitter {
         // Initialize logging
         this.initializeLogging();
 
-        console.log('👤 Human-in-the-Loop Manager initialized with deterministic oversight');
+        info('👤 Human-in-the-Loop Manager initialized with deterministic oversight');
     }
 
     /**
@@ -117,7 +118,7 @@ class HumanInTheLoopManager extends EventEmitter {
         const requestId = this.generateRequestId();
         const risk = RISK_LEVELS[riskLevel.toUpperCase()] || RISK_LEVELS.MEDIUM;
 
-        console.log(`👤 Human approval requested: ${actionDescription} (${risk.level} risk)`);
+        info(`👤 Human approval requested: ${actionDescription} (${risk.level} risk)`);
 
         // Low risk actions are auto-approved
         if (risk.level === 'low') {
@@ -204,10 +205,10 @@ class HumanInTheLoopManager extends EventEmitter {
     async processApprovalRequest(request) {
         const startTime = Date.now();
 
-        console.log(`👤 Processing approval request: ${request.requestId}`);
-        console.log(`   Description: ${request.description}`);
-        console.log(`   Risk level: ${request.risk.level}`);
-        console.log(`   Timeout: ${request.timeout}ms`);
+        info(`👤 Processing approval request: ${request.requestId}`);
+        info(`   Description: ${request.description}`);
+        info(`   Risk level: ${request.risk.level}`);
+        info(`   Timeout: ${request.timeout}ms`);
 
         // Emit request event for external integrations
         this.emit('approvalRequested', request);
@@ -227,12 +228,12 @@ class HumanInTheLoopManager extends EventEmitter {
 
             this.updateStats(result.decision, approvalTime);
 
-            console.log(`👤 Approval ${result.decision}: ${request.requestId} (${approvalTime}ms)`);
+            info(`👤 Approval ${result.decision}: ${request.requestId} (${approvalTime}ms)`);
 
             return result;
 
         } catch (error) {
-            console.log(`❌ Approval process error: ${request.requestId} - ${error.message}`);
+            error(`);
             throw error;
         }
     }
@@ -298,7 +299,7 @@ class HumanInTheLoopManager extends EventEmitter {
     createTimeoutPromise(request) {
         return new Promise((resolve, reject) => {
             const timeoutId = setTimeout(() => {
-                console.log(`⏰ Approval timeout: ${request.requestId}`);
+                info(`⏰ Approval timeout: ${request.requestId}`);
 
                 // Check if escalation is available
                 if (request.escalationChain.length > 0) {
@@ -346,7 +347,7 @@ class HumanInTheLoopManager extends EventEmitter {
             throw new Error(`Invalid decision: ${decision}. Must be 'approved' or 'denied'`);
         }
 
-        console.log(`👤 External approval received: ${requestId} - ${decision} by ${approver}`);
+        info(`👤 External approval received: ${requestId} - ${decision} by ${approver}`);
 
         // Emit approval event
         this.emit('approvalReceived', {
@@ -457,7 +458,7 @@ class HumanInTheLoopManager extends EventEmitter {
             const logLine = JSON.stringify(logEntry) + '\n';
             fs.appendFileSync(this.config.approvalLogPath, logLine);
         } catch (error) {
-            console.error('Failed to write approval log:', error.message);
+            error('Failed to write approval log:', error.message);
         }
     }
 
@@ -607,7 +608,7 @@ class HumanInTheLoopManager extends EventEmitter {
         this.pendingApprovals.clear();
         this.removeAllListeners();
 
-        console.log('👤 Human-in-the-Loop Manager cleanup complete');
+        info('👤 Human-in-the-Loop Manager cleanup complete');
     }
 }
 
@@ -627,7 +628,7 @@ class HumanApprovalValidatedAgent {
             ...config
         };
 
-        console.log(`👤 Human Approval integration added to: ${baseAgent.agentName}`);
+        info(`👤 Human Approval integration added to: ${baseAgent.agentName}`);
     }
 
     /**
@@ -639,7 +640,7 @@ class HumanApprovalValidatedAgent {
 
         // If high risk, request human approval first
         if (riskLevel === 'high') {
-            console.log(`🚨 High-stakes action detected: ${stepName}`);
+            info(`🚨 High-stakes action detected: ${stepName}`);
 
             const approvalResult = await this.humanLoop.requestApproval(
                 `Agent ${this.baseAgent.agentName} wants to execute: ${stepName}`,
@@ -661,7 +662,7 @@ class HumanApprovalValidatedAgent {
                 throw new Error(`Human approval ${approvalResult.decision}: ${approvalResult.reason}`);
             }
 
-            console.log(`✅ Human approval granted: ${stepName}`);
+            info(`Human approval granted: ${stepName}`);
         }
 
         // Execute the step using base agent validation
@@ -713,7 +714,7 @@ module.exports = {
 
 // Demo execution
 async function demoHumanInTheLoop() {
-    console.log('👤 Human-in-the-Loop Manager Demo\n');
+    info('👤 Human-in-the-Loop Manager Demo\n');
 
     const humanLoop = new HumanInTheLoopManager({
         auditLog: true,
@@ -725,53 +726,53 @@ async function demoHumanInTheLoop() {
     });
 
     try {
-        console.log('📊 Testing different risk levels...\n');
+        info('📊 Testing different risk levels...\n');
 
         // Test 1: Low risk (auto-approved)
-        console.log('🔹 Test 1: Low risk action');
+        info('🔹 Test 1: Low risk action');
         const lowRiskResult = await humanLoop.requestApproval(
             'Read user preferences from database',
             { operation: 'read', table: 'user_preferences' },
             'low'
         );
-        console.log(`   Result: ${lowRiskResult.decision} (${lowRiskResult.approvalTime}ms)\n`);
+        info(`   Result: ${lowRiskResult.decision} (${lowRiskResult.approvalTime}ms)\n`);
 
         // Test 2: Medium risk (human approval required)
-        console.log('🔸 Test 2: Medium risk action');
+        info('🔸 Test 2: Medium risk action');
         const mediumRiskResult = await humanLoop.requestApproval(
             'Send notification to user about account update',
             { operation: 'notify', recipient: 'user@example.com', type: 'account_update' },
             'medium'
         );
-        console.log(`   Result: ${mediumRiskResult.decision} by ${mediumRiskResult.approver} (${mediumRiskResult.approvalTime}ms)\n`);
+        info(`   Result: ${mediumRiskResult.decision} by ${mediumRiskResult.approver} (${mediumRiskResult.approvalTime}ms)\n`);
 
         // Test 3: High risk (requires admin approval)
-        console.log('🔺 Test 3: High risk action');
+        info('🔺 Test 3: High risk action');
         const highRiskResult = await humanLoop.requestApproval(
             'Deploy new version to production environment',
             { operation: 'deploy', environment: 'production', version: 'v2.1.0' },
             'high'
         );
-        console.log(`   Result: ${highRiskResult.decision} by ${highRiskResult.approver} (${highRiskResult.approvalTime}ms)\n`);
+        info(`   Result: ${highRiskResult.decision} by ${highRiskResult.approver} (${highRiskResult.approvalTime}ms)\n`);
 
         // Show statistics
         const stats = humanLoop.getStats();
-        console.log('📊 Approval Statistics:');
-        console.log(`   Total requests: ${stats.totalRequests}`);
-        console.log(`   Approval rate: ${stats.approvalRate}%`);
-        console.log(`   Average approval time: ${stats.averageApprovalTime}ms`);
-        console.log(`   Pending requests: ${stats.pendingRequests}`);
+        info('📊 Approval Statistics:');
+        info(`   Total requests: ${stats.totalRequests}`);
+        info(`   Approval rate: ${stats.approvalRate}%`);
+        info(`   Average approval time: ${stats.averageApprovalTime}ms`);
+        info(`   Pending requests: ${stats.pendingRequests}`);
 
-        console.log('\n🎉 Human-in-the-Loop Demo Complete!');
-        console.log('Key features demonstrated:');
-        console.log('  ✅ Risk-based approval routing (low/medium/high)');
-        console.log('  ✅ Timeout handling with escalation');
-        console.log('  ✅ Audit trail logging for compliance');
-        console.log('  ✅ Statistical tracking and reporting');
-        console.log('  ✅ Integration-ready for Slack/email/webhooks');
+        info('\n🎉 Human-in-the-Loop Demo Complete!');
+        info('Key features demonstrated:');
+        info('  ✅ Risk-based approval routing (low/medium/high)');
+        info('  ✅ Timeout handling with escalation');
+        info('  ✅ Audit trail logging for compliance');
+        info('  ✅ Statistical tracking and reporting');
+        info('  ✅ Integration-ready for Slack/email/webhooks');
 
     } catch (error) {
-        console.error('❌ Demo failed:', error.message);
+        error('❌ Demo failed:', error.message);
     } finally {
         await humanLoop.cleanup();
     }

@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Planning Manager Agent - Phase 1 Coordinator
  * Following 12-Factor Agents methodology and Factor 10 principles (≤8 execution steps)
@@ -302,9 +303,9 @@ class PlanningManagerAgent extends ValidatedAgent {
      */
     async validateExecutionPlan() {
         // Debug logging
-        console.log(`DEBUG: Validating execution plan. Plan exists: ${!!this.executionPlan}`);
+        info(`DEBUG: Validating execution plan. Plan exists: ${!!this.executionPlan}`);
         if (this.executionPlan) {
-            console.log(`DEBUG: Plan sections: ${Object.keys(this.executionPlan).join(', ')}`);
+            info(`DEBUG: Plan sections: ${Object.keys(this.executionPlan).join(', ')}`);
         }
         
         const validation = {
@@ -314,7 +315,7 @@ class PlanningManagerAgent extends ValidatedAgent {
             resourceAvailability: this.validateResourceAvailability()
         };
 
-        console.log(`DEBUG: Validation results:`, validation);
+        info(`DEBUG: Validation results:`, validation);
 
         if (validation.completeness < 0.5 || validation.feasibility < 0.5) {
             throw new Error(`Execution plan validation failed: Completeness ${validation.completeness}, Feasibility ${validation.feasibility}`);

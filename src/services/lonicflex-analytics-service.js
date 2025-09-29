@@ -788,7 +788,7 @@ module.exports = { LonicFlexAnalyticsService };
 if (require.main === module) {
     const service = new LonicFlexAnalyticsService();
     service.start().catch(error => {
-        console.error('Failed to start analytics service:', error);
+        logger.error('Failed to start analytics service:', error);
         process.exit(1);
     });
 }

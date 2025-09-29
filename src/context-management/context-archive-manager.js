@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Context Archive Manager - Enhanced storage and retrieval system
  * Provides indexing, compression, and advanced archive management
@@ -23,7 +24,7 @@ class ContextArchiveManager {
         this.index = new Map();
         this.initialized = false;
         
-        console.log('✅ ContextArchiveManager initialized');
+        info('ContextArchiveManager initialized');
     }
     
     /**
@@ -43,10 +44,10 @@ class ContextArchiveManager {
             await this.cleanupOldArchives();
             
             this.initialized = true;
-            console.log(`📦 Archive system initialized: ${this.index.size} archives indexed`);
+            info(`📦 Archive system initialized: ${this.index.size} archives indexed`);
             
         } catch (error) {
-            console.error('❌ Failed to initialize archive system:', error.message);
+            error('❌ Failed to initialize archive system:', error.message);
             throw error;
         }
     }
@@ -80,7 +81,7 @@ class ContextArchiveManager {
             const indexArray = Array.from(this.index.values());
             await fs.writeFile(this.indexFile, JSON.stringify(indexArray, null, 2), 'utf8');
         } catch (error) {
-            console.error('❌ Failed to save index:', error.message);
+            error('❌ Failed to save index:', error.message);
         }
     }
     
@@ -129,7 +130,7 @@ class ContextArchiveManager {
             this.index.set(archiveId, archiveMetadata);
             await this.saveIndex();
             
-            console.log(`📦 Archived: ${archiveId} (${(contextContent.length/1024).toFixed(1)}KB → ${(processedContent.length/1024).toFixed(1)}KB, ${(compressionRatio*100).toFixed(1)}% ratio)`);
+            info(`📦 Archived: ${archiveId} (${(contextContent.length/1024).toFixed(1)}KB → ${(processedContent.length/1024).toFixed(1)}KB, ${(compressionRatio*100).toFixed(1)}% ratio)`);
             
             // Cleanup if we have too many archives
             await this.enforceMaxArchives();
@@ -137,7 +138,7 @@ class ContextArchiveManager {
             return archiveId;
             
         } catch (error) {
-            console.error(`❌ Failed to archive context:`, error.message);
+            error(`❌ Failed to archive context:`, error.message);
             throw error;
         }
     }
@@ -176,7 +177,7 @@ class ContextArchiveManager {
             };
             
         } catch (error) {
-            console.error(`❌ Failed to retrieve archive ${archiveId}:`, error.message);
+            error(`❌ Failed to retrieve archive ${archiveId}:`, error.message);
             throw error;
         }
     }
@@ -263,11 +264,11 @@ class ContextArchiveManager {
             this.index.delete(archiveId);
             await this.saveIndex();
             
-            console.log(`🗑️ Deleted archive: ${archiveId}`);
+            info(`🗑️ Deleted archive: ${archiveId}`);
             return true;
             
         } catch (error) {
-            console.error(`❌ Failed to delete archive ${archiveId}:`, error.message);
+            error(`❌ Failed to delete archive ${archiveId}:`, error.message);
             throw error;
         }
     }
@@ -280,13 +281,13 @@ class ContextArchiveManager {
         const oldArchives = Array.from(this.index.values())
             .filter(a => new Date(a.timestamp) < cutoffDate);
         
-        console.log(`🧹 Cleaning up ${oldArchives.length} old archives (older than ${Math.floor(this.maxArchiveAge / (24*60*60*1000))} days)`);
+        info(`🧹 Cleaning up ${oldArchives.length} old archives (older than ${Math.floor(this.maxArchiveAge / (24*60*60*1000))} days)`);
         
         for (const archive of oldArchives) {
             try {
                 await this.deleteArchive(archive.archiveId);
             } catch (error) {
-                console.error(`❌ Failed to cleanup archive ${archive.archiveId}:`, error.message);
+                error(`❌ Failed to cleanup archive ${archive.archiveId}:`, error.message);
             }
         }
     }
@@ -302,13 +303,13 @@ class ContextArchiveManager {
         
         const toDelete = archives.slice(0, this.index.size - this.maxArchiveSize);
         
-        console.log(`🧹 Enforcing max archives: deleting ${toDelete.length} oldest archives`);
+        info(`🧹 Enforcing max archives: deleting ${toDelete.length} oldest archives`);
         
         for (const archive of toDelete) {
             try {
                 await this.deleteArchive(archive.archiveId);
             } catch (error) {
-                console.error(`❌ Failed to delete archive ${archive.archiveId}:`, error.message);
+                error(`❌ Failed to delete archive ${archive.archiveId}:`, error.message);
             }
         }
     }
@@ -425,42 +426,42 @@ async function runCLI() {
             case 'list':
             case 'ls':
                 const archives = await manager.searchArchives();
-                console.log(`📦 Found ${archives.length} archives:\n`);
+                info(`📦 Found ${archives.length} archives:\n`);
                 for (const archive of archives.slice(0, 10)) {
-                    console.log(`${archive.archiveId}`);
-                    console.log(`  📅 ${archive.timestamp}`);
-                    console.log(`  📄 ${(archive.originalSize/1024).toFixed(1)}KB (${archive.contentType})`);
-                    console.log(`  🏷️  ${archive.reason}`);
-                    console.log('');
+                    info(`${archive.archiveId}`);
+                    info(`  📅 ${archive.timestamp}`);
+                    info(`  📄 ${(archive.originalSize/1024).toFixed(1)}KB (${archive.contentType})`);
+                    info(`  🏷️  ${archive.reason}`);
+                    info('');
                 }
                 if (archives.length > 10) {
-                    console.log(`... and ${archives.length - 10} more`);
+                    info(`... and ${archives.length - 10} more`);
                 }
                 break;
                 
             case 'stats':
                 const stats = manager.getStats();
-                console.log('📊 Archive Statistics:');
-                console.log(JSON.stringify(stats, null, 2));
+                info('📊 Archive Statistics:');
+                info(JSON.stringify(stats, null, 2));
                 break;
                 
             case 'get':
             case 'retrieve':
                 const archiveId = args[1];
                 if (!archiveId) {
-                    console.error('Usage: get <archive_id>');
+                    error('Usage: get <archive_id>');
                     process.exit(1);
                 }
                 const archive = await manager.retrieveArchive(archiveId);
-                console.log('📄 Archive Content:');
-                console.log(archive.content);
+                info('📄 Archive Content:');
+                info(archive.content);
                 break;
                 
             case 'delete':
             case 'rm':
                 const deleteId = args[1];
                 if (!deleteId) {
-                    console.error('Usage: delete <archive_id>');
+                    error('Usage: delete <archive_id>');
                     process.exit(1);
                 }
                 await manager.deleteArchive(deleteId);
@@ -470,9 +471,9 @@ async function runCLI() {
                 const criteria = {};
                 if (args[1]) criteria.reason = args[1];
                 const results = await manager.searchArchives(criteria);
-                console.log(`🔍 Search Results (${results.length} found):`);
+                info(`🔍 Search Results (${results.length} found):`);
                 for (const result of results) {
-                    console.log(`${result.archiveId} - ${result.reason} (${result.timestamp})`);
+                    info(`${result.archiveId} - ${result.reason} (${result.timestamp})`);
                 }
                 break;
                 
@@ -501,7 +502,7 @@ Examples:
         }
         
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        error('❌ Error:', error.message);
         process.exit(1);
     }
 }

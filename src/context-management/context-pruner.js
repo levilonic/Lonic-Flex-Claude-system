@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * ContextPruner - Smart context reduction strategies
  * Implements Factor 3 principles: remove resolved errors, compact old events
@@ -19,44 +20,44 @@ class ContextPruner {
         this.compactAge = options.compactAge || 30 * 60 * 1000; // 30 minutes
         this.maxSummaryLength = options.maxSummaryLength || 200;
         
-        console.log('✅ ContextPruner initialized with strategies:', this.strategies);
+        info('ContextPruner initialized with strategies:', this.strategies);
     }
 
     /**
      * Emergency prune - aggressive reduction when hitting limits
      */
     async emergencyPrune(contextXml, targetReduction = 0.5) {
-        console.log(`🚨 Emergency pruning: target ${(targetReduction * 100)}% reduction`);
+        info(`🚨 Emergency pruning: target ${(targetReduction * 100)}% reduction`);
         
         const originalTokens = await this.tokenCounter.countContextTokens(contextXml);
-        console.log(`📊 Original context: ${originalTokens.total_tokens} tokens`);
+        info(`📊 Original context: ${originalTokens.total_tokens} tokens`);
         
         // Parse XML context
         const events = this.parseContextXml(contextXml);
-        console.log(`📋 Found ${events.length} events to analyze`);
+        info(`Found ${events.length} events to analyze`);
         
         // Apply all strategies aggressively
         let prunedEvents = events;
         
         // 1. Remove resolved errors first (highest priority)
         prunedEvents = this.removeResolvedErrors(prunedEvents);
-        console.log(`🔧 After error removal: ${prunedEvents.length} events`);
+        logger.debug(`After error removal: ${prunedEvents.length} events`);
         
         // 2. Remove old events (keep only recent)
         const recentEvents = Math.max(5, Math.floor(events.length * 0.3));
         prunedEvents = prunedEvents.slice(-recentEvents);
-        console.log(`🔧 After keeping recent: ${prunedEvents.length} events`);
+        logger.debug(`After keeping recent: ${prunedEvents.length} events`);
         
         // 3. Compact similar events
         prunedEvents = this.compactSimilarEvents(prunedEvents);
-        console.log(`🔧 After compacting similar: ${prunedEvents.length} events`);
+        logger.debug(`After compacting similar: ${prunedEvents.length} events`);
         
         // 4. Summarize if still too large
         const newXml = this.rebuildContextXml(prunedEvents);
         const newTokens = await this.tokenCounter.countContextTokens(newXml);
         
         if (newTokens.total_tokens > originalTokens.total_tokens * (1 - targetReduction)) {
-            console.log('🔧 Still too large, applying summarization...');
+            logger.debug('Still too large, applying summarization...');
             prunedEvents = this.summarizeEvents(prunedEvents, Math.floor(prunedEvents.length / 2));
         }
         
@@ -64,8 +65,8 @@ class ContextPruner {
         const finalTokens = await this.tokenCounter.countContextTokens(finalXml);
         
         const reduction = 1 - (finalTokens.total_tokens / originalTokens.total_tokens);
-        console.log(`✅ Emergency pruning complete: ${(reduction * 100).toFixed(1)}% reduction`);
-        console.log(`📊 Final size: ${finalTokens.total_tokens} tokens`);
+        info(`Emergency pruning complete: ${(reduction * 100).toFixed(1)}% reduction`);
+        info(`📊 Final size: ${finalTokens.total_tokens} tokens`);
         
         return finalXml;
     }
@@ -74,17 +75,17 @@ class ContextPruner {
      * Smart prune - gentle reduction with preservation of important context
      */
     async smartPrune(contextXml, targetReduction = 0.3) {
-        console.log(`🧠 Smart pruning: target ${(targetReduction * 100).toFixed(0)}% reduction`);
+        info(`🧠 Smart pruning: target ${(targetReduction * 100).toFixed(0)}% reduction`);
         
         const originalTokens = await this.tokenCounter.countContextTokens(contextXml);
-        console.log(`📊 Original context: ${originalTokens.total_tokens} tokens`);
+        info(`📊 Original context: ${originalTokens.total_tokens} tokens`);
         
         const events = this.parseContextXml(contextXml);
         let prunedEvents = events;
         
         // Identify essential events that must be preserved
         const essentialEvents = this.identifyEssentialEvents(prunedEvents);
-        console.log(`🔒 Protected ${essentialEvents.size} essential events from pruning`);
+        info(`🔒 Protected ${essentialEvents.size} essential events from pruning`);
         
         // Apply strategies in order of safety, respecting essential events
         for (const strategy of this.strategies) {
@@ -107,7 +108,7 @@ class ContextPruner {
             
             const afterCount = prunedEvents.length;
             if (beforeCount !== afterCount) {
-                console.log(`🔧 ${strategy}: ${beforeCount} → ${afterCount} events`);
+                logger.debug(`${strategy}: ${beforeCount} → ${afterCount} events`);
             }
             
             // Check if we've hit our target
@@ -116,7 +117,7 @@ class ContextPruner {
             const currentReduction = 1 - (currentTokens.total_tokens / originalTokens.total_tokens);
             
             if (currentReduction >= targetReduction) {
-                console.log(`🎯 Target reduction achieved: ${(currentReduction * 100).toFixed(1)}%`);
+                info(`Target reduction achieved: ${(currentReduction * 100).toFixed(1)}%`);
                 break;
             }
         }
@@ -129,17 +130,17 @@ class ContextPruner {
         const minViableSize = Math.max(100, originalTokens.total_tokens * 0.05); // At least 5% or 100 tokens
         
         if (finalTokens.total_tokens < minViableSize) {
-            console.log(`🛡️ Context too small after pruning (${finalTokens.total_tokens} tokens), preserving more content`);
+            info(`🛡️ Context too small after pruning (${finalTokens.total_tokens} tokens), preserving more content`);
             
             // Use original XML with minimal reduction to preserve integrity
             const minimalReduction = Math.min(0.2, targetReduction); // Cap at 20% reduction max
             const conservativePruning = await this.applyMinimalPruning(contextXml, minimalReduction);
             
-            console.log(`✅ Conservative pruning applied for data integrity preservation`);
+            info(`Conservative pruning applied for data integrity preservation`);
             return conservativePruning;
         }
         
-        console.log(`✅ Smart pruning complete: ${(reduction * 100).toFixed(1)}% reduction`);
+        info(`Smart pruning complete: ${(reduction * 100).toFixed(1)}% reduction`);
         return finalXml;
     }
 
@@ -281,7 +282,7 @@ class ContextPruner {
                    !event.content.match(/status.*(?:resolved|completed|success|fixed)/i);
         });
         
-        console.log(`🗑️  Removed ${beforeCount - filtered.length} resolved errors/tasks`);
+        info(`🗑️  Removed ${beforeCount - filtered.length} resolved errors/tasks`);
         return filtered;
     }
 
@@ -321,7 +322,7 @@ class ContextPruner {
             resolved: false
         };
         
-        console.log(`📦 Compacted ${compactableOldEvents.length} old events into summary`);
+        info(`📦 Compacted ${compactableOldEvents.length} old events into summary`);
         // Return essential old events + summary + recent events
         return [...essentialOldEvents, summaryEvent, ...recentEvents];
     }
@@ -375,7 +376,7 @@ class ContextPruner {
         
         const reduction = events.length - (consolidated.length + preservedEvents.length);
         if (reduction > 0) {
-            console.log(`🔄 Consolidated ${reduction} repetitive events`);
+            info(`🔄 Consolidated ${reduction} repetitive events`);
         }
         
         // Merge preserved essential events with consolidated events, maintaining relative order
@@ -533,7 +534,7 @@ class ContextPruner {
             resolved: false
         };
         
-        console.log(`📝 Summarized ${toSummarize.length} events, kept ${toKeep.length} recent ones`);
+        info(`📝 Summarized ${toSummarize.length} events, kept ${toKeep.length} recent ones`);
         return [summaryEvent, ...toKeep];
     }
 
@@ -568,7 +569,7 @@ class ContextPruner {
      * Demo function showing pruning strategies
      */
     async demo() {
-        console.log('✂️ ContextPruner Demo - Smart Context Reduction\n');
+        info('✂️ ContextPruner Demo - Smart Context Reduction\n');
         
         // Create mock context with various types of events
         const mockContext = `<workflow_context>
@@ -616,32 +617,32 @@ class ContextPruner {
 
 </workflow_context>`;
 
-        console.log('📄 Original Context:');
-        console.log(mockContext.substring(0, 300) + '...\n');
+        info('📄 Original Context:');
+        info(mockContext.substring(0, 300) + '...\n');
         
         const originalTokens = await this.tokenCounter.countContextTokens(mockContext);
-        console.log(`📊 Original size: ${originalTokens.total_tokens} tokens\n`);
+        info(`📊 Original size: ${originalTokens.total_tokens} tokens\n`);
         
         // Test smart pruning
-        console.log('🧠 Testing smart pruning...');
+        info('🧠 Testing smart pruning...');
         const smartPruned = await this.smartPrune(mockContext, 0.3);
         const smartTokens = await this.tokenCounter.countContextTokens(smartPruned);
         const smartReduction = 1 - (smartTokens.total_tokens / originalTokens.total_tokens);
         
-        console.log(`📊 Smart pruned: ${smartTokens.total_tokens} tokens (${(smartReduction * 100).toFixed(1)}% reduction)\n`);
+        info(`📊 Smart pruned: ${smartTokens.total_tokens} tokens (${(smartReduction * 100).toFixed(1)}% reduction)\n`);
         
         // Test emergency pruning
-        console.log('🚨 Testing emergency pruning...');
+        info('🚨 Testing emergency pruning...');
         const emergencyPruned = await this.emergencyPrune(mockContext, 0.6);
         const emergencyTokens = await this.tokenCounter.countContextTokens(emergencyPruned);
         const emergencyReduction = 1 - (emergencyTokens.total_tokens / originalTokens.total_tokens);
         
-        console.log(`📊 Emergency pruned: ${emergencyTokens.total_tokens} tokens (${(emergencyReduction * 100).toFixed(1)}% reduction)\n`);
+        info(`📊 Emergency pruned: ${emergencyTokens.total_tokens} tokens (${(emergencyReduction * 100).toFixed(1)}% reduction)\n`);
         
-        console.log('📝 Pruned Context Sample:');
-        console.log(smartPruned.substring(0, 400) + '...\n');
+        info('📝 Pruned Context Sample:');
+        info(smartPruned.substring(0, 400) + '...\n');
         
-        console.log('✅ ContextPruner demo completed!');
+        info('ContextPruner demo completed!');
     }
 }
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * OrganizationManager - Autonomous AI Organization Core
  * Phase 2 Implementation - Week 1, Day 1
@@ -79,16 +80,16 @@ class OrganizationManager extends BaseAgent {
      */
     async initialize() {
         // First, initialize the global ServiceContainer for all agents
-        console.log("🔧 Initializing ServiceContainer for autonomous organization...");
+        logger.debug("Initializing ServiceContainer for autonomous organization...");
         await initializeGlobalServiceContainer();
-        console.log("✅ ServiceContainer initialized - agents can now execute properly");
+        info("ServiceContainer initialized - agents can now execute properly");
 
         // Then initialize the BaseAgent (which depends on ServiceContainer)
         await super.initialize();
 
         // Use the real Factor3ContextManager from LonicFLex
         this.contextManager = new Factor3ContextManager();
-        console.log("✅ OrganizationManager initialized - production ready");
+        info("OrganizationManager initialized - production ready");
     }
 
     /**
@@ -272,7 +273,7 @@ class OrganizationManager extends BaseAgent {
      */
     async setupInfrastructure(project, team, context = {}) {
         // ALWAYS initialize external coordinator with real tokens
-        console.log("🔧 Initializing REAL external systems (GitHub + Slack)...");
+        logger.debug("Initializing REAL external systems (GitHub + Slack)...");
         const initResult = await this.externalCoordinator.initialize();
 
         if (initResult && initResult.github && initResult.github.error) {
@@ -284,7 +285,7 @@ class OrganizationManager extends BaseAgent {
 
         const githubOK = initResult && initResult.github && initResult.github.initialized;
         const slackOK = initResult && initResult.slack && initResult.slack.initialized;
-        console.log(`✅ External systems initialized: GitHub=${githubOK}, Slack=${slackOK}`);
+        info(`External systems initialized: GitHub=${githubOK}, Slack=${slackOK}`);
 
         // Prepare context data for external systems
         const contextData = {
@@ -451,7 +452,7 @@ class OrganizationManager extends BaseAgent {
      * ACTUAL AGENT EXECUTION - NO MORE FAKE COORDINATION
      */
     async coordinateExecution(executionPlan, project, team) {
-        console.log(`🚀 Starting REAL agent execution for project: ${project.name}`);
+        info(`Starting REAL agent execution for project: ${project.name}`);
 
         const coordinationResult = {
             projectId: project.id,
@@ -470,7 +471,7 @@ class OrganizationManager extends BaseAgent {
 
         // Execute each phase with real agents
         for (const [phaseIndex, phase] of executionPlan.phases.entries()) {
-            console.log(`📋 Executing Phase ${phaseIndex + 1}: ${phase.phase}`);
+            info(`Executing Phase ${phaseIndex + 1}: ${phase.phase}`);
             coordinationResult.currentPhase = phase;
             coordinationResult.phaseProgress = 0;
 
@@ -483,13 +484,13 @@ class OrganizationManager extends BaseAgent {
             coordinationResult.upcomingPhases = executionPlan.phases.slice(phaseIndex + 1);
             coordinationResult.overallProgress = Math.round(((phaseIndex + 1) / executionPlan.phases.length) * 100);
 
-            console.log(`✅ Phase ${phaseIndex + 1} completed: ${phase.phase}`);
+            info(`Phase ${phaseIndex + 1} completed: ${phase.phase}`);
         }
 
         coordinationResult.status = 'completed';
         coordinationResult.completedAt = new Date().toISOString();
 
-        console.log(`🎉 Project execution completed: ${project.name}`);
+        info(`🎉 Project execution completed: ${project.name}`);
         return coordinationResult;
     }
 
@@ -507,7 +508,7 @@ class OrganizationManager extends BaseAgent {
 
         // Execute each agent type for this phase
         for (const agentType of phase.agents) {
-            console.log(`🤖 Executing ${agentType} agent...`);
+            info(`🤖 Executing ${agentType} agent...`);
 
             try {
                 const agentResult = await this.executeRealAgent(agentType, project, team, phase);
@@ -516,7 +517,7 @@ class OrganizationManager extends BaseAgent {
                     result: agentResult,
                     completedAt: new Date().toISOString()
                 };
-                console.log(`✅ ${agentType} agent completed successfully`);
+                info(`${agentType} agent completed successfully`);
 
             } catch (error) {
                 phaseResults.results[agentType] = {
@@ -524,7 +525,7 @@ class OrganizationManager extends BaseAgent {
                     error: error.message,
                     failedAt: new Date().toISOString()
                 };
-                console.error(`❌ ${agentType} agent failed:`, error.message);
+                error(`❌ ${agentType} agent failed:`, error.message);
             }
         }
 
@@ -688,7 +689,7 @@ class OrganizationManager extends BaseAgent {
     updateProgress(progress, message) {
         this.progress = progress;
         this.currentStep = message;
-        console.log(`🏢 OrganizationManager [${progress}%]: ${message}`);
+        info(`🏢 OrganizationManager [${progress}%]: ${message}`);
     }
 
     /**

@@ -1,3 +1,4 @@
+const { info, warn, error } = require('./logger');
 /**
  * HealthMonitor - Phase 3: Infrastructure Management
  * Real-time system health monitoring with alerting and metrics collection
@@ -63,7 +64,7 @@ class HealthMonitor extends EventEmitter {
         this.isMonitoring = false;
         this.monitoringTimers = [];
 
-        console.log('🏥 HealthMonitor created with production-grade monitoring');
+        info('🏥 HealthMonitor created with production-grade monitoring');
     }
 
     /**
@@ -79,21 +80,21 @@ class HealthMonitor extends EventEmitter {
         // Start periodic health checks
         const healthTimer = setInterval(() => {
             this.performHealthCheck().catch(error => {
-                console.error('❌ Health check failed:', error.message);
+                logger.error('❌ Health check failed:', error.message);
             });
         }, this.config.healthCheckInterval);
 
         // Start metrics collection
         const metricsTimer = setInterval(() => {
             this.collectMetrics().catch(error => {
-                console.error('❌ Metrics collection failed:', error.message);
+                logger.error('❌ Metrics collection failed:', error.message);
             });
         }, this.config.metricsInterval);
 
         // Start alert processing
         const alertTimer = setInterval(() => {
             this.processAlerts().catch(error => {
-                console.error('❌ Alert processing failed:', error.message);
+                logger.error('❌ Alert processing failed:', error.message);
             });
         }, this.config.alertCheckInterval);
 
@@ -102,7 +103,7 @@ class HealthMonitor extends EventEmitter {
         // Perform initial health check
         await this.performHealthCheck();
 
-        console.log('✅ HealthMonitor started - Real-time monitoring active');
+        info('HealthMonitor started - Real-time monitoring active');
         this.emit('monitoring_started');
     }
 
@@ -120,7 +121,7 @@ class HealthMonitor extends EventEmitter {
         this.monitoringTimers.forEach(timer => clearInterval(timer));
         this.monitoringTimers = [];
 
-        console.log('🛑 HealthMonitor stopped');
+        info('🛑 HealthMonitor stopped');
         this.emit('monitoring_stopped');
     }
 
@@ -164,7 +165,7 @@ class HealthMonitor extends EventEmitter {
             this.emit('health_check_complete', this.currentHealth);
 
         } catch (error) {
-            console.error('❌ Health check failed:', error.message);
+            logger.error('❌ Health check failed:', error.message);
             this.currentHealth.overall = 'error';
             this.currentHealth.lastCheck = Date.now();
             this.currentHealth.error = error.message;
@@ -382,7 +383,7 @@ class HealthMonitor extends EventEmitter {
         try {
             await this.persistMetrics();
         } catch (error) {
-            console.error('❌ Failed to persist metrics:', error.message);
+            logger.error('❌ Failed to persist metrics:', error.message);
         }
     }
 
@@ -474,7 +475,7 @@ class HealthMonitor extends EventEmitter {
             const data = await fs.readFile(this.config.metricsFile, 'utf8');
             const metricsData = JSON.parse(data);
             this.metrics = metricsData.metrics || [];
-            console.log(`📊 Loaded ${this.metrics.length} historical metrics`);
+            info(`📊 Loaded ${this.metrics.length} historical metrics`);
         } catch (error) {
             // File doesn't exist or is corrupted - start fresh
             this.metrics = [];
@@ -487,7 +488,7 @@ class HealthMonitor extends EventEmitter {
     async cleanup() {
         await this.stopMonitoring();
         await this.persistMetrics();
-        console.log('🧹 HealthMonitor cleanup completed');
+        info('🧹 HealthMonitor cleanup completed');
     }
 }
 

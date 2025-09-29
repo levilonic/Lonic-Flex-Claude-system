@@ -619,21 +619,21 @@ if (require.main === module) {
     const service = new LonicFlexAgentsService();
     service.start()
         .then(() => {
-            console.log('✅ LonicFLex Agents Service started successfully');
+            logger.info('LonicFLex Agents Service started successfully');
         })
         .catch((error) => {
-            console.error('❌ Failed to start Agents service:', error.message);
+            logger.error('❌ Failed to start Agents service:', error.message);
             process.exit(1);
         });
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        console.log('Agents service shutting down...');
+        logger.info('Agents service shutting down...');
         process.exit(0);
     });
 
     process.on('SIGINT', () => {
-        console.log('Agents service shutting down...');
+        logger.info('Agents service shutting down...');
         process.exit(0);
     });
 }

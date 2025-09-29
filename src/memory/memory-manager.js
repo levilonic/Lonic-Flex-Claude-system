@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Memory Manager - Learning and Verification System
  * Extends SQLite Manager patterns for persistent memory and lesson tracking
@@ -26,7 +27,7 @@ class MemoryManager {
         await this.loadLessonsCache();
         this.isInitialized = true;
         
-        console.log('🧠 Memory Manager initialized - Learning system active');
+        info('🧠 Memory Manager initialized - Learning system active');
         return this;
     }
 
@@ -62,7 +63,7 @@ class MemoryManager {
             successRate: 0.0
         });
 
-        console.log(`📝 Lesson recorded: ${lessonType} for ${agentContext}`);
+        info(`📝 Lesson recorded: ${lessonType} for ${agentContext}`);
         return lessonId.lastID;
     }
 
@@ -127,7 +128,7 @@ class MemoryManager {
         });
 
         if (discrepancy) {
-            console.log(`🚨 DISCREPANCY DETECTED: Task "${taskId}" claimed "${claimedStatus}" but verified as "${verifiedStatus}"`);
+            info(`🚨 DISCREPANCY DETECTED: Task "${taskId}" claimed "${claimedStatus}" but verified as "${verifiedStatus}"`);
             
             // Auto-record lesson about false claims
             await this.recordLesson(
@@ -184,7 +185,7 @@ class MemoryManager {
             );
         }
 
-        console.log(`🔍 Pattern recorded: ${patternType} - ${actionTaken} → ${outcome}`);
+        info(`🔍 Pattern recorded: ${patternType} - ${actionTaken} → ${outcome}`);
     }
 
     /**
@@ -198,7 +199,7 @@ class MemoryManager {
             [agentContext]
         );
 
-        console.log(`🧠 Loaded ${lessons.length} lessons for ${agentContext}`);
+        info(`🧠 Loaded ${lessons.length} lessons for ${agentContext}`);
         return lessons;
     }
 
@@ -229,7 +230,7 @@ class MemoryManager {
             this.lessonsCache.set(key, lesson);
         }
 
-        console.log(`🧠 Loaded ${lessons.length} lessons into cache`);
+        info(`🧠 Loaded ${lessons.length} lessons into cache`);
     }
 
     /**
@@ -309,7 +310,7 @@ class MemoryManager {
  * Demo function showing memory system capabilities
  */
 async function demoMemorySystem() {
-    console.log('🧠 Memory Manager Demo - Learning System\n');
+    info('🧠 Memory Manager Demo - Learning System\n');
 
     const memory = new MemoryManager();
     
@@ -326,7 +327,7 @@ async function demoMemorySystem() {
         );
 
         // Test verification system
-        console.log('🧪 Testing verification system...');
+        info('🧪 Testing verification system...');
         const verification = await memory.verifyTaskCompletion(
             'demo_task_001',
             'completed',
@@ -335,7 +336,7 @@ async function demoMemorySystem() {
             'demo_session_001'
         );
         
-        console.log('✅ Verification result:', verification);
+        info('Verification result:', verification);
 
         // Record a pattern
         await memory.recordPattern(
@@ -347,14 +348,14 @@ async function demoMemorySystem() {
         );
 
         // Generate report
-        console.log('\n📊 Memory System Report:');
+        info('\n📊 Memory System Report:');
         const report = await memory.generateMemoryReport();
-        console.log(JSON.stringify(report, null, 2));
+        info(JSON.stringify(report, null, 2));
 
-        console.log('\n✅ Memory system demo completed successfully!');
+        info('\n✅ Memory system demo completed successfully!');
         
     } catch (error) {
-        console.error('❌ Memory system demo failed:', error.message);
+        error('❌ Memory system demo failed:', error.message);
     } finally {
         await memory.cleanup();
     }

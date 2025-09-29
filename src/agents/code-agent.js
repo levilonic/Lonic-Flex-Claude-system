@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * EnhancedCodeAgent - ServiceContainer Migration
  * Migrated from Heavy Agent Anti-Pattern to ServiceContainer dependency injection
@@ -58,7 +59,7 @@ class EnhancedCodeAgent extends ValidatedAgent {
             'finalize_code_output'
         ];
 
-        console.log(`✅ Enhanced CodeAgent created with ServiceContainer`);
+        info(`Enhanced CodeAgent created with ServiceContainer`);
     }
 
     /**
@@ -83,7 +84,7 @@ class EnhancedCodeAgent extends ValidatedAgent {
             }
         });
 
-        console.log(`✅ Enhanced CodeAgent initialized with ServiceContainer`);
+        info(`Enhanced CodeAgent initialized with ServiceContainer`);
         return this;
     }
 

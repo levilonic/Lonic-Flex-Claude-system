@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Project Lifecycle Manager
  * Phase 2 Week 2 Implementation - Days 8-9
@@ -89,7 +90,7 @@ class ProjectLifecycleManager extends BaseAgent {
             resourceEfficiency: 0
         };
 
-        console.log(`📋 Project Lifecycle Manager initialized: ${this.agentId}`);
+        info(`Project Lifecycle Manager initialized: ${this.agentId}`);
     }
 
     /**
@@ -216,7 +217,7 @@ class ProjectLifecycleManager extends BaseAgent {
         this.lifecycleMetrics.projectsManaged++;
         this.lifecycleMetrics.currentActiveProjects++;
 
-        console.log(`📋 Project lifecycle initialized: ${project.id} → ${lifecycleState.currentState}`);
+        info(`Project lifecycle initialized: ${project.id} → ${lifecycleState.currentState}`);
 
         return lifecycleState;
     }
@@ -329,7 +330,7 @@ class ProjectLifecycleManager extends BaseAgent {
             });
         });
 
-        console.log(`📊 Resource allocation completed: ${team.agents.length} agents across ${Object.keys(this.projectStates).length} phases`);
+        info(`📊 Resource allocation completed: ${team.agents.length} agents across ${Object.keys(this.projectStates).length} phases`);
 
         return resourcePlan;
     }
@@ -374,7 +375,7 @@ class ProjectLifecycleManager extends BaseAgent {
         // Setup automated state transition monitoring
         await this.setupStateTransitionMonitoring(lifecycleState, progressionManager);
 
-        console.log(`🚀 Lifecycle progression started: ${project.id} in ${lifecycleState.currentState} phase`);
+        info(`Lifecycle progression started: ${project.id} in ${lifecycleState.currentState} phase`);
 
         return progressionManager;
     }
@@ -563,13 +564,13 @@ class ProjectLifecycleManager extends BaseAgent {
         };
 
         lifecycleState.stateHistory.push(transition);
-        console.log(`📋 State transition: ${fromState} → ${toState} (${reason})`);
+        info(`State transition: ${fromState} → ${toState} (${reason})`);
     }
 
     async updateProgress(progress, step) {
         this.progress = progress;
         this.currentStep = step;
-        console.log(`ProjectLifecycleManager: ${progress}% - ${step}`);
+        info(`ProjectLifecycleManager: ${progress}% - ${step}`);
     }
 
     addExecutionStep(stepId, description) {
@@ -700,17 +701,17 @@ class ProjectLifecycleManager extends BaseAgent {
 
     async startProgressionEngine(lifecycleState, resourcePlan, progressionManager) {
         // Start automated progression
-        console.log(`🚀 Progression engine started for ${lifecycleState.projectId}`);
+        info(`Progression engine started for ${lifecycleState.projectId}`);
     }
 
     async setupStateTransitionMonitoring(lifecycleState, progressionManager) {
         // Setup monitoring
-        console.log(`📊 State transition monitoring active for ${lifecycleState.projectId}`);
+        info(`📊 State transition monitoring active for ${lifecycleState.projectId}`);
     }
 
     async startMonitoringProcesses(monitoring) {
         // Start monitoring processes
-        console.log(`📊 Monitoring processes started for ${monitoring.projectId}`);
+        info(`📊 Monitoring processes started for ${monitoring.projectId}`);
     }
 
     generateProjectOverviewDashboard(project, lifecycleState) {
@@ -743,7 +744,7 @@ class ProjectLifecycleManager extends BaseAgent {
     }
 
     async initializeAlertMonitoring(alertSystem, lifecycleState) {
-        console.log(`🚨 Alert monitoring initialized for ${lifecycleState.projectId}`);
+        info(`🚨 Alert monitoring initialized for ${lifecycleState.projectId}`);
     }
 
     getMilestoneStatus(projectId) {
@@ -830,7 +831,7 @@ class MilestoneTracker {
             lastUpdate: new Date()
         });
 
-        console.log(`🎯 Milestone tracking started: ${milestone.name}`);
+        info(`Milestone tracking started: ${milestone.name}`);
     }
 }
 
@@ -892,9 +893,9 @@ module.exports = {
 
 // CLI usage when run directly
 if (require.main === module) {
-    console.log('📋 Project Lifecycle Manager - Phase 2 Week 2');
-    console.log('Autonomous project lifecycle management with state machines and real-time monitoring');
-    console.log('');
-    console.log('Usage: node project-lifecycle-manager.js');
-    console.log('Or require as: const { ProjectLifecycleManager } = require("./project-lifecycle-manager");');
+    info('Project Lifecycle Manager - Phase 2 Week 2');
+    info('Autonomous project lifecycle management with state machines and real-time monitoring');
+    info('');
+    info('Usage: node project-lifecycle-manager.js');
+    info('Or require as: const { ProjectLifecycleManager } = require("./project-lifecycle-manager");');
 }
