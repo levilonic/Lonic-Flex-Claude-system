@@ -10,6 +10,7 @@ const { GitHubAgentWorking } = require('./src/working/github-agent-working');
 const { CodeAgentWorking } = require('./src/working/code-agent-working');
 const { SecurityAgentWorking } = require('./src/working/security-agent-working');
 const { DatabaseSimple } = require('./src/working/database-simple');
+const { AgentCoordinator } = require('./src/working/agent-coordinator');
 
 class WorkingCLI {
     constructor() {
@@ -17,6 +18,7 @@ class WorkingCLI {
         this.githubAgent = new GitHubAgentWorking({ sessionId: `cli-${Date.now()}` });
         this.codeAgent = new CodeAgentWorking({ sessionId: `cli-${Date.now()}`, outputDir: './generated' });
         this.securityAgent = new SecurityAgentWorking({ sessionId: `cli-${Date.now()}` });
+        this.coordinator = new AgentCoordinator({ sessionId: `cli-${Date.now()}`, outputDir: './generated' });
         this.prWorkflow = new PRReviewWorkflow();
     }
 
@@ -54,6 +56,9 @@ class WorkingCLI {
                     break;
                 case 'system-status':
                     await this.systemStatus();
+                    break;
+                case 'multi-task':
+                    await this.multiTask(options);
                     break;
                 case 'test':
                     await this.runTests();
@@ -488,6 +493,134 @@ class WorkingCLI {
     }
 
     /**
+     * Execute multi-agent workflows
+     */
+    async multiTask(options) {
+        const workflowType = options[0];
+
+        if (!workflowType) {
+            console.error('❌ Usage: cli-working multi-task <workflow>');
+            console.error('\nAvailable workflows:');
+            console.error('  review-fix <pr-number>               # Review PR and generate fix');
+            console.error('  generate-scan <type> <name>          # Generate code and security scan');
+            console.error('  full-feature <name> [methods]        # Complete feature development');
+            console.error('\nExamples:');
+            console.error('  cli-working multi-task review-fix 123');
+            console.error('  cli-working multi-task generate-scan class UserService');
+            console.error('  cli-working multi-task full-feature "User Management"');
+            process.exit(1);
+        }
+
+        console.log(`🚀 Starting multi-agent workflow: ${workflowType}`);
+
+        try {
+            let result;
+
+            if (workflowType === 'review-fix') {
+                const prNumber = parseInt(options[1]);
+                if (!prNumber) {
+                    console.error('❌ Usage: cli-working multi-task review-fix <pr-number>');
+                    process.exit(1);
+                }
+
+                result = await this.coordinator.executeWorkflow_ReviewAndFix(prNumber, options[2] || 'Automated fix');
+
+            } else if (workflowType === 'generate-scan') {
+                const codeType = options[1]; // function, class, module
+                const codeName = options[2];
+
+                if (!codeType || !codeName) {
+                    console.error('❌ Usage: cli-working multi-task generate-scan <type> <name>');
+                    console.error('  Types: function, class, module');
+                    process.exit(1);
+                }
+
+                result = await this.coordinator.executeWorkflow_GenerateAndScan(
+                    codeType,
+                    codeName,
+                    options[3] || `${codeName} ${codeType}`
+                );
+
+            } else if (workflowType === 'full-feature') {
+                const featureName = options[1];
+                if (!featureName) {
+                    console.error('❌ Usage: cli-working multi-task full-feature <name>');
+                    process.exit(1);
+                }
+
+                // Parse method specs if provided
+                const codeSpecs = {
+                    methods: [
+                        { name: 'initialize', params: [], body: '// Initialize feature' },
+                        { name: 'execute', params: ['input'], body: 'return input;' },
+                        { name: 'cleanup', params: [], body: '// Cleanup resources' }
+                    ],
+                    properties: ['status', 'config']
+                };
+
+                result = await this.coordinator.executeWorkflow_FullFeature(featureName, codeSpecs);
+
+            } else {
+                throw new Error(`Unknown workflow type: ${workflowType}`);
+            }
+
+            // Display results
+            console.log('\n🎉 Multi-Agent Workflow Completed!');
+            console.log('═'.repeat(50));
+
+            console.log('\n📊 Workflow Summary:');
+            console.log(`  Name: ${result.name}`);
+            console.log(`  Steps completed: ${result.steps.length}`);
+            console.log(`  Success: ${result.result.success ? '✅' : '❌'}`);
+
+            if (result.result.success) {
+                if (result.result.generatedFiles) {
+                    console.log(`  Generated files: ${result.result.generatedFiles.length}`);
+                    result.result.generatedFiles.forEach(file => {
+                        console.log(`    📄 ${file}`);
+                    });
+                }
+
+                if (result.result.branchCreated) {
+                    console.log(`  Branch created: ${result.result.branchCreated}`);
+                }
+
+                if (result.result.prCreated) {
+                    console.log(`  PR created: #${result.result.prCreated}`);
+                }
+
+                if (result.result.securityIssues !== undefined) {
+                    console.log(`  Security issues found: ${result.result.securityIssues}`);
+                }
+            }
+
+            console.log('\n📋 Step-by-Step Execution:');
+            result.steps.forEach((step, index) => {
+                console.log(`  ${index + 1}. ${step.agent}: ${step.success ? '✅' : '❌'}`);
+            });
+
+            // Show execution log
+            const log = this.coordinator.getExecutionLog();
+            if (log.length > 0) {
+                console.log('\n📝 Detailed Log:');
+                log.slice(-10).forEach(entry => { // Show last 10 entries
+                    const status = entry.success ? '✅' : '❌';
+                    console.log(`  ${status} ${entry.agent}: ${entry.timestamp}`);
+                    if (!entry.success && entry.error) {
+                        console.log(`    Error: ${entry.error}`);
+                    }
+                });
+            }
+
+        } catch (error) {
+            console.error(`❌ Multi-agent workflow failed: ${error.message}`);
+            process.exit(1);
+        }
+
+        process.exit(0);
+    }
+
+    /**
      * Run working tests
      */
     async runTests() {
@@ -529,6 +662,7 @@ Commands:
   code-gen <type> <name>       Generate code (function/class/module)
   security-scan [path] [type]  Scan for security issues (full/file/dependencies)
   system-status                Check what's working vs broken
+  multi-task <workflow>        Execute multi-agent workflows
   test                         Run integration tests
   help                         Show this help
 
@@ -542,6 +676,9 @@ Examples:
   node cli-working.js security-scan . full
   node cli-working.js security-scan package.json file
   node cli-working.js system-status
+  node cli-working.js multi-task generate-scan class UserService
+  node cli-working.js multi-task review-fix 123
+  node cli-working.js multi-task full-feature "Payment System"
   GITHUB_TOKEN=xxx node cli-working.js github-status
   node cli-working.js test
 
