@@ -63,6 +63,12 @@
 ### Current Session
 - No blockers identified
 
+### Critical System Issues (Post-Cleanup Priority)
+- **PM2 Services Architecture Issue**: 27 PM2 services creating individual `SQLiteManager` and `Factor3ContextManager` instances instead of using shared `ServiceContainer`
+  - **Impact**: Database lock conflicts, port collisions, memory duplication
+  - **Solution Required**: Implement shared ServiceContainer pattern (working example: `claude-multi-agent-core.js`)
+  - **Priority**: High - affects production service stability
+
 ### General System
 - Docker daemon not running (affects testing - use demo mode)
 - Some test files may have dependencies on removed components
