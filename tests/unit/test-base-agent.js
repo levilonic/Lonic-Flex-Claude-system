@@ -4,8 +4,8 @@
  * Tests core agent functionality and Factor compliance
  */
 
-const { BaseAgent } = require('./agents/base-agent');
-const { SQLiteManager } = require('./database/sqlite-manager');
+const { BaseAgent } = require('../../src/agents/base-agent');
+const { SQLiteManager } = require('../../src/database/sqlite-manager');
 const fs = require('fs').promises;
 const path = require('path');
 
