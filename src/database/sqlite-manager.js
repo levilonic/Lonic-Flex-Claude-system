@@ -90,13 +90,19 @@ class SQLiteManager {
             }
 
             const extendedPatterns = [
-                /project_/i,
-                /phase_/i,
-                /multi_workflow/i,
-                /enterprise_/i,
-                /cross_system/i,
-                /advanced_/i,
-                /lonicflex_/i
+                /projects?[_\s(]/i,         // Matches "project_", "projects", "project ", "project("
+                /phases?[_\s(]/i,           // Matches "phase_", "phases", "phase ", "phase("
+                /multi_workflow/i,          // Multi-workflow tables
+                /enterprise_/i,             // Enterprise tables
+                /cross_[a-z_]+/i,           // All cross_* tables (cross_system, cross_interaction, etc.)
+                /advanced_/i,               // Advanced feature tables
+                /lonicflex_/i,              // LonicFLex specific tables
+                /planning_results/i,        // Two-phase management tables
+                /execution_results/i,
+                /agent_delegations/i,
+                /quality_gates/i,
+                /approval_gates/i,
+                /workflow_state/i
             ];
 
             return extendedPatterns.some(pattern => pattern.test(sql));

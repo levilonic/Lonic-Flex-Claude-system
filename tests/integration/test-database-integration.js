@@ -63,10 +63,20 @@ class DatabaseIntegrationTests {
 
             const session = await this.db.getSession(sessionId);
 
-            assert.strictEqual(session.session_id, sessionId, 'Session ID should match');
+            assert.strictEqual(session.id, sessionId, 'Session ID should match');
             assert.strictEqual(session.workflow_type, workflowType, 'Workflow type should match');
 
-            const retrievedData = JSON.parse(session.context_data);
+            // Handle case where context_data might already be an object (not stringified)
+            let retrievedData;
+            if (typeof session.context_data === 'string') {
+                // Detect invalid JSON from .toString() conversion
+                if (session.context_data === '[object Object]') {
+                    throw new Error('context_data was incorrectly stringified using .toString() instead of JSON.stringify()');
+                }
+                retrievedData = JSON.parse(session.context_data);
+            } else {
+                retrievedData = session.context_data;
+            }
             assert.deepStrictEqual(retrievedData, contextData, 'Context data should match');
 
             console.log(`  ✅ Session created and retrieved: ${sessionId}`);
@@ -79,12 +89,12 @@ class DatabaseIntegrationTests {
             await this.db.createSession(sessionId, 'test_workflow');
             await this.db.updateSession(sessionId, {
                 status: 'completed',
-                ended_at: Date.now()
+                completed_at: Date.now()
             });
 
             const session = await this.db.getSession(sessionId);
             assert.strictEqual(session.status, 'completed', 'Status should be updated');
-            assert.ok(session.ended_at, 'ended_at should be set');
+            assert.ok(session.completed_at, 'completed_at should be set');
 
             console.log(`  ✅ Session status updated: ${sessionId}`);
             return true;
@@ -103,8 +113,8 @@ class DatabaseIntegrationTests {
 
             const agents = await this.db.getSessionAgents(sessionId);
             assert.strictEqual(agents.length, 1, 'Should have 1 agent');
-            assert.strictEqual(agents[0].agent_id, agentId, 'Agent ID should match');
-            assert.strictEqual(agents[0].agent_name, 'github', 'Agent name should match');
+            assert.strictEqual(agents[0].id, agentId, 'Agent ID should match');
+            assert.strictEqual(agents[0].name, 'github', 'Agent name should match');
 
             console.log(`  ✅ Agent created and tracked: ${agentId}`);
             return true;
