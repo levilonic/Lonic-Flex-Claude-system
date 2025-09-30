@@ -72,7 +72,7 @@
       "file": "tests\\integration\\test-service-container-integration.js",
       "reason": "execution_failed",
       "exitCode": 1,
-      "error": "Error: Unknown agent type: base_work\r"
+      "error": ""
     },
     {
       "file": "tests\\phase-tests\\test-phase3-infrastructure.js",
