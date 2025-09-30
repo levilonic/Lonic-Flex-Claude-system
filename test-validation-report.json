@@ -25,7 +25,15 @@
       "exitCode": 0
     },
     {
+      "file": "tests\\integration\\test-multi-context-workspace.js",
+      "exitCode": 0
+    },
+    {
       "file": "tests\\integration\\test-universal-context.js",
+      "exitCode": 0
+    },
+    {
+      "file": "tests\\phase-tests\\test-phase3-infrastructure.js",
       "exitCode": 0
     },
     {
@@ -63,22 +71,10 @@
       "error": "❌ Test suite failed: SQLITE_ERROR: no such table: main.projects"
     },
     {
-      "file": "tests\\integration\\test-multi-context-workspace.js",
-      "reason": "execution_failed",
-      "exitCode": 1,
-      "error": ""
-    },
-    {
       "file": "tests\\integration\\test-service-container-integration.js",
       "reason": "execution_failed",
       "exitCode": 1,
       "error": ""
-    },
-    {
-      "file": "tests\\phase-tests\\test-phase3-infrastructure.js",
-      "reason": "execution_failed",
-      "exitCode": 1,
-      "error": "   Stack: TypeError: this.calculateHealthScore is not a function"
     },
     {
       "file": "tests\\phase-tests\\test-phase3-orchestration.js",

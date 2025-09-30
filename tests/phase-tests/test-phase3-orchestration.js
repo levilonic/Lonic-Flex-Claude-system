@@ -97,7 +97,8 @@ async function testPhase3Orchestration() {
             });
 
         } catch (error) {
-            addTestResult('Agent pool management', false, { error: error.message });
+            const errorMsg = error && error.message ? error.message : String(error);
+            addTestResult('Agent pool management', false, { error: errorMsg });
         }
 
         // Test 3: Workflow Orchestration
@@ -139,7 +140,8 @@ async function testPhase3Orchestration() {
             });
 
         } catch (error) {
-            addTestResult('Workflow orchestration', false, { error: error.message });
+            const errorMsg = error && error.message ? error.message : String(error);
+            addTestResult('Workflow orchestration', false, { error: errorMsg });
         }
 
         // Test 4: Template-Based Workflow Execution
@@ -164,7 +166,8 @@ async function testPhase3Orchestration() {
             });
 
         } catch (error) {
-            addTestResult('Template-based workflow execution', false, { error: error.message });
+            const errorMsg = error && error.message ? error.message : String(error);
+            addTestResult('Template-based workflow execution', false, { error: errorMsg });
         }
 
         // Test 5: Resource Management and Circuit Breakers
@@ -251,7 +254,8 @@ async function testPhase3Orchestration() {
             });
 
         } catch (error) {
-            addTestResult('Parallel workflow execution', false, { error: error.message });
+            const errorMsg = error && error.message ? error.message : String(error);
+            addTestResult('Parallel workflow execution', false, { error: errorMsg });
         }
 
         // Test 8: Resource Cleanup and Management
