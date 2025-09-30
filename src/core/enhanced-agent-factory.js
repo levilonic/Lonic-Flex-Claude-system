@@ -69,7 +69,7 @@ class EnhancedAgentFactory {
 
         try {
             if (this.config.useEnhancedAgents && this.serviceContainer) {
-                const { EnhancedSecurityAgent } = require('./agents/enhanced-security-agent');
+                const { EnhancedSecurityAgent } = require('../agents/security-agent');
                 const agent = new EnhancedSecurityAgent(agentSessionId, this.serviceContainer, config);
                 await agent.initialize();
 
@@ -82,11 +82,11 @@ class EnhancedAgentFactory {
             if (!this.config.fallbackToOriginal) throw error;
         }
 
-        // Fallback to original
-        const { SecurityAgent } = require('../agents/security-agent');
-        const agent = new SecurityAgent(agentSessionId, config);
+        // Fallback: Create simplified security agent without ServiceContainer
+        const { EnhancedSecurityAgent } = require('../agents/security-agent');
+        const agent = new EnhancedSecurityAgent(agentSessionId, null, config);
         this.activeAgents.set(`security-${agentSessionId}`, agent);
-        info(' Original SecurityAgent created (fallback)');
+        info(' SecurityAgent created (no ServiceContainer)');
         return agent;
     }
 
