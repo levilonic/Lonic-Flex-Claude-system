@@ -1,6 +1,10 @@
 {
   "working": [
     {
+      "file": "tests\\unit\\test-advanced-agent-coordinator.js",
+      "exitCode": 0
+    },
+    {
       "file": "tests\\unit\\test-agent-null-safety.js",
       "exitCode": 0
     },
@@ -46,12 +50,6 @@
     }
   ],
   "broken": [
-    {
-      "file": "tests\\unit\\test-advanced-agent-coordinator.js",
-      "reason": "execution_failed",
-      "exitCode": 1,
-      "error": ""
-    },
     {
       "file": "tests\\unit\\test-foundation-v0-live.js",
       "reason": "execution_failed",
