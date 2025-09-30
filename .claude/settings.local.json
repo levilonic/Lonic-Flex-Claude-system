@@ -184,7 +184,9 @@
       "Bash(python:*)",
       "Bash(npm test)",
       "Bash(sed:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(tree:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []
