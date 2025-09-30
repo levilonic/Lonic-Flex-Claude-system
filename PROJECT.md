@@ -31,3 +31,21 @@
 Transformed LonicFLex from chaotic flat structure to organized, documented, professional development environment. Every file now has a logical place and documented purpose. This enables faster development, easier maintenance, and better collaboration.
 
 **Status**: System reorganization complete and fully functional. Ready for continued development with improved architecture.
+
+---
+
+## Future Development Backlog
+
+**Purpose**: Single source of truth for future features/improvements that don't make sense to implement yet. Add ideas here as they come up during development.
+
+### Testing & Quality
+- **Evolving Smoke Test System**: Self-discovering smoke tests that auto-detect new agents/services/workflows and validate them against contracts (agent-contract.js, service-contract.js, workflow-contract.js). Wait until: system is live and we have real usage patterns to inform what "smoke" means.
+
+### Infrastructure
+(Add future infrastructure ideas here)
+
+### Features
+(Add future feature ideas here)
+
+### Optimizations
+(Add future optimization ideas here)
