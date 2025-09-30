@@ -126,11 +126,11 @@ class MultiplanManagerAgent extends ValidatedAgent {
                     servicesInitialized: [
                         'issueService',
                         'milestoneService',
-                    validation: validation, 
                         'templateService',
                         'branchManager',
                         'crossBranchCoordinator'
-                    ]
+                    ],
+                    validation: validation
                 };
             } catch (error) {
                 throw new Error(`Service initialization failed: ${error.message}`);
