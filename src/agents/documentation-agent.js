@@ -5,7 +5,7 @@
 
 const { ValidatedAgent } = require('../core/validated-agent-base');
 const AnthropicDocsManager = require('../../docs/anthropic-docs-manager');
-const DocumentationSearchTool = require('../docs/doc-search');
+const DocumentationSearchTool = require('../../docs/doc-search');
 
 class DocumentationAgent extends ValidatedAgent {
     constructor(sessionId, config = {}) {

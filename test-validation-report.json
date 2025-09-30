@@ -53,38 +53,10 @@
       "error": ""
     },
     {
-      "file": "tests\\unit\\test-long-term-persistence.js",
-      "reason": "import_errors",
-      "errors": [
-        {
-          "import": "./long-term-persistence",
-          "message": "Cannot resolve: ./long-term-persistence"
-        },
-        {
-          "import": "./context-health-monitor",
-          "message": "Cannot resolve: ./context-health-monitor"
-        },
-        {
-          "import": "../context-management/factor3-context-manager",
-          "message": "Cannot resolve: ../context-management/factor3-context-manager"
-        }
-      ]
-    },
-    {
       "file": "tests\\unit\\test-two-phase-system.js",
       "reason": "execution_failed",
       "exitCode": 1,
       "error": "Error: Cannot find module '../docs/doc-search'\r"
-    },
-    {
-      "file": "tests\\unit\\test-unified-commands.js",
-      "reason": "import_errors",
-      "errors": [
-        {
-          "import": "./universal-context-commands",
-          "message": "Cannot resolve: ./universal-context-commands"
-        }
-      ]
     },
     {
       "file": "tests\\integration\\test-context-continuation.js",
@@ -99,50 +71,10 @@
       "error": "Error: Do not import `@jest/globals` outside of the Jest test environment\r"
     },
     {
-      "file": "tests\\integration\\test-enhanced-github-integration.js",
-      "reason": "import_errors",
-      "errors": [
-        {
-          "import": "../../src/agents/enhanced-github-agent",
-          "message": "Cannot resolve: ../../src/agents/enhanced-github-agent"
-        }
-      ]
-    },
-    {
-      "file": "tests\\integration\\test-multi-agent-integration.js",
-      "reason": "import_errors",
-      "errors": [
-        {
-          "import": "../../claude-multi-agent-core",
-          "message": "Cannot resolve: ../../claude-multi-agent-core"
-        }
-      ]
-    },
-    {
-      "file": "tests\\integration\\test-multi-branch-operations.js",
-      "reason": "import_errors",
-      "errors": [
-        {
-          "import": "../../integrations/claude/claude-multi-agent-core",
-          "message": "Cannot resolve: ../../integrations/claude/claude-multi-agent-core"
-        }
-      ]
-    },
-    {
       "file": "tests\\integration\\test-multi-context-workspace.js",
       "reason": "execution_failed",
       "exitCode": 1,
       "error": ""
-    },
-    {
-      "file": "tests\\integration\\test-real-github-integration.js",
-      "reason": "import_errors",
-      "errors": [
-        {
-          "import": "../../integrations/external-integrations/simplified-external-coordinator",
-          "message": "Cannot resolve: ../../integrations/external-integrations/simplified-external-coordinator"
-        }
-      ]
     },
     {
       "file": "tests\\integration\\test-service-container-integration.js",
@@ -167,16 +99,6 @@
       "reason": "execution_failed",
       "exitCode": 1,
       "error": "Error: Cannot find module './claude-analysis-service'\r"
-    },
-    {
-      "file": "tests\\phase-tests\\test-window1-multi-workflow-state.js",
-      "reason": "import_errors",
-      "errors": [
-        {
-          "import": "../../src/services/claude-state-bridge",
-          "message": "Cannot resolve: ../../src/services/claude-state-bridge"
-        }
-      ]
     }
   ],
   "skipped": []

@@ -8,6 +8,7 @@
 
 const { initializeGlobalServiceContainer } = require('../../src/services/service-container');
 const { BaseAgent } = require('../../src/agents/base-agent');
+const { EnhancedAgentFactory } = require('../../src/core/enhanced-agent-factory');
 
 async function testServiceContainerIntegration() {
     console.log('🧪 Testing ServiceContainer Integration - Phase 2');

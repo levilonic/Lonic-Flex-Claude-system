@@ -189,7 +189,8 @@
       "Bash(git log:*)",
       "Bash(ls:*)",
       "Bash(head:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(/dev/null)"
     ],
     "deny": [],
     "ask": []
