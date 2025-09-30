@@ -1,6 +1,10 @@
 {
   "working": [
     {
+      "file": "tests\\unit\\test-agent-null-safety.js",
+      "exitCode": 0
+    },
+    {
       "file": "tests\\unit\\test-base-agent.js",
       "exitCode": 0
     },
@@ -41,12 +45,6 @@
       "error": ""
     },
     {
-      "file": "tests\\unit\\test-agent-null-safety.js",
-      "reason": "execution_failed",
-      "exitCode": 1,
-      "error": "Stack trace: Error: ServiceContainer is required for BaseAgent initialization"
-    },
-    {
       "file": "tests\\unit\\test-foundation-v0-live.js",
       "reason": "execution_failed",
       "exitCode": 1,
@@ -62,7 +60,7 @@
       "file": "tests\\integration\\test-database-integration.js",
       "reason": "execution_failed",
       "exitCode": 1,
-      "error": "Error: Do not import `@jest/globals` outside of the Jest test environment\r"
+      "error": "❌ Test suite failed: SQLITE_ERROR: no such table: main.projects"
     },
     {
       "file": "tests\\integration\\test-multi-context-workspace.js",

@@ -73,7 +73,7 @@ class EnhancedAgentFactory {
         }
 
         // Fallback to original
-        const { SecurityAgent } = require('./agents/security-agent');
+        const { SecurityAgent } = require('../agents/security-agent');
         const agent = new SecurityAgent(agentSessionId, config);
         this.activeAgents.set(`security-${agentSessionId}`, agent);
         info(' Original SecurityAgent created (fallback)');
@@ -86,26 +86,18 @@ class EnhancedAgentFactory {
     async createCodeAgent(sessionId, config = {}) {
         const agentSessionId = sessionId || this.config.sessionId;
 
-        try {
-            if (this.config.useEnhancedAgents && this.serviceContainer) {
-                const { EnhancedCodeAgent } = require('./agents/enhanced-code-agent');
-                const agent = new EnhancedCodeAgent(agentSessionId, this.serviceContainer, config);
-                await agent.initialize();
+        // code-agent.js already exports EnhancedCodeAgent (no separate enhanced version exists)
+        const { EnhancedCodeAgent } = require('../agents/code-agent');
 
-                this.activeAgents.set(`code-${agentSessionId}`, agent);
-                info(' Enhanced CodeAgent created');
-                return agent;
-            }
-        } catch (error) {
-            console.warn('WARN Enhanced CodeAgent creation failed:', error.message);
-            if (!this.config.fallbackToOriginal) throw error;
+        // Ensure we have ServiceContainer
+        if (!this.serviceContainer) {
+            this.serviceContainer = new ServiceContainer();
+            await this.serviceContainer.initialize();
         }
 
-        // Fallback to original
-        const { CodeAgent } = require('./agents/code-agent');
-        const agent = new CodeAgent(agentSessionId, config);
+        const agent = new EnhancedCodeAgent(agentSessionId, this.serviceContainer, config);
         this.activeAgents.set(`code-${agentSessionId}`, agent);
-        info(' Original CodeAgent created (fallback)');
+        info(' CodeAgent created (already enhanced)');
         return agent;
     }
 
@@ -131,7 +123,7 @@ class EnhancedAgentFactory {
         }
 
         // Fallback to original
-        const { DeployAgent } = require('./agents/deploy-agent');
+        const { DeployAgent } = require('../agents/deploy-agent');
         const agent = new DeployAgent(agentSessionId, config);
         this.activeAgents.set(`deploy-${agentSessionId}`, agent);
         info('Original DeployAgent created (fallback)');
@@ -160,7 +152,7 @@ class EnhancedAgentFactory {
         }
 
         // Fallback to original
-        const { CommunicationAgent } = require('./agents/comm-agent');
+        const { CommunicationAgent } = require('../agents/comm-agent');
         const agent = new CommunicationAgent(agentSessionId, config);
         this.activeAgents.set(`comm-${agentSessionId}`, agent);
         info(' Original CommunicationAgent created (fallback)');
@@ -189,7 +181,7 @@ class EnhancedAgentFactory {
         }
 
         // Fallback to original
-        const { GitHubAgent } = require('./agents/github-agent');
+        const { GitHubAgent } = require('../agents/github-agent');
         const agent = new GitHubAgent(agentSessionId, config);
         this.activeAgents.set(`github-${agentSessionId}`, agent);
         info(' Original GitHubAgent created (fallback)');
