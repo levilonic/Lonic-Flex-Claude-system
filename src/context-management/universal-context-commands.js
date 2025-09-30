@@ -9,7 +9,8 @@ const { info, warn, error } = require('../services/logger');
 
 const { Factor3ContextManager, CONTEXT_SCOPES } = require('../context-management/factor3-context-manager');
 const { ContextScopeManager, SCOPE_TYPES } = require('./context-scope-manager');
-const { MultiAgentCore } = require('../../integrations/claude/claude-multi-agent-core');
+// NOTE: MultiAgentCore archived - using simplified coordinator directly
+// const { MultiAgentCore } = require('../../integrations/claude/claude-multi-agent-core');
 const { SimplifiedExternalCoordinator } = require('../../integrations/simplified-external-coordinator');
 const { LongTermPersistence } = require('./long-term-persistence');
 const { ContextHealthMonitor } = require('./context-health-monitor');
@@ -144,11 +145,11 @@ class UniversalContextCommands {
      * Create new context (session or project)
      */
     async createNewContext(contextName, scopeType, flags) {
-        // Initialize multi-agent system if needed
-        if (!this.multiAgentCore) {
-            this.multiAgentCore = new MultiAgentCore();
-            await this.multiAgentCore.initialize();
-        }
+        // NOTE: MultiAgentCore archived - external coordinator handles agent coordination
+        // if (!this.multiAgentCore) {
+        //     this.multiAgentCore = new MultiAgentCore();
+        //     await this.multiAgentCore.initialize();
+        // }
 
         // Phase 3A: Initialize external system coordination
         if (!this.externalCoordinator) {
@@ -237,11 +238,11 @@ class UniversalContextCommands {
                 errors: externalResult.summary.errors
             });
             
-        } catch (error) {
-            error('FAIL External system setup failed:', error.message);
+        } catch (err) {
+            error('FAIL External system setup failed:', err.message);
             // Continue without external systems - not a blocking error
             context.addEvent('external_systems_error', {
-                error: error.message,
+                error: err.message,
                 timestamp: new Date().toISOString()
             });
         }

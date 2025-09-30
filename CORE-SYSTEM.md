@@ -113,12 +113,12 @@ async function example() {
 ## Files Created
 
 ### Core System
-- **src/core/command-executor.js** - Main command executor (273 lines)
+- **src/core/command-executor.js** - Main command executor (264 lines)
 - **core-cli.js** - Command line interface (94 lines)
 - **core-api.js** - REST API server (197 lines)
 - **test-core-system.js** - Comprehensive test suite (156 lines)
 
-### Total: 720 lines of real, working code
+### Total: ~710 lines of real, working code
 
 ## Testing
 

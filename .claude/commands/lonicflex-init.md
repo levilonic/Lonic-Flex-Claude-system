@@ -15,7 +15,7 @@ You are now the **LonicFLex Init Agent**. Load all system context, then present 
 This system follows strict protocols to prevent lies and ensure accurate communication.
 
 ## 🚨 MANDATORY: Communication Protocol
-**READ FIRST**: [COMMUNICATION-PROTOCOL.md](../COMMUNICATION-PROTOCOL.md)
+**READ FIRST**: [docs/COMMUNICATION-PROTOCOL.md](../../docs/COMMUNICATION-PROTOCOL.md)
 - 4-layer verification system with "THE BE ALL AND KNOW ALL" checks
 - Anti-bullshit verification requirements  
 - Error prevention mechanisms
@@ -31,37 +31,27 @@ Load these files in order for immediate productivity:
 - Detect phase transitions and handoff requirements
 - Determine appropriate initialization path
 
-### 2. Phase-Specific Context Loading
-**IF Phase 1 Research Complete** - **READ**: [PHASE1-RESEARCH-COMPLETE.md](../PHASE1-RESEARCH-COMPLETE.md)
-- Implementation plan and technical architecture ready
-- Phase 2 todo list and deliverables
-- Service gap analysis and implementation requirements
-- Foundation v0 live system deployment strategy
+### 2. Current System Status
+**READ**: [PROJECT.md](../../PROJECT.md)
+- Latest milestone and accomplishments
+- Test results with verification commands
+- Current system status
 
-**OTHERWISE** - **READ**: [PROGRESS-CHECKPOINT.md](../PROGRESS-CHECKPOINT.md)
-- Current working status and completed components
-- System test commands and verification steps
-- Active development phase and next milestones
-
-### 3. Current System Status
-**READ**: [SYSTEM-STATUS.md](../SYSTEM-STATUS.md)
-- What actually works (with test commands)
-- What's broken (specific errors)
-- Infrastructure dependencies and current blockers
-- PM2 service implementation status (X/8 services complete)
+### 3. Production Guidelines
+**READ**: [docs/PRODUCTION-GUIDELINES.md](../../docs/PRODUCTION-GUIDELINES.md)
+- Production system requirements
+- Development standards
+- Integration guidelines
 
 ### 4. Agent Capabilities
-**READ**: [AGENT-REGISTRY.md](../AGENT-REGISTRY.md)
+**READ**: [docs/AGENT-REGISTRY.md](../../docs/AGENT-REGISTRY.md)
 - Available agents and their status
 - Specific capabilities and limitations
-- Integration points and dependencies
-- Verification commands
 
 ### 5. Technical Architecture
-**READ**: [INFRASTRUCTURE-MAP.md](../INFRASTRUCTURE-MAP.md)
+**READ**: [docs/INFRASTRUCTURE-MAP.md](../../docs/INFRASTRUCTURE-MAP.md)
 - Database schema and state
 - Docker setup and networking
-- Memory/verification system status
 - File structure overview
 
 ## 📚 PROGRESSIVE DISCLOSURE
