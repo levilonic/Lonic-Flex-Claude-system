@@ -1,6 +1,6 @@
 # LonicFLex System - Foundation v0
 
-**Purpose**: Internal development platform/system for company to automate development workflows with robust multi-agent coordination.
+**Purpose**: Internal development platform/system for my company to automate development workflows with robust multi-agent coordination.
 
 **Current Status**: Foundation v0 - Building live LonicFLex system with full automation capabilities.
 
