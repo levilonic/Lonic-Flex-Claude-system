@@ -115,7 +115,7 @@ class ContextEngineeringEngine extends EventEmitter {
         };
 
         this.initializeDefaultRules();
-        info('🧠 Context Engineering Engine initialized with 12-factor principles');
+        info(' Context Engineering Engine initialized with 12-factor principles');
     }
 
     /**
@@ -187,7 +187,7 @@ class ContextEngineeringEngine extends EventEmitter {
      * Main entry point for context engineering
      */
     async createEngineeredContext(contextId, initialContent = '', contextMeta = {}) {
-        info(`🧠 Creating engineered context: ${contextId}`);
+        info(` Creating engineered context: ${contextId}`);
 
         const contextPartition = {
             id: contextId,
@@ -280,7 +280,7 @@ class ContextEngineeringEngine extends EventEmitter {
             });
 
         } catch (error) {
-            error(`❌ Context engineering failed: ${contextPartition.id} - ${error.message}`);
+            error(`FAIL Context engineering failed: ${contextPartition.id} - ${error.message}`);
             throw error;
         }
     }
@@ -356,7 +356,7 @@ class ContextEngineeringEngine extends EventEmitter {
         contextPartition.qualityGates.poisoningCheck = averagePoisoning <= this.config.poisoningThreshold;
 
         if (averagePoisoning > this.config.poisoningThreshold) {
-            info(`   ⚠️ Context poisoning detected: ${contextPartition.engineeringState.poisoningRisk}% risk`);
+            info(`   WARN Context poisoning detected: ${contextPartition.engineeringState.poisoningRisk}% risk`);
             this.stats.poisoningDetections++;
 
             // Apply poisoning removal (simplified)
@@ -512,7 +512,7 @@ class ContextEngineeringEngine extends EventEmitter {
         const qualityPercentage = Math.round((passedGates / totalGates) * 100);
 
         if (qualityPercentage < 75) {
-            info(`   ⚠️ Quality gates: ${passedGates}/${totalGates} passed (${qualityPercentage}%)`);
+            info(`   WARN Quality gates: ${passedGates}/${totalGates} passed (${qualityPercentage}%)`);
         } else {
             info(`   Quality gates: ${passedGates}/${totalGates} passed (${qualityPercentage}%)`);
         }
@@ -546,7 +546,7 @@ class ContextEngineeringEngine extends EventEmitter {
      */
     addRelevanceFilter(name, filterFunction) {
         this.relevanceFilters.set(name, filterFunction);
-        info(`📝 Added relevance filter: ${name}`);
+        info(` Added relevance filter: ${name}`);
     }
 
     /**
@@ -554,7 +554,7 @@ class ContextEngineeringEngine extends EventEmitter {
      */
     addCompressionStrategy(name, strategyFunction) {
         this.compressionStrategies.set(name, strategyFunction);
-        info(`📦 Added compression strategy: ${name}`);
+        info(` Added compression strategy: ${name}`);
     }
 
     /**
@@ -562,7 +562,7 @@ class ContextEngineeringEngine extends EventEmitter {
      */
     addPoisoningDetector(detectorFunction) {
         this.poisoningDetectors.add(detectorFunction);
-        info(`🛡️ Added poisoning detector`);
+        info(` Added poisoning detector`);
     }
 
     /**
@@ -585,7 +585,7 @@ class ContextEngineeringEngine extends EventEmitter {
         // Re-engineer the context
         await this.engineerContext(contextPartition);
 
-        info(`🔄 Context updated and re-engineered: ${contextId}`);
+        info(`CYCLE Context updated and re-engineered: ${contextId}`);
 
         return contextPartition;
     }
@@ -725,7 +725,7 @@ class ContextEngineeringEngine extends EventEmitter {
         this.qualityMetrics.clear();
         this.removeAllListeners();
 
-        info('🧠 Context Engineering Engine cleanup complete');
+        info(' Context Engineering Engine cleanup complete');
     }
 }
 
@@ -737,7 +737,7 @@ module.exports = {
 
 // Demo execution
 async function demoContextEngineering() {
-    info('🧠 Context Engineering Engine Demo\n');
+    info(' Context Engineering Engine Demo\n');
 
     const engine = new ContextEngineeringEngine({
         maxContextSize: 1000, // Small for demo
@@ -747,10 +747,10 @@ async function demoContextEngineering() {
     });
 
     try {
-        info('📝 Testing context engineering principles...\n');
+        info(' Testing context engineering principles...\n');
 
         // Test 1: Create context with relevant content
-        info('🔹 Test 1: High-quality relevant context');
+        info(' Test 1: High-quality relevant context');
         const relevantContent = `
 Task: Fix authentication bug in login system
 Error: Authentication timeout after 30 seconds
@@ -768,7 +768,7 @@ Priority: High - affects user experience
         info(`   Quality: ${engine.getOverallQuality(context1)}%`);
 
         // Test 2: Create context with poisoned content
-        info('\n🔸 Test 2: Context with poisoning (debug logs)');
+        info('\n Test 2: Context with poisoning (debug logs)');
         const poisonedContent = `
 DEBUG 2025-09-19T10:30:00.123Z Method entry: validateUser
 TRACE 2025-09-19T10:30:00.124Z Parameters: username, password
@@ -791,7 +791,7 @@ DEBUG 2025-09-19T10:30:00.129Z Method exit: updateProfile
         info(`   Quality: ${engine.getOverallQuality(context2)}%`);
 
         // Test 3: Large context requiring compression
-        info('\n🔺 Test 3: Large context requiring compression');
+        info('\n Test 3: Large context requiring compression');
         let largeContent = 'Task: Deploy application to production\n\n';
         for (let i = 0; i < 50; i++) {
             largeContent += `Step ${i + 1}: Configure deployment parameter ${i + 1}\n`;
@@ -810,7 +810,7 @@ DEBUG 2025-09-19T10:30:00.129Z Method exit: updateProfile
 
         // Show engineering statistics
         const stats = engine.getStats();
-        info('\n📊 Context Engineering Statistics:');
+        info('\nMETRICS Context Engineering Statistics:');
         info(`   Active contexts: ${stats.activeContexts}`);
         info(`   Average relevance: ${stats.averageRelevanceScore}%`);
         info(`   Average freshness: ${stats.averageFreshnessScore}%`);
@@ -819,20 +819,20 @@ DEBUG 2025-09-19T10:30:00.129Z Method exit: updateProfile
 
         // Generate system report
         const report = engine.generateEngineeringReport();
-        info('\n📋 Context Engineering Report:');
+        info('\n Context Engineering Report:');
         info(`   Principles applied: ${report.principles.length}`);
         info(`   Quality metrics tracked: ${report.qualityMetrics.length}`);
 
-        info('\n🎉 Context Engineering Demo Complete!');
+        info('\n Context Engineering Demo Complete!');
         info('Key features demonstrated:');
-        info('  ✅ Relevance filtering and scoring');
-        info('  ✅ Context poisoning detection and removal');
-        info('  ✅ Intelligent compression for large contexts');
-        info('  ✅ Quality gate validation');
-        info('  ✅ 12-factor engineering principles');
+        info('  PASS Relevance filtering and scoring');
+        info('  PASS Context poisoning detection and removal');
+        info('  PASS Intelligent compression for large contexts');
+        info('  PASS Quality gate validation');
+        info('  PASS 12-factor engineering principles');
 
     } catch (error) {
-        error('❌ Demo failed:', error.message);
+        error('FAIL Demo failed:', error.message);
     } finally {
         await engine.cleanup();
     }

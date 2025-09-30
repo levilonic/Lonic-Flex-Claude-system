@@ -37,11 +37,11 @@ class SecretsValidator {
      */
     async start() {
         if (this.isRunning) {
-            info('⚠️  Secrets validator already running');
+            info('WARN  Secrets validator already running');
             return;
         }
 
-        info('🔍 Starting secrets validation monitoring...');
+        info(' Starting secrets validation monitoring...');
         
         // Ensure auth manager is initialized
         await this.authManager.initialize();
@@ -53,7 +53,7 @@ class SecretsValidator {
         this.scheduleValidations();
         
         this.isRunning = true;
-        info('✅ Secrets validation monitoring started');
+        info('PASS Secrets validation monitoring started');
     }
 
     /**
@@ -68,7 +68,7 @@ class SecretsValidator {
         }
         
         this.isRunning = false;
-        info('🛑 Secrets validation monitoring stopped');
+        info('STOP Secrets validation monitoring stopped');
     }
 
     /**
@@ -79,7 +79,7 @@ class SecretsValidator {
             try {
                 await this.validateAllSecrets();
             } catch (error) {
-                error('❌ Scheduled validation failed:', error.message);
+                error('FAIL Scheduled validation failed:', error.message);
                 this.recordValidationResult('system', {
                     valid: false,
                     error: error.message,
@@ -88,14 +88,14 @@ class SecretsValidator {
             }
         }, this.validationInterval);
         
-        info(`⏰ Validations scheduled every ${this.validationInterval / 1000} seconds`);
+        info(`CLOCK Validations scheduled every ${this.validationInterval / 1000} seconds`);
     }
 
     /**
      * Validate all configured secrets
      */
     async validateAllSecrets() {
-        info('🔍 Validating all secrets...');
+        info(' Validating all secrets...');
         
         const services = ['github', 'slack', 'docker', 'anthropic'];
         const results = {};
@@ -106,7 +106,7 @@ class SecretsValidator {
                 results[service] = result;
                 this.recordValidationResult(service, result);
                 
-                const status = result.valid ? '✅' : '❌';
+                const status = result.valid ? 'PASS' : 'FAIL';
                 info(`${status} ${service}: ${result.valid ? 'Valid' : result.error}`);
                 
             } catch (error) {
@@ -117,7 +117,7 @@ class SecretsValidator {
                 };
                 results[service] = errorResult;
                 this.recordValidationResult(service, errorResult);
-                error(`❌ ${service} validation failed:`, error.message);
+                error(`FAIL ${service} validation failed:`, error.message);
             }
         }
         
@@ -133,7 +133,7 @@ class SecretsValidator {
             results
         });
         
-        info(`📊 Validation completed: ${validCount}/${totalCount} secrets valid`);
+        info(`METRICS Validation completed: ${validCount}/${totalCount} secrets valid`);
         return results;
     }
 
@@ -318,7 +318,7 @@ class SecretsValidator {
                 const result = await validatorFn();
                 
                 if (attempt > 1) {
-                    info(`✅ ${serviceName} validation succeeded on attempt ${attempt}`);
+                    info(`PASS ${serviceName} validation succeeded on attempt ${attempt}`);
                 }
                 
                 return result;
@@ -327,10 +327,10 @@ class SecretsValidator {
                 lastError = error;
                 
                 if (attempt < this.maxRetries) {
-                    warn(`⚠️  ${serviceName} validation failed (attempt ${attempt}/${this.maxRetries}), retrying in ${this.retryDelay}ms...`);
+                    warn(`WARN  ${serviceName} validation failed (attempt ${attempt}/${this.maxRetries}), retrying in ${this.retryDelay}ms...`);
                     await this.sleep(this.retryDelay);
                 } else {
-                    error(`❌ ${serviceName} validation failed after ${this.maxRetries} attempts`);
+                    error(`FAIL ${serviceName} validation failed after ${this.maxRetries} attempts`);
                 }
             }
         }
@@ -400,7 +400,7 @@ class SecretsValidator {
             severity: 'high'
         };
         
-        warn(`🚨 SECRET ALERT: ${service} validation failed - ${result.error}`);
+        warn(`ALERT SECRET ALERT: ${service} validation failed - ${result.error}`);
         
         // In a real implementation, this would send to monitoring system
         this.sendAlert(alert);
@@ -419,7 +419,7 @@ class SecretsValidator {
             severity: snapshot.healthScore < 25 ? 'critical' : 'high'
         };
         
-        warn(`🚨 HEALTH ALERT: Secrets health degraded to ${snapshot.healthScore}%`);
+        warn(`ALERT HEALTH ALERT: Secrets health degraded to ${snapshot.healthScore}%`);
         
         this.sendAlert(alert);
     }
@@ -435,7 +435,7 @@ class SecretsValidator {
         // - Email notifications
         // - Webhook endpoints
         
-        info(`📢 Alert would be sent:`, JSON.stringify(alert, null, 2));
+        info(` Alert would be sent:`, JSON.stringify(alert, null, 2));
     }
 
     /**
@@ -469,7 +469,7 @@ class SecretsValidator {
      * Force validation of specific service
      */
     async forceValidateService(service) {
-        info(`🔧 Force validating ${service}...`);
+        info(` Force validating ${service}...`);
         
         try {
             const result = await this.validateServiceSecret(service);
@@ -605,7 +605,7 @@ class SecretsValidator {
  * Demo function for secrets validation
  */
 async function demoSecretsValidation() {
-    info('🔍 Secrets Validation System Demo\n');
+    info(' Secrets Validation System Demo\n');
     
     try {
         const validator = new SecretsValidator({
@@ -613,52 +613,52 @@ async function demoSecretsValidation() {
             timeout: 5000    // 5 seconds timeout
         });
         
-        info('📋 Validation Configuration:');
-        info('   • GitHub API validation');
-        info('   • Slack API validation');
-        info('   • Docker registry validation (placeholder)');
-        info('   • Anthropic API validation (placeholder)');
-        info('   • 30-second validation intervals');
-        info('   • 3 retry attempts with 5-second delays');
+        info(' Validation Configuration:');
+        info('   - GitHub API validation');
+        info('   - Slack API validation');
+        info('   - Docker registry validation (placeholder)');
+        info('   - Anthropic API validation (placeholder)');
+        info('   - 30-second validation intervals');
+        info('   - 3 retry attempts with 5-second delays');
         
         // Start monitoring
         await validator.start();
         
         // Wait for a few validation cycles
-        info('\n⏳ Running validation cycles...');
+        info('\nHOURGLASS Running validation cycles...');
         await validator.sleep(5000);
         
         // Get status report
         const status = validator.getValidationStatus();
-        info('\n📊 Validation Status:');
+        info('\nMETRICS Validation Status:');
         info(`   Overall Health: ${status.overallHealth}%`);
         info(`   Valid Secrets: ${status.validSecrets}/${status.totalSecrets}`);
         
         for (const [service, result] of Object.entries(status.services)) {
-            const statusIcon = result.valid ? '✅' : '❌';
+            const statusIcon = result.valid ? 'PASS' : 'FAIL';
             const mode = result.simulationMode ? ' (simulated)' : '';
             info(`   ${statusIcon} ${service}: ${result.valid ? 'Valid' : result.error}${mode}`);
         }
         
         // Generate health report
-        info('\n📋 Generating detailed health report...');
+        info('\n Generating detailed health report...');
         const healthReport = await validator.generateHealthReport();
         
-        info('\n🏥 Health Report Summary:');
+        info('\nHEALTH Health Report Summary:');
         info(`   Trend: ${healthReport.summary.trend}`);
         info(`   Recommendations: ${healthReport.recommendations.length}`);
         
         for (const recommendation of healthReport.recommendations.slice(0, 3)) {
-            info(`   • ${recommendation}`);
+            info(`   - ${recommendation}`);
         }
         
         // Stop monitoring
         validator.stop();
         
-        info('\n✅ Secrets validation demo completed!');
+        info('\nPASS Secrets validation demo completed!');
         
     } catch (error) {
-        error('❌ Demo failed:', error.message);
+        error('FAIL Demo failed:', error.message);
     }
 }
 

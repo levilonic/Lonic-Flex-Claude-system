@@ -4,7 +4,7 @@
  * Systematically converts console.log/error statements to structured logging
  *
  * Features:
- * - Pattern-based conversion (emojis → log levels)
+ * - Pattern-based conversion (emojis -> log levels)
  * - Context-aware logger injection
  * - Safe backup and verification
  * - Dry-run and batch modes
@@ -28,14 +28,14 @@ class ConsoleToLoggerConverter {
 
         // Pattern mappings for intelligent conversion
         this.patterns = [
-            { regex: /console\.log\((['"`])✅([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'success' },
-            { regex: /console\.log\((['"`])❌([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'error', category: 'error' },
-            { regex: /console\.log\((['"`])⚠️([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'warn', category: 'warning' },
-            { regex: /console\.log\((['"`])🔧([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'debug', category: 'operation' },
-            { regex: /console\.log\((['"`])📋([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'status' },
-            { regex: /console\.log\((['"`])🚀([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'startup' },
-            { regex: /console\.log\((['"`])🎯([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'target' },
-            { regex: /console\.log\((['"`])🏗️([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'build' },
+            { regex: /console\.log\((['"`])PASS([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'success' },
+            { regex: /console\.log\((['"`])FAIL([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'error', category: 'error' },
+            { regex: /console\.log\((['"`])WARN([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'warn', category: 'warning' },
+            { regex: /console\.log\((['"`])([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'debug', category: 'operation' },
+            { regex: /console\.log\((['"`])([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'status' },
+            { regex: /console\.log\((['"`])([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'startup' },
+            { regex: /console\.log\((['"`])([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'target' },
+            { regex: /console\.log\((['"`])BUILD([^'"`]*?)\1(\s*,\s*(.*?))?\)/g, level: 'info', category: 'build' },
             { regex: /console\.error\((.*?)\)/g, level: 'error', category: 'error' },
             { regex: /console\.log\((.*?)\)/g, level: 'info', category: 'general' }
         ];
@@ -47,7 +47,7 @@ class ConsoleToLoggerConverter {
     async processFile(filePath) {
         try {
             if (this.verbose) {
-                console.log(`📂 Processing: ${filePath}`);
+                console.log(` Processing: ${filePath}`);
             }
 
             const content = await fs.readFile(filePath, 'utf8');
@@ -99,10 +99,10 @@ class ConsoleToLoggerConverter {
                 await fs.writeFile(filePath, modifiedContent, 'utf8');
 
                 if (this.verbose) {
-                    console.log(`  ✅ Converted: ${fileStats.consoleLog + fileStats.consoleError} statements`);
+                    console.log(`  PASS Converted: ${fileStats.consoleLog + fileStats.consoleError} statements`);
                 }
             } else if (this.dryRun && modifiedContent !== originalContent) {
-                console.log(`  🔍 Would convert: ${fileStats.consoleLog + fileStats.consoleError} statements in ${filePath}`);
+                console.log(`   Would convert: ${fileStats.consoleLog + fileStats.consoleError} statements in ${filePath}`);
             }
 
             this.stats.filesProcessed++;
@@ -110,7 +110,7 @@ class ConsoleToLoggerConverter {
 
         } catch (error) {
             this.stats.errors.push({ file: filePath, error: error.message });
-            console.error(`❌ Error processing ${filePath}: ${error.message}`);
+            console.error(`FAIL Error processing ${filePath}: ${error.message}`);
             return null;
         }
     }
@@ -277,13 +277,13 @@ class ConsoleToLoggerConverter {
             filePattern = /\.js$/
         } = options;
 
-        console.log(`🔄 Processing directory: ${dirPath}`);
+        console.log(`CYCLE Processing directory: ${dirPath}`);
 
         try {
             const files = await this.findJSFiles(dirPath, includeTests, filePattern);
             const filesToProcess = files.slice(0, maxFiles);
 
-            console.log(`📁 Found ${files.length} files, processing ${filesToProcess.length}`);
+            console.log(` Found ${files.length} files, processing ${filesToProcess.length}`);
 
             for (const file of filesToProcess) {
                 await this.processFile(file);
@@ -293,7 +293,7 @@ class ConsoleToLoggerConverter {
             return this.stats;
 
         } catch (error) {
-            console.error(`❌ Error processing directory: ${error.message}`);
+            console.error(`FAIL Error processing directory: ${error.message}`);
             throw error;
         }
     }
@@ -332,7 +332,7 @@ class ConsoleToLoggerConverter {
      * Print conversion statistics
      */
     printStats() {
-        console.log('\n📊 Conversion Statistics:');
+        console.log('\nMETRICS Conversion Statistics:');
         console.log('='.repeat(40));
         console.log(`Files processed: ${this.stats.filesProcessed}`);
         console.log(`console.log converted: ${this.stats.consoleLogsConverted}`);
@@ -347,7 +347,7 @@ class ConsoleToLoggerConverter {
         }
 
         if (this.stats.errors.length > 0) {
-            console.log(`\n❌ Errors: ${this.stats.errors.length}`);
+            console.log(`\nFAIL Errors: ${this.stats.errors.length}`);
             this.stats.errors.forEach(error => {
                 console.log(`  ${error.file}: ${error.error}`);
             });
@@ -415,7 +415,7 @@ Examples:
                 break;
 
             case 'core':
-                console.log('🎯 Converting critical core services...');
+                console.log(' Converting critical core services...');
                 const coreFiles = [
                     'src/core/system-startup.js',
                     'src/core/advanced-agent-coordinator.js',
@@ -440,10 +440,10 @@ Examples:
                 throw new Error(`Unknown command: ${command}`);
         }
 
-        console.log('\n✅ Conversion completed successfully!');
+        console.log('\nPASS Conversion completed successfully!');
 
     } catch (error) {
-        console.error(`❌ Conversion failed: ${error.message}`);
+        console.error(`FAIL Conversion failed: ${error.message}`);
         process.exit(1);
     }
 }

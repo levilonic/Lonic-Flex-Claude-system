@@ -51,11 +51,11 @@ class SecretsRotator {
      */
     async start() {
         if (this.isRunning) {
-            info('⚠️  Secrets rotator already running');
+            info('WARN  Secrets rotator already running');
             return;
         }
 
-        info('🔄 Starting secrets rotation scheduler...');
+        info('CYCLE Starting secrets rotation scheduler...');
         
         // Ensure auth manager is initialized
         await this.authManager.initialize();
@@ -67,7 +67,7 @@ class SecretsRotator {
         this.scheduleRotationChecks();
         
         this.isRunning = true;
-        info('✅ Secrets rotation scheduler started');
+        info('PASS Secrets rotation scheduler started');
         
         // Perform initial check
         await this.checkRotationNeeded();
@@ -85,7 +85,7 @@ class SecretsRotator {
         }
         
         this.isRunning = false;
-        info('🛑 Secrets rotation scheduler stopped');
+        info('STOP Secrets rotation scheduler stopped');
     }
 
     /**
@@ -98,19 +98,19 @@ class SecretsRotator {
             try {
                 await this.checkRotationNeeded();
             } catch (error) {
-                error('❌ Rotation check failed:', error.message);
+                error('FAIL Rotation check failed:', error.message);
                 this.logRotationEvent('check_failed', null, { error: error.message });
             }
         }, checkInterval);
         
-        info(`⏰ Rotation checks scheduled every ${checkInterval / (60 * 60 * 1000)} hours`);
+        info(`CLOCK Rotation checks scheduled every ${checkInterval / (60 * 60 * 1000)} hours`);
     }
 
     /**
      * Check if any secrets need rotation
      */
     async checkRotationNeeded() {
-        info('🔍 Checking for secrets needing rotation...');
+        info(' Checking for secrets needing rotation...');
         
         const services = Object.keys(this.rotationSchedule.services);
         const rotationNeeded = [];
@@ -126,10 +126,10 @@ class SecretsRotator {
         }
         
         if (rotationNeeded.length > 0) {
-            info(`🔄 Services needing rotation: ${rotationNeeded.join(', ')}`);
+            info(`CYCLE Services needing rotation: ${rotationNeeded.join(', ')}`);
             await this.rotateServices(rotationNeeded);
         } else {
-            info('✅ No secrets need rotation at this time');
+            info('PASS No secrets need rotation at this time');
         }
         
         return rotationNeeded;
@@ -152,12 +152,12 @@ class SecretsRotator {
             const shouldRotate = rotationAge >= rotationInterval;
             
             if (shouldRotate) {
-                info(`🔄 ${service} token is ${Math.floor(rotationAge / (24 * 60 * 60 * 1000))} days old (threshold: ${intervalDays} days)`);
+                info(`CYCLE ${service} token is ${Math.floor(rotationAge / (24 * 60 * 60 * 1000))} days old (threshold: ${intervalDays} days)`);
             }
             
             return shouldRotate;
         } catch (error) {
-            warn(`⚠️  Could not check rotation status for ${service}:`, error.message);
+            warn(`WARN  Could not check rotation status for ${service}:`, error.message);
             return false;
         }
     }
@@ -169,7 +169,7 @@ class SecretsRotator {
         // For now, assume tokens should be rotated if they're older than half the interval
         // In a real implementation, this would check token creation date from API
         const graceInterval = intervalDays * 0.5; // Half the rotation interval
-        info(`📅 ${service} token age check - grace period: ${graceInterval} days`);
+        info(` ${service} token age check - grace period: ${graceInterval} days`);
         return false; // Conservative approach - don't rotate without explicit history
     }
 
@@ -198,21 +198,21 @@ class SecretsRotator {
      * Rotate secrets for multiple services
      */
     async rotateServices(services) {
-        info(`🔄 Starting rotation for services: ${services.join(', ')}`);
+        info(`CYCLE Starting rotation for services: ${services.join(', ')}`);
         
         const results = [];
         
         for (const service of services) {
             try {
-                info(`🔄 Rotating ${service} secrets...`);
+                info(`CYCLE Rotating ${service} secrets...`);
                 const result = await this.rotateServiceSecret(service);
                 results.push(result);
                 
                 if (result.success) {
                     await this.backupOldSecret(service, result.oldToken);
-                    info(`✅ ${service} secret rotated successfully`);
+                    info(`PASS ${service} secret rotated successfully`);
                 } else {
-                    error(`❌ Failed to rotate ${service} secret:`, result.error);
+                    error(`FAIL Failed to rotate ${service} secret:`, result.error);
                 }
                 
                 this.logRotationEvent('rotation_attempt', service, result);
@@ -229,11 +229,11 @@ class SecretsRotator {
                 };
                 results.push(errorResult);
                 this.logRotationEvent('rotation_error', service, errorResult);
-                error(`❌ Rotation failed for ${service}:`, error.message);
+                error(`FAIL Rotation failed for ${service}:`, error.message);
             }
         }
         
-        info(`🔄 Rotation completed. Success: ${results.filter(r => r.success).length}/${results.length}`);
+        info(`CYCLE Rotation completed. Success: ${results.filter(r => r.success).length}/${results.length}`);
         return results;
     }
 
@@ -260,7 +260,7 @@ class SecretsRotator {
      * Rotate GitHub secret (placeholder implementation)
      */
     async rotateGitHubSecret() {
-        info('🔄 GitHub secret rotation (simulated)...');
+        info('CYCLE GitHub secret rotation (simulated)...');
         
         // In a real implementation:
         // 1. Use GitHub App to generate new token
@@ -281,7 +281,7 @@ class SecretsRotator {
      * Rotate Slack secret (placeholder implementation)
      */
     async rotateSlackSecret() {
-        info('🔄 Slack secret rotation (simulated)...');
+        info('CYCLE Slack secret rotation (simulated)...');
         
         // In a real implementation:
         // 1. Use refresh token to get new access token
@@ -302,7 +302,7 @@ class SecretsRotator {
      * Rotate Docker secret (placeholder implementation)
      */
     async rotateDockerSecret() {
-        info('🔄 Docker secret rotation (simulated)...');
+        info('CYCLE Docker secret rotation (simulated)...');
         
         return {
             service: 'docker',
@@ -317,7 +317,7 @@ class SecretsRotator {
      * Rotate Anthropic secret (placeholder implementation)
      */
     async rotateAnthropicSecret() {
-        info('🔄 Anthropic secret rotation (simulated)...');
+        info('CYCLE Anthropic secret rotation (simulated)...');
         
         return {
             service: 'anthropic',
@@ -344,12 +344,12 @@ class SecretsRotator {
             };
             
             await fs.writeFile(backupFile, JSON.stringify(backup, null, 2));
-            info(`💾 Backed up old ${service} secret`);
+            info(` Backed up old ${service} secret`);
             
             // Clean up old backups
             await this.cleanupOldBackups(service);
         } catch (error) {
-            warn(`⚠️  Failed to backup old ${service} secret:`, error.message);
+            warn(`WARN  Failed to backup old ${service} secret:`, error.message);
         }
     }
 
@@ -373,10 +373,10 @@ class SecretsRotator {
             
             for (const backup of toDelete) {
                 await fs.unlink(backup.path);
-                info(`🗑️  Deleted old backup: ${backup.name}`);
+                info(`DELETE  Deleted old backup: ${backup.name}`);
             }
         } catch (error) {
-            warn(`⚠️  Backup cleanup failed for ${service}:`, error.message);
+            warn(`WARN  Backup cleanup failed for ${service}:`, error.message);
         }
     }
 
@@ -426,7 +426,7 @@ class SecretsRotator {
             
             await fs.writeFile(logFile, JSON.stringify(existingLog, null, 2));
         } catch (error) {
-            warn('⚠️  Failed to persist rotation log:', error.message);
+            warn('WARN  Failed to persist rotation log:', error.message);
         }
     }
 
@@ -438,7 +438,7 @@ class SecretsRotator {
             await fs.access(this.backupPath);
         } catch (error) {
             await fs.mkdir(this.backupPath, { recursive: true });
-            info(`📁 Created backup directory: ${this.backupPath}`);
+            info(` Created backup directory: ${this.backupPath}`);
         }
     }
 
@@ -474,7 +474,7 @@ class SecretsRotator {
      * Force rotation of specific service (for testing/emergency)
      */
     async forceRotateService(service) {
-        info(`🔧 Force rotating ${service} secret...`);
+        info(` Force rotating ${service} secret...`);
         
         if (!this.rotationSchedule.services[service]) {
             throw new Error(`Unknown service: ${service}`);
@@ -498,45 +498,45 @@ class SecretsRotator {
  * Demo function for secrets rotation
  */
 async function demoSecretsRotation() {
-    info('🔄 Secrets Rotation System Demo\n');
+    info('CYCLE Secrets Rotation System Demo\n');
     
     try {
         const rotator = new SecretsRotator();
         
-        info('📋 Rotation Configuration:');
-        info('   • GitHub tokens: 30 day rotation');
-        info('   • Slack tokens: 90 day rotation');
-        info('   • Docker tokens: 60 day rotation (disabled)');
-        info('   • Daily rotation checks at 2 AM UTC');
+        info(' Rotation Configuration:');
+        info('   - GitHub tokens: 30 day rotation');
+        info('   - Slack tokens: 90 day rotation');
+        info('   - Docker tokens: 60 day rotation (disabled)');
+        info('   - Daily rotation checks at 2 AM UTC');
         
         // Start the rotation scheduler
         await rotator.start();
         
         // Get current status
         const status = await rotator.getRotationStatus();
-        info('\n📊 Current Rotation Status:');
+        info('\nMETRICS Current Rotation Status:');
         for (const [service, serviceStatus] of Object.entries(status.services)) {
-            const enabled = serviceStatus.enabled ? '✅' : '❌';
+            const enabled = serviceStatus.enabled ? 'PASS' : 'FAIL';
             const lastRotation = serviceStatus.lastRotation ? 
                 serviceStatus.lastRotation.toISOString().split('T')[0] : 'Never';
             info(`   ${enabled} ${service}: Last rotated ${lastRotation} (${serviceStatus.intervalDays} day interval)`);
         }
         
         // Simulate rotation check
-        info('\n🔍 Checking for services needing rotation...');
+        info('\n Checking for services needing rotation...');
         const neededRotation = await rotator.checkRotationNeeded();
         
         if (neededRotation.length === 0) {
-            info('✅ No rotations needed at this time');
+            info('PASS No rotations needed at this time');
         }
         
         // Stop the scheduler
         rotator.stop();
         
-        info('\n✅ Secrets rotation demo completed!');
+        info('\nPASS Secrets rotation demo completed!');
         
     } catch (error) {
-        error('❌ Demo failed:', error.message);
+        error('FAIL Demo failed:', error.message);
     }
 }
 

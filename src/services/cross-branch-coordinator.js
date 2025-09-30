@@ -133,7 +133,7 @@ class CrossBranchCoordinator extends EventEmitter {
         // Store in database
         await this.storeBranchContext(branchName, 'registration', initialContext);
         
-        info(`🌿 Registered branch: ${branchName}`);
+        info(` Registered branch: ${branchName}`);
         this.emit('branchRegistered', { branchName, initialContext });
         
         return true;
@@ -296,7 +296,7 @@ class CrossBranchCoordinator extends EventEmitter {
 
         const coordinationId = `coord_${Date.now()}`;
         
-        info(`🔄 Coordinating ${actionType} across branches: ${targetBranches.join(', ')}`);
+        info(`CYCLE Coordinating ${actionType} across branches: ${targetBranches.join(', ')}`);
         
         // Store coordination action
         await this.storeCoordinationAction(coordinationId, actionType, targetBranches, actionData);
@@ -624,7 +624,7 @@ class CrossBranchCoordinator extends EventEmitter {
         this.pendingConflicts.clear();
         this.removeAllListeners();
         
-        info('🧹 Cross-Branch Coordinator cleaned up');
+        info('CLEANUP Cross-Branch Coordinator cleaned up');
     }
 }
 

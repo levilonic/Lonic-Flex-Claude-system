@@ -171,7 +171,7 @@ class MilestoneIntegrationService {
             return milestone;
 
         } catch (error) {
-            error(`❌ Failed to create branch milestone: ${error.message}`);
+            error(`FAIL Failed to create branch milestone: ${error.message}`);
             return null;
         }
     }
@@ -230,7 +230,7 @@ class MilestoneIntegrationService {
             return overallProgress;
 
         } catch (error) {
-            error(`❌ Failed to update milestone progress: ${error.message}`);
+            error(`FAIL Failed to update milestone progress: ${error.message}`);
             return null;
         }
     }
@@ -314,7 +314,7 @@ class MilestoneIntegrationService {
             info(`Milestone completed: ${milestone.title}`);
 
         } catch (error) {
-            error(`❌ Failed to complete milestone: ${error.message}`);
+            error(`FAIL Failed to complete milestone: ${error.message}`);
         }
     }
 
@@ -377,7 +377,7 @@ This milestone tracks the completion of all agent tasks in the multi-agent workf
 ${progressBar}
 
 **Tasks Completed**: ${progress.completedTasks}/${progress.totalTasks}
-**Status**: ${progress.isCompleted ? '✅ Completed' : '🔄 In Progress'}
+**Status**: ${progress.isCompleted ? 'PASS Completed' : 'CYCLE In Progress'}
 **Last Updated**: ${new Date().toISOString()}
             `;
 
@@ -393,7 +393,7 @@ ${progressBar}
             });
 
         } catch (error) {
-            error(`❌ Failed to update milestone description: ${error.message}`);
+            error(`FAIL Failed to update milestone description: ${error.message}`);
         }
     }
 
@@ -403,7 +403,7 @@ ${progressBar}
     generateProgressBar(percentage, width = 20) {
         const filled = Math.round((percentage / 100) * width);
         const empty = width - filled;
-        return '█'.repeat(filled) + '░'.repeat(empty) + ` ${percentage}%`;
+        return ''.repeat(filled) + ''.repeat(empty) + ` ${percentage}%`;
     }
 
     /**
@@ -451,7 +451,7 @@ ${progressBar}
                 });
                 return milestone;
             } catch (error) {
-                console.warn(`⚠️ Milestone ${result.milestone_number} not found on GitHub`);
+                console.warn(`WARN Milestone ${result.milestone_number} not found on GitHub`);
             }
         }
 
@@ -598,7 +598,7 @@ async function demoMilestoneIntegration() {
         }
         
     } catch (error) {
-        error(`❌ Error: ${error.message}`);
+        error(`FAIL Error: ${error.message}`);
     }
 }
 

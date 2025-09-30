@@ -84,9 +84,9 @@ class EnhancedCommunicationAgent extends ValidatedAgent {
         if (this.slackClient) {
             try {
                 // Test Slack connection (demo mode - don't actually call API)
-                info('📱 Slack client ready (demo mode)');
+                info(' Slack client ready (demo mode)');
             } catch (error) {
-                console.warn('⚠️ Slack connection test failed:', error.message);
+                console.warn('WARN Slack connection test failed:', error.message);
             }
         }
 

@@ -622,7 +622,7 @@ if (require.main === module) {
             logger.info('LonicFLex Agents Service started successfully');
         })
         .catch((error) => {
-            logger.error('❌ Failed to start Agents service:', error.message);
+            logger.error('FAIL Failed to start Agents service:', error.message);
             process.exit(1);
         });
 

@@ -150,7 +150,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
             return coordinationState;
 
         } catch (error) {
-            error(`❌ Coordination initialization failed for ${project.id}:`, error);
+            error(`FAIL Coordination initialization failed for ${project.id}:`, error);
             throw error;
         }
     }
@@ -165,7 +165,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
         }
 
         try {
-            info(`🔄 Coordinating execution for ${tasks.length} tasks in project: ${projectId}`);
+            info(`CYCLE Coordinating execution for ${tasks.length} tasks in project: ${projectId}`);
 
             // Analyze task dependencies and optimal execution order
             const executionPlan = await this.analyzeExecutionDependencies(tasks, coordinationState);
@@ -219,7 +219,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
             return coordinationResult;
 
         } catch (error) {
-            error(`❌ Execution coordination failed for ${projectId}:`, error);
+            error(`FAIL Execution coordination failed for ${projectId}:`, error);
             throw error;
         }
     }
@@ -234,7 +234,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
         }
 
         try {
-            info(`➕ Adding agent ${agent.agentId} to coordination with role: ${role}`);
+            info(`PLUS Adding agent ${agent.agentId} to coordination with role: ${role}`);
 
             // Register agent in coordination state
             const agentData = {
@@ -296,7 +296,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
             };
 
         } catch (error) {
-            error(`❌ Failed to add agent ${agent.agentId}:`, error);
+            error(`FAIL Failed to add agent ${agent.agentId}:`, error);
             throw error;
         }
     }
@@ -311,7 +311,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
         }
 
         try {
-            info(`🗳️ Executing consensus decision: ${decision.type} for project: ${projectId}`);
+            info(`BALLOT Executing consensus decision: ${decision.type} for project: ${projectId}`);
 
             const consensusResult = await this.consensusEngine.executeConsensus(
                 coordinationState, decision, participants
@@ -334,11 +334,11 @@ class AdvancedAgentCoordinator extends EventEmitter {
                 participants: participants.length
             });
 
-            info(`✅ Consensus decision: ${consensusResult.consensus ? 'REACHED' : 'FAILED'}`);
+            info(`PASS Consensus decision: ${consensusResult.consensus ? 'REACHED' : 'FAILED'}`);
             return consensusResult;
 
         } catch (error) {
-            error(`❌ Consensus decision failed for ${projectId}:`, error);
+            error(`FAIL Consensus decision failed for ${projectId}:`, error);
             throw error;
         }
     }
@@ -353,7 +353,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
         }
 
         try {
-            info(`⚡ Resolving conflict: ${conflict.type} in project: ${projectId}`);
+            info(`FAST Resolving conflict: ${conflict.type} in project: ${projectId}`);
 
             const resolution = await this.conflictResolver.resolveConflict(
                 coordinationState, conflict
@@ -376,7 +376,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
             return resolution;
 
         } catch (error) {
-            error(`❌ Conflict resolution failed for ${projectId}:`, error);
+            error(`FAIL Conflict resolution failed for ${projectId}:`, error);
             throw error;
         }
     }
@@ -450,7 +450,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
 
     async coordinateHybridExecution(coordinationState, executionPlan) {
         // Hybrid coordination combines hierarchical and distributed approaches
-        info(`🔄 Executing hybrid coordination pattern`);
+        info(`CYCLE Executing hybrid coordination pattern`);
 
         const results = {
             status: 'executing',
@@ -705,7 +705,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
     }
 
     async transitionCoordinationPattern(coordinationState, newPattern) {
-        info(`🔄 Transitioning coordination pattern: ${coordinationState.pattern} → ${newPattern}`);
+        info(`CYCLE Transitioning coordination pattern: ${coordinationState.pattern} -> ${newPattern}`);
 
         // Graceful transition logic - placeholder for complex transition handling
         coordinationState.pattern = newPattern;
@@ -749,7 +749,7 @@ class AdvancedAgentCoordinator extends EventEmitter {
 
     async escalateConsensusFailure(coordinationState, consensusResult) {
         // Escalation logic - could notify human oversight, apply default decisions, etc.
-        info(`📢 Escalating consensus failure for project: ${coordinationState.projectId}`);
+        info(` Escalating consensus failure for project: ${coordinationState.projectId}`);
 
         this.emit('consensusEscalation', {
             projectId: coordinationState.projectId,
@@ -779,19 +779,19 @@ class AdvancedAgentCoordinator extends EventEmitter {
 
     async reassignConflictingTask(coordinationState, resolution) {
         // Task reassignment logic
-        info(`🔄 Reassigning conflicting task: ${resolution.taskId}`);
+        info(`CYCLE Reassigning conflicting task: ${resolution.taskId}`);
     }
 
     async reallocateConflictingResources(coordinationState, resolution) {
         // Resource reallocation logic
         const resources = resolution.resources || ['unspecified'];
-        info(`💾 Reallocating conflicting resources: ${resources.join(', ')}`);
+        info(` Reallocating conflicting resources: ${resources.join(', ')}`);
     }
 
     async adjustTaskPriorities(coordinationState, resolution) {
         // Priority adjustment logic
         const adjustments = resolution.adjustments || [];
-        info(`⚡ Adjusting task priorities: ${adjustments.length} changes`);
+        info(`FAST Adjusting task priorities: ${adjustments.length} changes`);
     }
 }
 
@@ -823,7 +823,7 @@ class HierarchicalCoordinator {
     }
 
     async coordinateExecution(coordinationState, executionPlan) {
-        info(`📊 Coordinating hierarchical execution for ${executionPlan.tasks.length} tasks`);
+        info(`METRICS Coordinating hierarchical execution for ${executionPlan.tasks.length} tasks`);
 
         const hierarchy = this.hierarchies.get(coordinationState.projectId);
         const results = {
@@ -865,7 +865,7 @@ class HierarchicalCoordinator {
         const hierarchy = this.hierarchies.get(coordinationState.projectId);
         if (!hierarchy) return;
 
-        info(`🔗 Integrating agent ${agent.agentId} into hierarchical structure`);
+        info(` Integrating agent ${agent.agentId} into hierarchical structure`);
 
         // Determine appropriate position in hierarchy
         const position = this.determineHierarchicalPosition(hierarchy, agent, role);
@@ -1051,7 +1051,7 @@ class DistributedCoordinator {
     }
 
     async initializeDistribution(coordinationState, team) {
-        info(`🌐 Initializing distributed coordination for ${team.members.length} agents`);
+        info(` Initializing distributed coordination for ${team.members.length} agents`);
 
         const network = {
             nodes: this.createNetworkNodes(team),
@@ -1068,7 +1068,7 @@ class DistributedCoordinator {
     }
 
     async coordinateExecution(coordinationState, executionPlan) {
-        info(`🌐 Coordinating distributed execution for ${executionPlan.tasks.length} tasks`);
+        info(` Coordinating distributed execution for ${executionPlan.tasks.length} tasks`);
 
         const network = this.distributedNetworks.get(coordinationState.projectId);
         const results = {
@@ -1108,7 +1108,7 @@ class DistributedCoordinator {
         const network = this.distributedNetworks.get(coordinationState.projectId);
         if (!network) return;
 
-        info(`🔗 Integrating agent ${agent.agentId} into distributed network`);
+        info(` Integrating agent ${agent.agentId} into distributed network`);
 
         // Add as new network node
         const newNode = this.createNetworkNode(agent, role);
@@ -1408,14 +1408,14 @@ class ConsensusEngine {
         const groups = this.createOptimalConsensusGroups(team);
         coordinationState.consensusGroups = groups;
 
-        info(`🗳️ Setup ${groups.length} consensus groups for project: ${coordinationState.projectId}`);
+        info(`BALLOT Setup ${groups.length} consensus groups for project: ${coordinationState.projectId}`);
         return groups;
     }
 
     async executeConsensus(coordinationState, decision, participants) {
         const consensusId = `consensus-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        info(`🗳️ Executing consensus: ${decision.type} with ${participants.length} participants`);
+        info(`BALLOT Executing consensus: ${decision.type} with ${participants.length} participants`);
 
         const consensusState = {
             id: consensusId,
@@ -1440,7 +1440,7 @@ class ConsensusEngine {
         // Archive consensus
         this.archiveConsensus(consensusState, consensusResult);
 
-        info(`✅ Consensus ${consensusResult.consensus ? 'REACHED' : 'FAILED'}: ${decision.type}`);
+        info(`PASS Consensus ${consensusResult.consensus ? 'REACHED' : 'FAILED'}: ${decision.type}`);
         return consensusResult;
     }
 
@@ -1454,7 +1454,7 @@ class ConsensusEngine {
             }
         }
 
-        info(`🔄 Updated consensus groups with new agent: ${newAgent.agentId}`);
+        info(`CYCLE Updated consensus groups with new agent: ${newAgent.agentId}`);
     }
 
     createOptimalConsensusGroups(team) {
@@ -1645,14 +1645,14 @@ class AdvancedHandoffManager {
         const protocols = this.createHandoffProtocols(executionPlan, coordinationState);
         this.handoffProtocols.set(coordinationState.projectId, protocols);
 
-        info(`🔄 Initialized ${protocols.length} handoff protocols for project: ${coordinationState.projectId}`);
+        info(`CYCLE Initialized ${protocols.length} handoff protocols for project: ${coordinationState.projectId}`);
         return protocols;
     }
 
     async executeHandoff(fromAgent, toAgent, task, handoffData, coordinationState) {
         const handoffId = `handoff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        info(`🔄 Executing handoff: ${fromAgent.agentId} → ${toAgent.agentId} for task: ${task.id}`);
+        info(`CYCLE Executing handoff: ${fromAgent.agentId} -> ${toAgent.agentId} for task: ${task.id}`);
 
         const handoffState = {
             id: handoffId,
@@ -1682,7 +1682,7 @@ class AdvancedHandoffManager {
                 coordinationState.performanceData.handoffsExecuted++;
             }
 
-            info(`✅ Handoff ${result.success ? 'COMPLETED' : 'FAILED'}: ${handoffId}`);
+            info(`PASS Handoff ${result.success ? 'COMPLETED' : 'FAILED'}: ${handoffId}`);
             return result;
 
         } catch (error) {
@@ -2158,7 +2158,7 @@ class ConflictResolutionEngine {
     }
 
     async resolveConflict(coordinationState, conflict) {
-        info(`⚡ Resolving ${conflict.type} conflict in project: ${coordinationState.projectId}`);
+        info(`FAST Resolving ${conflict.type} conflict in project: ${coordinationState.projectId}`);
 
         // Analyze conflict
         const conflictAnalysis = this.analyzeConflict(conflict, coordinationState);

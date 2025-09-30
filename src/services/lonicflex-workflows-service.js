@@ -870,7 +870,7 @@ if (require.main === module) {
             logger.info('LonicFLex Workflows Service started successfully');
         })
         .catch((error) => {
-            logger.error('❌ Failed to start Workflows service:', error.message);
+            logger.error('FAIL Failed to start Workflows service:', error.message);
             process.exit(1);
         });
 

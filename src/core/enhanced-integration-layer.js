@@ -42,7 +42,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
         // Active integrations
         this.activeIntegrations = new Map();
 
-        info(`🔗 Enhanced Integration Layer initialized: ${this.layerId}`);
+        info(` Enhanced Integration Layer initialized: ${this.layerId}`);
     }
 
     /**
@@ -69,7 +69,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
                 });
                 info('GitHub integration initialized');
             } catch (error) {
-                console.warn('⚠️ GitHub integration failed:', error.message);
+                console.warn('WARN GitHub integration failed:', error.message);
                 results.github = { error: error.message };
                 this.integrationState.set('github', {
                     status: 'failed',
@@ -88,7 +88,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
                 });
                 info('Slack integration initialized');
             } catch (error) {
-                console.warn('⚠️ Slack integration failed:', error.message);
+                console.warn('WARN Slack integration failed:', error.message);
                 results.slack = { error: error.message };
                 this.integrationState.set('slack', {
                     status: 'failed',
@@ -113,11 +113,11 @@ class EnhancedIntegrationLayer extends EventEmitter {
                 )
             });
 
-            info(`🎯 Enhanced Integration Layer ready with ${results.github ? 'GitHub' : ''} ${results.slack ? 'Slack' : ''} support`);
+            info(` Enhanced Integration Layer ready with ${results.github ? 'GitHub' : ''} ${results.slack ? 'Slack' : ''} support`);
             return results;
 
         } catch (error) {
-            error('❌ Enhanced Integration Layer initialization failed:', error);
+            error('FAIL Enhanced Integration Layer initialization failed:', error);
             throw error;
         }
     }
@@ -172,7 +172,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
             workflows: integration.workflows.length
         });
 
-        info(`✅ Project integration setup complete: ${Object.keys(integration.platforms).join(', ')}`);
+        info(`PASS Project integration setup complete: ${Object.keys(integration.platforms).join(', ')}`);
         return integration;
     }
 
@@ -181,7 +181,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
      */
     async processEvent(platform, event, context = {}) {
         try {
-            info(`📡 Processing ${platform} event: ${event.type}`);
+            info(` Processing ${platform} event: ${event.type}`);
 
             // Route event through cross-platform router
             const routingResult = await this.crossPlatformRouter.routeEvent(platform, event, context);
@@ -207,7 +207,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
             return routingResult;
 
         } catch (error) {
-            error(`❌ Event processing failed for ${platform}:`, error);
+            error(`FAIL Event processing failed for ${platform}:`, error);
             this.integrationMetrics.recordError(platform, event.type, error.message);
             throw error;
         }
@@ -219,7 +219,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
     async executeAction(action, context) {
         const actionId = `action-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        info(`⚡ Executing cross-platform action: ${action.type}`);
+        info(`FAST Executing cross-platform action: ${action.type}`);
 
         const execution = {
             id: actionId,
@@ -289,7 +289,7 @@ class EnhancedIntegrationLayer extends EventEmitter {
             execution.error = error.message;
             execution.endTime = new Date();
 
-            error(`❌ Cross-platform action failed: ${actionId}`, error);
+            error(`FAIL Cross-platform action failed: ${actionId}`, error);
             throw error;
         }
     }
@@ -558,7 +558,7 @@ class AdvancedGitHubIntegration {
             };
 
         } catch (error) {
-            error('❌ GitHub integration initialization failed:', error);
+            error('FAIL GitHub integration initialization failed:', error);
             throw error;
         }
     }
@@ -582,7 +582,7 @@ class AdvancedGitHubIntegration {
     }
 
     async executeAction(action, context) {
-        info(`⚡ Executing GitHub action: ${action.type}`);
+        info(`FAST Executing GitHub action: ${action.type}`);
 
         switch (action.type) {
             case 'create_branch':
@@ -614,7 +614,7 @@ class AdvancedGitHubIntegration {
             });
         } catch (error) {
             // Fallback if Octokit is not available
-            console.warn('⚠️ Octokit not available, using mock API');
+            console.warn('WARN Octokit not available, using mock API');
             return this.createMockGitHubAPI();
         }
     }
@@ -653,7 +653,7 @@ class AdvancedGitHubIntegration {
             });
             capabilities.push('github_actions');
         } catch (error) {
-            console.warn('⚠️ GitHub Actions not available');
+            console.warn('WARN GitHub Actions not available');
         }
 
         try {
@@ -664,14 +664,14 @@ class AdvancedGitHubIntegration {
             });
             capabilities.push('security_management');
         } catch (error) {
-            console.warn('⚠️ Security management not available');
+            console.warn('WARN Security management not available');
         }
 
         return capabilities;
     }
 
     async setupProjectRepository(project) {
-        info(`📁 Setting up repository for project: ${project.name}`);
+        info(` Setting up repository for project: ${project.name}`);
 
         // Create project-specific branch
         const branchName = `autonomous/${project.id}`;
@@ -695,7 +695,7 @@ class AdvancedGitHubIntegration {
 
         } catch (error) {
             if (error.status === 422) {
-                info(`📁 Branch already exists: ${branchName}`);
+                info(` Branch already exists: ${branchName}`);
                 return { name: this.config.repo, branch: branchName, structure: 'existing' };
             }
             throw error;
@@ -724,7 +724,7 @@ class AdvancedGitHubIntegration {
                 });
             } catch (error) {
                 if (error.status !== 422) { // Branch already exists
-                    console.warn(`⚠️ Failed to create branch ${branchName}:`, error.message);
+                    console.warn(`WARN Failed to create branch ${branchName}:`, error.message);
                 }
             }
         }
@@ -921,7 +921,7 @@ class AdvancedGitHubIntegration {
                     branch: branchName
                 });
             } catch (error) {
-                console.warn(`⚠️ Failed to create ${path}:`, error.message);
+                console.warn(`WARN Failed to create ${path}:`, error.message);
             }
         }
     }
@@ -1032,7 +1032,7 @@ class AdvancedSlackIntegration {
             };
 
         } catch (error) {
-            error('❌ Slack integration initialization failed:', error);
+            error('FAIL Slack integration initialization failed:', error);
             throw error;
         }
     }
@@ -1049,12 +1049,12 @@ class AdvancedSlackIntegration {
 
         this.activeProjects.set(project.id, projectIntegration);
 
-        info(`💬 Slack project integration setup: ${project.name}`);
+        info(` Slack project integration setup: ${project.name}`);
         return projectIntegration;
     }
 
     async executeAction(action, context) {
-        info(`⚡ Executing Slack action: ${action.type}`);
+        info(`FAST Executing Slack action: ${action.type}`);
 
         switch (action.type) {
             case 'send_message':
@@ -1082,7 +1082,7 @@ class AdvancedSlackIntegration {
                 userAgent: this.config.userAgent
             });
         } catch (error) {
-            console.warn('⚠️ Slack WebClient not available, using mock API');
+            console.warn('WARN Slack WebClient not available, using mock API');
             return this.createMockSlackAPI();
         }
     }
@@ -1104,7 +1104,7 @@ class AdvancedSlackIntegration {
             info('Slack Socket Mode connected');
 
         } catch (error) {
-            console.warn('⚠️ Slack Socket Mode not available:', error.message);
+            console.warn('WARN Slack Socket Mode not available:', error.message);
         }
     }
 
@@ -1148,7 +1148,7 @@ class AdvancedSlackIntegration {
             await this.slackApp.conversations.list({ limit: 1 });
             capabilities.push('channel_management');
         } catch (error) {
-            console.warn('⚠️ Channel management not available');
+            console.warn('WARN Channel management not available');
         }
 
         return capabilities;
@@ -1166,20 +1166,20 @@ class AdvancedSlackIntegration {
             // Send welcome message
             await this.slackApp.chat.postMessage({
                 channel: result.channel.id,
-                text: `🚀 Welcome to the autonomous project: *${project.name}*\n\nThis channel will provide real-time updates on project progress.`,
+                text: ` Welcome to the autonomous project: *${project.name}*\n\nThis channel will provide real-time updates on project progress.`,
                 blocks: [
                     {
                         type: 'section',
                         text: {
                             type: 'mrkdwn',
-                            text: `🚀 Welcome to the autonomous project: *${project.name}*`
+                            text: ` Welcome to the autonomous project: *${project.name}*`
                         }
                     },
                     {
                         type: 'section',
                         text: {
                             type: 'mrkdwn',
-                            text: `📋 *Description:* ${project.description}`
+                            text: ` *Description:* ${project.description}`
                         }
                     },
                     {
@@ -1269,7 +1269,7 @@ class AdvancedSlackIntegration {
                 type: 'section',
                 text: {
                     type: 'mrkdwn',
-                    text: `🔔 *${data.title || 'Notification'}*\n${data.message}`
+                    text: ` *${data.title || 'Notification'}*\n${data.message}`
                 }
             }
         ];
@@ -1305,13 +1305,13 @@ class AdvancedSlackIntegration {
     async broadcastUpdate(data, context) {
         const message = {
             channel: this.getProjectChannel(context.projectId),
-            text: `📢 Project Update: ${data.title}`,
+            text: ` Project Update: ${data.title}`,
             blocks: [
                 {
                     type: 'header',
                     text: {
                         type: 'plain_text',
-                        text: `📢 ${data.title}`
+                        text: ` ${data.title}`
                     }
                 },
                 {
@@ -1406,7 +1406,7 @@ class AdvancedSlackIntegration {
     }
 
     async handleSocketEvent(event) {
-        info(`📡 Received Slack event: ${event.event.type}`);
+        info(` Received Slack event: ${event.event.type}`);
 
         // Route event through parent layer
         await this.parent.processEvent('slack', {
@@ -1417,7 +1417,7 @@ class AdvancedSlackIntegration {
     }
 
     async handleInteraction(interaction) {
-        info(`🔄 Received Slack interaction: ${interaction.type}`);
+        info(`CYCLE Received Slack interaction: ${interaction.type}`);
 
         await this.interactionHandler.handleInteraction(interaction);
     }

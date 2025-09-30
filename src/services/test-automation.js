@@ -48,7 +48,7 @@ class TestAutomation {
             coveragePercentage: 0
         };
         
-        info('🧪 Test Automation Service initialized');
+        info('TEST Test Automation Service initialized');
     }
     
     /**
@@ -130,7 +130,7 @@ class TestAutomation {
         const startTime = Date.now();
         
         try {
-            info(`🧪 Starting test run: ${testSuite} (${runId})`);
+            info(`TEST Starting test run: ${testSuite} (${runId})`);
             
             this.isRunning = true;
             this.currentTestRun = {
@@ -159,7 +159,7 @@ class TestAutomation {
             
             // Execute test suites
             for (const suite of suitesToRun) {
-                info(`🔍 Running test suite: ${suite.name}`);
+                info(` Running test suite: ${suite.name}`);
                 
                 const suiteResult = await this.executeTestSuite(suite);
                 testResults.push(suiteResult);
@@ -205,8 +205,8 @@ class TestAutomation {
             this.currentTestRun.status = success ? 'completed' : 'failed';
             this.currentTestRun.results = finalResults;
             
-            info(`✅ Test run ${success ? 'completed successfully' : 'failed'}: ${runId}`);
-            info(`📊 Results: ${finalResults.summary.passedSuites}/${finalResults.summary.totalSuites} suites passed, ${finalResults.summary.passedTests}/${finalResults.summary.totalTests} tests passed`);
+            info(`PASS Test run ${success ? 'completed successfully' : 'failed'}: ${runId}`);
+            info(`METRICS Results: ${finalResults.summary.passedSuites}/${finalResults.summary.totalSuites} suites passed, ${finalResults.summary.passedTests}/${finalResults.summary.totalTests} tests passed`);
             
             return finalResults;
             
@@ -226,7 +226,7 @@ class TestAutomation {
             this.stats.failedTestRuns++;
             this.stats.totalTestRuns++;
             
-            error(`❌ Test run failed: ${error.message}`);
+            error(`FAIL Test run failed: ${error.message}`);
             return errorResults;
             
         } finally {
@@ -242,7 +242,7 @@ class TestAutomation {
         const startTime = Date.now();
         
         try {
-            info(`🔍 Executing: ${suite.command}`);
+            info(` Executing: ${suite.command}`);
             
             let result;
             
@@ -296,7 +296,7 @@ class TestAutomation {
         
         try {
             // Test File System Automation
-            info('🧪 Testing File System Automation...');
+            info('TEST Testing File System Automation...');
             const { FileSystemAutomation } = require('./filesystem-automation');
             const fsService = new FileSystemAutomation();
             
@@ -319,7 +319,7 @@ class TestAutomation {
         
         try {
             // Test Git Automation
-            info('🧪 Testing Git Automation...');
+            info('TEST Testing Git Automation...');
             const { GitAutomation } = require('./git-automation');
             const gitService = new GitAutomation();
             
@@ -338,7 +338,7 @@ class TestAutomation {
         
         try {
             // Test Progress Monitor
-            info('🧪 Testing Progress Monitor...');
+            info('TEST Testing Progress Monitor...');
             const { ProgressMonitor } = require('./progress-monitor');
             const monitor = new ProgressMonitor({ enableSlackNotifications: false });
             
@@ -358,7 +358,7 @@ class TestAutomation {
         
         try {
             // Test Error Recovery
-            info('🧪 Testing Error Recovery...');
+            info('TEST Testing Error Recovery...');
             const { ErrorRecovery } = require('./error-recovery');
             const errorRecovery = new ErrorRecovery();
             
@@ -395,7 +395,7 @@ class TestAutomation {
         const validationResults = [];
         
         try {
-            info('🔍 Validating code quality...');
+            info(' Validating code quality...');
             
             // Get files to validate
             let filesToValidate = files;
@@ -431,7 +431,7 @@ class TestAutomation {
             const validFiles = validationResults.filter(r => r.valid).length;
             const invalidFiles = validationResults.filter(r => !r.valid).length;
             
-            info(`📊 Code validation: ${validFiles} valid, ${invalidFiles} invalid files`);
+            info(`METRICS Code validation: ${validFiles} valid, ${invalidFiles} invalid files`);
             
             return {
                 success: invalidFiles === 0,
@@ -442,7 +442,7 @@ class TestAutomation {
             };
             
         } catch (error) {
-            error('❌ Code validation failed:', error.message);
+            error('FAIL Code validation failed:', error.message);
             return {
                 success: false,
                 error: error.message
@@ -455,7 +455,7 @@ class TestAutomation {
      */
     async integrateWithWorkflow(workflow) {
         try {
-            info(`🔗 Integrating testing with workflow: ${workflow.name || 'unknown'}`);
+            info(` Integrating testing with workflow: ${workflow.name || 'unknown'}`);
             
             // Set up test triggers based on workflow
             const integrationConfig = {
@@ -468,7 +468,7 @@ class TestAutomation {
             
             // Enable continuous testing if requested
             if (this.config.enableContinuousTesting && workflow.continuous) {
-                info('🔄 Enabling continuous testing...');
+                info('CYCLE Enabling continuous testing...');
                 // This would set up file watchers in production
             }
             
@@ -482,7 +482,7 @@ class TestAutomation {
             };
             
         } catch (error) {
-            error('❌ Workflow integration failed:', error.message);
+            error('FAIL Workflow integration failed:', error.message);
             return {
                 success: false,
                 error: error.message
@@ -548,10 +548,10 @@ class TestAutomation {
         
         // Parse different test output formats
         if (type === 'passed') {
-            const passMatches = output.match(/✅|PASS|passed|success/gi);
+            const passMatches = output.match(/PASS|PASS|passed|success/gi);
             return passMatches ? passMatches.length : 0;
         } else if (type === 'failed') {
-            const failMatches = output.match(/❌|FAIL|failed|error/gi);
+            const failMatches = output.match(/FAIL|FAIL|failed|error/gi);
             return failMatches ? failMatches.length : 0;
         }
         
@@ -612,7 +612,7 @@ module.exports = { TestAutomation };
 // If run directly, demonstrate the service
 if (require.main === module) {
     (async () => {
-        info('🧪 Testing Test Automation Service...');
+        info('TEST Testing Test Automation Service...');
         
         const testAutomation = new TestAutomation({
             testTimeout: 60000,
@@ -621,17 +621,17 @@ if (require.main === module) {
         
         try {
             // Run service tests
-            info('\n🔍 Running service tests...');
+            info('\n Running service tests...');
             const serviceResults = await testAutomation.runTests('services');
             info('Service test results:', serviceResults.success ? 'PASSED' : 'FAILED');
             
             // Validate some code
-            info('\n🔍 Running code validation...');
+            info('\n Running code validation...');
             const validationResults = await testAutomation.validateCode([__filename]);
             info('Code validation:', validationResults.success ? 'PASSED' : 'FAILED');
             
             // Show status
-            info('\n📊 Test Automation Status:');
+            info('\nMETRICS Test Automation Status:');
             const status = testAutomation.getStatus();
             info(`Available test suites: ${status.availableTestSuites.length}`);
             info(`Statistics:`, status.statistics);
@@ -639,7 +639,7 @@ if (require.main === module) {
             info('Test Automation Service demonstration completed');
             
         } catch (error) {
-            error('❌ Test failed:', error.message);
+            error('FAIL Test failed:', error.message);
         }
     })();
 }

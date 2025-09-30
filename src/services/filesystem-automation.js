@@ -34,9 +34,9 @@ class FileSystemAutomation {
     async initializeBackupDirectory() {
         try {
             await fs.mkdir(this.config.backupDir, { recursive: true });
-            info(`📁 Backup directory initialized: ${this.config.backupDir}`);
+            info(` Backup directory initialized: ${this.config.backupDir}`);
         } catch (error) {
-            error('❌ Failed to initialize backup directory:', error.message);
+            error('FAIL Failed to initialize backup directory:', error.message);
             throw error;
         }
     }
@@ -57,7 +57,7 @@ class FileSystemAutomation {
         };
         
         try {
-            info(`📝 Starting atomic write: ${filePath} (${operationId})`);
+            info(` Starting atomic write: ${filePath} (${operationId})`);
             
             // Step 1: Check if original file exists
             operation.originalExists = await this.fileExists(filePath);
@@ -65,7 +65,7 @@ class FileSystemAutomation {
             // Step 2: Create backup if original exists
             if (operation.originalExists && this.config.enableBackups) {
                 operation.backupPath = await this.createBackup(filePath, operationId);
-                info(`💾 Backup created: ${operation.backupPath}`);
+                info(` Backup created: ${operation.backupPath}`);
             }
             
             // Step 3: Write to temporary file first (atomic operation)
@@ -115,7 +115,7 @@ class FileSystemAutomation {
             // Cleanup on failure
             await this.cleanupFailedOperation(operation);
             
-            error(`❌ Atomic write failed for ${filePath}:`, error.message);
+            error(`FAIL Atomic write failed for ${filePath}:`, error.message);
             throw new Error(`File write operation failed: ${error.message}`);
         }
     }
@@ -155,7 +155,7 @@ class FileSystemAutomation {
         try {
             await fs.mkdir(dirPath, { recursive: true, ...options });
             
-            info(`📁 Directory created: ${dirPath}`);
+            info(` Directory created: ${dirPath}`);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -165,7 +165,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            error(`❌ Directory creation failed: ${dirPath}`, error.message);
+            error(`FAIL Directory creation failed: ${dirPath}`, error.message);
             throw error;
         }
     }
@@ -199,7 +199,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            error(`❌ File copy failed: ${sourcePath} -> ${destPath}`, error.message);
+            error(`FAIL File copy failed: ${sourcePath} -> ${destPath}`, error.message);
             throw error;
         }
     }
@@ -218,7 +218,7 @@ class FileSystemAutomation {
         };
         
         try {
-            info(`🗑️ Deleting file: ${filePath} (${operationId})`);
+            info(`DELETE Deleting file: ${filePath} (${operationId})`);
             
             // Check if file exists
             if (!await this.fileExists(filePath)) {
@@ -235,7 +235,7 @@ class FileSystemAutomation {
             // Create backup before deletion
             if (this.config.enableBackups && !options.skipBackup) {
                 operation.backupPath = await this.createBackup(filePath, operationId);
-                info(`💾 Backup before deletion: ${operation.backupPath}`);
+                info(` Backup before deletion: ${operation.backupPath}`);
             }
             
             // Delete the file
@@ -254,7 +254,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            error(`❌ File deletion failed: ${filePath}`, error.message);
+            error(`FAIL File deletion failed: ${filePath}`, error.message);
             throw error;
         }
     }
@@ -269,7 +269,7 @@ class FileSystemAutomation {
         }
         
         try {
-            info(`🔄 Rolling back operation: ${operationId}`);
+            info(`CYCLE Rolling back operation: ${operationId}`);
             
             switch (operation.type) {
                 case 'writeFile':
@@ -302,7 +302,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            error(`❌ Rollback failed for ${operationId}:`, error.message);
+            error(`FAIL Rollback failed for ${operationId}:`, error.message);
             throw error;
         }
     }
@@ -314,12 +314,12 @@ class FileSystemAutomation {
         if (operation.originalExists && operation.backupPath) {
             // Restore from backup
             await fs.copyFile(operation.backupPath, operation.filePath);
-            info(`🔄 File restored from backup: ${operation.filePath}`);
+            info(`CYCLE File restored from backup: ${operation.filePath}`);
         } else {
             // File didn't exist originally, so delete it
             if (await this.fileExists(operation.filePath)) {
                 await fs.unlink(operation.filePath);
-                info(`🔄 New file deleted: ${operation.filePath}`);
+                info(`CYCLE New file deleted: ${operation.filePath}`);
             }
         }
     }
@@ -331,7 +331,7 @@ class FileSystemAutomation {
         if (operation.backupPath && await this.fileExists(operation.backupPath)) {
             // Restore from backup
             await fs.copyFile(operation.backupPath, operation.filePath);
-            info(`🔄 Deleted file restored: ${operation.filePath}`);
+            info(`CYCLE Deleted file restored: ${operation.filePath}`);
         } else {
             throw new Error(`Cannot rollback deletion: no backup found for ${operation.filePath}`);
         }
@@ -386,7 +386,7 @@ class FileSystemAutomation {
             };
             
         } catch (error) {
-            error(`❌ Project structure creation failed:`, error.message);
+            error(`FAIL Project structure creation failed:`, error.message);
             
             // Cleanup created items on failure
             await this.cleanupProjectStructure(createdItems);
@@ -497,7 +497,7 @@ class FileSystemAutomation {
     }
     
     async cleanupProjectStructure(createdItems) {
-        info('🧹 Cleaning up failed project structure...');
+        info('CLEANUP Cleaning up failed project structure...');
         
         // Delete in reverse order (files first, then directories)
         const sortedItems = [...createdItems].reverse();
@@ -571,11 +571,11 @@ class FileSystemAutomation {
                 }
             }
             
-            info(`🧹 Cleaned up ${cleanedCount} old backup files`);
+            info(`CLEANUP Cleaned up ${cleanedCount} old backup files`);
             return { cleanedCount };
             
         } catch (error) {
-            error('❌ Backup cleanup failed:', error.message);
+            error('FAIL Backup cleanup failed:', error.message);
             throw error;
         }
     }
@@ -586,7 +586,7 @@ module.exports = { FileSystemAutomation };
 // If run directly, demonstrate the service
 if (require.main === module) {
     (async () => {
-        info('🧪 Testing File System Automation Service...');
+        info('TEST Testing File System Automation Service...');
         
         const fsService = new FileSystemAutomation({
             backupDir: path.join(__dirname, '..', '.test-backups')
@@ -614,7 +614,7 @@ if (require.main === module) {
             info('File System Automation Service test completed');
             
         } catch (error) {
-            error('❌ Test failed:', error.message);
+            error('FAIL Test failed:', error.message);
         }
     })();
 }

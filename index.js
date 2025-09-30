@@ -28,17 +28,17 @@ class LonicFLexMain {
         }
 
         try {
-            info('🚀 Starting LonicFLex System v' + this.version);
+            info('Starting LonicFLex System v' + this.version);
 
             // Initialize core system
             this.serviceContainer = await systemStartup.initialize();
             this.initialized = true;
 
-            info('✅ LonicFLex System initialized successfully');
+            info('LonicFLex System initialized successfully');
             return this.serviceContainer;
 
         } catch (err) {
-            error('❌ LonicFLex System initialization failed:', err.message);
+            error('LonicFLex System initialization failed:', err.message);
             throw err;
         }
     }
@@ -49,10 +49,10 @@ class LonicFLexMain {
     async start() {
         await this.initialize();
 
-        info('🎯 LonicFLex System is running');
-        info('   - Universal Context System: ✅ Active');
-        info('   - Multi-Agent Coordination: ✅ Active');
-        info('   - External Integrations: ✅ Ready');
+        info('LonicFLex System is running');
+        info('   - Universal Context System: active');
+        info('   - Multi-Agent Coordination: active');
+        info('   - External Integrations: ready');
 
         // Keep the process running
         process.on('SIGINT', async () => {
@@ -65,13 +65,13 @@ class LonicFLexMain {
      * Graceful shutdown
      */
     async shutdown() {
-        info('🛑 Shutting down LonicFLex System...');
+        info('Shutting down LonicFLex System...');
 
         if (this.serviceContainer) {
             await systemStartup.shutdown();
         }
 
-        info('✅ LonicFLex System shutdown complete');
+        info('LonicFLex System shutdown complete');
     }
 
     /**

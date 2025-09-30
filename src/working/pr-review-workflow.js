@@ -19,12 +19,12 @@ class PRReviewWorkflow {
      * Execute PR review workflow - ACTUALLY WORKS
      */
     async execute(prNumber) {
-        console.log(`🔍 Starting PR review for #${prNumber}...`);
+        console.log(` Starting PR review for #${prNumber}...`);
 
         try {
             // Step 1: Get PR details
             const pr = await this.github.getPR(prNumber);
-            console.log(`📋 Reviewing: ${pr.title}`);
+            console.log(` Reviewing: ${pr.title}`);
 
             // Step 2: Analyze PR
             const analysis = this.analyzePR(pr);
@@ -43,11 +43,11 @@ class PRReviewWorkflow {
                 timestamp: new Date().toISOString()
             };
 
-            console.log(`✅ Review completed with score: ${review.overallScore}/100`);
+            console.log(`PASS Review completed with score: ${review.overallScore}/100`);
             return review;
 
         } catch (error) {
-            console.error(`❌ PR review failed for #${prNumber}:`, error.message);
+            console.error(`FAIL PR review failed for #${prNumber}:`, error.message);
             throw error;
         }
     }
@@ -179,21 +179,21 @@ class PRReviewWorkflow {
      * Format review as markdown comment
      */
     formatReviewComment(review) {
-        return `## 🤖 Automated PR Review
+        return `## AGENT Automated PR Review
 
 **Overall Score: ${review.overallScore}/100**
 
-### 📊 Analysis
+### METRICS Analysis
 - **Size**: ${review.analysis.size.additions} additions, ${review.analysis.size.deletions} deletions
 - **Files**: ${review.analysis.size.changedFiles} changed
 - **Complexity**: ${review.analysis.size.complexity}
 
-### ⚠️ Risks Found
+### WARN Risks Found
 ${review.analysis.risks.length > 0 ?
     review.analysis.risks.map(risk => `- ${risk}`).join('\n') :
     '- No major risks identified'}
 
-### 💡 Recommendations
+###  Recommendations
 ${review.recommendations.map(rec => `- ${rec}`).join('\n')}
 
 ---
@@ -206,7 +206,7 @@ module.exports = { PRReviewWorkflow };
 // Test if run directly
 if (require.main === module) {
     async function testWorkflow() {
-        console.log('🧪 Testing PR Review Workflow...\n');
+        console.log('TEST Testing PR Review Workflow...\n');
 
         const workflow = new PRReviewWorkflow();
 
@@ -214,18 +214,18 @@ if (require.main === module) {
             // Test with mock PR (no token needed)
             const review = await workflow.execute(123);
 
-            console.log('\n📋 Review Results:');
+            console.log('\n Review Results:');
             console.log(`Score: ${review.overallScore}/100`);
             console.log(`Recommendations: ${review.recommendations.length}`);
             console.log(`Risks: ${review.analysis.risks.length}`);
 
-            console.log('\n💬 Generated Comment:');
+            console.log('\n Generated Comment:');
             console.log(workflow.formatReviewComment(review));
 
-            console.log('\n✅ PR Review Workflow test completed!');
+            console.log('\nPASS PR Review Workflow test completed!');
 
         } catch (error) {
-            console.error('\n❌ Workflow test failed:', error.message);
+            console.error('\nFAIL Workflow test failed:', error.message);
         }
     }
 

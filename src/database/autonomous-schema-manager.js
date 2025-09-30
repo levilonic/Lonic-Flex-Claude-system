@@ -50,7 +50,7 @@ class AutonomousSchemaManager {
                 } catch (error) {
                     // Log but don't fail for already existing objects
                     if (!error.message.includes('already exists')) {
-                        console.warn(`⚠️ Warning executing statement: ${error.message}`);
+                        console.warn(`WARN Warning executing statement: ${error.message}`);
                     }
                 }
             }
@@ -58,9 +58,9 @@ class AutonomousSchemaManager {
             this.isExtended = true;
 
             info(`Autonomous organization schema applied:`);
-            info(`   📊 Tables: ${tablesCreated}`);
-            info(`   🔍 Indexes: ${indexesCreated}`);
-            info(`   👁️ Views: ${viewsCreated}`);
+            info(`   METRICS Tables: ${tablesCreated}`);
+            info(`    Indexes: ${indexesCreated}`);
+            info(`   EYE Views: ${viewsCreated}`);
 
             // Verify schema with evidence-based validation
             const schemaValidation = await this.verifySchema();
@@ -84,7 +84,7 @@ class AutonomousSchemaManager {
             };
 
         } catch (error) {
-            error('❌ Failed to apply autonomous organization schema:', error);
+            error('FAIL Failed to apply autonomous organization schema:', error);
             throw error;
         }
     }

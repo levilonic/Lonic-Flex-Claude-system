@@ -39,7 +39,7 @@ class TokenCounter {
                 });
                 info('TokenCounter: Anthropic SDK initialized');
             } else {
-                info('ℹ️ TokenCounter: Using optimized estimation (API disabled)');
+                info(' TokenCounter: Using optimized estimation (API disabled)');
                 this.anthropicClient = null;
             }
         } catch (error) {
@@ -281,7 +281,7 @@ class TokenCounter {
      * Demo function showing token counting capabilities
      */
     async demo() {
-        info('🔢 TokenCounter Demo - Accurate Context Monitoring\n');
+        info(' TokenCounter Demo - Accurate Context Monitoring\n');
         
         const testContent = `
         <workflow_context>
@@ -305,15 +305,15 @@ class TokenCounter {
         </workflow_context>
         `;
 
-        info('📄 Test Context (Factor 3 XML format):');
+        info(' Test Context (Factor 3 XML format):');
         info(testContent.substring(0, 200) + '...\n');
 
         // Count tokens different ways
-        info('🔍 Token Counting Methods:');
+        info(' Token Counting Methods:');
         
         // Estimation method
         const estimated = await this.countTokens(testContent, { forceEstimate: true });
-        info(`📊 Estimation (${this.fallbackRatio} chars/token): ${estimated.total_tokens} tokens`);
+        info(`METRICS Estimation (${this.fallbackRatio} chars/token): ${estimated.total_tokens} tokens`);
         
         // API method (if available)
         if (this.anthropicClient) {
@@ -322,7 +322,7 @@ class TokenCounter {
                 info(`API Count: ${apiResult.total_tokens} tokens`);
                 
                 const accuracy = (1 - Math.abs(estimated.total_tokens - apiResult.total_tokens) / apiResult.total_tokens) * 100;
-                info(`📈 Estimation Accuracy: ${accuracy.toFixed(1)}%`);
+                info(` Estimation Accuracy: ${accuracy.toFixed(1)}%`);
             } catch (error) {
                 error('Failed to get API token count:', error.message);
             }
@@ -331,20 +331,20 @@ class TokenCounter {
         }
 
         // Context percentage analysis
-        info('\n📊 Context Window Analysis:');
+        info('\nMETRICS Context Window Analysis:');
         const tokenCount = estimated.total_tokens;
         const percentage = this.calculatePercentageUntilCompact(tokenCount);
         
         info(`Current usage: ${tokenCount}/${percentage.limitTokens} tokens (${percentage.usedPercentage.toFixed(1)}%)`);
         info(`Remaining until auto-compact: ${percentage.remainingPercentage.toFixed(1)}%`);
-        info(`Status: ${percentage.isCritical ? '🔴 CRITICAL' : percentage.isNearLimit ? '🟡 WARNING' : '🟢 SAFE'}`);
+        info(`Status: ${percentage.isCritical ? ' CRITICAL' : percentage.isNearLimit ? ' WARNING' : ' SAFE'}`);
         
         // Cache statistics
-        info('\n💾 Cache Performance:');
+        info('\n Cache Performance:');
         const cacheStats = this.getCacheStats();
         info(`Cache size: ${cacheStats.size}/${cacheStats.maxSize} entries`);
         
-        info('\n✅ TokenCounter demo completed!');
+        info('\nPASS TokenCounter demo completed!');
     }
 }
 

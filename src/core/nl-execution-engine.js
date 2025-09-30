@@ -24,7 +24,7 @@ class NaturalLanguageExecutionEngine extends EventEmitter {
     }
 
     async transformToExecution(naturalLanguage, context = {}) {
-        info(`🧠 NL Engine: Processing "${naturalLanguage.substring(0, 50)}..."`);
+        info(` NL Engine: Processing "${naturalLanguage.substring(0, 50)}..."`);
 
         // Stage 1: ADaPT - Recursive decomposition
         const adaptResult = await this.adaptProcessor.decomposeAsNeeded(naturalLanguage, context);
@@ -89,7 +89,7 @@ class ADaPTProcessor {
     }
 
     async decomposeAsNeeded(input, context = {}, depth = 0) {
-        info(`🔄 ADaPT: Decomposing (depth ${depth})`);
+        info(`CYCLE ADaPT: Decomposing (depth ${depth})`);
 
         const complexity = this.assessComplexity(input);
         const executable = this.isDirectlyExecutable(input, complexity);
@@ -285,7 +285,7 @@ class DARTProcessor {
     }
 
     async analyzeDependencies(adaptResult) {
-        info(`📊 DART: Analyzing dependencies`);
+        info(`METRICS DART: Analyzing dependencies`);
 
         const tasks = this.extractAllTasks(adaptResult);
         const dependencies = await this.identifyDependencies(tasks);
@@ -706,7 +706,7 @@ export default {{componentName}};
     }
 
     async generateCodePlan(dartResult) {
-        info(`💻 CoC: Generating code execution plan`);
+        info(` CoC: Generating code execution plan`);
 
         const tasks = dartResult.executionSequence.map(item => item.task);
         const codeComponents = [];
@@ -968,7 +968,7 @@ class LILOProcessor {
     }
 
     async optimizeWithPatterns(cocResult) {
-        info(`🔍 LILO: Optimizing with pattern recognition`);
+        info(` LILO: Optimizing with pattern recognition`);
 
         const identifiedPatterns = await this.identifyPatterns(cocResult);
         const optimizedTemplates = await this.optimizeTemplates(cocResult.generatedTemplates, identifiedPatterns);

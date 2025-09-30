@@ -457,7 +457,7 @@ async function demoEnhancedClaudeParser() {
         const result = parser.parseClaudeCommand(testCase.text, testCase.context);
 
         if (result) {
-            info(`   ✅ Parsed successfully (${Math.round(result.confidence * 100)}% confidence)`);
+            info(`   PASS Parsed successfully (${Math.round(result.confidence * 100)}% confidence)`);
             info(`   Command: ${result.command}`);
 
             if (result.template) {
@@ -467,10 +467,10 @@ async function demoEnhancedClaudeParser() {
 
             const validation = parser.validateCommand(result);
             if (validation.warnings.length > 0) {
-                info(`   ⚠️  Warnings: ${validation.warnings.join(', ')}`);
+                info(`   WARN  Warnings: ${validation.warnings.join(', ')}`);
             }
         } else {
-            info('   ❌ Parsing failed');
+            info('   FAIL Parsing failed');
         }
 
         info();

@@ -98,7 +98,7 @@ class MultiAgentPlanningEngine {
             await agent.initialize(this.dbManager);
         }
         
-        info('🧠 Multi-Agent Planning Engine initialized');
+        info(' Multi-Agent Planning Engine initialized');
         info(`   Available agents: ${Array.from(this.availableAgents.keys()).join(', ')}`);
     }
 
@@ -106,7 +106,7 @@ class MultiAgentPlanningEngine {
      * Start collaborative planning session (Team Huddle Phase)
      */
     async startPlanningSession(projectGoal, projectContext = {}) {
-        info('\n🏢 TEAM HUDDLE - PLANNING SESSION STARTED');
+        info('\n TEAM HUDDLE - PLANNING SESSION STARTED');
         info(`Project Goal: ${projectGoal}`);
         
         this.planningSession = {
@@ -126,17 +126,17 @@ class MultiAgentPlanningEngine {
         const requiredAgents = await this.determineRequiredAgents(requirements);
         
         // Step 3: Agent research phase - each agent researches their domain
-        info('\n🔍 AGENT RESEARCH PHASE');
+        info('\n AGENT RESEARCH PHASE');
         await this.conductAgentResearch(requiredAgents, requirements);
         
         // Step 4: Collaborative planning - agents create unified plan
-        info('\n🤝 COLLABORATIVE PLANNING PHASE');
+        info('\n COLLABORATIVE PLANNING PHASE');
         this.teamPlan = await this.createTeamPlan(requiredAgents, requirements);
         
         // Step 5: Save planning results to Universal Context
         await this.savePlanningResults();
         
-        info('\n✅ TEAM HUDDLE COMPLETE - EXECUTION BLUEPRINT READY');
+        info('\nPASS TEAM HUDDLE COMPLETE - EXECUTION BLUEPRINT READY');
         return this.teamPlan;
     }
 
@@ -144,7 +144,7 @@ class MultiAgentPlanningEngine {
      * Analyze project requirements and complexity
      */
     async analyzeProjectRequirements(goal, context) {
-        info('📊 Analyzing project requirements...');
+        info('METRICS Analyzing project requirements...');
         
         const goalLower = goal.toLowerCase();
         let complexity = 'moderate'; // default
@@ -203,7 +203,7 @@ class MultiAgentPlanningEngine {
             requiredAgents.unshift('github');
         }
         
-        info(`🎯 Required agents determined: ${requiredAgents.join(', ')}`);
+        info(` Required agents determined: ${requiredAgents.join(', ')}`);
         return requiredAgents;
     }
 
@@ -217,7 +217,7 @@ class MultiAgentPlanningEngine {
             const agent = this.availableAgents.get(agentName);
             if (!agent) continue;
             
-            info(`   🔍 ${AGENT_SKILLS[agentName].name} researching ${AGENT_SKILLS[agentName].description}`);
+            info(`    ${AGENT_SKILLS[agentName].name} researching ${AGENT_SKILLS[agentName].description}`);
             
             const researchTask = this.conductAgentDomainResearch(agent, agentName, requirements);
             researchTasks.push(researchTask);
@@ -231,7 +231,7 @@ class MultiAgentPlanningEngine {
             this.planningSession.agentResearch.set(requiredAgents[i], researchResults[i]);
         }
         
-        info(`   ✅ Research complete - ${requiredAgents.length} agents contributed`);
+        info(`   PASS Research complete - ${requiredAgents.length} agents contributed`);
     }
 
     /**
@@ -385,7 +385,7 @@ class MultiAgentPlanningEngine {
             'Project goal achieved within estimated timeframe'
         ];
         
-        info(`   ✅ Team plan created with ${teamPlan.agents.length} agents and ${teamPlan.phases.length} phases`);
+        info(`   PASS Team plan created with ${teamPlan.agents.length} agents and ${teamPlan.phases.length} phases`);
         return teamPlan;
     }
 
@@ -408,7 +408,7 @@ class MultiAgentPlanningEngine {
      * Save planning results to Universal Context for execution phase
      */
     async savePlanningResults() {
-        info('💾 Saving planning results to Universal Context...');
+        info(' Saving planning results to Universal Context...');
         
         // Add planning session results to context
         await this.contextManager.addEvent('team_planning_complete', {
@@ -426,7 +426,7 @@ class MultiAgentPlanningEngine {
             timestamp: new Date().toISOString()
         });
         
-        info('   ✅ Planning results saved - ready for execution phase');
+        info('   PASS Planning results saved - ready for execution phase');
     }
 
     /**
@@ -447,7 +447,7 @@ module.exports = { MultiAgentPlanningEngine, AGENT_SKILLS, COMPLEXITY_PATTERNS }
 // Demo/test functionality
 if (require.main === module) {
     async function demoPlanningEngine() {
-        info('🧠 Multi-Agent Planning Engine Demo\n');
+        info(' Multi-Agent Planning Engine Demo\n');
         
         const engine = new MultiAgentPlanningEngine();
         await engine.initialize();
@@ -462,19 +462,19 @@ if (require.main === module) {
         
         const teamPlan = await engine.startPlanningSession(projectGoal, context);
         
-        info('\n📋 EXECUTION BLUEPRINT:');
+        info('\n EXECUTION BLUEPRINT:');
         info(`   Project: ${teamPlan.goal}`);
         info(`   Agents: ${teamPlan.agents.length}`);
         info(`   Phases: ${teamPlan.phases.length}`);
         info(`   Duration: ${teamPlan.estimatedDuration}`);
         
         // Show agent assignments
-        info('\n👥 AGENT ASSIGNMENTS:');
+        info('\n AGENT ASSIGNMENTS:');
         teamPlan.agents.forEach(agent => {
             info(`   ${agent.name}: ${agent.responsibilities.length} tasks, ${agent.estimatedEffort}`);
         });
         
-        info('\n✅ Planning demo complete - ready for execution phase');
+        info('\nPASS Planning demo complete - ready for execution phase');
     }
     
     demoPlanningEngine().catch(console.error);

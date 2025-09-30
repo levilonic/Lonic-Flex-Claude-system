@@ -445,7 +445,7 @@ class WorkflowTemplateService {
         } catch (error) {
             // Update execution record with error
             await this.completeExecutionRecord(executionId, 'failed', null, error.message);
-            error(`❌ Template execution failed: ${error.message}`);
+            error(`FAIL Template execution failed: ${error.message}`);
             throw error;
         }
     }
@@ -456,7 +456,7 @@ class WorkflowTemplateService {
     async executeSequentialWorkflow(template, executionId, sessionId, branchName, customConfig) {
         const results = {};
         
-        info(`🔄 Executing sequential workflow: ${template.name}`);
+        info(`CYCLE Executing sequential workflow: ${template.name}`);
         
         for (let i = 0; i < template.agentTypes.length; i++) {
             const agentType = template.agentTypes[i];
@@ -465,7 +465,7 @@ class WorkflowTemplateService {
                 ...customConfig[agentType] 
             };
 
-            info(`  🤖 Step ${i + 1}/${template.agentTypes.length}: ${agentType} agent`);
+            info(`  AGENT Step ${i + 1}/${template.agentTypes.length}: ${agentType} agent`);
 
             try {
                 // Simulate agent execution (in real implementation, would call actual agents)
@@ -494,7 +494,7 @@ class WorkflowTemplateService {
      * Execute parallel workflow
      */
     async executeParallelWorkflow(template, executionId, sessionId, branchName, customConfig) {
-        info(`🔄 Executing parallel workflow: ${template.name}`);
+        info(`CYCLE Executing parallel workflow: ${template.name}`);
         
         const agentPromises = template.agentTypes.map(async (agentType, index) => {
             const agentConfig = { 
@@ -502,7 +502,7 @@ class WorkflowTemplateService {
                 ...customConfig[agentType] 
             };
 
-            info(`  🤖 Starting parallel: ${agentType} agent`);
+            info(`  AGENT Starting parallel: ${agentType} agent`);
 
             try {
                 const agentResult = await this.executeAgent(agentType, agentConfig, {
@@ -575,7 +575,7 @@ class WorkflowTemplateService {
             
             // Execute real agent workflow
             const agentResult = await agent.executeWorkflow(context, (progress, message) => {
-                info(`    📊 ${agentType}: ${progress}% - ${message}`);
+                info(`    METRICS ${agentType}: ${progress}% - ${message}`);
             });
             
             const executionTime = Date.now() - startTime;
@@ -591,7 +591,7 @@ class WorkflowTemplateService {
         } catch (error) {
             const executionTime = Date.now() - startTime;
             
-            error(`❌ Real agent execution failed for ${agentType}: ${error.message}`);
+            error(`FAIL Real agent execution failed for ${agentType}: ${error.message}`);
             
             // Return error result instead of throwing to allow other agents to continue
             return {
@@ -683,7 +683,7 @@ class WorkflowTemplateService {
      */
     async logExecutionProgress(executionId, agentType, status, results) {
         // In real implementation, would update milestone and send notifications
-        info(`    ✅ ${agentType}: ${status} (${JSON.stringify(results).substring(0, 100)}...)`);
+        info(`    PASS ${agentType}: ${status} (${JSON.stringify(results).substring(0, 100)}...)`);
     }
 
     /**
@@ -726,11 +726,11 @@ async function demoWorkflowTemplates() {
         info(`Available templates: ${templates.length}`);
         
         for (const template of templates) {
-            info(`  • ${template.name} (${template.id}) - ${template.estimatedDuration}min`);
+            info(`  - ${template.name} (${template.id}) - ${template.estimatedDuration}min`);
         }
 
         // Execute a template
-        info('\n🚀 Executing feature-development template...');
+        info('\n Executing feature-development template...');
         const result = await templateService.executeTemplate('feature-development', {
             branchName: 'feature/template-demo',
             owner: 'levilonic',
@@ -738,10 +738,10 @@ async function demoWorkflowTemplates() {
         });
 
         info(`Template execution completed: ${result.executionId}`);
-        info(`📊 Results: ${Object.keys(result.results).length} agents completed`);
+        info(`METRICS Results: ${Object.keys(result.results).length} agents completed`);
         
     } catch (error) {
-        error(`❌ Error: ${error.message}`);
+        error(`FAIL Error: ${error.message}`);
     }
 }
 

@@ -19,7 +19,7 @@ class RepositoryConfigManager {
         this.octokit = null;
         this.repoSettings = null;
 
-        info('⚙️ Repository Configuration Manager initialized for', `${this.config.owner}/${this.config.repo}`);
+        info('GEAR Repository Configuration Manager initialized for', `${this.config.owner}/${this.config.repo}`);
     }
 
     /**
@@ -111,7 +111,7 @@ class RepositoryConfigManager {
             return updatedRepo;
 
         } catch (error) {
-            error('❌ Failed to configure repository:', error.message);
+            error('FAIL Failed to configure repository:', error.message);
             throw error;
         }
     }
@@ -120,7 +120,7 @@ class RepositoryConfigManager {
      * Set up branch protection rules
      */
     async configureBranchProtection(branch = 'master') {
-        info(`🛡️ Configuring branch protection for: ${branch}`);
+        info(` Configuring branch protection for: ${branch}`);
 
         try {
             const protectionRules = {
@@ -154,7 +154,7 @@ class RepositoryConfigManager {
                 warn(`Branch ${branch} not found or no push access for protection rules`);
                 return null;
             }
-            error(`❌ Failed to configure branch protection for ${branch}:`, error.message);
+            error(`FAIL Failed to configure branch protection for ${branch}:`, error.message);
             throw error;
         }
     }
@@ -163,7 +163,7 @@ class RepositoryConfigManager {
      * Set up repository labels for LonicFLex
      */
     async configureLabels() {
-        info('🏷️ Configuring repository labels...');
+        info('LABEL Configuring repository labels...');
 
         const lonicflexLabels = [
             // Agent types
@@ -228,15 +228,15 @@ class RepositoryConfigManager {
                         });
 
                         updatedLabels.push(updatedLabel.name);
-                        info(`🔄 Updated label: ${updatedLabel.name}`);
+                        info(`CYCLE Updated label: ${updatedLabel.name}`);
 
                     } catch (updateError) {
                         errors.push({ label: label.name, error: updateError.message });
-                        error(`❌ Failed to update label ${label.name}:`, updateError.message);
+                        error(`FAIL Failed to update label ${label.name}:`, updateError.message);
                     }
                 } else {
                     errors.push({ label: label.name, error: error.message });
-                    error(`❌ Failed to create label ${label.name}:`, error.message);
+                    error(`FAIL Failed to create label ${label.name}:`, error.message);
                 }
             }
         }
@@ -254,7 +254,7 @@ class RepositoryConfigManager {
      * Create repository environments for deployment
      */
     async configureEnvironments() {
-        info('🌍 Configuring deployment environments...');
+        info(' Configuring deployment environments...');
 
         const environments = [
             {
@@ -301,7 +301,7 @@ class RepositoryConfigManager {
                 info(`Environment configured: ${env.name}`);
 
             } catch (error) {
-                error(`❌ Failed to configure environment ${env.name}:`, error.message);
+                error(`FAIL Failed to configure environment ${env.name}:`, error.message);
                 results.push({ name: env.name, error: error.message });
             }
         }
@@ -313,7 +313,7 @@ class RepositoryConfigManager {
      * Set up webhooks for LonicFLex integration
      */
     async configureWebhooks() {
-        info('🔗 Configuring repository webhooks...');
+        info(' Configuring repository webhooks...');
 
         const webhooks = [
             {
@@ -347,7 +347,7 @@ class RepositoryConfigManager {
                 const existing = existingWebhooks.find(w => w.config.url === webhook.config.url);
 
                 if (existing) {
-                    info(`🔄 Webhook already exists: ${webhook.name}`);
+                    info(`CYCLE Webhook already exists: ${webhook.name}`);
                     results.push({ ...existing, status: 'exists' });
                 } else if (webhook.config.url.includes('your-lonicflex-webhook.com')) {
                     warn(`Skipping webhook creation - placeholder URL: ${webhook.name}`);
@@ -367,7 +367,7 @@ class RepositoryConfigManager {
                 }
 
             } catch (error) {
-                error(`❌ Failed to configure webhook ${webhook.name}:`, error.message);
+                error(`FAIL Failed to configure webhook ${webhook.name}:`, error.message);
                 results.push({ name: webhook.name, error: error.message });
             }
         }
@@ -383,7 +383,7 @@ class RepositoryConfigManager {
             const { data: user } = await this.octokit.rest.users.getAuthenticated();
             return user.id;
         } catch (error) {
-            error('❌ Failed to get user ID:', error.message);
+            error('FAIL Failed to get user ID:', error.message);
             return null;
         }
     }
@@ -426,11 +426,11 @@ class RepositoryConfigManager {
             // Configure webhooks
             results.webhooks = await this.configureWebhooks();
 
-            info('🎉 Repository configuration complete!');
+            info(' Repository configuration complete!');
             return results;
 
         } catch (error) {
-            error('❌ Repository configuration failed:', error.message);
+            error('FAIL Repository configuration failed:', error.message);
             throw error;
         }
     }
@@ -478,7 +478,7 @@ class RepositoryConfigManager {
             };
 
         } catch (error) {
-            error('❌ Failed to get repository configuration:', error.message);
+            error('FAIL Failed to get repository configuration:', error.message);
             throw error;
         }
     }
@@ -497,13 +497,13 @@ if (require.main === module) {
             await configManager.initialize();
             const results = await configManager.configureAll();
 
-            info('\n🎉 REAL Repository Configuration Complete!');
+            info('\n REAL Repository Configuration Complete!');
             info(`   Repository: ${results.repository?.full_name || 'configured'}`);
             info(`   Labels: ${results.labels?.created?.length || 0} created, ${results.labels?.updated?.length || 0} updated`);
             info(`   Webhooks: ${results.webhooks?.filter(w => w.status === 'created').length || 0} created`);
 
         } catch (error) {
-            error('\n❌ REAL configuration failed:', error.message);
+            error('\nFAIL REAL configuration failed:', error.message);
             process.exit(1);
         }
     })();

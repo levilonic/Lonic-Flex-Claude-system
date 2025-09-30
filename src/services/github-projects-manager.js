@@ -599,11 +599,11 @@ async function demoGitHubProjects() {
             
             // Get project items
             const items = await projectsManager.getProjectItems(project.id);
-            info(`📝 Project has ${items.length} items`);
+            info(` Project has ${items.length} items`);
         }
         
     } catch (error) {
-        error(`❌ Error: ${error.message}`);
+        error(`FAIL Error: ${error.message}`);
     }
 }
 

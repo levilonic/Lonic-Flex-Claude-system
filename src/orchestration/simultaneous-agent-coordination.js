@@ -74,7 +74,7 @@ class CollaborativeAgent extends EventEmitter {
         this.taskCompletions = 0;
         this.collaborationCount = 0;
         
-        info(`🤖 Collaborative ${this.agentName} initialized`);
+        info(`AGENT Collaborative ${this.agentName} initialized`);
     }
 
     /**
@@ -96,7 +96,7 @@ class CollaborativeAgent extends EventEmitter {
         // Start communication processing
         this.startCommunicationProcessing();
         
-        info(`   ✅ ${this.agentName} collaborative work started`);
+        info(`   PASS ${this.agentName} collaborative work started`);
     }
 
     /**
@@ -122,14 +122,14 @@ class CollaborativeAgent extends EventEmitter {
         // Initialize base agent with collaborative context
         await this.baseAgent.initialize(this.workspace.dbManager);
         
-        info(`   ✅ ${this.agentName} workspace context loaded`);
+        info(`   PASS ${this.agentName} workspace context loaded`);
     }
 
     /**
      * Main work loop - processes tasks while coordinating with team
      */
     async startWorkLoop() {
-        info(`🔄 ${this.agentName} work loop started`);
+        info(`CYCLE ${this.agentName} work loop started`);
         
         // Continue working until all responsibilities are complete
         while (this.state !== AGENT_STATES.COMPLETED && this.state !== AGENT_STATES.ERROR) {
@@ -154,7 +154,7 @@ class CollaborativeAgent extends EventEmitter {
                 await this.sleep(1000);
                 
             } catch (error) {
-                error(`❌ ${this.agentName} work loop error:`, error.message);
+                error(`FAIL ${this.agentName} work loop error:`, error.message);
                 this.setState(AGENT_STATES.ERROR);
                 await this.reportError(error);
             }
@@ -167,7 +167,7 @@ class CollaborativeAgent extends EventEmitter {
      * Execute task while coordinating with other agents
      */
     async executeTaskWithCoordination(task) {
-        info(`⚡ ${this.agentName} executing: ${task.description}`);
+        info(`FAST ${this.agentName} executing: ${task.description}`);
         
         this.currentTask = task;
         this.updateProgress(0);
@@ -176,7 +176,7 @@ class CollaborativeAgent extends EventEmitter {
         const coordinationNeeded = await this.checkCoordinationNeeds(task);
         
         if (coordinationNeeded.length > 0) {
-            info(`   🤝 ${this.agentName} coordinating with: ${coordinationNeeded.join(', ')}`);
+            info(`    ${this.agentName} coordinating with: ${coordinationNeeded.join(', ')}`);
             await this.coordinateBeforeTask(task, coordinationNeeded);
         }
         
@@ -194,7 +194,7 @@ class CollaborativeAgent extends EventEmitter {
         this.taskCompletions++;
         this.updateProgress(100);
         
-        info(`   ✅ ${this.agentName} completed: ${task.description}`);
+        info(`   PASS ${this.agentName} completed: ${task.description}`);
     }
 
     /**
@@ -405,7 +405,7 @@ class CollaborativeAgent extends EventEmitter {
      * Share task results with relevant team members
      */
     async shareTaskResults(task, result) {
-        info(`📢 ${this.agentName} sharing results of: ${task.description}`);
+        info(` ${this.agentName} sharing results of: ${task.description}`);
         
         const insight = {
             agent: this.agentName,
@@ -491,7 +491,7 @@ class CollaborativeAgent extends EventEmitter {
      * Handle incoming message from another agent
      */
     async handleIncomingMessage(message) {
-        info(`📨 ${this.agentName} received ${message.type} from ${message.from}`);
+        info(` ${this.agentName} received ${message.type} from ${message.from}`);
         
         switch (message.type) {
             case COORDINATION_MESSAGES.REQUEST_HELP:
@@ -511,7 +511,7 @@ class CollaborativeAgent extends EventEmitter {
                 break;
                 
             default:
-                info(`   ⚠️ Unknown message type: ${message.type}`);
+                info(`   WARN Unknown message type: ${message.type}`);
         }
     }
 
@@ -525,7 +525,7 @@ class CollaborativeAgent extends EventEmitter {
         const canHelp = this.canProvideHelp(helpType, details);
         
         if (canHelp) {
-            info(`   🤝 ${this.agentName} offering help to ${message.from}`);
+            info(`    ${this.agentName} offering help to ${message.from}`);
             
             await this.sendMessage(message.from, {
                 type: COORDINATION_MESSAGES.OFFER_HELP,
@@ -541,13 +541,13 @@ class CollaborativeAgent extends EventEmitter {
     async handleSharedInsight(message) {
         const insight = message.insight;
         
-        info(`   💡 ${this.agentName} received insight from ${message.from}: ${insight.task}`);
+        info(`    ${this.agentName} received insight from ${message.from}: ${insight.task}`);
         
         // Analyze if insight affects current work
         const impactAnalysis = this.analyzeInsightImpact(insight);
         
         if (impactAnalysis.affectsCurrentWork) {
-            info(`   🔄 ${this.agentName} adjusting work based on insight`);
+            info(`   CYCLE ${this.agentName} adjusting work based on insight`);
             await this.incorporateInsight(insight, impactAnalysis);
         }
     }
@@ -559,7 +559,7 @@ class CollaborativeAgent extends EventEmitter {
         const oldState = this.state;
         this.state = newState;
         
-        info(`🔄 ${this.agentName}: ${oldState} → ${newState}`);
+        info(`CYCLE ${this.agentName}: ${oldState} -> ${newState}`);
         
         // Notify workspace of state change
         this.workspace.communicationHub.emit(COMMUNICATION_EVENTS.AGENT_STATUS_UPDATE, {
@@ -585,7 +585,7 @@ class CollaborativeAgent extends EventEmitter {
     }
 
     reportStatus(status) {
-        info(`📊 ${this.agentName} status: ${status}`);
+        info(`METRICS ${this.agentName} status: ${status}`);
     }
 
     /**
@@ -611,7 +611,7 @@ class CollaborativeAgent extends EventEmitter {
     }
 
     async waitForDependencies() {
-        info(`⏳ ${this.agentName} waiting for dependencies: ${this.roleAssignment.dependencies.join(', ')}`);
+        info(`HOURGLASS ${this.agentName} waiting for dependencies: ${this.roleAssignment.dependencies.join(', ')}`);
         this.setState(AGENT_STATES.WAITING);
         await this.sleep(5000); // Wait 5 seconds before checking again
     }
@@ -621,7 +621,7 @@ class CollaborativeAgent extends EventEmitter {
         
         if (allResponsibilitiesComplete) {
             this.setState(AGENT_STATES.COMPLETED);
-            info(`🎉 ${this.agentName} all responsibilities completed!`);
+            info(` ${this.agentName} all responsibilities completed!`);
             
             await this.workspace.communicationHub.emit(COMMUNICATION_EVENTS.TASK_COMPLETED, {
                 agent: this.agentName,
@@ -676,13 +676,13 @@ class SimultaneousAgentCoordination {
      * Initialize collaborative agents from team plan
      */
     async initializeCollaborativeAgents(teamPlan, roleAssignments) {
-        info('🤖 Initializing collaborative agents for simultaneous work...');
+        info('AGENT Initializing collaborative agents for simultaneous work...');
         
         for (const agentPlan of teamPlan.agents) {
             const roleAssignment = roleAssignments.assignments.find(a => a.agent === agentPlan.agent);
             
             if (!roleAssignment) {
-                error(`❌ No role assignment found for agent: ${agentPlan.agent}`);
+                error(`FAIL No role assignment found for agent: ${agentPlan.agent}`);
                 continue;
             }
             
@@ -707,7 +707,7 @@ class SimultaneousAgentCoordination {
                     baseAgent = new CommunicationAgent(sessionId, {});
                     break;
                 default:
-                    error(`❌ Unknown agent type: ${agentPlan.agent}`);
+                    error(`FAIL Unknown agent type: ${agentPlan.agent}`);
                     continue;
             }
             
@@ -719,7 +719,7 @@ class SimultaneousAgentCoordination {
             this.setupAgentCommunicationRouting(collaborativeAgent);
         }
         
-        info(`   ✅ ${this.collaborativeAgents.size} collaborative agents initialized`);
+        info(`   PASS ${this.collaborativeAgents.size} collaborative agents initialized`);
     }
 
     /**
@@ -746,10 +746,10 @@ class SimultaneousAgentCoordination {
         const agentPromises = [];
         
         for (const [agentName, agent] of this.collaborativeAgents) {
-            info(`   🏃 Starting ${agentName}...`);
+            info(`    Starting ${agentName}...`);
             const agentPromise = agent.startCollaborativeWork()
                 .catch(error => {
-                    error(`❌ ${agentName} execution error:`, error.message);
+                    error(`FAIL ${agentName} execution error:`, error.message);
                     return { agent: agentName, error };
                 });
             
@@ -760,12 +760,12 @@ class SimultaneousAgentCoordination {
         this.startCoordinationMonitoring();
         
         // Wait for all agents to complete or timeout
-        info('⏳ Waiting for all agents to complete...');
+        info('HOURGLASS Waiting for all agents to complete...');
         const results = await Promise.allSettled(agentPromises);
         
         this.coordinationActive = false;
         
-        info('🏁 Simultaneous execution completed');
+        info(' Simultaneous execution completed');
         this.reportExecutionMetrics();
         
         return results;
@@ -817,7 +817,7 @@ class SimultaneousAgentCoordination {
     reportExecutionMetrics() {
         const totalTime = Date.now() - this.startTime;
         
-        info('\n📊 SIMULTANEOUS EXECUTION METRICS:');
+        info('\nMETRICS SIMULTANEOUS EXECUTION METRICS:');
         info(`   Total execution time: ${Math.round(totalTime / 1000)} seconds`);
         info(`   Tasks completed: ${this.executionMetrics.completedTasks}/${this.executionMetrics.totalTasks}`);
         info(`   Agent collaborations: ${this.executionMetrics.collaborations}`);
@@ -838,7 +838,7 @@ class SimultaneousAgentCoordination {
         const activeAgents = Array.from(this.collaborativeAgents.values())
             .filter(agent => agent.state === AGENT_STATES.WORKING).length;
         
-        info(`🔄 Coordination status: ${activeAgents} agents active, ${this.executionMetrics.collaborations} collaborations`);
+        info(`CYCLE Coordination status: ${activeAgents} agents active, ${this.executionMetrics.collaborations} collaborations`);
     }
 }
 
@@ -852,7 +852,7 @@ module.exports = {
 // Demo/test functionality
 if (require.main === module) {
     async function demoSimultaneousCoordination() {
-        info('🤖 Simultaneous Agent Coordination Demo\n');
+        info('AGENT Simultaneous Agent Coordination Demo\n');
         
         const { CollaborativeWorkspaceInfrastructure } = require('./collaborative-workspace-infrastructure');
         
@@ -877,10 +877,10 @@ if (require.main === module) {
         );
         
         // Start simultaneous execution (this would run agents concurrently)
-        info('\n🚀 Starting simultaneous agent execution...');
+        info('\n Starting simultaneous agent execution...');
         info('   (Demo mode - agents would work concurrently in real execution)');
         
-        info('\n✅ Simultaneous coordination demo complete');
+        info('\nPASS Simultaneous coordination demo complete');
         info('   Ready for full collaborative agent execution');
     }
     

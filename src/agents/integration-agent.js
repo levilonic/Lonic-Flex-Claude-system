@@ -1,7 +1,7 @@
 /**
  * Integration Agent - Specialized Execution Phase Agent
  * Validates system integration points and ensures component interoperability
- * Following Factor 10 principles (≤8 execution steps)
+ * Following Factor 10 principles (<=8 execution steps)
  */
 
 const { ValidatedAgent } = require('../core/validated-agent-base');
@@ -22,7 +22,7 @@ class IntegrationAgent extends ValidatedAgent {
         this.systemValidation = {};
         this.backwardCompatibility = {};
         
-        // Integration workflow steps (Factor 10: ≤8 steps)
+        // Integration workflow steps (Factor 10: <=8 steps)
         this.executionSteps = [
             'identify_integration_points',
             'validate_database_integration',

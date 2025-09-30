@@ -56,7 +56,7 @@ class ErrorRecovery extends EventEmitter {
             conditions: ['transient_error', 'network_timeout', 'rate_limit'],
             action: async (error, context, attempt = 1) => {
                 const delay = Math.min(this.config.retryDelay * Math.pow(2, attempt - 1), 30000);
-                info(`🔄 Retrying operation in ${delay}ms (attempt ${attempt})`);
+                info(`CYCLE Retrying operation in ${delay}ms (attempt ${attempt})`);
                 
                 await new Promise(resolve => setTimeout(resolve, delay));
 
@@ -78,7 +78,7 @@ class ErrorRecovery extends EventEmitter {
             priority: 2,
             conditions: ['file_write_error', 'database_constraint', 'invalid_state'],
             action: async (error, context) => {
-                info('🔄 Rolling back last change...');
+                info('CYCLE Rolling back last change...');
                 
                 // Integrate with file system automation and git automation
                 const rollbackResults = [];
@@ -121,7 +121,7 @@ class ErrorRecovery extends EventEmitter {
             priority: 3,
             conditions: ['service_unavailable', 'memory_leak', 'deadlock'],
             action: async (error, context) => {
-                info('🔄 Restarting component...');
+                info('CYCLE Restarting component...');
                 
                 const component = context.component || 'unknown';
                 
@@ -144,7 +144,7 @@ class ErrorRecovery extends EventEmitter {
             priority: 4,
             conditions: ['non_critical_error', 'optional_step', 'dependency_missing'],
             action: async (error, context) => {
-                info('⏭️ Skipping current step...');
+                info(' Skipping current step...');
 
                 const validation = { success: this.validateSuccess() };return {
 
@@ -163,14 +163,14 @@ class ErrorRecovery extends EventEmitter {
             priority: 5,
             conditions: ['critical_error', 'security_issue', 'data_corruption'],
             action: async (error, context) => {
-                info('🚨 Escalating error for human intervention...');
+                info('ALERT Escalating error for human intervention...');
                 
                 // Send escalation notification
                 try {
                     const { CommunicationAgent } = require('../agents/comm-agent');
                     const commAgent = new CommunicationAgent(context.sessionId || 'error-recovery');
                     
-                    await commAgent.sendSlackNotification('critical-errors', `🚨 **Critical Error Escalation**
+                    await commAgent.sendSlackNotification('critical-errors', `ALERT **Critical Error Escalation**
                     
 **Error**: ${error.message}
 **Context**: ${context.currentStep || 'Unknown step'}
@@ -205,7 +205,7 @@ Human intervention required immediately.`);
         const startTime = Date.now();
         
         try {
-            info(`🚨 Handling error: ${error.message} (${errorId})`);
+            info(`ALERT Handling error: ${error.message} (${errorId})`);
             this.stats.totalErrors++;
             
             // Classify the error
@@ -238,7 +238,7 @@ Human intervention required immediately.`);
                 this.stats.failedRecoveries++;
             }
             
-            info(`✅ Error recovery ${recoveryResult.success ? 'successful' : 'failed'}: ${strategy.name}`);
+            info(`PASS Error recovery ${recoveryResult.success ? 'successful' : 'failed'}: ${strategy.name}`);
             
             // Emit recovery event
             this.emit('recovery', {
@@ -252,7 +252,7 @@ Human intervention required immediately.`);
             return recoveryResult;
             
         } catch (recoveryError) {
-            error(`❌ Error recovery failed: ${recoveryError.message}`);
+            error(`FAIL Error recovery failed: ${recoveryError.message}`);
             this.stats.failedRecoveries++;
             
             // Emit recovery failure event
@@ -490,7 +490,7 @@ Human intervention required immediately.`);
             pattern.contexts = pattern.contexts.slice(-10);
         }
         
-        info(`📚 Learning from error pattern: ${patternKey} (${pattern.occurrences} occurrences)`);
+        info(` Learning from error pattern: ${patternKey} (${pattern.occurrences} occurrences)`);
     }
     
     /**
@@ -604,7 +604,7 @@ Human intervention required immediately.`);
             averageRecoveryTime: 0
         };
         
-        info('🔄 Error recovery system reset');
+        info('CYCLE Error recovery system reset');
     }
 }
 
@@ -613,7 +613,7 @@ module.exports = { ErrorRecovery };
 // If run directly, demonstrate the service
 if (require.main === module) {
     (async () => {
-        info('🧪 Testing Error Recovery Service...');
+        info('TEST Testing Error Recovery Service...');
         
         const errorRecovery = new ErrorRecovery({
             maxRetries: 2,
@@ -631,19 +631,19 @@ if (require.main === module) {
             ];
             
             for (const test of testErrors) {
-                info(`\n🧪 Testing error: ${test.error.message}`);
+                info(`\nTEST Testing error: ${test.error.message}`);
                 const result = await errorRecovery.handleError(test.error, test.context);
                 info(`Result: ${result.success ? 'Success' : 'Failed'} - ${result.message || result.error}`);
             }
             
             // Show statistics
-            info('\n📊 Recovery Statistics:', errorRecovery.getStats());
-            info('\n📚 Learned Patterns:', errorRecovery.getLearnedPatterns().length);
+            info('\nMETRICS Recovery Statistics:', errorRecovery.getStats());
+            info('\n Learned Patterns:', errorRecovery.getLearnedPatterns().length);
             
             info('Error Recovery Service test completed');
             
         } catch (error) {
-            error('❌ Test failed:', error.message);
+            error('FAIL Test failed:', error.message);
         }
     })();
 }

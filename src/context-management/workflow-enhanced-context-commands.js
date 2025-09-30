@@ -106,7 +106,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             };
             
         } catch (error) {
-            error('❌ Failed to start workflow:', error.message);
+            error('FAIL Failed to start workflow:', error.message);
             // Clean up on failure
             this.activeWorkflows.delete(contextName);
             throw error;
@@ -121,12 +121,12 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         
         // Add workflow status to all active workflows
         if (this.activeWorkflows.size > 0) {
-            info(`\n📋 Active Workflows (${this.activeWorkflows.size}):`);
+            info(`\n Active Workflows (${this.activeWorkflows.size}):`);
             
             for (const [contextId, workflowEngine] of this.activeWorkflows) {
                 const workflowStatus = workflowEngine.getWorkflowStatus();
                 
-                info(`\n🔧 Context: ${contextId}`);
+                info(`\n Context: ${contextId}`);
                 info(`   Template: ${workflowStatus.template}`);
                 info(`   Phase: ${workflowStatus.currentPhase} (${workflowStatus.currentPhaseIndex + 1}/${workflowStatus.totalPhases})`);
                 info(`   Progress: ${workflowStatus.progress}%`);
@@ -168,7 +168,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             this.displayCurrentPhase(workflowEngine);
             
         } catch (error) {
-            error('❌ Failed to complete task:', error.message);
+            error('FAIL Failed to complete task:', error.message);
             throw error;
         }
     }
@@ -203,7 +203,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             return result;
             
         } catch (error) {
-            error('❌ Failed to evaluate quality gate:', error.message);
+            error('FAIL Failed to evaluate quality gate:', error.message);
             throw error;
         }
     }
@@ -214,7 +214,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
     setupWorkflowEventHandlers(workflowEngine, contextId) {
         // Handle agent switching requirements
         workflowEngine.on('agent-switch-required', (data) => {
-            info(`\n🤖 Agent Switch Required:`);
+            info(`\nAGENT Agent Switch Required:`);
             info(`   Current: ${data.currentAgent}`);
             info(`   Required: ${data.requiredAgent}`);
             info(`   Phase: ${data.phase}`);
@@ -223,7 +223,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         
         // Handle phase transitions
         workflowEngine.on('phase-started', (data) => {
-            info(`\n🎯 Phase Started: ${data.phase.name}`);
+            info(`\n Phase Started: ${data.phase.name}`);
             
             // Log to context
             const context = Factor3ContextManager.getContextById(contextId);
@@ -239,7 +239,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         
         // Handle phase completion
         workflowEngine.on('phase-completed', (data) => {
-            info(`\n✅ Phase Completed: ${data.phase.name}`);
+            info(`\nPASS Phase Completed: ${data.phase.name}`);
             info(`   Duration: ${Math.round(data.phase.duration / 1000)}s`);
             
             // Log to context
@@ -255,7 +255,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         
         // Handle workflow completion
         workflowEngine.on('workflow-completed', (data) => {
-            info(`\n🎉 Workflow Completed: ${data.summary.template}`);
+            info(`\n Workflow Completed: ${data.summary.template}`);
             info(`   Total Duration: ${Math.round(data.summary.totalDuration / 1000)}s`);
             info(`   Success: ${data.summary.success}`);
             
@@ -290,7 +290,7 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
         const status = workflowEngine.getWorkflowStatus();
         const currentPhase = workflowEngine.workflow.currentPhase;
         
-        info(`\n📊 Current Phase Status:`);
+        info(`\nMETRICS Current Phase Status:`);
         info(`   Phase: ${currentPhase.name} (${status.currentPhaseIndex + 1}/${status.totalPhases})`);
         info(`   Progress: ${status.progress}%`);
         
@@ -302,9 +302,9 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             });
             
             if (pendingTasks.length > 0) {
-                info(`\n📋 Pending Tasks (${pendingTasks.length}):`);
+                info(`\n Pending Tasks (${pendingTasks.length}):`);
                 for (const task of pendingTasks) {
-                    info(`   • ${task.name}`);
+                    info(`   - ${task.name}`);
                     if (task.verificationCommand) {
                         info(`     Verification: ${task.verificationCommand}`);
                     }
@@ -320,9 +320,9 @@ class WorkflowEnhancedContextCommands extends UniversalContextCommands {
             });
             
             if (pendingGates.length > 0) {
-                info(`\n🚪 Pending Quality Gates (${pendingGates.length}):`);
+                info(`\n Pending Quality Gates (${pendingGates.length}):`);
                 for (const gate of pendingGates) {
-                    info(`   • ${gate.name}`);
+                    info(`   - ${gate.name}`);
                     info(`     Criteria: ${gate.criteria}`);
                 }
             }

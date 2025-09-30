@@ -71,7 +71,7 @@ class GitHubAgent extends ValidatedAgent {
 
             info(`GitHub Agent authenticated for ${this.githubConfig.owner}/${this.githubConfig.repo}`);
         } catch (error) {
-            error(`❌ GitHub Agent authentication failed: ${error.message}`);
+            error(`FAIL GitHub Agent authentication failed: ${error.message}`);
             // Don't throw here - let the execute method handle it gracefully
         }
 
@@ -963,7 +963,7 @@ class GitHubAgent extends ValidatedAgent {
  * GitHub Agent execution function
  */
 async function runGitHubAgent() {
-    info('🐙 GitHub Agent - Real Execution Mode\n');
+    info(' GitHub Agent - Real Execution Mode\n');
     
     const { SQLiteManager } = require('../database/sqlite-manager');
     const dbManager = new SQLiteManager(':memory:');
@@ -990,7 +990,7 @@ async function runGitHubAgent() {
         info(`   Repository: ${agent.githubConfig.owner}/${agent.githubConfig.repo}`);
         
         // Test context analysis without actual GitHub API calls
-        info('\n🔍 Testing context analysis...');
+        info('\n Testing context analysis...');
         
         const testContexts = [
             { pull_request: { number: 123 }, pr_action: 'analyze' },
@@ -1001,26 +1001,26 @@ async function runGitHubAgent() {
         
         for (const context of testContexts) {
             const action = agent.determineAction(context);
-            info(`   Context: ${Object.keys(context)[0]} → Action: ${action.type}`);
+            info(`   Context: ${Object.keys(context)[0]} -> Action: ${action.type}`);
         }
         
         // Show status
         const status = agent.getStatus();
-        info(`\n📊 Agent Status:`);
+        info(`\nMETRICS Agent Status:`);
         info(`   State: ${status.state}`);
         info(`   Execution steps defined: ${status.executionSteps.length}`);
         
-        info('\n✅ GitHub Agent execution completed successfully!');
-        info('   ✓ Factor 10: 8 execution steps (≤8 max)');
-        info('   ✓ Extends BaseAgent with GitHub-specific functionality');
-        info('   ✓ Supports PR, Issue, Branch, and Repository analysis');
-        info('   ✓ Includes rate limiting and validation');
+        info('\nPASS GitHub Agent execution completed successfully!');
+        info('   OK Factor 10: 8 execution steps (<=8 max)');
+        info('   OK Extends BaseAgent with GitHub-specific functionality');
+        info('   OK Supports PR, Issue, Branch, and Repository analysis');
+        info('   OK Includes rate limiting and validation');
         
-        info('\n📝 Note: Full GitHub API integration requires valid token');
+        info('\n Note: Full GitHub API integration requires valid token');
         info('   Set GITHUB_TOKEN environment variable for production use');
         
     } catch (error) {
-        error('❌ Execution failed:', error.message);
+        error('FAIL Execution failed:', error.message);
     } finally {
         await dbManager.close();
     }

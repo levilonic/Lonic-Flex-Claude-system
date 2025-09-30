@@ -45,14 +45,14 @@ class AgentCoordinator {
         this.executionLog.push(logEntry);
 
         if (success) {
-            console.log(`  ✅ Step ${step}: ${agent} completed`);
+            console.log(`  PASS Step ${step}: ${agent} completed`);
         } else {
-            console.log(`  ❌ Step ${step}: ${agent} failed - ${error}`);
+            console.log(`  FAIL Step ${step}: ${agent} failed - ${error}`);
         }
     }
 
     /**
-     * Execute workflow: Review PR → Generate Fix → Create Branch
+     * Execute workflow: Review PR -> Generate Fix -> Create Branch
      */
     async executeWorkflow_ReviewAndFix(prNumber, fixDescription = 'Automated fix') {
         const workflow = {
@@ -62,7 +62,7 @@ class AgentCoordinator {
         };
 
         try {
-            console.log(`🔄 Starting workflow: Review and Fix PR #${prNumber}`);
+            console.log(`CYCLE Starting workflow: Review and Fix PR #${prNumber}`);
 
             // Step 1: Review PR
             const reviewResult = await this.agents.prReview.execute(prNumber);
@@ -118,7 +118,7 @@ class AgentCoordinator {
                 };
             }
 
-            console.log(`✅ Workflow completed: ${workflow.name}`);
+            console.log(`PASS Workflow completed: ${workflow.name}`);
             return workflow;
 
         } catch (error) {
@@ -129,7 +129,7 @@ class AgentCoordinator {
     }
 
     /**
-     * Execute workflow: Generate Code → Scan → Test
+     * Execute workflow: Generate Code -> Scan -> Test
      */
     async executeWorkflow_GenerateAndScan(codeType, codeName, description = '') {
         const workflow = {
@@ -139,7 +139,7 @@ class AgentCoordinator {
         };
 
         try {
-            console.log(`🔄 Starting workflow: Generate ${codeType} ${codeName}`);
+            console.log(`CYCLE Starting workflow: Generate ${codeType} ${codeName}`);
 
             // Step 1: Generate code
             let codeContext = { action: `generate-${codeType}`, name: codeName };
@@ -181,7 +181,7 @@ class AgentCoordinator {
                 success: true
             };
 
-            console.log(`✅ Workflow completed: ${workflow.name}`);
+            console.log(`PASS Workflow completed: ${workflow.name}`);
             return workflow;
 
         } catch (error) {
@@ -192,7 +192,7 @@ class AgentCoordinator {
     }
 
     /**
-     * Execute workflow: Create Feature Branch → Generate Code → Scan → Create PR
+     * Execute workflow: Create Feature Branch -> Generate Code -> Scan -> Create PR
      */
     async executeWorkflow_FullFeature(featureName, codeSpecs) {
         const workflow = {
@@ -202,7 +202,7 @@ class AgentCoordinator {
         };
 
         try {
-            console.log(`🔄 Starting workflow: Full Feature Development - ${featureName}`);
+            console.log(`CYCLE Starting workflow: Full Feature Development - ${featureName}`);
 
             // Step 1: Create feature branch
             const branchName = `feature/${featureName.toLowerCase().replace(/\s+/g, '-')}`;
@@ -263,7 +263,7 @@ class AgentCoordinator {
                 success: true
             };
 
-            console.log(`✅ Workflow completed: ${workflow.name}`);
+            console.log(`PASS Workflow completed: ${workflow.name}`);
             return workflow;
 
         } catch (error) {
@@ -309,7 +309,7 @@ module.exports = { AgentCoordinator };
 // Test if run directly
 if (require.main === module) {
     async function testCoordinator() {
-        console.log('🧪 Testing Agent Coordinator...\n');
+        console.log('TEST Testing Agent Coordinator...\n');
 
         const coordinator = new AgentCoordinator({ sessionId: 'test-coord' });
         console.log('Coordinator status:', coordinator.getStatus());
@@ -318,18 +318,18 @@ if (require.main === module) {
             // Test Generate and Scan workflow
             const result = await coordinator.executeWorkflow_GenerateAndScan('class', 'TestService', 'Service for testing coordination');
 
-            console.log('\n📊 Workflow Results:');
+            console.log('\nMETRICS Workflow Results:');
             console.log(`  Success: ${result.result.success}`);
             console.log(`  Generated files: ${result.result.generatedFiles?.length || 0}`);
             console.log(`  Security issues: ${result.result.totalIssues}`);
 
-            console.log('\n📋 Execution Log:');
+            console.log('\n Execution Log:');
             coordinator.getExecutionLog().forEach(entry => {
                 console.log(`  ${entry.timestamp}: ${entry.agent} - ${entry.success ? 'SUCCESS' : 'FAILED'}`);
             });
 
         } catch (error) {
-            console.error('❌ Coordinator test failed:', error.message);
+            console.error('FAIL Coordinator test failed:', error.message);
         }
     }
 

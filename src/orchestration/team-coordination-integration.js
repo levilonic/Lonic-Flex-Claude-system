@@ -38,31 +38,31 @@ const MESSAGE_TEMPLATES = {
         agent_status: {
             color: "#36a64f",
             title: "Agent Status Update",
-            template: "🤖 *{agent}* is now {status}\n📋 Current task: {task}\n📊 Progress: {progress}%"
+            template: "AGENT *{agent}* is now {status}\n Current task: {task}\nMETRICS Progress: {progress}%"
         },
         
         collaboration: {
             color: "#ff9f00", 
             title: "Agent Collaboration",
-            template: "🤝 *{agent1}* is collaborating with *{agent2}*\n🎯 Purpose: {purpose}\n💡 Insight: {insight}"
+            template: " *{agent1}* is collaborating with *{agent2}*\n Purpose: {purpose}\n Insight: {insight}"
         },
         
         milestone: {
             color: "#00ff00",
             title: "Milestone Achieved", 
-            template: "🎉 *Milestone Reached*: {milestone}\n👥 Team: {agents}\n📈 Progress: {progress}%\n⏱️ Duration: {duration}"
+            template: " *Milestone Reached*: {milestone}\n Team: {agents}\n Progress: {progress}%\n Duration: {duration}"
         },
         
         conflict: {
             color: "#ff0000",
             title: "Conflict Alert",
-            template: "⚠️ *Conflict Detected*: {conflict_type}\n👥 Involved: {agents}\n🔄 Status: {status}\n🛠️ Resolution: {resolution}"
+            template: "WARN *Conflict Detected*: {conflict_type}\n Involved: {agents}\nCYCLE Status: {status}\n Resolution: {resolution}"
         },
         
         completion: {
             color: "#0099ff",
             title: "Project Completion",
-            template: "✅ *Project Complete*: {project}\n🎯 Goal: {goal}\n👥 Team: {agents}\n📊 Success Rate: {success_rate}%"
+            template: "PASS *Project Complete*: {project}\n Goal: {goal}\n Team: {agents}\nMETRICS Success Rate: {success_rate}%"
         }
     },
     
@@ -95,7 +95,7 @@ class TeamCoordinationIntegration {
         this.teamMilestones = new Map(); // milestone -> status
         this.escalationPaths = new Map(); // issue type -> escalation
         
-        info('🔗 Team Coordination Integration initialized');
+        info(' Team Coordination Integration initialized');
     }
 
     /**
@@ -114,14 +114,14 @@ class TeamCoordinationIntegration {
         await this.setupExternalResourceTracking();
         
         this.integrationActive = true;
-        info('   ✅ Team coordination integration active');
+        info('   PASS Team coordination integration active');
     }
 
     /**
      * Setup event listeners for workspace events that need external coordination
      */
     setupWorkspaceEventListeners() {
-        info('📡 Setting up workspace event listeners...');
+        info(' Setting up workspace event listeners...');
         
         // Agent status updates
         this.workspace.communicationHub.on(COMMUNICATION_EVENTS.AGENT_STATUS_UPDATE, (data) => {
@@ -158,14 +158,14 @@ class TeamCoordinationIntegration {
             this.handleAgentCollaborationForTeam(data);
         });
         
-        info('   ✅ Workspace event listeners configured');
+        info('   PASS Workspace event listeners configured');
     }
 
     /**
      * Setup external resource tracking for the team
      */
     async setupExternalResourceTracking() {
-        info('📚 Setting up external resource tracking...');
+        info(' Setting up external resource tracking...');
         
         const projectContext = this.workspace.getSharedResource('project_context');
         
@@ -182,7 +182,7 @@ class TeamCoordinationIntegration {
             
             if (mainBranchResult.success) {
                 this.externalResources.set('main_branch', mainBranchResult.resources.branches[0]);
-                info(`   ✅ Main project branch created: ${mainBranchResult.resources.branches[0].name}`);
+                info(`   PASS Main project branch created: ${mainBranchResult.resources.branches[0].name}`);
             }
         }
         
@@ -199,7 +199,7 @@ class TeamCoordinationIntegration {
             });
             
             if (channelResult.success) {
-                info('   ✅ Team coordination channel configured');
+                info('   PASS Team coordination channel configured');
             }
         }
     }
@@ -249,7 +249,7 @@ class TeamCoordinationIntegration {
         
         if (branchResult.success && branchResult.resources.branches.length > 0) {
             this.teamBranches.set(branchKey, branchResult.resources.branches[0]);
-            info(`🌿 Created branch for ${agent}: ${branchName}`);
+            info(` Created branch for ${agent}: ${branchName}`);
         }
     }
 
@@ -270,7 +270,7 @@ class TeamCoordinationIntegration {
         });
         
         if (result.success) {
-            info(`📢 Slack status update sent for ${agent}`);
+            info(` Slack status update sent for ${agent}`);
         }
     }
 
@@ -375,7 +375,7 @@ class TeamCoordinationIntegration {
             const progressUpdate = await this.calculateTeamProgress();
             
             if (progressUpdate.shouldNotify) {
-                const message = `🎯 **Progress Update**: ${agent} completed "${task}"\n📊 Overall progress: ${progressUpdate.percentage}%`;
+                const message = ` **Progress Update**: ${agent} completed "${task}"\nMETRICS Overall progress: ${progressUpdate.percentage}%`;
                 
                 await this.externalCoordinator.sendSlackNotification({
                     message: message,
@@ -416,7 +416,7 @@ class TeamCoordinationIntegration {
     formatSlackMessage(messageType, data) {
         const template = MESSAGE_TEMPLATES.slack[messageType];
         if (!template) {
-            return `🤖 ${messageType}: ${JSON.stringify(data)}`;
+            return `AGENT ${messageType}: ${JSON.stringify(data)}`;
         }
         
         let message = template.template;
@@ -522,26 +522,26 @@ class TeamCoordinationIntegration {
      * Cleanup team coordination resources
      */
     async cleanup() {
-        info('🧹 Cleaning up team coordination resources...');
+        info('CLEANUP Cleaning up team coordination resources...');
         
         this.integrationActive = false;
         
         // Clean up GitHub resources if needed
         if (this.externalCoordinator.config.enableGitHub) {
             // This would clean up temporary branches, close issues, etc.
-            info('   🌿 GitHub resources cleanup (would be implemented)');
+            info('    GitHub resources cleanup (would be implemented)');
         }
         
         // Send final Slack notification
         if (this.externalCoordinator.config.enableSlack) {
             const summary = this.getCoordinationSummary();
             await this.externalCoordinator.sendSlackNotification({
-                message: `🏁 **Workspace Complete**: ${this.workspace.workspaceId}\n📊 Coordination events: ${summary.coordination_events}\n🌿 Branches: ${summary.team_branches.size}`,
+                message: ` **Workspace Complete**: ${this.workspace.workspaceId}\nMETRICS Coordination events: ${summary.coordination_events}\n Branches: ${summary.team_branches.size}`,
                 channel: this.externalCoordinator.config.slack.channel
             });
         }
         
-        info('   ✅ Team coordination cleanup complete');
+        info('   PASS Team coordination cleanup complete');
     }
 }
 
@@ -554,7 +554,7 @@ module.exports = {
 // Demo/test functionality
 if (require.main === module) {
     async function demoTeamCoordination() {
-        info('🔗 Team Coordination Integration Demo\n');
+        info(' Team Coordination Integration Demo\n');
         
         const { CollaborativeWorkspaceInfrastructure } = require('./collaborative-workspace-infrastructure');
         
@@ -580,7 +580,7 @@ if (require.main === module) {
         await teamCoordination.initialize();
         
         // Simulate some team coordination events
-        info('\n🎭 Simulating team coordination events...');
+        info('\n Simulating team coordination events...');
         
         // Agent status update
         workspace.communicationHub.emit(COMMUNICATION_EVENTS.AGENT_STATUS_UPDATE, {
@@ -610,7 +610,7 @@ if (require.main === module) {
         // Get coordination summary
         const summary = teamCoordination.getCoordinationSummary();
         
-        info('\n📊 TEAM COORDINATION SUMMARY:');
+        info('\nMETRICS TEAM COORDINATION SUMMARY:');
         info(`   Integration active: ${summary.integration_active}`);
         info(`   External resources: ${Object.keys(summary.external_resources).length}`);
         info(`   Coordination events: ${summary.coordination_events}`);
@@ -619,7 +619,7 @@ if (require.main === module) {
         
         await teamCoordination.cleanup();
         
-        info('\n✅ Team coordination integration demo complete');
+        info('\nPASS Team coordination integration demo complete');
     }
     
     demoTeamCoordination().catch(console.error);

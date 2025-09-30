@@ -71,11 +71,11 @@ class Factor3ContextManager {
         // Auto-monitoring setup
         if (this.monitor) {
             this.monitor.on('threshold_warning', (state) => {
-                info(`🟡 CONTEXT WARNING: ${state.percentage.toFixed(1)}% usage - approaching 40% limit!`);
+                info(` CONTEXT WARNING: ${state.percentage.toFixed(1)}% usage - approaching 40% limit!`);
             });
             
             this.monitor.on('threshold_critical', (state) => {
-                info(`🟠 CONTEXT CRITICAL: ${state.percentage.toFixed(1)}% usage - auto-compact prevention active!`);
+                info(` CONTEXT CRITICAL: ${state.percentage.toFixed(1)}% usage - auto-compact prevention active!`);
             });
             
             // Start monitoring with this context manager as source
@@ -314,7 +314,7 @@ ${instruction}`
     }
 
     /**
-     * Upgrade context scope (session → project)
+     * Upgrade context scope (session -> project)
      */
     upgradeToProject(projectInfo) {
         if (this.contextScope === 'project') {
@@ -373,7 +373,7 @@ ${instruction}`
         const afterCount = this.events.length;
         
         if (beforeCount !== afterCount) {
-            info(`🗑️ Cleared ${beforeCount - afterCount} resolved errors`);
+            info(`DELETE Cleared ${beforeCount - afterCount} resolved errors`);
             await this.updateContext();
         }
     }
@@ -401,7 +401,7 @@ ${instruction}`
      */
     async emergencyCompact() {
         try {
-            info('🚨 EMERGENCY COMPACT: Context approaching auto-compact limits!');
+            info('ALERT EMERGENCY COMPACT: Context approaching auto-compact limits!');
             
             const { ContextPruner } = require("./context-pruner");
             const pruner = new ContextPruner();
@@ -426,7 +426,7 @@ ${instruction}`
             
             return this.tokenUsage;
         } catch (error) {
-            error('🚨 Emergency compact failed:', error);
+            error('ALERT Emergency compact failed:', error);
             throw error;
         }
     }
@@ -437,7 +437,7 @@ ${instruction}`
     async updateContextFromXml(newXml) {
         // This allows the monitor to update context after pruning
         // For now, we'll just log - in full implementation this would parse XML back to events
-        info('📝 Context updated from external source');
+        info(' Context updated from external source');
         this.currentContext.context_window = newXml;
         await this.updateContext();
     }
@@ -450,7 +450,7 @@ ${instruction}`
             this.monitor.stopMonitoring();
             this.monitor.removeAllListeners();
         }
-        info('🛑 Factor3ContextManager destroyed');
+        info('STOP Factor3ContextManager destroyed');
     }
 
     /**
@@ -487,7 +487,7 @@ ${instruction}`
      * Demo of Enhanced Factor 3 context management with token counting
      */
     static async demo() {
-        info('📄 Enhanced Factor 3: Context Window + Token Monitoring Demo\n');
+        info(' Enhanced Factor 3: Context Window + Token Monitoring Demo\n');
         
         // Create enhanced context manager with monitoring
         const context = new Factor3ContextManager({
@@ -498,7 +498,7 @@ ${instruction}`
             }
         });
         
-        info('📈 Adding events and monitoring token usage...\n');
+        info(' Adding events and monitoring token usage...\n');
         
         // Add events following Factor 3 principles (now async)
         await context.addSlackEvent("Can you deploy the backend?", "#deployments", "@alex");
@@ -519,19 +519,19 @@ ${instruction}`
         info('Added agent completed event');
 
         // Show enhanced context summary with token data
-        info('\n📊 Enhanced Context Summary with Token Counting:');
+        info('\nMETRICS Enhanced Context Summary with Token Counting:');
         const summary = await context.getContextSummary();
         info(JSON.stringify(summary, null, 2));
         
         // Show token percentage monitoring
-        info('\n🎯 Token Usage Monitoring:');
+        info('\n Token Usage Monitoring:');
         const tokenData = await context.getTokenPercentage();
         info(`Current usage: ${tokenData.tokens} tokens (${tokenData.percentage.toFixed(1)}%)`);
         info(`Remaining until auto-compact: ${tokenData.remainingPercentage.toFixed(1)}%`);
-        info(`Warning level: ${tokenData.isWarning ? '🟡 WARNING' : '🟢 SAFE'}`);
+        info(`Warning level: ${tokenData.isWarning ? ' WARNING' : ' SAFE'}`);
         
         // Test resolved error clearing
-        info('\n🗑️ Testing resolved error clearing...');
+        info('\nDELETE Testing resolved error clearing...');
         await context.addEvent('error', { 
             message: 'Test error', 
             status: 'resolved' 
@@ -542,7 +542,7 @@ ${instruction}`
         info('Cleared resolved errors');
         
         // Generate context for LLM
-        info('\n💬 LLM Context Generation:');
+        info('\n LLM Context Generation:');
         const llmMessages = context.getContextForLLM("What's the deployment status?");
         info(`Generated ${llmMessages.length} messages for LLM`);
         info(`Total context length: ${llmMessages[1].content.length} characters`);
@@ -550,7 +550,7 @@ ${instruction}`
         // Clean up
         context.destroy();
         
-        info('\n✅ Enhanced Factor 3 demo completed!');
+        info('\nPASS Enhanced Factor 3 demo completed!');
         info('This system now provides:');
         info('  - Real token counting (not just character estimates)');
         info('  - 40% threshold monitoring with warnings');  

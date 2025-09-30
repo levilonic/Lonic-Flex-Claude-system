@@ -52,7 +52,7 @@ class AgentSpecializationPlatform extends EventEmitter {
             resourceUtilization: 0
         };
 
-        info(`🤖 Agent Specialization Platform initialized: ${this.platformId}`);
+        info(`AGENT Agent Specialization Platform initialized: ${this.platformId}`);
     }
 
     /**
@@ -107,7 +107,7 @@ class AgentSpecializationPlatform extends EventEmitter {
      */
     async createSpecializedAgent(agentType, requirements, projectContext) {
         try {
-            info(`🏭 Creating specialized ${agentType} agent for project: ${projectContext.projectId}`);
+            info(` Creating specialized ${agentType} agent for project: ${projectContext.projectId}`);
 
             // Check resource availability
             const resourceCheck = await this.resourceAllocator.checkAvailability(agentType, requirements);
@@ -145,7 +145,7 @@ class AgentSpecializationPlatform extends EventEmitter {
             return agent;
 
         } catch (error) {
-            error(`❌ Failed to create ${agentType} agent:`, error);
+            error(`FAIL Failed to create ${agentType} agent:`, error);
             throw error;
         }
     }
@@ -246,7 +246,7 @@ class AgentSpecializationPlatform extends EventEmitter {
         }
         this.specializedAgents.get(specialty).push(agent.agentId);
 
-        info(`📝 Registered ${agentType} agent: ${agent.agentId} (specialty: ${specialty})`);
+        info(` Registered ${agentType} agent: ${agent.agentId} (specialty: ${specialty})`);
     }
 
     /**
@@ -316,11 +316,11 @@ class AgentSpecializationPlatform extends EventEmitter {
                 assignment: assignment
             });
 
-            info(`Task assigned: ${task.id} → ${agent.agentId}`);
+            info(`Task assigned: ${task.id} -> ${agent.agentId}`);
             return assignment;
 
         } catch (error) {
-            error('❌ Task assignment failed:', error);
+            error('FAIL Task assignment failed:', error);
             throw error;
         }
     }
@@ -330,7 +330,7 @@ class AgentSpecializationPlatform extends EventEmitter {
      */
     async performAgentHandoff(fromAgent, toAgent, task, handoffData) {
         try {
-            info(`🔄 Performing agent handoff: ${fromAgent.agentId} → ${toAgent.agentId}`);
+            info(`CYCLE Performing agent handoff: ${fromAgent.agentId} -> ${toAgent.agentId}`);
 
             // Prepare handoff context
             const handoffContext = {
@@ -361,11 +361,11 @@ class AgentSpecializationPlatform extends EventEmitter {
                 result: handoffResult
             });
 
-            info(`✅ Agent handoff completed: ${handoffResult.success ? 'SUCCESS' : 'FAILED'}`);
+            info(`PASS Agent handoff completed: ${handoffResult.success ? 'SUCCESS' : 'FAILED'}`);
             return handoffResult;
 
         } catch (error) {
-            error('❌ Agent handoff failed:', error);
+            error('FAIL Agent handoff failed:', error);
             throw error;
         }
     }
@@ -375,7 +375,7 @@ class AgentSpecializationPlatform extends EventEmitter {
      */
     async scaleAgentPool(projectContext, demandMetrics) {
         try {
-            info(`📈 Scaling agent pool for project: ${projectContext.projectId}`);
+            info(` Scaling agent pool for project: ${projectContext.projectId}`);
 
             const currentAgents = this.getProjectAgents(projectContext.projectId);
             const scalingDecision = this.calculateScalingNeed(currentAgents, demandMetrics);
@@ -408,7 +408,7 @@ class AgentSpecializationPlatform extends EventEmitter {
             }
 
         } catch (error) {
-            error('❌ Agent pool scaling failed:', error);
+            error('FAIL Agent pool scaling failed:', error);
             throw error;
         }
     }
@@ -420,11 +420,11 @@ class AgentSpecializationPlatform extends EventEmitter {
         try {
             const registration = this.agentRegistry.get(agentId);
             if (!registration) {
-                console.warn(`⚠️ Agent not found for destruction: ${agentId}`);
+                console.warn(`WARN Agent not found for destruction: ${agentId}`);
                 return;
             }
 
-            info(`🗑️ Destroying agent: ${agentId}`);
+            info(`DELETE Destroying agent: ${agentId}`);
 
             // Stop performance monitoring
             this.performanceMonitor.stopMonitoring(registration.agent);
@@ -461,7 +461,7 @@ class AgentSpecializationPlatform extends EventEmitter {
             info(`Agent destroyed: ${agentId}`);
 
         } catch (error) {
-            error(`❌ Failed to destroy agent ${agentId}:`, error);
+            error(`FAIL Failed to destroy agent ${agentId}:`, error);
             throw error;
         }
     }
@@ -680,7 +680,7 @@ class SpecializedAgentFactory {
 
             info(`Initialized ${this.agentConstructors.size} specialized agent constructors`);
         } catch (error) {
-            console.warn('⚠️ Some agent constructors not available:', error.message);
+            console.warn('WARN Some agent constructors not available:', error.message);
             // Fallback to base agent
             this.agentConstructors.set('github', BaseAgent);
             this.agentConstructors.set('security', BaseAgent);
@@ -917,7 +917,7 @@ class ResourceAllocator {
 
         this.allocatedResources.set(agentId, allocation);
 
-        info(`📊 Allocated resources to ${agentId}: CPU=${allocation.cpu}, Memory=${allocation.memory}`);
+        info(`METRICS Allocated resources to ${agentId}: CPU=${allocation.cpu}, Memory=${allocation.memory}`);
         return allocation;
     }
 
@@ -925,7 +925,7 @@ class ResourceAllocator {
         const allocation = this.allocatedResources.get(agentId);
         if (allocation) {
             this.allocatedResources.delete(agentId);
-            info(`📊 Released resources from ${agentId}: CPU=${allocation.cpu}, Memory=${allocation.memory}`);
+            info(`METRICS Released resources from ${agentId}: CPU=${allocation.cpu}, Memory=${allocation.memory}`);
         }
     }
 
@@ -981,7 +981,7 @@ class AgentPerformanceMonitor {
         };
 
         this.monitoredAgents.set(agentId, monitoringData);
-        info(`📈 Started monitoring agent: ${agentId}`);
+        info(` Started monitoring agent: ${agentId}`);
     }
 
     stopMonitoring(agent) {
@@ -992,7 +992,7 @@ class AgentPerformanceMonitor {
             // Archive performance history
             this.archivePerformanceHistory(agentId, monitoringData);
             this.monitoredAgents.delete(agentId);
-            info(`📈 Stopped monitoring agent: ${agentId}`);
+            info(` Stopped monitoring agent: ${agentId}`);
         }
     }
 
@@ -1044,7 +1044,7 @@ class AgentPerformanceMonitor {
                 timestamp: new Date()
             };
             data.alerts.push(alert);
-            console.warn(`⚠️ High failure rate alert for ${agentId}: ${(failureRate * 100).toFixed(1)}%`);
+            console.warn(`WARN High failure rate alert for ${agentId}: ${(failureRate * 100).toFixed(1)}%`);
         }
 
         // Check response time
@@ -1056,7 +1056,7 @@ class AgentPerformanceMonitor {
                 timestamp: new Date()
             };
             data.alerts.push(alert);
-            console.warn(`⚠️ Slow response alert for ${agentId}: ${(averageResponseTime / 1000).toFixed(1)}s`);
+            console.warn(`WARN Slow response alert for ${agentId}: ${(averageResponseTime / 1000).toFixed(1)}s`);
         }
     }
 

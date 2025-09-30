@@ -1,7 +1,7 @@
 /**
  * Protocol Research Agent - Specialized Planning Phase Agent
  * Researches external protocols, standards, and best practices for implementation
- * Following Factor 10 principles (≤8 execution steps)
+ * Following Factor 10 principles (<=8 execution steps)
  */
 
 const { ValidatedAgent } = require('../core/validated-agent-base');
@@ -22,7 +22,7 @@ class ProtocolResearchAgent extends ValidatedAgent {
         this.standardsAnalysis = {};
         this.recommendations = [];
         
-        // Research workflow steps (Factor 10: ≤8 steps)
+        // Research workflow steps (Factor 10: <=8 steps)
         this.executionSteps = [
             'initialize_research_scope',
             'research_domain_protocols', 
@@ -530,7 +530,7 @@ class ProtocolResearchAgent extends ValidatedAgent {
             {
                 practice: 'Plan-Do-Check-Act Cycle',
                 domain: 'Quality Management',
-                applicability: 'High - fits planning → execution → validation model',
+                applicability: 'High - fits planning -> execution -> validation model',
                 implementation: 'Plan (Phase 1), Do (Phase 2), Check (Quality gates), Act (Delivery)'
             }
         ];
@@ -559,7 +559,7 @@ class ProtocolResearchAgent extends ValidatedAgent {
                 practice: 'Stage-Gate Process',
                 domain: 'Project Management',
                 applicability: 'High - quality gates between phases',
-                implementation: 'Define criteria for Phase 1 → Phase 2 transition'
+                implementation: 'Define criteria for Phase 1 -> Phase 2 transition'
             },
             {
                 practice: 'Definition of Done',

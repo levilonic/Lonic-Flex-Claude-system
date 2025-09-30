@@ -26,7 +26,7 @@ class StatusVerifier {
         await this.loadTaskVerificationMap();
         this.isInitialized = true;
         
-        info('🔍 Status Verifier initialized - Anti-bullshit system active');
+        info(' Status Verifier initialized - Anti-bullshit system active');
     }
 
     /**
@@ -36,16 +36,16 @@ class StatusVerifier {
         // Define verification commands for different task types
         this.taskVerificationMap = new Map([
             // Foundation Agent tasks
-            ['Multi-Agent Core to use real agents', 'node claude-multi-agent-core.js 2>&1 | grep "🤖 Executing real agent"'],
-            ['SQLiteManager Schema completeness', 'npm run demo-db 2>&1 | grep "✅ Database initialized"'],
-            ['Authentication System', 'npm run demo-auth 2>&1 | grep "✅ Authentication Manager initialized"'],
+            ['Multi-Agent Core to use real agents', 'node claude-multi-agent-core.js 2>&1 | grep "AGENT Executing real agent"'],
+            ['SQLiteManager Schema completeness', 'npm run demo-db 2>&1 | grep "PASS Database initialized"'],
+            ['Authentication System', 'npm run demo-auth 2>&1 | grep "PASS Authentication Manager initialized"'],
             ['Multi-agent dashboard works', 'npm run demo-multi-overlay 2>&1 | grep "Multi-Agent Demo completed"'],
-            ['Database Integration Testing', 'npm run demo-db 2>&1 | grep "✅ SQLite Manager demo completed"'],
+            ['Database Integration Testing', 'npm run demo-db 2>&1 | grep "PASS SQLite Manager demo completed"'],
             
             // Agent functionality tests
-            ['BaseAgent functionality', 'npm run demo-base-agent 2>&1 | grep "✅ Base Agent demo completed"'],
-            ['GitHub Agent functionality', 'npm run demo-github-agent 2>&1 | grep "✅ GitHub Agent demo completed"'],
-            ['Security Agent functionality', 'npm run demo-security-agent 2>&1 | grep "✅ Security Agent demo completed"'],
+            ['BaseAgent functionality', 'npm run demo-base-agent 2>&1 | grep "PASS Base Agent demo completed"'],
+            ['GitHub Agent functionality', 'npm run demo-github-agent 2>&1 | grep "PASS GitHub Agent demo completed"'],
+            ['Security Agent functionality', 'npm run demo-security-agent 2>&1 | grep "PASS Security Agent demo completed"'],
             
             // Core system tests  
             ['Multi-agent coordination', 'npm run demo 2>&1 | head -10 | grep "Multi-Agent"'],
@@ -53,14 +53,14 @@ class StatusVerifier {
             ['Memory system', 'npm run demo-memory 2>&1 | grep "Memory system demo completed"'],
             
             // Infrastructure tests
-            ['Module imports', 'node -e "info(require(\'./claude-multi-agent-core.js\') ? \'✅ PASS\' : \'❌ FAIL\')"'],
-            ['Database tables exist', 'node -e "const db = require(\'./database/sqlite-manager.js\'); info(\'✅ PASS\')"'],
+            ['Module imports', 'node -e "info(require(\'./claude-multi-agent-core.js\') ? \'PASS PASS\' : \'FAIL FAIL\')"'],
+            ['Database tables exist', 'node -e "const db = require(\'./database/sqlite-manager.js\'); info(\'PASS PASS\')"'],
             
             // Test cases (will fail deliberately)
-            ['fake task for testing', 'echo "❌ FAKE TASK - This should fail" && exit 1']
+            ['fake task for testing', 'echo "FAIL FAKE TASK - This should fail" && exit 1']
         ]);
 
-        info(`🔍 Loaded ${this.taskVerificationMap.size} verification commands`);
+        info(` Loaded ${this.taskVerificationMap.size} verification commands`);
     }
 
     /**
@@ -80,7 +80,7 @@ class StatusVerifier {
         }
 
         if (!verificationCommand) {
-            info(`⚠️  No verification command found for task: "${taskDescription}"`);
+            info(`WARN  No verification command found for task: "${taskDescription}"`);
             return {
                 taskId: taskDescription,
                 claimed: claimedStatus,
@@ -107,21 +107,21 @@ class StatusVerifier {
     async verifyAllTasks() {
         if (!this.isInitialized) await this.initialize();
 
-        info('🔍 Verifying all tasks in PROGRESS-CHECKPOINT.md...\n');
+        info(' Verifying all tasks in PROGRESS-CHECKPOINT.md...\n');
 
         try {
             const progressFile = path.join(__dirname, '..', 'PROGRESS-CHECKPOINT.md');
             const content = await fs.readFile(progressFile, 'utf-8');
             
-            // Extract all ✅ marked tasks
+            // Extract all PASS marked tasks
             const completedTasks = [];
             const lines = content.split('\n');
             
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
-                if (line.includes('✅') && line.includes('Phase ')) {
+                if (line.includes('PASS') && line.includes('Phase ')) {
                     // Extract task description - handle numbered format
-                    const match = line.match(/✅\s*Phase \d+\.\d+:\s*(.+?)(?:\s-\s|$)/);
+                    const match = line.match(/PASS\s*Phase \d+\.\d+:\s*(.+?)(?:\s-\s|$)/);
                     if (match) {
                         completedTasks.push({
                             line: i + 1,
@@ -131,7 +131,7 @@ class StatusVerifier {
                         });
                     } else {
                         // Try simpler pattern for other formats  
-                        const simpleMatch = line.match(/✅.*?Phase \d+\.\d+:\s*(.+)/);
+                        const simpleMatch = line.match(/PASS.*?Phase \d+\.\d+:\s*(.+)/);
                         if (simpleMatch) {
                             completedTasks.push({
                                 line: i + 1,
@@ -151,7 +151,7 @@ class StatusVerifier {
             let discrepancyCount = 0;
 
             for (const task of completedTasks) {
-                info(`🧪 Verifying: ${task.taskDescription}`);
+                info(`TEST Verifying: ${task.taskDescription}`);
                 
                 const result = await this.verifyTask(
                     task.taskDescription,
@@ -163,7 +163,7 @@ class StatusVerifier {
                 
                 if (result.discrepancy) {
                     discrepancyCount++;
-                    info(`🚨 DISCREPANCY: ${task.taskDescription}`);
+                    info(`ALERT DISCREPANCY: ${task.taskDescription}`);
                     info(`   Claimed: ${result.claimed} | Verified: ${result.verified}\n`);
                 } else {
                     info(`Verified: ${task.taskDescription}\n`);
@@ -180,14 +180,14 @@ class StatusVerifier {
                 results: results
             };
 
-            info('📊 VERIFICATION SUMMARY:');
+            info('METRICS VERIFICATION SUMMARY:');
             info(`   Total tasks claimed complete: ${summary.totalTasks}`);
             info(`   Actually verified complete: ${summary.verifiedTasks}`);
             info(`   Discrepancies found: ${summary.discrepancies}`);
             info(`   Accuracy rate: ${summary.accuracyRate}%`);
 
             if (summary.discrepancies > 0) {
-                info('\n🚨 HONESTY ISSUES DETECTED:');
+                info('\nALERT HONESTY ISSUES DETECTED:');
                 results.filter(r => r.discrepancy).forEach(r => {
                     info(`   - "${r.taskId}": claimed ${r.claimed} but verified ${r.verified}`);
                 });
@@ -196,7 +196,7 @@ class StatusVerifier {
             return summary;
 
         } catch (error) {
-            error('❌ Verification failed:', error.message);
+            error('FAIL Verification failed:', error.message);
             throw error;
         }
     }
@@ -207,11 +207,11 @@ class StatusVerifier {
     async verifySpecificTask(taskId) {
         if (!this.isInitialized) await this.initialize();
 
-        info(`🔍 Verifying specific task: ${taskId}\n`);
+        info(` Verifying specific task: ${taskId}\n`);
 
         const result = await this.verifyTask(taskId, 'completed', 'manual_verification');
         
-        info('📊 VERIFICATION RESULT:');
+        info('METRICS VERIFICATION RESULT:');
         info(`   Task: ${result.taskId}`);
         info(`   Claimed: ${result.claimed}`);
         info(`   Verified: ${result.verified}`);
@@ -232,11 +232,11 @@ class StatusVerifier {
 
         const discrepancies = await this.memoryManager.getDiscrepancies();
         
-        info('📊 DISCREPANCY REPORT:');
+        info('METRICS DISCREPANCY REPORT:');
         info(`   Total discrepancies: ${discrepancies.length}\n`);
 
         if (discrepancies.length > 0) {
-            info('🚨 Recent discrepancies:');
+            info('ALERT Recent discrepancies:');
             discrepancies.slice(0, 10).forEach((d, i) => {
                 info(`   ${i + 1}. "${d.task_id}"`);
                 info(`      Claimed: ${d.claimed_status} | Verified: ${d.verified_status}`);
@@ -286,7 +286,7 @@ async function main() {
         }
 
     } catch (err) {
-        error('❌ Verification system error:', err.message);
+        error('FAIL Verification system error:', err.message);
         process.exit(1);
     } finally {
         await verifier.cleanup();

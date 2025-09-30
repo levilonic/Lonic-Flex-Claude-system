@@ -175,7 +175,7 @@ class BranchAwareAgentManager {
         }
 
         try {
-            info(`🌿 Creating branch: ${branchName} from ${baseBranch}`);
+            info(` Creating branch: ${branchName} from ${baseBranch}`);
 
             // Get base branch reference
             const { data: baseRef } = await this.octokit.rest.git.getRef({
@@ -218,7 +218,7 @@ class BranchAwareAgentManager {
                     sha: baseRef.object.sha
                 });
             } catch (error) {
-                info(`📱 Slack notification failed: ${error.message}`);
+                info(` Slack notification failed: ${error.message}`);
             }
             
             return {
@@ -255,7 +255,7 @@ class BranchAwareAgentManager {
 
         for (const agentType of agentTypes) {
             if (!this.supportedAgentTypes.includes(agentType)) {
-                console.warn(`⚠️  Unsupported agent type: ${agentType}`);
+                console.warn(`WARN  Unsupported agent type: ${agentType}`);
                 continue;
             }
 
@@ -294,7 +294,7 @@ class BranchAwareAgentManager {
                     agentConfig
                 });
 
-                info(`   ✅ Created ${agentType} agent for branch ${branchName}`);
+                info(`   PASS Created ${agentType} agent for branch ${branchName}`);
             }
         }
 
@@ -327,7 +327,7 @@ class BranchAwareAgentManager {
             crossBranchContext: this.crossBranchContext.get(branchName) || {}
         };
 
-        info(`⚡ Executing ${workflowType} workflow on branch: ${branchName}`);
+        info(`FAST Executing ${workflowType} workflow on branch: ${branchName}`);
 
         const results = new Map();
         
@@ -335,7 +335,7 @@ class BranchAwareAgentManager {
         for (const [agentType, agent] of agents) {
             if (this.shouldRunAgentForWorkflow(agentType, workflowType)) {
                 try {
-                    info(`   🤖 Running ${agentType} agent on ${branchName}`);
+                    info(`   AGENT Running ${agentType} agent on ${branchName}`);
                     
                     const result = await agent.executeWorkflow(branchContext, (progress, message) => {
                         info(`      ${progress}% - ${message}`);
@@ -347,7 +347,7 @@ class BranchAwareAgentManager {
                     this.updateCrossBranchContext(branchName, agentType, result);
 
                 } catch (error) {
-                    error(`❌ ${agentType} agent failed on ${branchName}: ${error.message}`);
+                    error(`FAIL ${agentType} agent failed on ${branchName}: ${error.message}`);
                     results.set(agentType, { error: error.message });
                 }
             }
@@ -387,7 +387,7 @@ class BranchAwareAgentManager {
                 base,
                 simulated: true
             };
-            info(`📝 Simulated PR #${simulatedPR.number}: ${simulatedPR.title}`);
+            info(` Simulated PR #${simulatedPR.number}: ${simulatedPR.title}`);
             return simulatedPR;
         }
 
@@ -401,7 +401,7 @@ class BranchAwareAgentManager {
                 base
             });
 
-            info(`📝 Created PR #${pr.number}: ${pr.title}`);
+            info(` Created PR #${pr.number}: ${pr.title}`);
             info(`   URL: ${pr.html_url}`);
 
             return {
@@ -481,7 +481,7 @@ class BranchAwareAgentManager {
      * Coordinate agents across multiple branches
      */
     async coordinateAcrossBranches(sessionId, branches, coordinationTask) {
-        info(`🔄 Coordinating across branches: ${branches.join(', ')}`);
+        info(`CYCLE Coordinating across branches: ${branches.join(', ')}`);
 
         const branchResults = new Map();
         
@@ -519,7 +519,7 @@ class BranchAwareAgentManager {
                 resolved: successCount
             });
         } catch (error) {
-            info(`📱 Cross-branch coordination Slack notification failed: ${error.message}`);
+            info(` Cross-branch coordination Slack notification failed: ${error.message}`);
         }
 
         return coordinationResult;

@@ -2,7 +2,6 @@
   "name": "lonicflex-12-factor-agents",
   "version": "1.0.0",
   "description": "12-Factor Agents methodology with live multi-agent infrastructure implementation",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "demo": "node demo.js",
@@ -32,7 +31,6 @@
     "agents:code": "node src/agents/code-agent.js",
     "verify:all": "node src/memory/status-verifier.js --all",
     "verify:discrepancies": "node src/memory/status-verifier.js --discrepancies",
-
     "smoke": "node src/smoke.js",
     "test": "node --test tests/*.test.js"
   },

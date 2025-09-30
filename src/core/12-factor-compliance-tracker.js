@@ -286,7 +286,7 @@ class TwelveFactorCompliance {
         this.complianceLog.push(entry);
         this.activeFactors.add(factorNumber);
         
-        info(`✓ Factor ${factorNumber}: ${factorName} - Applied`);
+        info(`OK Factor ${factorNumber}: ${factorName} - Applied`);
     }
 
     getComplianceReport() {
@@ -353,10 +353,10 @@ if (require.main === module) {
         compliance.validateAgentScope("integration_fixer", 3, 8);
         compliance.registerTrigger("slack", "slash_command", () => {});
         
-        info('\n📊 Compliance Report:');
+        info('\nMETRICS Compliance Report:');
         info(compliance.getComplianceReport());
         
-        info('\n📄 Current Context (Factor 3):');
+        info('\n Current Context (Factor 3):');
         info(compliance.getContextWindow());
     }
     

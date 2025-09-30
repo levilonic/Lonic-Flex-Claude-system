@@ -217,7 +217,7 @@ class ProjectLifecycleManager extends BaseAgent {
         this.lifecycleMetrics.projectsManaged++;
         this.lifecycleMetrics.currentActiveProjects++;
 
-        info(`Project lifecycle initialized: ${project.id} → ${lifecycleState.currentState}`);
+        info(`Project lifecycle initialized: ${project.id} -> ${lifecycleState.currentState}`);
 
         return lifecycleState;
     }
@@ -330,7 +330,7 @@ class ProjectLifecycleManager extends BaseAgent {
             });
         });
 
-        info(`📊 Resource allocation completed: ${team.agents.length} agents across ${Object.keys(this.projectStates).length} phases`);
+        info(`METRICS Resource allocation completed: ${team.agents.length} agents across ${Object.keys(this.projectStates).length} phases`);
 
         return resourcePlan;
     }
@@ -564,7 +564,7 @@ class ProjectLifecycleManager extends BaseAgent {
         };
 
         lifecycleState.stateHistory.push(transition);
-        info(`State transition: ${fromState} → ${toState} (${reason})`);
+        info(`State transition: ${fromState} -> ${toState} (${reason})`);
     }
 
     async updateProgress(progress, step) {
@@ -706,12 +706,12 @@ class ProjectLifecycleManager extends BaseAgent {
 
     async setupStateTransitionMonitoring(lifecycleState, progressionManager) {
         // Setup monitoring
-        info(`📊 State transition monitoring active for ${lifecycleState.projectId}`);
+        info(`METRICS State transition monitoring active for ${lifecycleState.projectId}`);
     }
 
     async startMonitoringProcesses(monitoring) {
         // Start monitoring processes
-        info(`📊 Monitoring processes started for ${monitoring.projectId}`);
+        info(`METRICS Monitoring processes started for ${monitoring.projectId}`);
     }
 
     generateProjectOverviewDashboard(project, lifecycleState) {
@@ -744,7 +744,7 @@ class ProjectLifecycleManager extends BaseAgent {
     }
 
     async initializeAlertMonitoring(alertSystem, lifecycleState) {
-        info(`🚨 Alert monitoring initialized for ${lifecycleState.projectId}`);
+        info(`ALERT Alert monitoring initialized for ${lifecycleState.projectId}`);
     }
 
     getMilestoneStatus(projectId) {

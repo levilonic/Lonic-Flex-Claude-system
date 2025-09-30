@@ -80,12 +80,12 @@ class AuthManager {
         const salt = process.env.SECRETS_SALT || 'lonicflex-salt-dev-only';
         
         if (passphrase === 'lonicflex-default-key-dev-only') {
-            console.warn('⚠️  Using default passphrase - set SECRETS_PASSPHRASE for production');
+            console.warn('WARN  Using default passphrase - set SECRETS_PASSPHRASE for production');
         }
         
         // Derive key using PBKDF2
         this.masterKey = crypto.pbkdf2Sync(passphrase, salt, this.keyDerivationIterations, 32, 'sha256');
-        info('🔐 Master key derived successfully');
+        info(' Master key derived successfully');
     }
 
     /**
@@ -137,7 +137,7 @@ class AuthManager {
         try {
             const configExists = await fs.access(this.configFile).then(() => true).catch(() => false);
             if (!configExists) {
-                info('📝 No encrypted config file found - using environment only');
+                info(' No encrypted config file found - using environment only');
                 return;
             }
 
@@ -150,13 +150,13 @@ class AuthManager {
                     const decryptedValue = this.decrypt(value);
                     this.secrets.set(key, decryptedValue);
                 } catch (error) {
-                    console.warn(`⚠️  Failed to decrypt secret: ${key}`);
+                    console.warn(`WARN  Failed to decrypt secret: ${key}`);
                 }
             }
             
             info(`Loaded ${this.secrets.size} encrypted secrets`);
         } catch (error) {
-            console.warn('⚠️  Error loading encrypted config:', error.message);
+            console.warn('WARN  Error loading encrypted config:', error.message);
         }
     }
 
@@ -245,7 +245,7 @@ class AuthManager {
                     repo = repo || match[2];
                 }
             } catch (error) {
-                console.warn('⚠️  Could not auto-detect GitHub repository, using defaults');
+                console.warn('WARN  Could not auto-detect GitHub repository, using defaults');
             }
         }
         
@@ -301,7 +301,7 @@ class AuthManager {
         
         // Save to encrypted file
         await this.saveEncryptedSecrets(key, encrypted);
-        info(`🔐 Secret stored and encrypted: ${key}`);
+        info(` Secret stored and encrypted: ${key}`);
     }
 
     /**
@@ -328,7 +328,7 @@ class AuthManager {
             // Write back to file
             await fs.writeFile(this.configFile, JSON.stringify(existingSecrets, null, 2));
         } catch (error) {
-            error('❌ Failed to save encrypted secrets:', error.message);
+            error('FAIL Failed to save encrypted secrets:', error.message);
             throw error;
         }
     }
@@ -337,7 +337,7 @@ class AuthManager {
      * Rotate all API keys
      */
     async rotateApiKeys() {
-        info('🔄 Starting API key rotation...');
+        info('CYCLE Starting API key rotation...');
         const rotationResults = [];
         
         // GitHub token rotation (if configured)
@@ -368,7 +368,7 @@ class AuthManager {
             }
         }
         
-        info('🔄 API key rotation completed');
+        info('CYCLE API key rotation completed');
         return rotationResults;
     }
 
@@ -376,7 +376,7 @@ class AuthManager {
      * Rotate GitHub token (placeholder - requires GitHub App)
      */
     async rotateGitHubToken() {
-        info('🔄 Rotating GitHub token...');
+        info('CYCLE Rotating GitHub token...');
         
         // In a real implementation, this would:
         // 1. Generate new token via GitHub API
@@ -396,7 +396,7 @@ class AuthManager {
      * Rotate Slack token (placeholder - requires Slack App refresh)
      */
     async rotateSlackToken() {
-        info('🔄 Rotating Slack token...');
+        info('CYCLE Rotating Slack token...');
         
         // In a real implementation, this would:
         // 1. Use refresh token to get new access token
@@ -455,28 +455,28 @@ function getAuthManager() {
  * Demo function
  */
 async function demoAuthManager() {
-    info('🔐 Authentication Manager Demo\n');
+    info(' Authentication Manager Demo\n');
 
     const auth = getAuthManager();
     await auth.initialize();
 
-    info('📊 Authentication Status:');
+    info('METRICS Authentication Status:');
     const status = auth.getAuthStatus();
     info(JSON.stringify(status, null, 2));
 
-    info('\n🧪 Testing agent validations:');
+    info('\nTEST Testing agent validations:');
     const agents = ['github', 'security', 'slack', 'deploy'];
     
     for (const agent of agents) {
         const validation = await auth.validateAgentAuth(agent);
-        const icon = validation.valid ? '✅' : '❌';
+        const icon = validation.valid ? 'PASS' : 'FAIL';
         info(`${icon} ${agent}: ${validation.valid ? 'Ready' : validation.error}`);
         if (!validation.valid && validation.suggestion) {
-            info(`   💡 ${validation.suggestion}`);
+            info(`    ${validation.suggestion}`);
         }
     }
 
-    info('\n✅ Authentication Manager demo completed!');
+    info('\nPASS Authentication Manager demo completed!');
 }
 
 module.exports = {

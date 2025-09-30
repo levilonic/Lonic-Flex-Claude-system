@@ -86,7 +86,7 @@ class ContextWindowMonitor extends EventEmitter {
             this.intervalId = null;
         }
         
-        info('🛑 Context monitoring stopped');
+        info('STOP Context monitoring stopped');
         this.emit('monitoring_stopped');
     }
 
@@ -160,28 +160,28 @@ class ContextWindowMonitor extends EventEmitter {
         
         // Only log context stats in development mode or for critical issues
         if (process.env.NODE_ENV !== 'production' || newState.level === 'critical' || newState.level === 'emergency') {
-            info(`📊 Context: ${newState.tokens} tokens (${newState.percentage.toFixed(1)}%) - ${newState.level.toUpperCase()}`);
+            info(`METRICS Context: ${newState.tokens} tokens (${newState.percentage.toFixed(1)}%) - ${newState.level.toUpperCase()}`);
         }
         
         // Emit specific threshold events
         switch (newState.level) {
             case 'warning':
                 if (levelChanged) {
-                    info(`🟡 WARNING: Context usage reached ${this.thresholds.warning}% threshold!`);
+                    info(` WARNING: Context usage reached ${this.thresholds.warning}% threshold!`);
                     this.emit('threshold_warning', newState);
                 }
                 break;
                 
             case 'critical':
                 if (levelChanged) {
-                    info(`🟠 CRITICAL: Context usage reached ${this.thresholds.critical}% threshold!`);
+                    info(` CRITICAL: Context usage reached ${this.thresholds.critical}% threshold!`);
                     this.emit('threshold_critical', newState);
                 }
                 break;
                 
             case 'emergency':
                 if (levelChanged) {
-                    info(`🔴 EMERGENCY: Context usage reached ${this.thresholds.emergency}% - AUTO-COMPACT IMMINENT!`);
+                    info(` EMERGENCY: Context usage reached ${this.thresholds.emergency}% - AUTO-COMPACT IMMINENT!`);
                     this.emit('threshold_emergency', newState);
                     
                     if (this.autoCompactEnabled) {
@@ -192,7 +192,7 @@ class ContextWindowMonitor extends EventEmitter {
                 
             case 'safe':
                 if (oldState.level !== 'safe') {
-                    info(`🟢 Context usage back to safe levels (${newState.percentage.toFixed(1)}%)`);
+                    info(` Context usage back to safe levels (${newState.percentage.toFixed(1)}%)`);
                     this.emit('threshold_safe', newState);
                 }
                 break;
@@ -201,7 +201,7 @@ class ContextWindowMonitor extends EventEmitter {
         // Trend analysis - only log rapid growth in critical situations or development
         if (percentageChange > 10) {
             if (process.env.NODE_ENV !== 'production' || percentageChange > 25) {
-                info(`⚡ Rapid context growth: +${percentageChange.toFixed(1)}% in ${this.monitoringInterval/1000}s`);
+                info(`FAST Rapid context growth: +${percentageChange.toFixed(1)}% in ${this.monitoringInterval/1000}s`);
             }
             this.emit('rapid_growth', { change: percentageChange, duration: this.monitoringInterval });
         }
@@ -211,7 +211,7 @@ class ContextWindowMonitor extends EventEmitter {
      * Handle emergency auto-compact prevention
      */
     async handleEmergencyCompact(state) {
-        info('🚨 EMERGENCY COMPACT PREVENTION ACTIVATED');
+        info('ALERT EMERGENCY COMPACT PREVENTION ACTIVATED');
         
         try {
             // Emit emergency event first
@@ -254,7 +254,7 @@ class ContextWindowMonitor extends EventEmitter {
             }, 1000);
             
         } catch (error) {
-            logger.error('🚨 Emergency compact failed:', error);
+            logger.error('ALERT Emergency compact failed:', error);
             this.emit('emergency_compact_failed', { state, error });
         }
     }
@@ -363,7 +363,7 @@ class ContextWindowMonitor extends EventEmitter {
      */
     updateThresholds(newThresholds) {
         this.thresholds = { ...this.thresholds, ...newThresholds };
-        info(`📊 Thresholds updated:`, this.thresholds);
+        info(`METRICS Thresholds updated:`, this.thresholds);
         this.emit('thresholds_updated', this.thresholds);
     }
 
@@ -371,7 +371,7 @@ class ContextWindowMonitor extends EventEmitter {
      * Force immediate context check
      */
     async forceCheck(contextContent = null) {
-        info('🔍 Force checking context usage...');
+        info(' Force checking context usage...');
         return await this.checkContextUsage(contextContent);
     }
 
@@ -379,22 +379,22 @@ class ContextWindowMonitor extends EventEmitter {
      * Demo function showing threshold monitoring
      */
     async demo() {
-        info('📊 ContextWindowMonitor Demo - 40% Threshold Protection\n');
+        info('METRICS ContextWindowMonitor Demo - 40% Threshold Protection\n');
         
         // Mock context content that grows over time
         let mockContext = '<workflow_context>\n';
         
         // Set up event listeners
         this.on('threshold_warning', (state) => {
-            info(`🚨 THRESHOLD ALERT: ${state.percentage.toFixed(1)}% usage detected!`);
+            info(`ALERT THRESHOLD ALERT: ${state.percentage.toFixed(1)}% usage detected!`);
         });
         
         this.on('context_updated', (state) => {
             const emoji = {
-                safe: '🟢',
-                warning: '🟡', 
-                critical: '🟠',
-                emergency: '🔴'
+                safe: '',
+                warning: '', 
+                critical: '',
+                emergency: ''
             }[state.level];
             
             info(`${emoji} Context: ${state.tokens} tokens (${state.percentage.toFixed(1)}%) - Level: ${state.level}`);
@@ -403,7 +403,7 @@ class ContextWindowMonitor extends EventEmitter {
         // Start monitoring
         this.startMonitoring();
         
-        info('📈 Simulating context growth...\n');
+        info(' Simulating context growth...\n');
         
         // Simulate growing context
         for (let i = 0; i < 10; i++) {
@@ -429,19 +429,19 @@ class ContextWindowMonitor extends EventEmitter {
             
             // Break if we hit warning threshold
             if (this.currentState.level !== 'safe') {
-                info(`\n🎯 Demo reached ${this.currentState.level} level - stopping simulation`);
+                info(`\n Demo reached ${this.currentState.level} level - stopping simulation`);
                 break;
             }
         }
         
         // Show trends
-        info('\n📈 Context Growth Trends:');
+        info('\n Context Growth Trends:');
         const trends = this.getTrends(5);
         info(`Trend: ${trends.trend}`);
         info(`Growth rate: ${(trends.slope * 60).toFixed(2)}% per minute`);
         
         if (trends.predictions.length > 0) {
-            info('\n⏰ Threshold Predictions:');
+            info('\nCLOCK Threshold Predictions:');
             trends.predictions.forEach(pred => {
                 const minutes = Math.ceil(pred.eta / 60);
                 info(`${pred.threshold}: ${minutes} minutes`);
@@ -451,7 +451,7 @@ class ContextWindowMonitor extends EventEmitter {
         this.stopMonitoring();
         mockContext += '\n</workflow_context>';
         
-        info('\n✅ ContextWindowMonitor demo completed!');
+        info('\nPASS ContextWindowMonitor demo completed!');
         info(`Final context size: ${mockContext.length} characters`);
     }
 }

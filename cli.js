@@ -53,7 +53,7 @@ class LonicFLexCLI {
      * Start the LonicFLex system
      */
     async startSystem(options) {
-        info('🚀 Starting LonicFLex System via CLI...');
+        info('Starting LonicFLex System via CLI...');
         await lonicflex.start();
     }
 
@@ -65,16 +65,16 @@ class LonicFLexCLI {
             await lonicflex.initialize();
             const status = lonicflex.getStatus();
 
-            info('📊 LonicFLex System Status:');
+            info('LonicFLex System Status:');
             info(`   Version: ${status.version}`);
-            info(`   Initialized: ${status.initialized ? '✅' : '❌'}`);
+            info(`   Initialized: ${status.initialized ? 'true' : 'false'}`);
             info(`   Uptime: ${Math.floor(status.uptime)}s`);
             info(`   Memory: ${Math.round(status.memoryUsage.rss / 1024 / 1024)}MB`);
 
             // System health from service container
             if (lonicflex.serviceContainer) {
                 const health = await lonicflex.serviceContainer.getSystemHealth();
-                info(`   System Health: ${health.status === 'healthy' ? '✅' : '⚠️'} ${health.status}`);
+                info(`   System Health: ${health.status}`);
             }
 
         } catch (err) {
@@ -86,7 +86,7 @@ class LonicFLexCLI {
      * Run system tests
      */
     async runTests(options) {
-        info('🧪 Running LonicFLex System Tests...');
+        info('Running LonicFLex System Tests...');
 
         const { spawn } = require('child_process');
         const testFiles = [
@@ -105,14 +105,14 @@ class LonicFLexCLI {
                         else reject(new Error(`Test failed with code ${code}`));
                     });
                 });
-                info(`✅ ${testFile} passed`);
+                info(`${testFile} passed`);
             } catch (err) {
-                error(`❌ ${testFile} failed`);
+                error(`${testFile} failed`);
                 throw err;
             }
         }
 
-        info('✅ All tests passed');
+        info('All tests passed');
     }
 
     /**
@@ -125,7 +125,7 @@ class LonicFLexCLI {
         const agentsDir = path.join(__dirname, 'src', 'agents');
         const agentFiles = fs.readdirSync(agentsDir).filter(f => f.endsWith('.js'));
 
-        info('🤖 Available Agents:');
+        info('Available Agents:');
         agentFiles.forEach(file => {
             const name = file.replace('.js', '');
             info(`   - ${name}`);
@@ -136,7 +136,7 @@ class LonicFLexCLI {
      * Health check
      */
     async healthCheck(options) {
-        info('🏥 LonicFLex Health Check...');
+        info('LonicFLex Health Check...');
 
         try {
             await lonicflex.initialize();
@@ -145,25 +145,25 @@ class LonicFLexCLI {
             const db = lonicflex.serviceContainer.getService('database');
             if (db) {
                 const stats = await db.getStats();
-                info('✅ Database: Connected');
+                info('Database: Connected');
                 info(`   Sessions: ${stats.total_sessions || 0}`);
                 info(`   Agents: ${stats.total_agents || 0}`);
             } else {
-                warn('⚠️ Database: Not available');
+                warn('Database: Not available');
             }
 
             // Check memory service
             const memory = lonicflex.serviceContainer.getService('memory');
             if (memory) {
-                info('✅ Memory Service: Available');
+                info('Memory Service: Available');
             } else {
-                warn('⚠️ Memory Service: Not available');
+                warn('Memory Service: Not available');
             }
 
-            info('✅ Health check complete');
+            info('Health check complete');
 
         } catch (err) {
-            error('❌ Health check failed:', err.message);
+            error('Health check failed:', err.message);
             throw err;
         }
     }

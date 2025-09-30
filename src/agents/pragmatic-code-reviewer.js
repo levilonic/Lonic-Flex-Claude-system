@@ -1033,7 +1033,7 @@ class PragmaticCodeReviewerAgent extends ValidatedAgent {
  * Demo function for Pragmatic Code Reviewer Agent
  */
 async function demoPragmaticCodeReviewerAgent() {
-    logger.info('🔍 Pragmatic Code Reviewer Agent Demo - OneRedOak Methodology\n');
+    logger.info(' Pragmatic Code Reviewer Agent Demo - OneRedOak Methodology\n');
 
     const { SQLiteManager } = require('../database/sqlite-manager');
     const dbManager = new SQLiteManager(':memory:');
@@ -1061,13 +1061,13 @@ async function demoPragmaticCodeReviewerAgent() {
         logger.info(`   Categories: ${Object.keys(agent.reviewFramework).length}`);
 
         // Test review framework
-        logger.info('\n📊 Testing 7-category framework...');
+        logger.info('\nMETRICS Testing 7-category framework...');
         for (const [category, framework] of Object.entries(agent.reviewFramework)) {
             logger.info(`   ${category}: ${(framework.weight * 100).toFixed(0)}% weight, ${framework.threshold} threshold`);
         }
 
         // Test pattern detection
-        logger.info('\n🔍 Testing pattern detection...');
+        logger.info('\n Testing pattern detection...');
 
         const testCode = `
             // Architecture patterns
@@ -1118,24 +1118,24 @@ async function demoPragmaticCodeReviewerAgent() {
 
         // Show status
         const status = agent.getStatus();
-        logger.info(`\n📊 Agent Status:`);
+        logger.info(`\nMETRICS Agent Status:`);
         logger.info(`   State: ${status.state}`);
         logger.info(`   Methodology: ${agent.reviewConfig.methodology}`);
         logger.info(`   Framework: ${agent.reviewConfig.framework}`);
 
-        logger.info('\n✅ Pragmatic Code Reviewer demo completed successfully!');
-        logger.info('   ✓ Factor 10: 8 execution steps (≤8 max)');
-        logger.info('   ✓ OneRedOak methodology: "Net Positive > Perfection"');
-        logger.info('   ✓ 7-category assessment framework');
-        logger.info('   ✓ Weighted scoring and severity classification');
-        logger.info('   ✓ Comprehensive pattern detection');
-        logger.info('   ✓ Pragmatic merge recommendations');
+        logger.info('\nPASS Pragmatic Code Reviewer demo completed successfully!');
+        logger.info('   OK Factor 10: 8 execution steps (<=8 max)');
+        logger.info('   OK OneRedOak methodology: "Net Positive > Perfection"');
+        logger.info('   OK 7-category assessment framework');
+        logger.info('   OK Weighted scoring and severity classification');
+        logger.info('   OK Comprehensive pattern detection');
+        logger.info('   OK Pragmatic merge recommendations');
 
-        logger.info('\n📝 Note: Full code review requires git repository and source files');
+        logger.info('\n Note: Full code review requires git repository and source files');
         logger.info('   Usage: agent.executeWorkflow({ files: ["src/file1.js", "src/file2.js"] })');
 
     } catch (error) {
-        logger.error('❌ Demo failed:', error.message);
+        logger.error('FAIL Demo failed:', error.message);
     } finally {
         await dbManager.close();
     }

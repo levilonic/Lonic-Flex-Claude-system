@@ -93,7 +93,7 @@ describe('${className}', () => {
         const filePath = path.join(outputPath, filename);
         await fs.writeFile(filePath, content, 'utf8');
 
-        console.log(`✅ Generated: ${filePath}`);
+        console.log(`PASS Generated: ${filePath}`);
         return filePath;
     }
 
@@ -243,7 +243,7 @@ module.exports = { CodeAgentWorking };
 // Test if run directly
 if (require.main === module) {
     async function testCodeAgent() {
-        console.log('🧪 Testing CodeAgentWorking...\n');
+        console.log('TEST Testing CodeAgentWorking...\n');
 
         const agent = new CodeAgentWorking({
             sessionId: 'test-session',
@@ -262,7 +262,7 @@ if (require.main === module) {
                 description: 'Calculates the sum of two numbers'
             });
 
-            console.log('✅ Code generation successful');
+            console.log('PASS Code generation successful');
             console.log(`Generated files: ${result.files.length}`);
 
             // Test class generation
@@ -278,11 +278,11 @@ if (require.main === module) {
                 generateTests: true
             });
 
-            console.log('✅ Class generation successful');
+            console.log('PASS Class generation successful');
             console.log(`Generated files: ${classResult.files.length}`);
 
         } catch (error) {
-            console.error('❌ Code agent test failed:', error.message);
+            console.error('FAIL Code agent test failed:', error.message);
         }
     }
 

@@ -686,7 +686,7 @@ class LonicFLexAPI {
 
                 // Send completion notification
                 if (result && result.notify) {
-                    await this.notifySlack(`✅ Job completed: ${job.type} (${job.id})`);
+                    await this.notifySlack(`PASS Job completed: ${job.type} (${job.id})`);
                 }
 
             } catch (error) {
@@ -697,7 +697,7 @@ class LonicFLexAPI {
                 console.error(`Job ${job.id} failed:`, error);
 
                 // Send failure notification
-                await this.notifySlack(`❌ Job failed: ${job.type} (${job.id}) - ${error.message}`);
+                await this.notifySlack(`FAIL Job failed: ${job.type} (${job.id}) - ${error.message}`);
             }
 
             // Store completed job (keep last 100)
@@ -821,12 +821,12 @@ class LonicFLexAPI {
         try {
             // Initialize database
             await this.db.initialize();
-            console.log('✅ Database initialized');
+            console.log('PASS Database initialized');
 
             // Start server
             return new Promise((resolve) => {
                 this.server = this.app.listen(this.port, () => {
-                    console.log(`\n🚀 LonicFLex API Server running on port ${this.port}`);
+                    console.log(`\n LonicFLex API Server running on port ${this.port}`);
                     console.log(`   Health: http://localhost:${this.port}/health`);
                     console.log(`   Docs:   http://localhost:${this.port}/api/docs`);
                     console.log(`   Status: http://localhost:${this.port}/api/system/status`);
@@ -834,7 +834,7 @@ class LonicFLexAPI {
                 });
             });
         } catch (error) {
-            console.error('❌ Failed to start API server:', error);
+            console.error('FAIL Failed to start API server:', error);
             throw error;
         }
     }
@@ -845,12 +845,12 @@ class LonicFLexAPI {
     async stop() {
         if (this.server) {
             await new Promise(resolve => this.server.close(resolve));
-            console.log('🛑 API Server stopped');
+            console.log('STOP API Server stopped');
         }
 
         if (this.db) {
             await this.db.close();
-            console.log('🛑 Database closed');
+            console.log('STOP Database closed');
         }
     }
 }

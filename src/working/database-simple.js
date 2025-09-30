@@ -224,14 +224,14 @@ module.exports = { DatabaseSimple };
 // Test if run directly
 if (require.main === module) {
     async function testDatabase() {
-        console.log('🧪 Testing DatabaseSimple...\n');
+        console.log('TEST Testing DatabaseSimple...\n');
 
         const db = new DatabaseSimple();
         console.log('Initial status:', db.getStatus());
 
         try {
             await db.initialize();
-            console.log('✅ Database initialized');
+            console.log('PASS Database initialized');
             console.log('Status:', db.getStatus());
 
             // Test simple query
@@ -243,17 +243,17 @@ if (require.main === module) {
                 id: 'test-session-123',
                 data: JSON.stringify({ test: true })
             });
-            console.log('✅ Insert successful:', insertResult);
+            console.log('PASS Insert successful:', insertResult);
 
             // Test data retrieval
             const session = await db.get('SELECT * FROM sessions WHERE id = ?', ['test-session-123']);
-            console.log('✅ Retrieved data:', session);
+            console.log('PASS Retrieved data:', session);
 
             await db.close();
-            console.log('✅ Database closed cleanly');
+            console.log('PASS Database closed cleanly');
 
         } catch (error) {
-            console.error('❌ Database test failed:', error.message);
+            console.error('FAIL Database test failed:', error.message);
         }
     }
 

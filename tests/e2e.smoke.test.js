@@ -1,8 +1,9 @@
-import test from 'node:test';
-import assert from 'node:assert';
-import { readFile } from 'node:fs/promises';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+﻿const test = require('node:test');
+const assert = require('node:assert');
+const { readFile } = require('fs/promises');
+const { execFile } = require('child_process');
+const { promisify } = require('util');
+
 const execFileP = promisify(execFile);
 
 test('smoke writes data/result.json with ok:true', async () => {

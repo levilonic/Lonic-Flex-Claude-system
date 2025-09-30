@@ -37,7 +37,7 @@ class CLIContextDisplay {
         this.contextSource = contextSource;
         this.isRunning = true;
         
-        info('🖥️  Starting persistent context display...');
+        info('DISPLAY  Starting persistent context display...');
         
         // Create initial display state
         this.updateDisplayState();
@@ -50,7 +50,7 @@ class CLIContextDisplay {
             this.updateDisplayState();
         }, this.updateInterval);
         
-        info(`📊 Context display active - updating every ${this.updateInterval/1000}s`);
+        info(`METRICS Context display active - updating every ${this.updateInterval/1000}s`);
     }
 
     /**
@@ -69,7 +69,7 @@ class CLIContextDisplay {
         // Mark display as inactive
         this.updateDisplayState({ isActive: false });
         
-        info('🛑 Context display stopped');
+        info('STOP Context display stopped');
     }
 
     /**
@@ -126,14 +126,14 @@ class CLIContextDisplay {
         const detailText = `${tokens.toLocaleString()} tokens (${percentage.toFixed(1)}% used)`;
         
         // Status indicator
-        let statusIcon = '🟢';
+        let statusIcon = '';
         let statusText = 'SAFE';
         
         if (isCritical) {
-            statusIcon = '🔴';
+            statusIcon = '';
             statusText = 'CRITICAL';
         } else if (isWarning) {
-            statusIcon = '🟡';
+            statusIcon = '';
             statusText = 'WARNING';
         }
         
@@ -269,7 +269,7 @@ class ContextDisplayProcess {
         if (this.displayActive) {
             process.stdout.write('\\033[1A\\033[2K'); // Move up and clear line
         } else {
-            info('\\n🎯 Context Monitor Active - Real-time token usage:');
+            info('\\n Context Monitor Active - Real-time token usage:');
             this.displayActive = true;
         }
         
@@ -288,7 +288,7 @@ class ContextDisplayProcess {
                 const state = JSON.parse(data);
                 
                 if (!state.isActive) {
-                    info('\\n🛑 Context monitoring stopped by main process');
+                    info('\\nSTOP Context monitoring stopped by main process');
                     process.exit(0);
                 }
                 
@@ -305,13 +305,13 @@ class ContextDisplayProcess {
     }
 
     start() {
-        info('📊 Context Display Process Started');
+        info('METRICS Context Display Process Started');
         info('Monitoring context usage in real-time...');
         this.checkForUpdates();
         
         // Handle graceful shutdown
         process.on('SIGINT', () => {
-            info('\\n🛑 Context display process stopped');
+            info('\\nSTOP Context display process stopped');
             process.exit(0);
         });
     }
@@ -357,7 +357,7 @@ display.start();
      * Demo function
      */
     async demo() {
-        info('🖥️  CLI Context Display Demo\\n');
+        info('DISPLAY  CLI Context Display Demo\\n');
         
         // Mock context source for demo
         const mockContextSource = {
@@ -374,18 +374,18 @@ display.start();
             }
         };
         
-        info('📊 Starting context display with mock data...');
+        info('METRICS Starting context display with mock data...');
         this.startDisplay(mockContextSource);
         
         info('Context display is now running!');
-        info('📱 Check for:');
+        info(' Check for:');
         info('  - Separate window showing context percentage');
         info('  - Updates every 5 seconds');
         info('  - Color coding: Green (safe), Yellow (warning), Red (critical)');
         
         // Run for demo duration
         setTimeout(() => {
-            info('\\n🛑 Demo completed - stopping context display');
+            info('\\nSTOP Demo completed - stopping context display');
             this.stopDisplay();
         }, 15000);
         

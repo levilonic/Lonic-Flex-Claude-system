@@ -53,7 +53,7 @@ class LongTermPersistence {
             }
         };
         
-        info(`📁 Archive directory: ${this.baseArchiveDir}`);
+        info(` Archive directory: ${this.baseArchiveDir}`);
         info('LongTermPersistence initialized - 3+ month context survival ready');
     }
 
@@ -75,7 +75,7 @@ class LongTermPersistence {
             } catch (error) {
                 if (error.code === 'ENOENT') {
                     await fs.mkdir(dir, { recursive: true });
-                    info(`📁 Created directory: ${dir}`);
+                    info(` Created directory: ${dir}`);
                 }
             }
         }
@@ -86,7 +86,7 @@ class LongTermPersistence {
      */
     async archiveContext(contextId, contextData, scope = 'session') {
         const startTime = Date.now();
-        info(`📦 Archiving ${scope} context: ${contextId}`);
+        info(` Archiving ${scope} context: ${contextId}`);
 
         // Ensure directories exist before archiving
         await this.ensureDirectories();
@@ -144,7 +144,7 @@ class LongTermPersistence {
             await fs.writeFile(metadataPath, JSON.stringify(archiveMetadata, null, 2));
         } catch (error) {
             if (error.code === 'ENOENT') {
-                info(`📁 Directory missing, creating: ${archiveDir}`);
+                info(` Directory missing, creating: ${archiveDir}`);
                 await this.ensureDirectories();
                 // Retry after creating directories
                 await fs.writeFile(contextPath, compressedContext);
@@ -156,7 +156,7 @@ class LongTermPersistence {
 
         const archiveTime = Date.now() - startTime;
         info(`Context archived in ${archiveTime}ms`);
-        info(`📊 Size: ${contextXml.length} → ${compressedContext.length} (${(archiveMetadata.compressionRatio * 100).toFixed(1)}% of original)`);
+        info(`METRICS Size: ${contextXml.length} -> ${compressedContext.length} (${(archiveMetadata.compressionRatio * 100).toFixed(1)}% of original)`);
 
         const validation = { success: this.validateSuccess() };return {
 
@@ -177,7 +177,7 @@ class LongTermPersistence {
      */
     async restoreContext(contextId, scope = 'session') {
         const startTime = Date.now();
-        info(`🔄 Restoring ${scope} context: ${contextId}`);
+        info(`CYCLE Restoring ${scope} context: ${contextId}`);
 
         // Load metadata first for quick checks
         const metadataPath = path.join(this.baseArchiveDir, 'metadata', `${contextId}.json`);
@@ -202,7 +202,7 @@ class LongTermPersistence {
         // Verify integrity
         const currentFingerprint = this.createContextFingerprint(compressedContext);
         if (currentFingerprint !== metadata.fingerprint) {
-            console.warn('⚠️ Context fingerprint mismatch - possible corruption');
+            console.warn('WARN Context fingerprint mismatch - possible corruption');
         }
 
         // Apply restoration enhancement for time gaps
@@ -216,7 +216,7 @@ class LongTermPersistence {
         const restoreTime = Date.now() - startTime;
         
         // Check if we met the sub-second performance target
-        const performanceStatus = restoreTime <= this.targets.resumeTime ? '🚀 TARGET MET' : '⚠️ SLOW';
+        const performanceStatus = restoreTime <= this.targets.resumeTime ? ' TARGET MET' : 'WARN SLOW';
         info(`Context restored in ${restoreTime}ms ${performanceStatus}`);
 
         const validation = { success: this.validateSuccess() };return {
@@ -460,7 +460,7 @@ class LongTermPersistence {
         }
 
         if (cleaned.count > 0) {
-            info(`🗑️ Cleaned up ${cleaned.count} expired contexts, freed ${(cleaned.freedBytes / 1024 / 1024).toFixed(2)}MB`);
+            info(`DELETE Cleaned up ${cleaned.count} expired contexts, freed ${(cleaned.freedBytes / 1024 / 1024).toFixed(2)}MB`);
         }
 
         return cleaned;
@@ -470,7 +470,7 @@ class LongTermPersistence {
      * Demo showing long-term persistence capabilities
      */
     async demo() {
-        info('📦 Long-Term Persistence Demo - 3+ Month Context Survival\n');
+        info(' Long-Term Persistence Demo - 3+ Month Context Survival\n');
 
         // Create mock context for different ages
         const mockContext = `<workflow_context>
@@ -510,7 +510,7 @@ class LongTermPersistence {
         ];
 
         for (const testCase of testCases) {
-            info(`\n🧪 Testing ${testCase.name}:`);
+            info(`\nTEST Testing ${testCase.name}:`);
             
             const contextData = {
                 context: mockContext,
@@ -521,13 +521,13 @@ class LongTermPersistence {
 
             // Archive
             const archiveResult = await this.archiveContext('demo-context', contextData, 'session');
-            info(`📦 Archived with ${archiveResult.archiveLevel} level`);
+            info(` Archived with ${archiveResult.archiveLevel} level`);
 
             // Restore
             const restoreResult = await this.restoreContext('demo-context', 'session');
-            info(`⚡ Restore time: ${restoreResult.restoreTime}ms`);
-            info(`📈 Performance: ${restoreResult.performanceMet ? 'TARGET MET' : 'SLOW'}`);
-            info(`💡 Time gap: ${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`);
+            info(`FAST Restore time: ${restoreResult.restoreTime}ms`);
+            info(` Performance: ${restoreResult.performanceMet ? 'TARGET MET' : 'SLOW'}`);
+            info(` Time gap: ${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`);
 
             // Clean up
             await fs.unlink(archiveResult.paths.context).catch(() => {});
@@ -535,12 +535,12 @@ class LongTermPersistence {
         }
 
         // Show archive statistics
-        info('\n📊 Archive Statistics:');
+        info('\nMETRICS Archive Statistics:');
         const stats = await this.getArchiveStatistics();
         info(`Total archived: ${stats.totalContexts} contexts`);
         info(`Average compression: ${(stats.averageCompressionRatio * 100).toFixed(1)}%`);
 
-        info('\n✅ Long-Term Persistence demo completed!');
+        info('\nPASS Long-Term Persistence demo completed!');
         info('System ready for 3+ month context survival with sub-second resume times');
     }
 }

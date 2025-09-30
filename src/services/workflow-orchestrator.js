@@ -65,7 +65,7 @@ class WorkflowOrchestrator extends EventEmitter {
         this.isInitialized = false;
         this.isShuttingDown = false;
 
-        info('🎭 WorkflowOrchestrator created with intelligent coordination');
+        info(' WorkflowOrchestrator created with intelligent coordination');
     }
 
     /**
@@ -108,7 +108,7 @@ class WorkflowOrchestrator extends EventEmitter {
             return this;
 
         } catch (error) {
-            error('❌ WorkflowOrchestrator initialization failed:', error.message);
+            error('FAIL WorkflowOrchestrator initialization failed:', error.message);
             throw error;
         }
     }
@@ -149,7 +149,7 @@ class WorkflowOrchestrator extends EventEmitter {
         });
 
         try {
-            info(`🎭 Starting workflow orchestration: ${workflowId}`);
+            info(` Starting workflow orchestration: ${workflowId}`);
             const result = await execution.execute();
 
             // Move to completed tracking
@@ -187,7 +187,7 @@ class WorkflowOrchestrator extends EventEmitter {
                 executionTime: Date.now() - execution.startedAt
             });
 
-            error(`❌ Workflow orchestration failed: ${workflowId}`, error.message);
+            error(`FAIL Workflow orchestration failed: ${workflowId}`, error.message);
             throw error;
         }
     }
@@ -228,7 +228,7 @@ class WorkflowOrchestrator extends EventEmitter {
      */
     async returnAgent(agentId) {
         if (!this.poolManager) {
-            console.warn('⚠️ AgentPoolManager not available - cannot return agent');
+            console.warn('WARN AgentPoolManager not available - cannot return agent');
             return false;
         }
         return this.poolManager.returnAgent(agentId);
@@ -326,7 +326,7 @@ class WorkflowOrchestrator extends EventEmitter {
                     queue: false
                 });
             } catch (error) {
-                error('❌ Error processing queued workflow:', error.message);
+                error('FAIL Error processing queued workflow:', error.message);
                 // Could implement retry logic here
             }
         }
@@ -434,7 +434,7 @@ class WorkflowOrchestrator extends EventEmitter {
      * Shutdown orchestrator
      */
     async shutdown() {
-        info('🛑 Shutting down WorkflowOrchestrator...');
+        info('STOP Shutting down WorkflowOrchestrator...');
         this.isShuttingDown = true;
 
         // Wait for active workflows to complete (with timeout)
@@ -442,7 +442,7 @@ class WorkflowOrchestrator extends EventEmitter {
         const startTime = Date.now();
 
         while (this.activeWorkflows.size > 0 && (Date.now() - startTime) < shutdownTimeout) {
-            info(`⏳ Waiting for ${this.activeWorkflows.size} workflows to complete...`);
+            info(`HOURGLASS Waiting for ${this.activeWorkflows.size} workflows to complete...`);
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
@@ -451,7 +451,7 @@ class WorkflowOrchestrator extends EventEmitter {
             try {
                 await execution.forceStop();
             } catch (error) {
-                console.warn(`⚠️ Error stopping workflow ${execution.workflowId}:`, error.message);
+                console.warn(`WARN Error stopping workflow ${execution.workflowId}:`, error.message);
             }
         }
 
@@ -497,7 +497,7 @@ class WorkflowExecution {
      */
     async execute() {
         try {
-            info(`🎬 Executing workflow: ${this.workflowId}`);
+            info(` Executing workflow: ${this.workflowId}`);
 
             // Initialize workflow context
             await this.initializeWorkflowContext();
@@ -562,12 +562,12 @@ class WorkflowExecution {
             }
 
         } catch (error) {
-            error(`❌ Step execution failed: ${this.currentStep}`, error.message);
+            error(`FAIL Step execution failed: ${this.currentStep}`, error.message);
             throw error;
 
         } finally {
             const stepExecutionTime = Date.now() - stepStartTime;
-            info(`⏱️ Step ${this.currentStep} completed in ${stepExecutionTime}ms`);
+            info(` Step ${this.currentStep} completed in ${stepExecutionTime}ms`);
         }
     }
 
@@ -609,7 +609,7 @@ class WorkflowExecution {
             try {
                 await this.orchestrator.returnAgent(agent.agentId);
             } catch (returnError) {
-                console.warn(`⚠️ Failed to return agent ${agent.agentId} to pool:`, returnError.message);
+                console.warn(`WARN Failed to return agent ${agent.agentId} to pool:`, returnError.message);
             }
             throw error;
         }
@@ -742,7 +742,7 @@ class WorkflowExecution {
      * Handle execution errors
      */
     async handleExecutionError(error) {
-        error(`❌ Workflow execution failed: ${this.workflowId}`, error.message);
+        error(`FAIL Workflow execution failed: ${this.workflowId}`, error.message);
 
         // Could implement retry logic, partial recovery, etc.
         this.context.set('error', error.message);
@@ -754,7 +754,7 @@ class WorkflowExecution {
      * Force stop execution
      */
     async forceStop() {
-        info(`🛑 Force stopping workflow: ${this.workflowId}`);
+        info(`STOP Force stopping workflow: ${this.workflowId}`);
         await this.cleanup();
     }
 
@@ -767,7 +767,7 @@ class WorkflowExecution {
             try {
                 await this.orchestrator.returnAgent(agent.agentId);
             } catch (error) {
-                console.warn(`⚠️ Error returning agent during cleanup: ${agent.agentId}`);
+                console.warn(`WARN Error returning agent during cleanup: ${agent.agentId}`);
             }
         }
 

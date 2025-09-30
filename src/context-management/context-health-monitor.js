@@ -486,7 +486,7 @@ class ContextHealthMonitor extends EventEmitter {
             return;
         }
 
-        info('🤖 Starting background context maintenance');
+        info('AGENT Starting background context maintenance');
         
         this.maintenanceInterval = setInterval(async () => {
             await this.runBackgroundMaintenance();
@@ -503,7 +503,7 @@ class ContextHealthMonitor extends EventEmitter {
         if (this.maintenanceInterval) {
             clearInterval(this.maintenanceInterval);
             this.maintenanceInterval = null;
-            info('🛑 Stopped background context maintenance');
+            info('STOP Stopped background context maintenance');
         }
     }
 
@@ -516,16 +516,16 @@ class ContextHealthMonitor extends EventEmitter {
         // Skip during quiet hours
         if (hour >= this.maintenanceConfig.quietHours.start || 
             hour < this.maintenanceConfig.quietHours.end) {
-            info('😴 Skipping maintenance during quiet hours');
+            info(' Skipping maintenance during quiet hours');
             return;
         }
 
         if (this.runningJobs.size >= this.maintenanceConfig.maxConcurrentJobs) {
-            info('⏳ Maintenance queue full, skipping cycle');
+            info('HOURGLASS Maintenance queue full, skipping cycle');
             return;
         }
 
-        info('🔍 Running background maintenance cycle');
+        info(' Running background maintenance cycle');
 
         try {
             // Get contexts that need maintenance (would integrate with context registry)
@@ -582,7 +582,7 @@ class ContextHealthMonitor extends EventEmitter {
      * Demo showing health monitoring capabilities
      */
     async demo() {
-        info('🏥 Context Health Monitor Demo - Proactive Context Maintenance\n');
+        info('HEALTH Context Health Monitor Demo - Proactive Context Maintenance\n');
 
         // Mock contexts with different health conditions
         const testContexts = [
@@ -617,29 +617,29 @@ class ContextHealthMonitor extends EventEmitter {
 
         // Test health calculation for each context
         for (const context of testContexts) {
-            info(`\n🔍 Health check for: ${context.id}`);
+            info(`\n Health check for: ${context.id}`);
             
             const healthMetrics = await this.calculateHealthScore(context.id, context.data);
             
-            info(`📊 Overall Score: ${(healthMetrics.overallScore * 100).toFixed(1)}% (${healthMetrics.level})`);
-            info(`📈 Detailed Scores:`);
+            info(`METRICS Overall Score: ${(healthMetrics.overallScore * 100).toFixed(1)}% (${healthMetrics.level})`);
+            info(` Detailed Scores:`);
             Object.entries(healthMetrics.scores).forEach(([metric, score]) => {
                 info(`   ${metric}: ${(score * 100).toFixed(1)}%`);
             });
             
             if (healthMetrics.recommendations.length > 0) {
-                info(`💡 Recommendations:`);
+                info(` Recommendations:`);
                 healthMetrics.recommendations.forEach(rec => info(`   - ${rec}`));
             }
 
             // Test maintenance
             const maintenanceResult = await this.performMaintenance(context.id, context.data);
             if (maintenanceResult.success) {
-                info(`🔧 Maintenance: ${maintenanceResult.actions.join(', ') || 'No actions needed'}`);
+                info(` Maintenance: ${maintenanceResult.actions.join(', ') || 'No actions needed'}`);
             }
         }
 
-        info('\n✅ Context Health Monitor demo completed!');
+        info('\nPASS Context Health Monitor demo completed!');
         info('System ready for proactive context maintenance and degradation prevention');
     }
 }

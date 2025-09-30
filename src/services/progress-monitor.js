@@ -45,7 +45,7 @@ class ProgressMonitor extends EventEmitter {
             estimatedTimeRemaining: null
         };
         
-        info('📊 Progress Monitor initialized');
+        info('METRICS Progress Monitor initialized');
     }
     
     /**
@@ -53,7 +53,7 @@ class ProgressMonitor extends EventEmitter {
      */
     async startMonitoring(sessionId, executionPlan) {
         try {
-            info(`📊 Starting progress monitoring for session: ${sessionId}`);
+            info(`METRICS Starting progress monitoring for session: ${sessionId}`);
             
             this.sessionId = sessionId;
             this.executionPlan = executionPlan;
@@ -86,7 +86,7 @@ class ProgressMonitor extends EventEmitter {
             };
             
         } catch (error) {
-            error('❌ Failed to start progress monitoring:', error.message);
+            error('FAIL Failed to start progress monitoring:', error.message);
             throw error;
         }
     }
@@ -133,7 +133,7 @@ class ProgressMonitor extends EventEmitter {
         
         // Console logging
         if (this.config.enableConsoleLogging) {
-            info(`📊 Progress: ${phase} - ${step} (${this.formatUptime(progressEntry.uptime)})`);
+            info(`METRICS Progress: ${phase} - ${step} (${this.formatUptime(progressEntry.uptime)})`);
         }
         
         // Emit progress event
@@ -190,11 +190,11 @@ class ProgressMonitor extends EventEmitter {
                 await this.sendPeriodicReport();
                 this.stats.progressReports++;
             } catch (error) {
-                error('❌ Periodic report failed:', error.message);
+                error('FAIL Periodic report failed:', error.message);
             }
         }, this.config.reportInterval);
         
-        info(`⏰ Periodic reporting scheduled every ${this.config.reportInterval / 60000} minutes`);
+        info(`CLOCK Periodic reporting scheduled every ${this.config.reportInterval / 60000} minutes`);
     }
     
     /**
@@ -244,30 +244,30 @@ class ProgressMonitor extends EventEmitter {
             const { CommAgent } = require('../agents/comm-agent');
             const commAgent = new CommAgent(this.sessionId);
             
-            const message = `🤖 **LonicFLex Autonomous Execution - Progress Report**
+            const message = `AGENT **LonicFLex Autonomous Execution - Progress Report**
 
-⏱️ **Uptime**: ${report.uptimeFormatted}
-📊 **Progress**: ${report.progress.completed}/${report.progress.total} tasks (${report.progress.percentage}%)
-🎯 **Current Phase**: ${report.currentPhase || 'Initializing'}
-📋 **Current Step**: ${report.currentStep || 'Starting'}
+ **Uptime**: ${report.uptimeFormatted}
+METRICS **Progress**: ${report.progress.completed}/${report.progress.total} tasks (${report.progress.percentage}%)
+ **Current Phase**: ${report.currentPhase || 'Initializing'}
+ **Current Step**: ${report.currentStep || 'Starting'}
 
-📈 **Statistics**:
-• Progress Reports: ${report.statistics.progressReports}
-• Milestones Reached: ${report.statistics.milestonesReached}
-• Failed Tasks: ${report.progress.failed}
-${report.statistics.estimatedTimeRemaining ? `• Estimated Time Remaining: ${this.formatUptime(report.statistics.estimatedTimeRemaining)}` : ''}
+ **Statistics**:
+- Progress Reports: ${report.statistics.progressReports}
+- Milestones Reached: ${report.statistics.milestonesReached}
+- Failed Tasks: ${report.progress.failed}
+${report.statistics.estimatedTimeRemaining ? `- Estimated Time Remaining: ${this.formatUptime(report.statistics.estimatedTimeRemaining)}` : ''}
 
-🔄 **Recent Activity**:
-${report.recentActivity.map(activity => `• ${activity.phase}: ${activity.step}`).join('\n')}
+CYCLE **Recent Activity**:
+${report.recentActivity.map(activity => `- ${activity.phase}: ${activity.step}`).join('\n')}
 
 Session: \`${this.sessionId}\`
 Timestamp: ${new Date(report.timestamp).toLocaleString()}`;
 
             await commAgent.sendSlackNotification('autonomous-execution-progress', message);
-            info('📢 Slack progress report sent');
+            info(' Slack progress report sent');
             
         } catch (error) {
-            info('📝 Slack unavailable, progress logged locally:', {
+            info(' Slack unavailable, progress logged locally:', {
                 uptime: report.uptimeFormatted,
                 progress: `${report.progress.completed}/${report.progress.total}`,
                 phase: report.currentPhase,
@@ -286,12 +286,12 @@ Timestamp: ${new Date(report.timestamp).toLocaleString()}`;
             const { CommAgent } = require('../agents/comm-agent');
             const commAgent = new CommAgent(this.sessionId);
             
-            const message = `📊 **Progress Update** - ${Math.round(progressPercent)}% Complete
+            const message = `METRICS **Progress Update** - ${Math.round(progressPercent)}% Complete
 
-🎯 **Phase**: ${progressEntry.phase}
-📋 **Step**: ${progressEntry.step}
-⏱️ **Uptime**: ${this.formatUptime(progressEntry.uptime)}
-📈 **Tasks**: ${this.stats.completedTasks}/${this.stats.totalTasks}
+ **Phase**: ${progressEntry.phase}
+ **Step**: ${progressEntry.step}
+ **Uptime**: ${this.formatUptime(progressEntry.uptime)}
+ **Tasks**: ${this.stats.completedTasks}/${this.stats.totalTasks}
 
 Session: \`${this.sessionId}\``;
 
@@ -312,14 +312,14 @@ Session: \`${this.sessionId}\``;
             const { CommAgent } = require('../agents/comm-agent');
             const commAgent = new CommAgent(this.sessionId);
             
-            const message = `🎯 **Milestone Achieved!**
+            const message = ` **Milestone Achieved!**
 
-🏆 **Milestone**: ${milestoneEntry.milestone}
-⏱️ **Time Taken**: ${this.formatUptime(milestoneEntry.uptime)}
-📊 **Progress**: ${this.stats.completedTasks}/${this.stats.totalTasks} tasks
+ **Milestone**: ${milestoneEntry.milestone}
+ **Time Taken**: ${this.formatUptime(milestoneEntry.uptime)}
+METRICS **Progress**: ${this.stats.completedTasks}/${this.stats.totalTasks} tasks
 
-🎉 **Achievements**:
-${Object.entries(milestoneEntry.achievements).map(([key, value]) => `• ${key}: ${value}`).join('\n')}
+ **Achievements**:
+${Object.entries(milestoneEntry.achievements).map(([key, value]) => `- ${key}: ${value}`).join('\n')}
 
 Session: \`${this.sessionId}\``;
 
@@ -397,7 +397,7 @@ Session: \`${this.sessionId}\``;
      * Stop progress monitoring
      */
     async stop() {
-        info('🛑 Stopping progress monitoring...');
+        info('STOP Stopping progress monitoring...');
         
         this.isMonitoring = false;
         
@@ -422,7 +422,7 @@ Session: \`${this.sessionId}\``;
             });
             
         } catch (error) {
-            error('❌ Final report failed:', error.message);
+            error('FAIL Final report failed:', error.message);
         }
         
         info('Progress monitoring stopped');
@@ -486,7 +486,7 @@ module.exports = { ProgressMonitor };
 // If run directly, demonstrate the service
 if (require.main === module) {
     (async () => {
-        info('🧪 Testing Progress Monitoring Service...');
+        info('TEST Testing Progress Monitoring Service...');
         
         const monitor = new ProgressMonitor({
             reportInterval: 5000, // 5 seconds for testing
@@ -524,7 +524,7 @@ if (require.main === module) {
             info('Progress Monitoring Service test completed');
             
         } catch (error) {
-            error('❌ Test failed:', error.message);
+            error('FAIL Test failed:', error.message);
         }
     })();
 }

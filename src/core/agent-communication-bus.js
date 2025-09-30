@@ -45,7 +45,7 @@ class AgentCommunicationBus extends EventEmitter {
         // Communication patterns
         this.communicationPatterns = new CommunicationPatterns(this);
 
-        info(`📡 Agent Communication Bus initialized: ${this.busId}`);
+        info(` Agent Communication Bus initialized: ${this.busId}`);
     }
 
     /**
@@ -54,7 +54,7 @@ class AgentCommunicationBus extends EventEmitter {
     async registerAgent(agent, capabilities = {}) {
         const agentId = agent.agentId || agent.sessionId;
 
-        info(`📝 Registering agent on communication bus: ${agentId}`);
+        info(` Registering agent on communication bus: ${agentId}`);
 
         const registration = {
             agentId: agentId,
@@ -99,7 +99,7 @@ class AgentCommunicationBus extends EventEmitter {
         try {
             const messageId = `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-            info(`📤 Sending message: ${fromAgentId} → ${toAgentId} (${message.type})`);
+            info(` Sending message: ${fromAgentId} -> ${toAgentId} (${message.type})`);
 
             // Validate sender and recipient
             const sender = this.registeredAgents.get(fromAgentId);
@@ -145,11 +145,11 @@ class AgentCommunicationBus extends EventEmitter {
                 });
             }
 
-            info(`${routingResult.success ? '✅' : '❌'} Message ${routingResult.success ? 'delivered' : 'failed'}: ${messageId}`);
+            info(`${routingResult.success ? 'PASS' : 'FAIL'} Message ${routingResult.success ? 'delivered' : 'failed'}: ${messageId}`);
             return routingResult;
 
         } catch (error) {
-            error('❌ Message sending failed:', error);
+            error('FAIL Message sending failed:', error);
             this.messageMetrics.recordError(fromAgentId, 'send_failed', error.message);
             throw error;
         }
@@ -161,7 +161,7 @@ class AgentCommunicationBus extends EventEmitter {
     async broadcastMessage(fromAgentId, recipients, message) {
         const broadcastId = `broadcast-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        info(`📢 Broadcasting message from ${fromAgentId} to ${recipients.length} recipients`);
+        info(` Broadcasting message from ${fromAgentId} to ${recipients.length} recipients`);
 
         const results = [];
 
@@ -196,7 +196,7 @@ class AgentCommunicationBus extends EventEmitter {
      * Create and manage communication channels
      */
     async createChannel(channelName, options = {}) {
-        info(`📺 Creating communication channel: ${channelName}`);
+        info(` Creating communication channel: ${channelName}`);
 
         const channel = {
             name: channelName,
@@ -248,7 +248,7 @@ class AgentCommunicationBus extends EventEmitter {
             throw new Error(`Channel is full: ${channelName} (${channel.maxMembers} max)`);
         }
 
-        info(`🔗 Agent ${agentId} joining channel: ${channelName}`);
+        info(` Agent ${agentId} joining channel: ${channelName}`);
 
         channel.members.push(agentId);
         agent.channels.push(channelName);
@@ -278,7 +278,7 @@ class AgentCommunicationBus extends EventEmitter {
 
         const messageId = `ch-msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        info(`📺 Sending channel message: ${fromAgentId} → #${channelName}`);
+        info(` Sending channel message: ${fromAgentId} -> #${channelName}`);
 
         const channelMessage = {
             id: messageId,
@@ -323,7 +323,7 @@ class AgentCommunicationBus extends EventEmitter {
             throw new Error(`Agent not registered: ${agentId}`);
         }
 
-        info(`🔔 Agent ${agentId} subscribing to events: ${eventTypes.join(', ')}`);
+        info(` Agent ${agentId} subscribing to events: ${eventTypes.join(', ')}`);
 
         for (const eventType of eventTypes) {
             if (!this.subscriptions.has(eventType)) {
@@ -352,7 +352,7 @@ class AgentCommunicationBus extends EventEmitter {
     async publishEvent(publisherAgentId, eventType, eventData) {
         const subscribers = this.subscriptions.get(eventType) || [];
 
-        info(`📡 Publishing event: ${eventType} to ${subscribers.length} subscribers`);
+        info(` Publishing event: ${eventType} to ${subscribers.length} subscribers`);
 
         const eventId = `event-${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const event = {
@@ -389,7 +389,7 @@ class AgentCommunicationBus extends EventEmitter {
     async sendRequest(fromAgentId, toAgentId, request, timeout = 30000) {
         const requestId = `req-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        info(`🔄 Sending request: ${fromAgentId} → ${toAgentId} (${request.type})`);
+        info(`CYCLE Sending request: ${fromAgentId} -> ${toAgentId} (${request.type})`);
 
         const requestMessage = {
             type: 'request',
@@ -424,7 +424,7 @@ class AgentCommunicationBus extends EventEmitter {
      * Send response to request
      */
     async sendResponse(fromAgentId, requestId, response) {
-        info(`↩️ Sending response for request: ${requestId}`);
+        info(` Sending response for request: ${requestId}`);
 
         const responseMessage = {
             type: 'response',
@@ -580,7 +580,7 @@ class AgentCommunicationBus extends EventEmitter {
             recipient.lastActivity = new Date();
 
         } catch (error) {
-            console.warn(`⚠️ Failed to notify agent ${recipientId} of channel message:`, error.message);
+            console.warn(`WARN Failed to notify agent ${recipientId} of channel message:`, error.message);
             recipient.metrics.errors++;
         }
     }
@@ -601,7 +601,7 @@ class AgentCommunicationBus extends EventEmitter {
             subscriber.lastActivity = new Date();
 
         } catch (error) {
-            console.warn(`⚠️ Failed to deliver event ${event.type} to ${subscriberId}:`, error.message);
+            console.warn(`WARN Failed to deliver event ${event.type} to ${subscriberId}:`, error.message);
             subscriber.metrics.errors++;
         }
     }
@@ -661,7 +661,7 @@ class MessageRouter {
     }
 
     async routeMessage(envelope) {
-        info(`🔀 Routing message: ${envelope.id} (${envelope.from} → ${envelope.to})`);
+        info(` Routing message: ${envelope.id} (${envelope.from} -> ${envelope.to})`);
 
         try {
             // Apply routing strategy
@@ -947,7 +947,7 @@ class PersistentMessageQueue {
             attempts: 0
         });
 
-        info(`📥 Message queued for ${agentId} (${priority} priority)`);
+        info(` Message queued for ${agentId} (${priority} priority)`);
     }
 
     async dequeueNextMessage(agentId) {
@@ -995,7 +995,7 @@ class PersistentMessageQueue {
                 this.retryMessage(messageId);
             }, this.retryDelay * failedMessage.attempts);
         } else {
-            error(`❌ Message permanently failed after ${this.maxRetries} attempts: ${messageId}`);
+            error(`FAIL Message permanently failed after ${this.maxRetries} attempts: ${messageId}`);
             this.failedMessages.delete(messageId);
         }
     }
@@ -1004,7 +1004,7 @@ class PersistentMessageQueue {
         const failedMessage = this.failedMessages.get(messageId);
         if (!failedMessage) return;
 
-        info(`🔄 Retrying message delivery: ${messageId} (attempt ${failedMessage.attempts})`);
+        info(`CYCLE Retrying message delivery: ${messageId} (attempt ${failedMessage.attempts})`);
 
         try {
             // Attempt redelivery
@@ -1057,7 +1057,7 @@ class FaultToleranceManager {
         const circuitBreakerDuration = 300000; // 5 minutes
 
         if (recentFailures.length >= failureThreshold) {
-            info(`🚨 Circuit breaker triggered for agent: ${agentId}`);
+            info(`ALERT Circuit breaker triggered for agent: ${agentId}`);
 
             this.circuitBreakers.set(agentId, {
                 triggeredAt: new Date(),
@@ -1079,7 +1079,7 @@ class FaultToleranceManager {
     }
 
     resetCircuitBreaker(agentId) {
-        info(`🔄 Resetting circuit breaker for agent: ${agentId}`);
+        info(`CYCLE Resetting circuit breaker for agent: ${agentId}`);
 
         this.circuitBreakers.delete(agentId);
 
@@ -1110,7 +1110,7 @@ class CommunicationPatterns {
      * Implement publish-subscribe pattern
      */
     async publishSubscribe(publisherId, topic, message, filters = {}) {
-        info(`📢 Pub-Sub: Publishing to topic ${topic}`);
+        info(` Pub-Sub: Publishing to topic ${topic}`);
 
         const subscribers = this.getTopicSubscribers(topic, filters);
         const results = [];
@@ -1136,7 +1136,7 @@ class CommunicationPatterns {
      * Implement request-response pattern with multiple responders
      */
     async multicastRequest(requesterId, responderIds, request, timeout = 30000) {
-        info(`🔄 Multicast request to ${responderIds.length} responders`);
+        info(`CYCLE Multicast request to ${responderIds.length} responders`);
 
         const requestPromises = responderIds.map(responderId =>
             this.bus.sendRequest(requesterId, responderId, request, timeout)
@@ -1157,7 +1157,7 @@ class CommunicationPatterns {
      * Implement workflow coordination pattern
      */
     async coordinateWorkflow(coordinatorId, participants, workflow) {
-        info(`🔄 Coordinating workflow with ${participants.length} participants`);
+        info(`CYCLE Coordinating workflow with ${participants.length} participants`);
 
         const workflowId = `workflow-${Date.now()}`;
         const results = [];

@@ -541,7 +541,7 @@ class AdvancedWorkflowTemplates {
      */
     async registerWithWorkflowService() {
         try {
-            info('🔄 Registering advanced templates with workflow service...');
+            info('CYCLE Registering advanced templates with workflow service...');
 
             for (const [templateId, template] of this.templates.entries()) {
                 // Convert to workflow service format
@@ -564,13 +564,13 @@ class AdvancedWorkflowTemplates {
                     }
                 };
 
-                info(`  ✅ Registered: ${template.name} (${templateId})`);
+                info(`  PASS Registered: ${template.name} (${templateId})`);
             }
 
-            info('🎉 All advanced templates registered successfully');
+            info(' All advanced templates registered successfully');
 
         } catch (error) {
-            error('❌ Failed to register templates:', error.message);
+            error('FAIL Failed to register templates:', error.message);
             throw error;
         }
     }
@@ -630,7 +630,7 @@ async function demoAdvancedWorkflowTemplates() {
     const allTemplates = templates.getAllTemplates();
 
     for (const template of allTemplates) {
-        info(`\n• ${template.name} (${template.id})`);
+        info(`\n- ${template.name} (${template.id})`);
         info(`  Description: ${template.description}`);
         info(`  Category: ${template.category}`);
         info(`  Trigger: ${template.trigger}`);
@@ -638,7 +638,7 @@ async function demoAdvancedWorkflowTemplates() {
         info(`  Steps: ${template.steps}`);
     }
 
-    info('\n🧪 Command Matching Tests:');
+    info('\nTEST Command Matching Tests:');
     const testCommands = [
         { command: 'review', parameters: {} },
         { command: 'fix', parameters: { issue: '123' } },
@@ -653,13 +653,13 @@ async function demoAdvancedWorkflowTemplates() {
             ` ${JSON.stringify(test.parameters)}` : '';
 
         if (template) {
-            info(`✅ "@claude ${test.command}${paramStr}" → ${template.name}`);
+            info(`PASS "@claude ${test.command}${paramStr}" -> ${template.name}`);
         } else {
-            info(`❌ "@claude ${test.command}${paramStr}" → No matching template`);
+            info(`FAIL "@claude ${test.command}${paramStr}" -> No matching template`);
         }
     }
 
-    info('\n✅ Advanced Workflow Templates Demo Complete!');
+    info('\nPASS Advanced Workflow Templates Demo Complete!');
 }
 
 module.exports = { AdvancedWorkflowTemplates };

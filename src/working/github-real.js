@@ -16,7 +16,7 @@ class GitHubReal {
             this.connected = true;
         } else {
             this.connected = false;
-            console.log('ℹ️ GitHub token not provided - using mock mode');
+            console.log(' GitHub token not provided - using mock mode');
         }
     }
 
@@ -45,11 +45,11 @@ class GitHubReal {
                 state: 'open'
             });
 
-            console.log(`✅ Found ${data.length} open PRs`);
+            console.log(`PASS Found ${data.length} open PRs`);
             return data;
 
         } catch (error) {
-            console.error('❌ GitHub API error:', error.message);
+            console.error('FAIL GitHub API error:', error.message);
             throw error;
         }
     }
@@ -80,11 +80,11 @@ class GitHubReal {
                 pull_number: prNumber
             });
 
-            console.log(`✅ Retrieved PR #${prNumber}: ${data.title}`);
+            console.log(`PASS Retrieved PR #${prNumber}: ${data.title}`);
             return data;
 
         } catch (error) {
-            console.error(`❌ GitHub API error getting PR ${prNumber}:`, error.message);
+            console.error(`FAIL GitHub API error getting PR ${prNumber}:`, error.message);
             throw error;
         }
     }
@@ -110,7 +110,7 @@ class GitHubReal {
             });
 
             const files = Array.isArray(data) ? data : [data];
-            console.log(`✅ Found ${files.length} files in ${path || 'root'}`);
+            console.log(`PASS Found ${files.length} files in ${path || 'root'}`);
             return files.map(file => ({
                 name: file.name,
                 type: file.type,
@@ -118,7 +118,7 @@ class GitHubReal {
             }));
 
         } catch (error) {
-            console.error('❌ GitHub API error listing files:', error.message);
+            console.error('FAIL GitHub API error listing files:', error.message);
             throw error;
         }
     }
@@ -128,7 +128,7 @@ class GitHubReal {
      */
     async commentOnPR(prNumber, comment) {
         if (!this.connected) {
-            console.log(`📝 Mock comment on PR ${prNumber}: ${comment}`);
+            console.log(` Mock comment on PR ${prNumber}: ${comment}`);
             return { id: 'mock-comment-id', body: comment };
         }
 
@@ -140,11 +140,11 @@ class GitHubReal {
                 body: comment
             });
 
-            console.log(`✅ Posted comment on PR #${prNumber}`);
+            console.log(`PASS Posted comment on PR #${prNumber}`);
             return data;
 
         } catch (error) {
-            console.error(`❌ GitHub API error commenting on PR ${prNumber}:`, error.message);
+            console.error(`FAIL GitHub API error commenting on PR ${prNumber}:`, error.message);
             throw error;
         }
     }
@@ -168,7 +168,7 @@ module.exports = { GitHubReal };
 // Test if run directly
 if (require.main === module) {
     async function testGitHub() {
-        console.log('🧪 Testing GitHubReal...\n');
+        console.log('TEST Testing GitHubReal...\n');
 
         const github = new GitHubReal();
         console.log('Status:', github.getStatus());
@@ -188,10 +188,10 @@ if (require.main === module) {
             const files = await github.listFiles();
             console.log(`Found ${files.length} files in root`);
 
-            console.log('\n✅ GitHubReal test completed successfully!');
+            console.log('\nPASS GitHubReal test completed successfully!');
 
         } catch (error) {
-            console.error('\n❌ GitHubReal test failed:', error.message);
+            console.error('\nFAIL GitHubReal test failed:', error.message);
         }
     }
 

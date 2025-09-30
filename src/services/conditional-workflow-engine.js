@@ -4,8 +4,8 @@
  * Enterprise conditional workflow execution that Anthropic Claude Actions cannot provide
  *
  * Features:
- * - "If security scan fails → create follow-up issue" logic
- * - "If manager approves → deploy to production"
+ * - "If security scan fails -> create follow-up issue" logic
+ * - "If manager approves -> deploy to production"
  * - Cross-workflow conditional dependencies
  * - Real-time rule evaluation and execution
  * - Integration with all LonicFLex services

@@ -24,7 +24,7 @@ class ContextHealthChecker {
      * Run comprehensive context health check
      */
     async runHealthCheck(contextSource = null) {
-        info('🏥 Context Health Check - Auto-Compact Prevention Report\n');
+        info('HEALTH Context Health Check - Auto-Compact Prevention Report\n');
         
         try {
             // Test 1: Token Counter Functionality
@@ -50,7 +50,7 @@ class ContextHealthChecker {
             return this.results;
             
         } catch (error) {
-            error('❌ Health check failed:', error);
+            error('FAIL Health check failed:', error);
             this.results.status = 'error';
             this.results.issues.push(`Health check error: ${error.message}`);
             return this.results;
@@ -61,7 +61,7 @@ class ContextHealthChecker {
      * Test token counting functionality
      */
     async checkTokenCounter() {
-        info('🔢 Testing Token Counter...');
+        info(' Testing Token Counter...');
         
         try {
             // Test basic token counting
@@ -75,7 +75,7 @@ class ContextHealthChecker {
                 fromCache: tokenData.fromCache
             };
             
-            info(`  ✅ Token counting working (${tokenData.source}): ${tokenData.total_tokens} tokens`);
+            info(`  PASS Token counting working (${tokenData.source}): ${tokenData.total_tokens} tokens`);
             
             // Test API vs estimation accuracy
             if (this.tokenCounter.anthropicClient) {
@@ -91,22 +91,22 @@ class ContextHealthChecker {
                         accuracy: accuracy * 100
                     };
                     
-                    info(`  📊 Estimation accuracy: ${(accuracy * 100).toFixed(1)}%`);
+                    info(`  METRICS Estimation accuracy: ${(accuracy * 100).toFixed(1)}%`);
                     
                     if (accuracy < 0.8) {
                         this.results.issues.push('Token estimation accuracy below 80% - consider API integration');
                     }
                 } catch (error) {
-                    info('  ⚠️ API testing failed - using estimation only');
+                    info('  WARN API testing failed - using estimation only');
                     this.results.issues.push('Anthropic API not available - using estimation fallback');
                 }
             } else {
-                info('  ⚠️ Anthropic API not configured - using estimation');
+                info('  WARN Anthropic API not configured - using estimation');
                 this.results.issues.push('Anthropic API not configured - estimation only');
             }
             
         } catch (error) {
-            info(`  ❌ Token counter failed: ${error.message}`);
+            info(`  FAIL Token counter failed: ${error.message}`);
             this.results.issues.push(`Token counter not working: ${error.message}`);
             this.results.metrics.tokenCounter = { working: false, error: error.message };
         }
@@ -116,7 +116,7 @@ class ContextHealthChecker {
      * Test context manager integration
      */
     async checkContextManager() {
-        info('\n📄 Testing Context Manager...');
+        info('\n Testing Context Manager...');
         
         try {
             const contextManager = new Factor3ContextManager({
@@ -136,19 +136,19 @@ class ContextHealthChecker {
                 tokenPercentage: summary.token_percentage
             };
             
-            info(`  ✅ Context manager working`);
-            info(`  📊 Test context: ${summary.context_tokens} tokens (${summary.token_percentage.toFixed(1)}%)`);
+            info(`  PASS Context manager working`);
+            info(`  METRICS Test context: ${summary.context_tokens} tokens (${summary.token_percentage.toFixed(1)}%)`);
             
             // Test token percentage functionality
             const tokenData = await contextManager.getTokenPercentage();
             if (tokenData.percentage !== undefined) {
-                info(`  📈 Token monitoring: ${tokenData.remainingPercentage.toFixed(0)}% until auto-compact`);
+                info(`   Token monitoring: ${tokenData.remainingPercentage.toFixed(0)}% until auto-compact`);
             }
             
             contextManager.destroy();
             
         } catch (error) {
-            info(`  ❌ Context manager failed: ${error.message}`);
+            info(`  FAIL Context manager failed: ${error.message}`);
             this.results.issues.push(`Context manager not working: ${error.message}`);
             this.results.metrics.contextManager = { working: false, error: error.message };
         }
@@ -158,7 +158,7 @@ class ContextHealthChecker {
      * Test monitoring system
      */
     async checkMonitorSystem() {
-        info('\n📊 Testing Monitor System...');
+        info('\nMETRICS Testing Monitor System...');
         
         try {
             const monitor = new ContextWindowMonitor({
@@ -179,14 +179,14 @@ class ContextHealthChecker {
                 thresholds: monitor.thresholds
             };
             
-            info(`  ✅ Monitor system working`);
-            info(`  🎯 Threshold: Warning at ${monitor.thresholds.warning}%, Critical at ${monitor.thresholds.critical}%`);
-            info(`  📊 Test result: ${state.level.toUpperCase()} level`);
+            info(`  PASS Monitor system working`);
+            info(`   Threshold: Warning at ${monitor.thresholds.warning}%, Critical at ${monitor.thresholds.critical}%`);
+            info(`  METRICS Test result: ${state.level.toUpperCase()} level`);
             
             monitor.stopMonitoring();
             
         } catch (error) {
-            info(`  ❌ Monitor system failed: ${error.message}`);
+            info(`  FAIL Monitor system failed: ${error.message}`);
             this.results.issues.push(`Monitor system not working: ${error.message}`);
             this.results.metrics.monitor = { working: false, error: error.message };
         }
@@ -196,7 +196,7 @@ class ContextHealthChecker {
      * Check external context source
      */
     async checkExternalContext(contextSource) {
-        info('\n🔍 Testing External Context...');
+        info('\n Testing External Context...');
         
         try {
             const tokenData = await contextSource.getTokenPercentage();
@@ -211,9 +211,9 @@ class ContextHealthChecker {
                 eventsCount: summary.total_events
             };
             
-            info(`  ✅ External context working`);
-            info(`  📊 Current usage: ${tokenData.tokens} tokens (${tokenData.percentage.toFixed(1)}%)`);
-            info(`  🎯 Status: ${summary.warning_level.toUpperCase()}`);
+            info(`  PASS External context working`);
+            info(`  METRICS Current usage: ${tokenData.tokens} tokens (${tokenData.percentage.toFixed(1)}%)`);
+            info(`   Status: ${summary.warning_level.toUpperCase()}`);
             
             // Check for high usage
             if (tokenData.percentage > 60) {
@@ -221,7 +221,7 @@ class ContextHealthChecker {
             }
             
         } catch (error) {
-            info(`  ❌ External context check failed: ${error.message}`);
+            info(`  FAIL External context check failed: ${error.message}`);
             this.results.issues.push(`External context issue: ${error.message}`);
         }
     }
@@ -240,46 +240,46 @@ class ContextHealthChecker {
         if (hasWorkingTokens && hasWorkingContext && hasWorkingMonitor) {
             if (this.results.issues.length === 0) {
                 this.results.status = 'healthy';
-                recs.push('✅ System is healthy - no actions needed');
+                recs.push('PASS System is healthy - no actions needed');
             } else {
                 this.results.status = 'warning';
-                recs.push('⚠️ System working but has minor issues - see recommendations below');
+                recs.push('WARN System working but has minor issues - see recommendations below');
             }
         } else {
             this.results.status = 'critical';
-            recs.push('🔴 Critical issues found - immediate action required');
+            recs.push(' Critical issues found - immediate action required');
         }
 
         // Specific recommendations
         if (!hasWorkingTokens) {
-            recs.push('🔧 Install/configure Anthropic SDK for accurate token counting');
-            recs.push('📝 Set ANTHROPIC_API_KEY environment variable');
+            recs.push(' Install/configure Anthropic SDK for accurate token counting');
+            recs.push(' Set ANTHROPIC_API_KEY environment variable');
         }
 
         if (!this.tokenCounter.anthropicClient) {
-            recs.push('⚡ Consider adding Anthropic API key for 95%+ token counting accuracy');
+            recs.push('FAST Consider adding Anthropic API key for 95%+ token counting accuracy');
         }
 
         const accuracy = this.results.metrics.tokenAccuracy?.accuracy;
         if (accuracy && accuracy < 80) {
-            recs.push('📊 Token estimation accuracy low - verify character-to-token ratio');
+            recs.push('METRICS Token estimation accuracy low - verify character-to-token ratio');
         }
 
         // Context-specific recommendations
         const extContext = this.results.metrics.externalContext;
         if (extContext) {
             if (extContext.percentage > 70) {
-                recs.push('🚨 Context usage critical - run emergency compact');
-                recs.push('📝 Command: npm run compact-context');
+                recs.push('ALERT Context usage critical - run emergency compact');
+                recs.push(' Command: npm run compact-context');
             } else if (extContext.percentage > 40) {
-                recs.push('⚠️ Context usage above 40% threshold - monitor closely');
-                recs.push('🔧 Consider clearing resolved errors: context.clearResolvedErrors()');
+                recs.push('WARN Context usage above 40% threshold - monitor closely');
+                recs.push(' Consider clearing resolved errors: context.clearResolvedErrors()');
             }
         }
 
         // Performance recommendations
         if (this.results.metrics.tokenCounter?.fromCache === false) {
-            recs.push('💾 Enable token caching for better performance');
+            recs.push(' Enable token caching for better performance');
         }
     }
 
@@ -293,41 +293,41 @@ class ContextHealthChecker {
         
         // Overall status
         const statusEmojis = {
-            healthy: '🟢',
-            warning: '🟡', 
-            critical: '🔴',
-            error: '💥'
+            healthy: '',
+            warning: '', 
+            critical: '',
+            error: ''
         };
         
         info(`\nOverall Status: ${statusEmojis[this.results.status]} ${this.results.status.toUpperCase()}`);
         
         // Component status
-        info('\n📊 Component Status:');
+        info('\nMETRICS Component Status:');
         if (this.results.metrics.tokenCounter) {
-            const status = this.results.metrics.tokenCounter.working ? '✅' : '❌';
+            const status = this.results.metrics.tokenCounter.working ? 'PASS' : 'FAIL';
             info(`  ${status} Token Counter (${this.results.metrics.tokenCounter.source || 'error'})`);
         }
         
         if (this.results.metrics.contextManager) {
-            const status = this.results.metrics.contextManager.working ? '✅' : '❌';
+            const status = this.results.metrics.contextManager.working ? 'PASS' : 'FAIL';
             info(`  ${status} Context Manager`);
         }
         
         if (this.results.metrics.monitor) {
-            const status = this.results.metrics.monitor.working ? '✅' : '❌';
+            const status = this.results.metrics.monitor.working ? 'PASS' : 'FAIL';
             info(`  ${status} Monitor System`);
         }
         
         // Issues
         if (this.results.issues.length > 0) {
-            info('\n⚠️ Issues Found:');
+            info('\nWARN Issues Found:');
             this.results.issues.forEach((issue, i) => {
                 info(`  ${i + 1}. ${issue}`);
             });
         }
         
         // Recommendations  
-        info('\n💡 Recommendations:');
+        info('\n Recommendations:');
         this.results.recommendations.forEach((rec, i) => {
             info(`  ${i + 1}. ${rec}`);
         });
@@ -335,7 +335,7 @@ class ContextHealthChecker {
         // Context metrics (if available)
         if (this.results.metrics.externalContext) {
             const ctx = this.results.metrics.externalContext;
-            info('\n📈 Current Context Usage:');
+            info('\n Current Context Usage:');
             info(`  Tokens: ${ctx.tokens?.toLocaleString() || 'N/A'}`);
             info(`  Usage: ${ctx.percentage?.toFixed(1) || 'N/A'}%`);
             info(`  Remaining: ${ctx.remainingPercentage?.toFixed(1) || 'N/A'}% until auto-compact`);
@@ -358,8 +358,8 @@ class ContextHealthChecker {
             const tokenCounter = new TokenCounter();
             const testResult = await tokenCounter.countTokens('test');
             
-            info(`🎯 Context System: ${testResult.source === 'api' ? 'OPTIMAL' : 'FUNCTIONAL'}`);
-            info(`📊 Token counting: ${testResult.total_tokens} tokens (${testResult.source})`);
+            info(` Context System: ${testResult.source === 'api' ? 'OPTIMAL' : 'FUNCTIONAL'}`);
+            info(`METRICS Token counting: ${testResult.total_tokens} tokens (${testResult.source})`);
             
             return testResult.source === 'api' ? 'optimal' : 'functional';
         } catch (error) {

@@ -709,7 +709,7 @@ if (require.main === module) {
             logger.info('LonicFLex Health Service started successfully');
         })
         .catch((error) => {
-            logger.error('❌ Failed to start Health service:', error.message);
+            logger.error('FAIL Failed to start Health service:', error.message);
             process.exit(1);
         });
 

@@ -41,7 +41,7 @@ class RealNaturalLanguageProcessor {
     }
 
     async analyzeRequirements(input) {
-        info(`🧠 Real NL Processor: Analyzing "${input.substring(0, 50)}..."`);
+        info(` Real NL Processor: Analyzing "${input.substring(0, 50)}..."`);
 
         const projectType = this.detectProjectType(input);
         const complexity = this.assessComplexity(input);
@@ -76,7 +76,7 @@ class RealNaturalLanguageProcessor {
     }
 
     async decomposeProject(requirements) {
-        info(`🔄 Real NL Processor: Decomposing ${requirements.projectType} project`);
+        info(`CYCLE Real NL Processor: Decomposing ${requirements.projectType} project`);
 
         const phases = this.generatePhases(requirements.projectType, requirements.overallComplexity);
         const components = this.identifyComponents(requirements.projectType);

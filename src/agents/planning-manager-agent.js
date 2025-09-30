@@ -1,7 +1,7 @@
 const { info, warn, error } = require('../services/logger');
 /**
  * Planning Manager Agent - Phase 1 Coordinator
- * Following 12-Factor Agents methodology and Factor 10 principles (≤8 execution steps)
+ * Following 12-Factor Agents methodology and Factor 10 principles (<=8 execution steps)
  * Coordinates research and strategic planning through specialized agent delegation
  */
 
@@ -26,7 +26,7 @@ class PlanningManagerAgent extends ValidatedAgent {
         this.executionPlan = null;
         this.delegatedAgents = new Map();
         
-        // Planning workflow steps (Factor 10: ≤8 steps)
+        // Planning workflow steps (Factor 10: <=8 steps)
         this.executionSteps = [
             'initialize_planning_session',
             'delegate_research_analysis',
@@ -428,7 +428,7 @@ class PlanningManagerAgent extends ValidatedAgent {
     defineSuccessCriteria() {
         return [
             'All execution steps complete successfully',
-            'Factor 10 compliance maintained (≤8 steps)',
+            'Factor 10 compliance maintained (<=8 steps)',
             '12-Factor agents principles followed',
             'Integration tests pass',
             'Performance within acceptable bounds'

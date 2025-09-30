@@ -52,7 +52,7 @@ class MinimalAgent {
         }
 
         this.status = 'executing';
-        info(`🔄 MinimalAgent ${this.sessionId} executing task...`);
+        info(`CYCLE MinimalAgent ${this.sessionId} executing task...`);
 
         try {
             // Real operation: Insert agent record
@@ -97,7 +97,7 @@ class MinimalAgent {
 
         } catch (error) {
             this.status = 'failed';
-            error(`❌ MinimalAgent ${this.sessionId} failed:`, error.message);
+            error(`FAIL MinimalAgent ${this.sessionId} failed:`, error.message);
 
             // Return actual failure, don't hide it
             return {
@@ -122,7 +122,7 @@ class MinimalAgent {
                 'DELETE FROM agents WHERE id = ?',
                 [`agent-${this.sessionId}`]
             );
-            info(`🧹 Cleaned up agent record for ${this.sessionId}`);
+            info(`CLEANUP Cleaned up agent record for ${this.sessionId}`);
         } catch (error) {
             warn(`Cleanup error: ${error.message}`);
         }
@@ -150,7 +150,7 @@ if (require.main === module) {
     const { systemStartup } = require('../system-startup');
 
     async function testMinimalAgent() {
-        info('🧪 Testing MinimalAgent...');
+        info('TEST Testing MinimalAgent...');
 
         let agent = null;
 
@@ -162,18 +162,18 @@ if (require.main === module) {
             // Create and test agent
             agent = new MinimalAgent('test-minimal-agent', serviceContainer);
 
-            info('📝 Agent status before init:', agent.getStatus());
+            info(' Agent status before init:', agent.getStatus());
 
             await agent.initialize();
-            info('📝 Agent status after init:', agent.getStatus());
+            info(' Agent status after init:', agent.getStatus());
 
             const result = await agent.executeTask();
-            info('📝 Task result:', result);
+            info(' Task result:', result);
 
             if (result.success) {
-                info('🎉 MinimalAgent test: SUCCESS');
+                info(' MinimalAgent test: SUCCESS');
             } else {
-                error('🚨 MinimalAgent test: FAILED');
+                error('ALERT MinimalAgent test: FAILED');
                 info('Error:', result.error);
             }
 
@@ -182,7 +182,7 @@ if (require.main === module) {
             await systemStartup.shutdown();
 
         } catch (error) {
-            error('❌ Test failed:', error.message);
+            error('FAIL Test failed:', error.message);
             error('Stack:', error.stack);
 
             if (agent) {

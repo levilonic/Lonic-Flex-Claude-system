@@ -23,7 +23,7 @@ class RealNaturalLanguageProcessor {
      * Enhanced requirement analysis using intelligent pattern recognition
      */
     async analyzeRequirements(input) {
-        info(`🧠 Real NL Processor: Analyzing "${input.substring(0, 50)}..."`);
+        info(` Real NL Processor: Analyzing "${input.substring(0, 50)}..."`);
 
         // Step 1: Extract project type with confidence scoring
         const projectAnalysis = this.analyzeProjectType(input);
@@ -76,7 +76,7 @@ class RealNaturalLanguageProcessor {
      * Intelligent project decomposition based on analysis
      */
     async decomposeProject(requirementAnalysis) {
-        info(`🔄 Real NL Processor: Decomposing ${requirementAnalysis.projectType} project`);
+        info(`CYCLE Real NL Processor: Decomposing ${requirementAnalysis.projectType} project`);
 
         const decomposition = {
             projectId: `real_${Date.now()}_${randomBytes(4).toString('hex')}`,
@@ -106,7 +106,7 @@ class RealNaturalLanguageProcessor {
      * Generate actual code structure and implementation plan
      */
     async generateCodeImplementationPlan(decomposition) {
-        info(`💻 Real NL Processor: Planning code implementation for ${decomposition.projectType}`);
+        info(` Real NL Processor: Planning code implementation for ${decomposition.projectType}`);
 
         const implementationPlan = {
             projectStructure: this.generateProjectStructure(decomposition),

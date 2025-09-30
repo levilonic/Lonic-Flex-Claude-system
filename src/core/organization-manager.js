@@ -277,10 +277,10 @@ class OrganizationManager extends BaseAgent {
         const initResult = await this.externalCoordinator.initialize();
 
         if (initResult && initResult.github && initResult.github.error) {
-            console.warn("⚠️ GitHub initialization failed:", initResult.github.error);
+            console.warn("WARN GitHub initialization failed:", initResult.github.error);
         }
         if (initResult && initResult.slack && initResult.slack.error) {
-            console.warn("⚠️ Slack initialization failed:", initResult.slack.error);
+            console.warn("WARN Slack initialization failed:", initResult.slack.error);
         }
 
         const githubOK = initResult && initResult.github && initResult.github.initialized;
@@ -490,7 +490,7 @@ class OrganizationManager extends BaseAgent {
         coordinationResult.status = 'completed';
         coordinationResult.completedAt = new Date().toISOString();
 
-        info(`🎉 Project execution completed: ${project.name}`);
+        info(` Project execution completed: ${project.name}`);
         return coordinationResult;
     }
 
@@ -508,7 +508,7 @@ class OrganizationManager extends BaseAgent {
 
         // Execute each agent type for this phase
         for (const agentType of phase.agents) {
-            info(`🤖 Executing ${agentType} agent...`);
+            info(`AGENT Executing ${agentType} agent...`);
 
             try {
                 const agentResult = await this.executeRealAgent(agentType, project, team, phase);
@@ -525,7 +525,7 @@ class OrganizationManager extends BaseAgent {
                     error: error.message,
                     failedAt: new Date().toISOString()
                 };
-                error(`❌ ${agentType} agent failed:`, error.message);
+                error(`FAIL ${agentType} agent failed:`, error.message);
             }
         }
 
@@ -689,7 +689,7 @@ class OrganizationManager extends BaseAgent {
     updateProgress(progress, message) {
         this.progress = progress;
         this.currentStep = message;
-        info(`🏢 OrganizationManager [${progress}%]: ${message}`);
+        info(` OrganizationManager [${progress}%]: ${message}`);
     }
 
     /**

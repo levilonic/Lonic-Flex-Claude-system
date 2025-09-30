@@ -282,7 +282,7 @@ module.exports = { SecurityAgentWorking };
 // Test if run directly
 if (require.main === module) {
     async function testSecurityAgent() {
-        console.log('🧪 Testing SecurityAgentWorking...\n');
+        console.log('TEST Testing SecurityAgentWorking...\n');
 
         const agent = new SecurityAgentWorking({ sessionId: 'test-session' });
         console.log('Status:', agent.getStatus());
@@ -294,7 +294,7 @@ if (require.main === module) {
                 filePath: __filename
             });
 
-            console.log('✅ File scan completed');
+            console.log('PASS File scan completed');
             console.log(`   Secrets found: ${result.secrets.length}`);
             console.log(`   Issues found: ${result.issues.length}`);
 
@@ -306,7 +306,7 @@ if (require.main === module) {
             }
 
         } catch (error) {
-            console.error('❌ Security agent test failed:', error.message);
+            console.error('FAIL Security agent test failed:', error.message);
         }
     }
 

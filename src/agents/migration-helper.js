@@ -20,7 +20,7 @@ class AgentMigrationHelper {
      * Compare functionality between original and enhanced agent
      */
     async compareFunctionality(originalAgent, enhancedAgent, testScenarios) {
-        info(`🔍 Comparing functionality: ${originalAgent.agentName} vs Enhanced`);
+        info(` Comparing functionality: ${originalAgent.agentName} vs Enhanced`);
 
         const results = {
             agent: originalAgent.agentName,
@@ -47,13 +47,13 @@ class AgentMigrationHelper {
 
             try {
                 // Test original agent
-                info(`     → Testing original agent...`);
+                info(`     -> Testing original agent...`);
                 const originalStart = Date.now();
                 scenarioResult.original = await scenario.testFunction(originalAgent);
                 const originalTime = Date.now() - originalStart;
 
                 // Test enhanced agent
-                info(`     → Testing enhanced agent...`);
+                info(`     -> Testing enhanced agent...`);
                 const enhancedStart = Date.now();
                 scenarioResult.enhanced = await scenario.testFunction(enhancedAgent);
                 const enhancedTime = Date.now() - enhancedStart;
@@ -70,26 +70,26 @@ class AgentMigrationHelper {
 
                 if (scenarioResult.match) {
                     results.summary.passed++;
-                    info(`     ✅ PASS - Results match`);
+                    info(`     PASS PASS - Results match`);
                     if (scenarioResult.performanceImprovement > 0) {
                         info(`        Performance: ${scenarioResult.performanceImprovement}ms improvement`);
                     }
                 } else {
                     results.summary.failed++;
-                    info(`     ❌ FAIL - Results don't match`);
+                    info(`     FAIL FAIL - Results don't match`);
                 }
 
             } catch (error) {
                 results.summary.failed++;
                 scenarioResult.error = error.message;
-                info(`     💥 ERROR: ${error.message}`);
+                info(`      ERROR: ${error.message}`);
             }
 
             results.scenarios.push(scenarioResult);
         }
 
         const successRate = (results.summary.passed / results.summary.total) * 100;
-        info(`📊 Functionality Comparison Results: ${successRate}% success rate`);
+        info(`METRICS Functionality Comparison Results: ${successRate}% success rate`);
 
         this.migrationResults.set(originalAgent.agentName, results);
         return results;
@@ -140,7 +140,7 @@ class AgentMigrationHelper {
      * Performance comparison between original and enhanced agents
      */
     async comparePerformance(originalAgent, enhancedAgent, workloadTests) {
-        info(`⚡ Performance comparison: ${originalAgent.agentName}`);
+        info(`FAST Performance comparison: ${originalAgent.agentName}`);
 
         const metrics = {
             agent: originalAgent.agentName,
@@ -323,7 +323,7 @@ class AgentMigrationHelper {
         this.migrationResults.clear();
         this.performanceMetrics.clear();
 
-        info('🧹 Migration testing resources cleaned up');
+        info('CLEANUP Migration testing resources cleaned up');
     }
 
     /**

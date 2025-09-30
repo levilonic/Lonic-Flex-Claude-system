@@ -19,7 +19,7 @@ class GitHubAgentWorking extends GitHubReal {
      */
     async createBranch(branchName, baseBranch = 'main') {
         if (!this.connected) {
-            console.log(`📝 Mock: Would create branch '${branchName}' from '${baseBranch}'`);
+            console.log(` Mock: Would create branch '${branchName}' from '${baseBranch}'`);
             return { name: branchName, sha: 'mock-sha-123', created: true };
         }
 
@@ -39,7 +39,7 @@ class GitHubAgentWorking extends GitHubReal {
                 sha: baseRef.object.sha
             });
 
-            console.log(`✅ Created branch: ${branchName}`);
+            console.log(`PASS Created branch: ${branchName}`);
             return {
                 name: branchName,
                 sha: newRef.object.sha,
@@ -48,10 +48,10 @@ class GitHubAgentWorking extends GitHubReal {
 
         } catch (error) {
             if (error.status === 422) {
-                console.log(`ℹ️ Branch '${branchName}' already exists`);
+                console.log(` Branch '${branchName}' already exists`);
                 return { name: branchName, created: false, exists: true };
             }
-            console.error(`❌ Failed to create branch ${branchName}:`, error.message);
+            console.error(`FAIL Failed to create branch ${branchName}:`, error.message);
             throw error;
         }
     }
@@ -61,7 +61,7 @@ class GitHubAgentWorking extends GitHubReal {
      */
     async createIssue(title, body, labels = []) {
         if (!this.connected) {
-            console.log(`📝 Mock: Would create issue '${title}'`);
+            console.log(` Mock: Would create issue '${title}'`);
             return {
                 number: Math.floor(Math.random() * 1000) + 1,
                 title,
@@ -79,7 +79,7 @@ class GitHubAgentWorking extends GitHubReal {
                 labels
             });
 
-            console.log(`✅ Created issue #${data.number}: ${title}`);
+            console.log(`PASS Created issue #${data.number}: ${title}`);
             return {
                 number: data.number,
                 title: data.title,
@@ -88,7 +88,7 @@ class GitHubAgentWorking extends GitHubReal {
             };
 
         } catch (error) {
-            console.error(`❌ Failed to create issue:`, error.message);
+            console.error(`FAIL Failed to create issue:`, error.message);
             throw error;
         }
     }
@@ -98,7 +98,7 @@ class GitHubAgentWorking extends GitHubReal {
      */
     async createPR(title, body, head, base = 'main') {
         if (!this.connected) {
-            console.log(`📝 Mock: Would create PR '${title}' from ${head} to ${base}`);
+            console.log(` Mock: Would create PR '${title}' from ${head} to ${base}`);
             return {
                 number: Math.floor(Math.random() * 1000) + 1,
                 title,
@@ -118,7 +118,7 @@ class GitHubAgentWorking extends GitHubReal {
                 base
             });
 
-            console.log(`✅ Created PR #${data.number}: ${title}`);
+            console.log(`PASS Created PR #${data.number}: ${title}`);
             return {
                 number: data.number,
                 title: data.title,
@@ -128,7 +128,7 @@ class GitHubAgentWorking extends GitHubReal {
             };
 
         } catch (error) {
-            console.error(`❌ Failed to create PR:`, error.message);
+            console.error(`FAIL Failed to create PR:`, error.message);
             throw error;
         }
     }
@@ -155,7 +155,7 @@ class GitHubAgentWorking extends GitHubReal {
                 state
             });
 
-            console.log(`✅ Found ${data.length} ${state} issues`);
+            console.log(`PASS Found ${data.length} ${state} issues`);
             return data.map(issue => ({
                 number: issue.number,
                 title: issue.title,
@@ -164,7 +164,7 @@ class GitHubAgentWorking extends GitHubReal {
             }));
 
         } catch (error) {
-            console.error(`❌ Failed to list issues:`, error.message);
+            console.error(`FAIL Failed to list issues:`, error.message);
             throw error;
         }
     }
@@ -220,7 +220,7 @@ module.exports = { GitHubAgentWorking };
 // Test if run directly
 if (require.main === module) {
     async function testGitHubAgent() {
-        console.log('🧪 Testing GitHubAgentWorking...\n');
+        console.log('TEST Testing GitHubAgentWorking...\n');
 
         const agent = new GitHubAgentWorking({ sessionId: 'test-session' });
         console.log('Status:', agent.getStatus());
@@ -231,11 +231,11 @@ if (require.main === module) {
                 action: 'list-prs'
             });
 
-            console.log('✅ Workflow executed successfully');
+            console.log('PASS Workflow executed successfully');
             console.log('Result:', JSON.stringify(result, null, 2));
 
         } catch (error) {
-            console.error('❌ Workflow test failed:', error.message);
+            console.error('FAIL Workflow test failed:', error.message);
         }
     }
 

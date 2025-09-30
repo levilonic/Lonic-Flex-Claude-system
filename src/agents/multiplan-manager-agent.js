@@ -100,7 +100,7 @@ class MultiplanManagerAgent extends ValidatedAgent {
                 try {
                     await this.projectsManager.initialize();
                 } catch (error) {
-                    console.warn('⚠️ Projects Manager initialization failed (permissions), using fallback services');
+                    console.warn('WARN Projects Manager initialization failed (permissions), using fallback services');
                 }
                 
                 const evidence = {
@@ -358,7 +358,7 @@ class MultiplanManagerAgent extends ValidatedAgent {
                 };
 
             } catch (error) {
-                error(`❌ Plan failed: ${plan.planId} - ${error.message}`);
+                error(`FAIL Plan failed: ${plan.planId} - ${error.message}`);
                 
                 this.activePlans.set(plan.planId, {
                     ...plan,
@@ -569,11 +569,11 @@ class MultiplanManagerAgent extends ValidatedAgent {
 - **Success Rate**: ${results.consolidation?.successRate || 0}%
 
 ## Service Integration Status
-- Issue Management: ✅ Operational
-- Milestone Tracking: ✅ Active  
-- Template System: ✅ Functional
-- Branch Coordination: ✅ Enabled
-- GitHub Projects: ⚠️ Limited (permissions needed)
+- Issue Management: PASS Operational
+- Milestone Tracking: PASS Active  
+- Template System: PASS Functional
+- Branch Coordination: PASS Enabled
+- GitHub Projects: WARN Limited (permissions needed)
 
 ## Performance Metrics
 - Total Agent Executions: ${results.execution?.totalAgentExecutions || 0}
@@ -622,15 +622,15 @@ async function demoMultiplanManager() {
 
         info('Starting multiplan orchestration...');
         const result = await multiplanAgent.executeWorkflow(context, (progress, message) => {
-            info(`  📊 ${progress}% - ${message}`);
+            info(`  METRICS ${progress}% - ${message}`);
         });
 
         info('Orchestration completed successfully!');
-        info(`📊 Final report: ${result.finalReport.summary}`);
-        info(`🔍 Recommendations: ${result.recommendations.length}`);
+        info(`METRICS Final report: ${result.finalReport.summary}`);
+        info(` Recommendations: ${result.recommendations.length}`);
         
     } catch (error) {
-        error(`❌ Error: ${error.message}`);
+        error(`FAIL Error: ${error.message}`);
     } finally {
         // Cleanup ServiceContainer resources
         await serviceContainer.shutdown();

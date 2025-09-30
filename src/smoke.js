@@ -1,5 +1,5 @@
-import { ensureDirs, writeJson, appendJsonLog, ts } from './fs.js';
-import { SMOKE_REPO, GITHUB_TOKEN } from './env.js';
+const { ensureDirs, writeJson, appendJsonLog, ts } = require('./fs');
+const { SMOKE_REPO, GITHUB_TOKEN } = require('./env');
 
 async function main() {
   await ensureDirs();
