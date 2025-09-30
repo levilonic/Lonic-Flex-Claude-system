@@ -237,9 +237,10 @@ function discoverAgents() {
             // Exclude .OLD.js backup files
             if (file.endsWith('.OLD.js')) return false;
 
-            // Exclude helper/utility files
+            // Exclude helper/utility files and base classes
             if (file === 'migration-helper.js') return false;
             if (file === 'minimal-agent.js') return false;
+            if (file === 'base-agent.js') return false; // Base class, not a production agent
 
             return true;
         })
