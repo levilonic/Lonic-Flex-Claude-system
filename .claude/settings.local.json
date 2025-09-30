@@ -190,7 +190,8 @@
       "Bash(ls:*)",
       "Bash(head:*)",
       "Bash(git mv:*)",
-      "Bash(/dev/null)"
+      "Bash(/dev/null)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []
