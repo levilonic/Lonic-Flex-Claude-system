@@ -1,5 +1,5 @@
 const { info, warn, error } = require('./logger');
-const { graphql } = require('@octokit/graphql');
+// NOTE: @octokit/graphql is an ESM module - imported dynamically in initialize()
 const { Octokit } = require('@octokit/rest');
 const { getAuthManager } = require('../auth/auth-manager');
 const { SQLiteManager } = require('../database/sqlite-manager');
@@ -35,10 +35,13 @@ class GitHubProjectsManager {
         // Initialize auth manager
         await this.authManager.initialize();
         this.githubConfig = this.authManager.getGitHubConfig();
-        
+
         if (!this.githubConfig.token) {
             throw new Error('GitHub token required for Projects API operations');
         }
+
+        // Dynamically import @octokit/graphql (ESM module)
+        const { graphql } = await import('@octokit/graphql');
 
         // Initialize GraphQL client with authentication
         this.graphqlWithAuth = graphql.defaults({
