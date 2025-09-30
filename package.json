@@ -22,6 +22,8 @@
     "test:real": "node tests/real/pr-review-integration.test.js",
     "test:coverage": "node analyze-test-coverage.js",
     "test:enforce": "node enforce-test-coverage.js",
+    "verify-agents": "node verify-all-agents.js",
+    "verify-all": "npm run test && npm run verify-agents && npm run test:coverage",
     "context:health": "node src/context-management/context-window-monitor.js",
     "context:test": "node tests/integration/test-universal-context.js",
     "status": "node cli.js status",

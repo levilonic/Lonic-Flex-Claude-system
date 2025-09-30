@@ -8,8 +8,10 @@
 # Install dependencies
 npm install
 
-# Verify Documentation Accuracy
+# Verify System Health
 npm run verify:docs        # 📊 100% accuracy - Tests actual claims
+npm run verify-agents      # ✅ 100% - Verify all 16 production agents
+npm run verify-all         # ✅ Complete verification (tests + agents + coverage)
 
 # NEW: Core System (Simple, Working Commands)
 npm run test:core          # ✅ VERIFIED - Test all core functionality
