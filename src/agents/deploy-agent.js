@@ -9,7 +9,6 @@ const { ValidatedAgent } = require('../core/validated-agent-base');
 const { spawn } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
-const { DockerManager } = require('../claude-docker-manager');
 const axios = require('axios');
 
 class EnhancedDeployAgent extends ValidatedAgent {
@@ -45,12 +44,8 @@ class EnhancedDeployAgent extends ValidatedAgent {
             rollbacks: []
         };
 
-        // Initialize Docker manager for real deployments (preserved)
-        this.dockerManager = new DockerManager({
-            networkName: 'lonicflex-network',
-            volumePrefix: 'lonicflex-deploy',
-            demo: this.deployConfig.demoMode
-        });
+        // NOTE: Docker operations run in simulation mode
+        // For real Docker deployments, integrate docker service from serviceContainer
 
         // Define execution steps (preserved from original)
         this.executionSteps = [
