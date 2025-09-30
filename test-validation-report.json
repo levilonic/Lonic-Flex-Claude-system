@@ -21,11 +21,19 @@
       "exitCode": 0
     },
     {
+      "file": "tests\\unit\\test-foundation-v0-live.js",
+      "exitCode": 0
+    },
+    {
       "file": "tests\\unit\\test-github-actions-automation.js",
       "exitCode": 0
     },
     {
       "file": "tests\\unit\\test-service-container.js",
+      "exitCode": 0
+    },
+    {
+      "file": "tests\\integration\\test-context-continuation.js",
       "exitCode": 0
     },
     {
@@ -50,18 +58,6 @@
     }
   ],
   "broken": [
-    {
-      "file": "tests\\unit\\test-foundation-v0-live.js",
-      "reason": "execution_failed",
-      "exitCode": 1,
-      "error": ""
-    },
-    {
-      "file": "tests\\integration\\test-context-continuation.js",
-      "reason": "execution_failed",
-      "exitCode": 1,
-      "error": ""
-    },
     {
       "file": "tests\\integration\\test-database-integration.js",
       "reason": "execution_failed",

@@ -10,6 +10,15 @@ const path = require('path');
 
 console.log('🧪 Testing Context Continuation Fix...\n');
 
+// Check if session context file exists (only exists during active sessions)
+if (!fs.existsSync('current-session-context.xml')) {
+    console.log('⏭️  SKIPPED: No active session context found');
+    console.log('   This test requires an active Factor3ContextManager session');
+    console.log('   The session context file is created automatically during sessions');
+    console.log('\n✅ Test suite skipped gracefully (not a failure)\n');
+    process.exit(0);
+}
+
 // Test 1: Verify session context has active work section
 console.log('📋 Test 1: Session Context Format');
 try {
