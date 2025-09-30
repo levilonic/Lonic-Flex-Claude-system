@@ -181,7 +181,10 @@
       "WebFetch(domain:gist.github.com)",
       "Bash(powershell.exe:*)",
       "Bash(mv:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(npm test)",
+      "Bash(sed:*)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []

@@ -11,8 +11,8 @@
  * - Forensic audit analysis and investigation tools
  */
 
-const { GovernanceSchemaManager } = require('../database/governance-schema-manager');
-const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { GovernanceSchemaManager } = require('../src/database/governance-schema-manager');
+const { Factor3ContextManager } = require('../src/context-management/factor3-context-manager');
 const winston = require('winston');
 const crypto = require('crypto');
 const fs = require('fs').promises;

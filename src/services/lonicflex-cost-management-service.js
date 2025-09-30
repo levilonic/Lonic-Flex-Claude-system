@@ -14,7 +14,7 @@
 
 const express = require('express');
 const { GovernanceSchemaManager } = require('../database/governance-schema-manager');
-const { AuditManager } = require('../components/audit-manager');
+const { AuditManager } = require('../../components/audit-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
 const winston = require('winston');
 const crypto = require('crypto');
@@ -807,26 +807,68 @@ class LonicFlexCostManagementService {
     async loadBudgetAlerts() { }
     async loadOptimizationRules() { }
     async updateCurrencyRates() { }
-    startCostTrackingProcessor() { }
-    startBudgetMonitoring() { }
-    startOptimizationEngine() { }
-    async getBudgets(filters) { return []; }
-    async updateBudget(budgetId, updates) { return { success: this.validateSuccess() }; }
-    async getBudgetAlerts(filters) { return []; }
-    async createBudgetAlert(alertData) { return { success: this.validateSuccess() }; }
-    async generateCostOptimizationRecommendations(params) { return []; }
-    async checkBudgetAllowance(params) { return { allowed: true }; }
-    async getCostDashboardData() { return {}; }
-    async generateCostForecast(params) { return {}; }
-    async trackCost(costData, costContext) { return { success: this.validateSuccess() }; }
-    calculateCostTrends(data) { return {}; }
-    breakdownByModel(data) { return {}; }
-    breakdownByTeam(data) { return {}; }
-    breakdownByProject(data) { return {}; }
-    breakdownByDate(data, granularity) { return {}; }
-    async generateCostInsights(data, params) { return []; }
-    async generateCostRecommendations(data, params) { return []; }
-    async processPendingCostUpdates() { }
+    // STUB METHODS - NOT IMPLEMENTED
+    // These methods are placeholders for future implementation
+    startCostTrackingProcessor() {
+        throw new Error('NOT_IMPLEMENTED: startCostTrackingProcessor - Cost tracking processor not implemented');
+    }
+    startBudgetMonitoring() {
+        throw new Error('NOT_IMPLEMENTED: startBudgetMonitoring - Budget monitoring not implemented');
+    }
+    startOptimizationEngine() {
+        throw new Error('NOT_IMPLEMENTED: startOptimizationEngine - Optimization engine not implemented');
+    }
+    async getBudgets(filters) {
+        throw new Error('NOT_IMPLEMENTED: getBudgets - Budget retrieval not implemented');
+    }
+    async updateBudget(budgetId, updates) {
+        throw new Error('NOT_IMPLEMENTED: updateBudget - Budget updates not implemented');
+    }
+    async getBudgetAlerts(filters) {
+        throw new Error('NOT_IMPLEMENTED: getBudgetAlerts - Budget alerts not implemented');
+    }
+    async createBudgetAlert(alertData) {
+        throw new Error('NOT_IMPLEMENTED: createBudgetAlert - Budget alert creation not implemented');
+    }
+    async generateCostOptimizationRecommendations(params) {
+        throw new Error('NOT_IMPLEMENTED: generateCostOptimizationRecommendations - Cost optimization not implemented');
+    }
+    async checkBudgetAllowance(params) {
+        throw new Error('NOT_IMPLEMENTED: checkBudgetAllowance - Budget allowance checks not implemented');
+    }
+    async getCostDashboardData() {
+        throw new Error('NOT_IMPLEMENTED: getCostDashboardData - Cost dashboard not implemented');
+    }
+    async generateCostForecast(params) {
+        throw new Error('NOT_IMPLEMENTED: generateCostForecast - Cost forecasting not implemented');
+    }
+    async trackCost(costData, costContext) {
+        throw new Error('NOT_IMPLEMENTED: trackCost - Cost tracking not implemented');
+    }
+    calculateCostTrends(data) {
+        throw new Error('NOT_IMPLEMENTED: calculateCostTrends - Cost trend calculation not implemented');
+    }
+    breakdownByModel(data) {
+        throw new Error('NOT_IMPLEMENTED: breakdownByModel - Model breakdown not implemented');
+    }
+    breakdownByTeam(data) {
+        throw new Error('NOT_IMPLEMENTED: breakdownByTeam - Team breakdown not implemented');
+    }
+    breakdownByProject(data) {
+        throw new Error('NOT_IMPLEMENTED: breakdownByProject - Project breakdown not implemented');
+    }
+    breakdownByDate(data, granularity) {
+        throw new Error('NOT_IMPLEMENTED: breakdownByDate - Date breakdown not implemented');
+    }
+    async generateCostInsights(data, params) {
+        throw new Error('NOT_IMPLEMENTED: generateCostInsights - Cost insights not implemented');
+    }
+    async generateCostRecommendations(data, params) {
+        throw new Error('NOT_IMPLEMENTED: generateCostRecommendations - Cost recommendations not implemented');
+    }
+    async processPendingCostUpdates() {
+        throw new Error('NOT_IMPLEMENTED: processPendingCostUpdates - Cost update processing not implemented');
+    }
 }
 
 // Cost recommendation engine placeholder
