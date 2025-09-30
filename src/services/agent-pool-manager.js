@@ -1,4 +1,4 @@
-const { info, warn, error } = require('./logger');
+const { info, warn, error: logError } = require('./logger');
 /**
  * Agent Pool Manager - Phase 3A Implementation
  * Provides stateless, reusable agent instances for better performance
@@ -85,7 +85,7 @@ class AgentPoolManager extends EventEmitter {
             return this;
 
         } catch (error) {
-            error('AgentPoolManager initialization failed:', error.message);
+            logError('AgentPoolManager initialization failed:', error.message);
             throw error;
         }
     }
@@ -209,7 +209,7 @@ class AgentPoolManager extends EventEmitter {
             return true;
 
         } catch (error) {
-            error(`Error returning agent ${agentId}:`, error.message);
+            logError(`Error returning agent ${agentId}:`, error.message);
             return false;
         }
     }
@@ -244,7 +244,7 @@ class AgentPoolManager extends EventEmitter {
             return true;
 
         } catch (error) {
-            error(`Error releasing agent ${agentId}:`, error.message);
+            logError(`Error releasing agent ${agentId}:`, error.message);
             return false;
         }
     }
@@ -351,7 +351,7 @@ class AgentPoolManager extends EventEmitter {
             try {
                 await this.performCleanup();
             } catch (error) {
-                error('Pool cleanup error:', error.message);
+                logError('Pool cleanup error:', error.message);
             }
         }, this.config.cleanupInterval);
     }
@@ -371,7 +371,7 @@ class AgentPoolManager extends EventEmitter {
                     console.warn('Pool system health degraded:', health);
                 }
             } catch (error) {
-                error('Health check error:', error.message);
+                logError('Health check error:', error.message);
             }
         }, this.config.healthCheckInterval);
     }
@@ -387,7 +387,7 @@ class AgentPoolManager extends EventEmitter {
                 const cleaned = await pool.cleanup();
                 cleanedUp += cleaned;
             } catch (error) {
-                error(`Pool cleanup error for ${agentType}:`, error.message);
+                logError(`Pool cleanup error for ${agentType}:`, error.message);
             }
         }
 
@@ -431,7 +431,7 @@ class AgentPoolManager extends EventEmitter {
                 await pool.shutdown();
                 info(`Pool ${agentType} shutdown complete`);
             } catch (error) {
-                error(`Error shutting down pool ${agentType}:`, error.message);
+                logError(`Error shutting down pool ${agentType}:`, error.message);
             }
         }
 
@@ -481,7 +481,7 @@ class AgentPool {
                     lastUsed: Date.now()
                 });
             } catch (error) {
-                error(`Error pre-creating ${this.agentType} agent:`, error.message);
+                logError(`Error pre-creating ${this.agentType} agent:`, error.message);
             }
         }
 
@@ -550,7 +550,7 @@ class AgentPool {
             return true;
 
         } catch (error) {
-            error(`Error returning ${this.agentType} agent:`, error.message);
+            logError(`Error returning ${this.agentType} agent:`, error.message);
             // If reset fails, destroy the agent
             await this.destroyAgent(agent);
             this.inUseAgents.delete(agent.agentId);
@@ -563,7 +563,7 @@ class AgentPool {
      */
     async createAgent() {
         // Import the enhanced agent factory
-        const { EnhancedAgentFactory } = require('../enhanced-agent-factory');
+        const { EnhancedAgentFactory } = require('../core/enhanced-agent-factory');
 
         const factory = new EnhancedAgentFactory();
         await factory.initialize();
@@ -638,7 +638,7 @@ class AgentPool {
             }
             this.totalCreated = Math.max(0, this.totalCreated - 1);
         } catch (error) {
-            error(`Error destroying ${this.agentType} agent:`, error.message);
+            logError(`Error destroying ${this.agentType} agent:`, error.message);
         }
     }
 

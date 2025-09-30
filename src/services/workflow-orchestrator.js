@@ -1,4 +1,4 @@
-const { info, warn, error } = require('./logger');
+const { info, warn, error: logError } = require('./logger');
 /**
  * Workflow Orchestrator - Phase 3B Implementation
  * Intelligent coordination of multi-agent workflows with ServiceContainer integration
@@ -108,7 +108,7 @@ class WorkflowOrchestrator extends EventEmitter {
             return this;
 
         } catch (error) {
-            error('FAIL WorkflowOrchestrator initialization failed:', error.message);
+            logError('FAIL WorkflowOrchestrator initialization failed:', error.message);
             throw error;
         }
     }
@@ -187,7 +187,7 @@ class WorkflowOrchestrator extends EventEmitter {
                 executionTime: Date.now() - execution.startedAt
             });
 
-            error(`FAIL Workflow orchestration failed: ${workflowId}`, error.message);
+            logError(`FAIL Workflow orchestration failed: ${workflowId}`, error.message);
             throw error;
         }
     }
@@ -326,7 +326,7 @@ class WorkflowOrchestrator extends EventEmitter {
                     queue: false
                 });
             } catch (error) {
-                error('FAIL Error processing queued workflow:', error.message);
+                logError('FAIL Error processing queued workflow:', error.message);
                 // Could implement retry logic here
             }
         }
@@ -562,7 +562,7 @@ class WorkflowExecution {
             }
 
         } catch (error) {
-            error(`FAIL Step execution failed: ${this.currentStep}`, error.message);
+            logError(`FAIL Step execution failed: ${this.currentStep}`, error.message);
             throw error;
 
         } finally {
@@ -742,7 +742,7 @@ class WorkflowExecution {
      * Handle execution errors
      */
     async handleExecutionError(error) {
-        error(`FAIL Workflow execution failed: ${this.workflowId}`, error.message);
+        logError(`FAIL Workflow execution failed: ${this.workflowId}`, error.message);
 
         // Could implement retry logic, partial recovery, etc.
         this.context.set('error', error.message);
