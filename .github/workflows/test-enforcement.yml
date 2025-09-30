@@ -1,0 +1,73 @@
+name: 🔒 Test Enforcement - MANDATORY
+
+on:
+  push:
+    branches: [ main, foundation-v0, develop ]
+  pull_request:
+    branches: [ main, foundation-v0, develop ]
+
+jobs:
+  enforce-tests:
+    name: 🛡️ Enforce 100% Test Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run ALL tests
+        run: npm test
+        env:
+          CI: true
+
+      - name: 📊 Check test coverage
+        run: node analyze-test-coverage.js
+        continue-on-error: false
+
+      - name: 🚨 Enforce coverage threshold
+        run: |
+          COVERAGE=$(node analyze-test-coverage.js 2>&1 | grep "Files with tests:" | grep -oP '\d+\.\d+(?=%)')
+          echo "Current coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 100.0" | bc -l) )); then
+            echo "❌ COVERAGE BELOW 100%: $COVERAGE%"
+            echo "🚨 ALL files MUST have tests!"
+            exit 1
+          fi
+          echo "✅ Coverage at 100% - APPROVED"
+
+      - name: 🔍 Check for untested files
+        run: |
+          UNTESTED=$(node analyze-test-coverage.js 2>&1 | grep "Files without tests:" | grep -oP '\d+(?=/)')
+          echo "Untested files: $UNTESTED"
+          if [ "$UNTESTED" -gt 0 ]; then
+            echo "❌ FOUND $UNTESTED UNTESTED FILES!"
+            echo "🚨 Every file needs a test!"
+            node analyze-test-coverage.js
+            exit 1
+          fi
+          echo "✅ All files tested - APPROVED"
+
+      - name: ✅ Tests passed - PR approved
+        if: success()
+        run: |
+          echo "🎉 ALL CHECKS PASSED!"
+          echo "✅ Tests: PASSING"
+          echo "✅ Coverage: 100%"
+          echo "✅ No untested files"
+          echo "PR is safe to merge! 🚀"
+
+      - name: ❌ Tests failed - PR blocked
+        if: failure()
+        run: |
+          echo "🚨 CHECKS FAILED - PR BLOCKED!"
+          echo "Fix issues before merging!"
+          exit 1

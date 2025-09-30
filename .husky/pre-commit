@@ -1,0 +1,44 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 🔒 PRE-COMMIT HOOK - TEST ENFORCEMENT
+echo "🛡️  Pre-commit: Enforcing test requirements..."
+
+# Run quick smoke tests first
+echo "🧪 Running smoke tests..."
+npm run test:smoke || {
+    echo "❌ COMMIT BLOCKED: Smoke tests failed!"
+    echo "Fix the tests before committing."
+    exit 1
+}
+
+# Check if coverage analyzer exists
+if [ -f "analyze-test-coverage.js" ]; then
+    echo "📊 Checking test coverage..."
+
+    # Run coverage analysis
+    COVERAGE_OUTPUT=$(node analyze-test-coverage.js 2>&1)
+
+    # Extract coverage percentage
+    COVERAGE=$(echo "$COVERAGE_OUTPUT" | grep "Files with tests:" | grep -oP '\d+\.\d+(?=%)')
+
+    if [ -n "$COVERAGE" ]; then
+        echo "Current coverage: $COVERAGE%"
+
+        # Check if coverage is below 100%
+        if [ "$(echo "$COVERAGE < 100.0" | bc -l 2>/dev/null || echo "0")" = "1" ]; then
+            echo "⚠️  WARNING: Coverage is $COVERAGE%"
+            echo "Target: 100%"
+            echo ""
+            echo "Consider adding tests for uncovered files."
+            echo "Run: node analyze-test-coverage.js"
+            echo ""
+            # Warning only, not blocking for now
+        else
+            echo "✅ Coverage: $COVERAGE% - EXCELLENT!"
+        fi
+    fi
+fi
+
+echo "✅ Pre-commit checks passed!"
+exit 0

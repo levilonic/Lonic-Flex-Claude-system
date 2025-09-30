@@ -20,6 +20,8 @@
     "test:core": "node test-core-system.js",
     "test:legacy": "node cli.js test",
     "test:real": "node tests/real/pr-review-integration.test.js",
+    "test:coverage": "node analyze-test-coverage.js",
+    "test:enforce": "node enforce-test-coverage.js",
     "context:health": "node src/context-management/context-window-monitor.js",
     "context:test": "node tests/integration/test-universal-context.js",
     "status": "node cli.js status",
@@ -39,8 +41,10 @@
     "verify:all": "node src/memory/status-verifier.js --all",
     "verify:discrepancies": "node src/memory/status-verifier.js --discrepancies",
     "verify:docs": "node verify-docs.js",
+    "verify": "npm run test && npm run test:coverage && npm run test:enforce",
     "smoke": "node src/smoke.js",
-    "smoke:full": "node test-smoke-comprehensive.js"
+    "smoke:full": "node test-smoke-comprehensive.js",
+    "prepare": "husky"
   },
   "keywords": [
     "ai-agents",
@@ -75,6 +79,7 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "nodemon": "^3.0.2",
     "supertest": "^6.3.4"
