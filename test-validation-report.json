@@ -53,12 +53,6 @@
       "error": ""
     },
     {
-      "file": "tests\\unit\\test-two-phase-system.js",
-      "reason": "execution_failed",
-      "exitCode": 1,
-      "error": "Error: Cannot find module '../docs/doc-search'\r"
-    },
-    {
       "file": "tests\\integration\\test-context-continuation.js",
       "reason": "execution_failed",
       "exitCode": 1,
@@ -80,7 +74,7 @@
       "file": "tests\\integration\\test-service-container-integration.js",
       "reason": "execution_failed",
       "exitCode": 1,
-      "error": "💥 Test suite failed: EnhancedAgentFactory is not defined"
+      "error": "Error: Unknown agent type: base_work\r"
     },
     {
       "file": "tests\\phase-tests\\test-phase3-infrastructure.js",
@@ -93,12 +87,6 @@
       "reason": "execution_failed",
       "exitCode": 1,
       "error": "⚠️ Performance test warning: error is not a function"
-    },
-    {
-      "file": "tests\\phase-tests\\test-window1-enterprise-features.js",
-      "reason": "execution_failed",
-      "exitCode": 1,
-      "error": "Error: Cannot find module './claude-analysis-service'\r"
     }
   ],
   "skipped": []

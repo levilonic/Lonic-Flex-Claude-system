@@ -408,6 +408,16 @@ class BaseAgent extends ValidatedAgent {
      * Get current agent status
      */
     getStatus() {
+        // Get partition stats safely (Factor3ContextManager doesn't have getStats)
+        let partitionStats = null;
+        if (this.contextPartition) {
+            // Build stats from available Factor3ContextManager methods
+            partitionStats = {
+                contextId: this.workflowId,
+                scope: this.contextPartition.contextScope || 'workflow'
+            };
+        }
+
         return {
             agentId: this.agentId,
             agentName: this.agentName,
@@ -419,7 +429,7 @@ class BaseAgent extends ValidatedAgent {
             executionSteps: this.executionSteps,
             result: this.result,
             error: this.error,
-            partition_stats: this.contextPartition ? this.contextPartition.getStats() : null
+            partition_stats: partitionStats
         };
     }
 
@@ -428,12 +438,21 @@ class BaseAgent extends ValidatedAgent {
      * Using isolated partition context instead of shared
      */
     generateHandoffContext() {
+        // Get partition context safely
+        let partitionContext = null;
+        if (this.contextPartition) {
+            partitionContext = {
+                contextId: this.workflowId,
+                scope: this.contextPartition.contextScope || 'workflow'
+            };
+        }
+
         return {
             from_agent: this.agentName,
             workflow_id: this.workflowId,
             result: this.result,
             context_xml: this.contextManager.getCurrentContext(),
-            partition_context: this.contextPartition ? this.contextPartition.getStats() : null,
+            partition_context: partitionContext,
             execution_summary: {
                 steps_completed: this.executionSteps.length,
                 final_state: this.state,
