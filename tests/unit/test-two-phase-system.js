@@ -4,9 +4,9 @@
  */
 
 const { v4: uuidv4 } = require('uuid');
-const { SQLiteManager } = require('./database/sqlite-manager');
-const { PlanningManagerAgent } = require('./agents/planning-manager-agent');
-const { ExecutionManagerAgent } = require('./agents/execution-manager-agent');
+const { SQLiteManager } = require('../../src/database/sqlite-manager');
+const { PlanningManagerAgent } = require('../../src/agents/planning-manager-agent');
+const { ExecutionManagerAgent } = require('../../src/agents/execution-manager-agent');
 
 class TwoPhaseSystemTester {
     constructor() {

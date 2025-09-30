@@ -5,8 +5,8 @@
  * Tests simultaneous contexts, isolation, and workspace management
  */
 
-const { UniversalContextCommands } = require('./universal-context-commands');
-const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { UniversalContextCommands } = require('../../src/context-management/universal-context-commands');
+const { Factor3ContextManager } = require('../../src/context-management/factor3-context-manager');
 
 console.log('🧪 Testing Multi-Context Workspace - Phase 2C\n');
 

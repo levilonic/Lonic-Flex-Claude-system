@@ -5,7 +5,7 @@
  * Tests ServiceContainer instantiation and basic dependency injection
  */
 
-const { ServiceContainer, getGlobalServiceContainer, initializeGlobalServiceContainer } = require('../services/service-container');
+const { ServiceContainer, getGlobalServiceContainer, initializeGlobalServiceContainer } = require('../../src/services/service-container');
 
 async function testServiceContainer() {
     console.log('🧪 Testing ServiceContainer Architecture - Phase 1.1');

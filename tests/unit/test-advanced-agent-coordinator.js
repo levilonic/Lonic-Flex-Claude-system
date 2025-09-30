@@ -12,7 +12,7 @@
  * - Conflict resolution
  */
 
-const { AdvancedAgentCoordinator } = require('./core/advanced-agent-coordinator');
+const { AdvancedAgentCoordinator } = require('../../src/core/advanced-agent-coordinator');
 
 class AdvancedAgentCoordinatorTester {
     constructor() {

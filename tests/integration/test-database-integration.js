@@ -1,5 +1,5 @@
 const { describe, it, expect, beforeEach, afterEach } = require('@jest/globals');
-const { SQLiteManager } = require('../../database/sqlite-manager');
+const { SQLiteManager } = require('../../src/database/sqlite-manager');
 const fs = require('fs');
 const path = require('path');
 

@@ -1,0 +1,183 @@
+{
+  "working": [
+    {
+      "file": "tests\\unit\\test-base-agent.js",
+      "exitCode": 0
+    },
+    {
+      "file": "tests\\unit\\test-claude-parsing.js",
+      "exitCode": 0
+    },
+    {
+      "file": "tests\\unit\\test-database-isolation.js",
+      "exitCode": 0
+    },
+    {
+      "file": "tests\\unit\\test-github-actions-automation.js",
+      "exitCode": 0
+    },
+    {
+      "file": "tests\\unit\\test-service-container.js",
+      "exitCode": 0
+    },
+    {
+      "file": "tests\\integration\\test-universal-context.js",
+      "exitCode": 0
+    },
+    {
+      "file": "tests\\phase-tests\\test-phase3a-integration.js",
+      "exitCode": 0
+    },
+    {
+      "file": "tests\\phase-tests\\test-window3-integration.js",
+      "exitCode": 0
+    }
+  ],
+  "broken": [
+    {
+      "file": "tests\\unit\\test-advanced-agent-coordinator.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": ""
+    },
+    {
+      "file": "tests\\unit\\test-agent-null-safety.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": "Stack trace: Error: ServiceContainer is required for BaseAgent initialization"
+    },
+    {
+      "file": "tests\\unit\\test-foundation-v0-live.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": ""
+    },
+    {
+      "file": "tests\\unit\\test-long-term-persistence.js",
+      "reason": "import_errors",
+      "errors": [
+        {
+          "import": "./long-term-persistence",
+          "message": "Cannot resolve: ./long-term-persistence"
+        },
+        {
+          "import": "./context-health-monitor",
+          "message": "Cannot resolve: ./context-health-monitor"
+        },
+        {
+          "import": "../context-management/factor3-context-manager",
+          "message": "Cannot resolve: ../context-management/factor3-context-manager"
+        }
+      ]
+    },
+    {
+      "file": "tests\\unit\\test-two-phase-system.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": "Error: Cannot find module '../docs/doc-search'\r"
+    },
+    {
+      "file": "tests\\unit\\test-unified-commands.js",
+      "reason": "import_errors",
+      "errors": [
+        {
+          "import": "./universal-context-commands",
+          "message": "Cannot resolve: ./universal-context-commands"
+        }
+      ]
+    },
+    {
+      "file": "tests\\integration\\test-context-continuation.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": ""
+    },
+    {
+      "file": "tests\\integration\\test-database-integration.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": "Error: Do not import `@jest/globals` outside of the Jest test environment\r"
+    },
+    {
+      "file": "tests\\integration\\test-enhanced-github-integration.js",
+      "reason": "import_errors",
+      "errors": [
+        {
+          "import": "../../src/agents/enhanced-github-agent",
+          "message": "Cannot resolve: ../../src/agents/enhanced-github-agent"
+        }
+      ]
+    },
+    {
+      "file": "tests\\integration\\test-multi-agent-integration.js",
+      "reason": "import_errors",
+      "errors": [
+        {
+          "import": "../../claude-multi-agent-core",
+          "message": "Cannot resolve: ../../claude-multi-agent-core"
+        }
+      ]
+    },
+    {
+      "file": "tests\\integration\\test-multi-branch-operations.js",
+      "reason": "import_errors",
+      "errors": [
+        {
+          "import": "../../integrations/claude/claude-multi-agent-core",
+          "message": "Cannot resolve: ../../integrations/claude/claude-multi-agent-core"
+        }
+      ]
+    },
+    {
+      "file": "tests\\integration\\test-multi-context-workspace.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": ""
+    },
+    {
+      "file": "tests\\integration\\test-real-github-integration.js",
+      "reason": "import_errors",
+      "errors": [
+        {
+          "import": "../../integrations/external-integrations/simplified-external-coordinator",
+          "message": "Cannot resolve: ../../integrations/external-integrations/simplified-external-coordinator"
+        }
+      ]
+    },
+    {
+      "file": "tests\\integration\\test-service-container-integration.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": "💥 Test suite failed: EnhancedAgentFactory is not defined"
+    },
+    {
+      "file": "tests\\phase-tests\\test-phase3-infrastructure.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": "   Stack: TypeError: this.calculateHealthScore is not a function"
+    },
+    {
+      "file": "tests\\phase-tests\\test-phase3-orchestration.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": "⚠️ Performance test warning: error is not a function"
+    },
+    {
+      "file": "tests\\phase-tests\\test-window1-enterprise-features.js",
+      "reason": "execution_failed",
+      "exitCode": 1,
+      "error": "Error: Cannot find module './claude-analysis-service'\r"
+    },
+    {
+      "file": "tests\\phase-tests\\test-window1-multi-workflow-state.js",
+      "reason": "import_errors",
+      "errors": [
+        {
+          "import": "../../src/services/claude-state-bridge",
+          "message": "Cannot resolve: ../../src/services/claude-state-bridge"
+        }
+      ]
+    }
+  ],
+  "skipped": []
+}

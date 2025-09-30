@@ -12,10 +12,10 @@
  * ✅ Cost savings verification (60%+ reduction)
  */
 
-const { SQLiteManager } = require('./database/sqlite-manager');
-const { MultiWorkflowStateManager } = require('./services/multi-workflow-state-manager');
-const { ConditionalWorkflowEngine } = require('./services/conditional-workflow-engine');
-const { EnhancedApprovalGatesCoordinator } = require('./services/enhanced-approval-gates');
+const { SQLiteManager } = require('../../src/database/sqlite-manager');
+const { MultiWorkflowStateManager } = require('../../src/services/multi-workflow-state-manager');
+const { ConditionalWorkflowEngine } = require('../../src/services/conditional-workflow-engine');
+const { EnhancedApprovalGatesCoordinator } = require('../../src/services/enhanced-approval-gates');
 
 console.log('🧪 LonicFLex Window 1: Enterprise Features Test Suite');
 console.log('=' .repeat(60));

@@ -3,8 +3,8 @@
  * Validates that agents can handle null context managers gracefully
  */
 
-const { BaseAgent } = require('./agents/base-agent');
-const { GitHubAgent } = require('./agents/github-agent');
+const { BaseAgent } = require('../../src/agents/base-agent');
+const { GitHubAgent } = require('../../src/agents/github-agent');
 
 console.log('🧪 Testing Individual Agent Creation with Null Safety');
 

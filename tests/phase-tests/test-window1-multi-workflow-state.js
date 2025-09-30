@@ -11,11 +11,11 @@
  * - Integration between all components
  */
 
-const { SQLiteManager } = require('./database/sqlite-manager');
-const { MultiWorkflowStateManager } = require('./services/multi-workflow-state-manager');
-const { ClaudeStateBridge } = require('./services/claude-state-bridge');
-const { ConditionalWorkflowEngine } = require('./services/conditional-workflow-engine');
-const { EnhancedApprovalGates } = require('./services/enhanced-approval-gates');
+const { SQLiteManager } = require('../../src/database/sqlite-manager');
+const { MultiWorkflowStateManager } = require('../../src/services/multi-workflow-state-manager');
+const { ClaudeStateBridge } = require('../../src/services/claude-state-bridge');
+const { ConditionalWorkflowEngine } = require('../../src/services/conditional-workflow-engine');
+const { EnhancedApprovalGates } = require('../../src/services/enhanced-approval-gates');
 
 class Window1TestSuite {
     constructor() {

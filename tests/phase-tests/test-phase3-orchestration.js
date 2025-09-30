@@ -4,10 +4,10 @@
  * Validates performance improvements over Phase 2
  */
 
-const { ServiceContainer } = require('../services/service-container');
-const { AgentPoolManager } = require('./services/agent-pool-manager');
-const { WorkflowOrchestrator } = require('./services/workflow-orchestrator');
-const { ResourceManager } = require('./services/resource-manager');
+const { ServiceContainer } = require('../../src/services/service-container');
+const { AgentPoolManager } = require('../../src/services/agent-pool-manager');
+const { WorkflowOrchestrator } = require('../../src/services/workflow-orchestrator');
+const { ResourceManager } = require('../../src/services/resource-manager');
 
 async function testPhase3Orchestration() {
     console.log('🧪 Testing Phase 3 Orchestration System - Agent Lifecycle Management');

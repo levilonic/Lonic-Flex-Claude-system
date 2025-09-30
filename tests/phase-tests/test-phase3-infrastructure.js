@@ -9,7 +9,7 @@
  * - PM2 ecosystem configuration
  */
 
-const { initializeGlobalServiceContainer } = require('../services/service-container');
+const { initializeGlobalServiceContainer } = require('../../src/services/service-container');
 const fs = require('fs').promises;
 
 async function testPhase3Infrastructure() {

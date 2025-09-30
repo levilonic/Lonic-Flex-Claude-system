@@ -3,8 +3,8 @@
  * Validates that enhanced GitHubAgent integrates properly with existing multi-agent workflows
  */
 
-const { initializeGlobalServiceContainer } = require('../services/service-container');
-const { EnhancedGitHubAgent } = require('./agents/enhanced-github-agent');
+const { initializeGlobalServiceContainer } = require('../../src/services/service-container');
+const { EnhancedGitHubAgent } = require('../../src/agents/enhanced-github-agent');
 
 async function testEnhancedGitHubIntegration() {
     console.log('🔗 Testing Enhanced GitHub Agent Integration');

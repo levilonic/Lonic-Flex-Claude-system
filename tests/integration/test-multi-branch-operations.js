@@ -5,8 +5,8 @@
  */
 
 const { MultiAgentCore } = require('../../integrations/claude/claude-multi-agent-core');
-const { BranchAwareAgentManager } = require('./services/branch-aware-agent-manager');
-const { CrossBranchCoordinator } = require('./services/cross-branch-coordinator');
+const { BranchAwareAgentManager } = require('../../src/services/branch-aware-agent-manager');
+const { CrossBranchCoordinator } = require('../../src/services/cross-branch-coordinator');
 require('dotenv').config();
 
 /**
