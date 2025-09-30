@@ -12,7 +12,7 @@ const { ArchitectureDesignAgent } = require('./architecture-design-agent');
 const { DocumentationAgent } = require('./documentation-agent');
 
 class PlanningManagerAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('planning-manager', sessionId, {
             maxSteps: 8,
             timeout: 60000,
@@ -37,8 +37,12 @@ class PlanningManagerAgent extends ValidatedAgent {
             'validate_execution_plan',
             'prepare_phase2_handoff'
         ];
-        // Workflow configuration
-        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
+
+        this.contextManager.addAgentEvent(this.agentName, 'planning_manager_initialized', {
+            session_id: sessionId,
+            planning_phase: this.config.planningPhase,
+            max_steps: this.config.maxSteps
+        });
     }
 
     /**

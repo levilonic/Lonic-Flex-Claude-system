@@ -12,7 +12,7 @@ const { TestingAgent } = require('./testing-agent');
 const { IntegrationAgent } = require('./integration-agent');
 
 class ExecutionManagerAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('execution-manager', sessionId, {
             maxSteps: 8,
             timeout: 120000, // Longer timeout for execution phase
@@ -50,8 +50,12 @@ class ExecutionManagerAgent extends ValidatedAgent {
             'validate_quality_gates',
             'finalize_delivery'
         ];
-        // Workflow configuration
-        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
+
+        this.contextManager.addAgentEvent(this.agentName, 'execution_manager_initialized', {
+            session_id: sessionId,
+            execution_phase: this.config.executionPhase,
+            max_steps: this.config.maxSteps
+        });
     }
 
     /**

@@ -9,7 +9,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 class ResearchAnalysisAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('research-analysis', sessionId, {
             maxSteps: 8,
             timeout: 45000,
@@ -34,8 +34,11 @@ class ResearchAnalysisAgent extends ValidatedAgent {
             'generate_insights',
             'compile_analysis_report'
         ];
-        // Workflow configuration
-        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
+
+        this.contextManager.addAgentEvent(this.agentName, 'research_analysis_initialized', {
+            session_id: sessionId,
+            analysis_scope: this.config.analysisScope
+        });
     }
 
     /**

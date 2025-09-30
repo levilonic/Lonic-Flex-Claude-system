@@ -10,7 +10,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 class PragmaticCodeReviewerAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('pragmatic-code-reviewer', sessionId, {
             maxSteps: 8,
             timeout: 120000,
@@ -60,8 +60,11 @@ class PragmaticCodeReviewerAgent extends ValidatedAgent {
         this.reviewFramework = this.initializeReviewFramework();
 
         // Initialize review context
-        // Workflow configuration
-        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
+        this.contextManager.addAgentEvent(this.agentName, 'review_config_loaded', {
+            methodology: this.reviewConfig.methodology,
+            framework: this.reviewConfig.framework,
+            categories: Object.keys(this.reviewFramework).length
+        });
     }
 
     /**

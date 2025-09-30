@@ -12,7 +12,7 @@ const { getAuthManager } = require('../auth/auth-manager');
 require('dotenv').config();
 
 class GitHubAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('github', sessionId, {
             maxSteps: 8,
             timeout: 45000,

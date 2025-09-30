@@ -7,7 +7,7 @@
 const { ValidatedAgent } = require('../core/validated-agent-base');
 
 class ProtocolResearchAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('protocol-research', sessionId, {
             maxSteps: 8,
             timeout: 60000,
@@ -33,8 +33,11 @@ class ProtocolResearchAgent extends ValidatedAgent {
             'synthesize_recommendations',
             'compile_research_report'
         ];
-        // Workflow configuration
-        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
+
+        this.contextManager.addAgentEvent(this.agentName, 'protocol_research_initialized', {
+            session_id: sessionId,
+            research_depth: this.config.researchDepth
+        });
     }
 
     /**

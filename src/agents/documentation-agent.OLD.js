@@ -8,7 +8,7 @@ const AnthropicDocsManager = require('../../docs/anthropic-docs-manager');
 const DocumentationSearchTool = require('../../docs/doc-search');
 
 class DocumentationAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('DocumentationAgent', sessionId, config);
         
         // Initialize documentation tools

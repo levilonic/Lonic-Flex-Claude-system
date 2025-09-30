@@ -29,7 +29,7 @@ function findJSFiles(dir, fileList = []) {
             if (!file.startsWith('.') && file !== 'node_modules' && file !== 'generated') {
                 findJSFiles(filePath, fileList);
             }
-        } else if (file.endsWith('.js')) {
+        } else if (file.endsWith('.js') && !file.endsWith('.OLD.js')) {
             fileList.push(filePath);
         }
     });

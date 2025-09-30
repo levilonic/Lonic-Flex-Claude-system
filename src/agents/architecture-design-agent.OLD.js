@@ -7,7 +7,7 @@
 const { ValidatedAgent } = require('../core/validated-agent-base');
 
 class ArchitectureDesignAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('architecture-design', sessionId, {
             maxSteps: 8,
             timeout: 60000,
@@ -33,8 +33,11 @@ class ArchitectureDesignAgent extends ValidatedAgent {
             'validate_design_feasibility', 
             'finalize_architecture_plan'
         ];
-        // Workflow configuration
-        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
+
+        this.contextManager.addAgentEvent(this.agentName, 'architecture_design_initialized', {
+            session_id: sessionId,
+            design_approach: this.config.designApproach
+        });
     }
 
     /**

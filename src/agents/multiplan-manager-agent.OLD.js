@@ -14,7 +14,7 @@ const { BranchAwareAgentManager } = require('../services/branch-aware-agent-mana
 const { CrossBranchCoordinator } = require('../services/cross-branch-coordinator');
 
 class MultiplanManagerAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('multiplan-manager', sessionId, {
             maxSteps: 8,
             timeout: 300000, // 5 minutes for complex orchestration

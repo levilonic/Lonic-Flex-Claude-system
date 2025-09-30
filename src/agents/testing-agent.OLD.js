@@ -7,7 +7,7 @@
 const { ValidatedAgent } = require('../core/validated-agent-base');
 
 class TestingAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('testing', sessionId, {
             maxSteps: 8,
             timeout: 90000,
@@ -33,8 +33,11 @@ class TestingAgent extends ValidatedAgent {
             'assess_quality_metrics',
             'compile_testing_report'
         ];
-        // Workflow configuration
-        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
+
+        this.contextManager.addAgentEvent(this.agentName, 'testing_agent_initialized', {
+            session_id: sessionId,
+            test_suite: this.config.testSuite
+        });
     }
 
     /**

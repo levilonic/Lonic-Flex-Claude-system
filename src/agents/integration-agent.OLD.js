@@ -2,44 +2,26 @@
  * Integration Agent - Specialized Execution Phase Agent
  * Validates system integration points and ensures component interoperability
  * Following Factor 10 principles (<=8 execution steps)
- *
- * MIGRATED TO: ServiceContainer pattern with dependency injection
  */
 
 const { ValidatedAgent } = require('../core/validated-agent-base');
 
 class IntegrationAgent extends ValidatedAgent {
-    constructor(sessionId, serviceContainer, config = {}) {
+    constructor(sessionId, config = {}) {
         super('integration', sessionId, {
             maxSteps: 8,
             timeout: 90000,
             integrationType: config.integrationType || 'full-system',
             ...config
         });
-
-        // ServiceContainer validation and injection
-        if (!serviceContainer) {
-            throw new Error('ServiceContainer is required for IntegrationAgent initialization');
-        }
-
-        this.services = serviceContainer;
-
-        // Get shared services from container
-        this.dbManager = null; // Will be injected during initialize()
-        this.memoryManager = this.services.getMemoryService();
-        this.compliance = this.services.getComplianceService();
-
-        // Context manager will be assigned during initialize()
-        this.contextPartition = null;
-        this.contextManager = null;
-
+        
         // Integration-specific state
         this.integrationPoints = [];
         this.integrationResults = {};
         this.compatibilityReport = {};
         this.systemValidation = {};
         this.backwardCompatibility = {};
-
+        
         // Integration workflow steps (Factor 10: <=8 steps)
         this.executionSteps = [
             'identify_integration_points',
@@ -52,41 +34,11 @@ class IntegrationAgent extends ValidatedAgent {
             'compile_integration_report'
         ];
 
-        // Workflow configuration
-        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
-    }
-
-    /**
-     * Initialize agent with database connection and context partition
-     */
-    async initialize(workflowId = null) {
-        // Use provided workflow ID or generate one
-        if (workflowId) {
-            this.workflowId = workflowId;
-        }
-
-        // Get database service from container
-        this.dbManager = this.services.getDatabaseService();
-
-        // Get isolated context partition for this workflow
-        this.contextPartition = await this.services.createWorkflowPartition(
-            this.workflowId,
-            { contextScope: this.config.contextScope || 'session' }
-        );
-
-        // Use the context partition directly as context manager (Factor3ContextManager)
-        this.contextManager = this.contextPartition;
-
-        // NOW safe to use contextManager
         this.contextManager.addAgentEvent(this.agentName, 'integration_agent_initialized', {
-            session_id: this.sessionId,
-            integration_type: this.config.integrationType,
-            workflow_id: this.workflowId
+            session_id: sessionId,
+            integration_type: this.config.integrationType
         });
-
-        return this;
     }
-
 
     /**
      * Execute integration validation workflow (Factor 10: max 8 steps)
