@@ -11,17 +11,22 @@ const { ServiceContainer } = require('../services/service-container');
  * Enhanced Agent Factory for Production Deployment
  */
 class EnhancedAgentFactory {
-    constructor(config = {}) {
+    constructor(configOrServiceContainer = {}) {
+        // Handle both: new EnhancedAgentFactory(serviceContainer) or new EnhancedAgentFactory({config})
+        const isServiceContainer = configOrServiceContainer && typeof configOrServiceContainer.initialize === 'function';
+        const passedServiceContainer = isServiceContainer ? configOrServiceContainer : null;
+        const config = isServiceContainer ? {} : configOrServiceContainer;
+
         this.config = {
             useEnhancedAgents: config.useEnhancedAgents !== false, // Default to enhanced
             fallbackToOriginal: config.fallbackToOriginal !== false, // Allow fallback
-            serviceContainer: null,
+            serviceContainer: passedServiceContainer || config.serviceContainer || null,
             sessionId: null,
             ...config
         };
 
-        // Initialize ServiceContainer if using enhanced agents
-        this.serviceContainer = null;
+        // Use passed ServiceContainer or create new one later
+        this.serviceContainer = passedServiceContainer || null;
         this.isInitialized = false;
 
         // Track created agents for cleanup
@@ -38,9 +43,14 @@ class EnhancedAgentFactory {
 
         if (this.config.useEnhancedAgents) {
             try {
-                this.serviceContainer = new ServiceContainer();
-                await this.serviceContainer.initialize();
-                info(' Agent Factory initialized with ServiceContainer');
+                // Only create new ServiceContainer if one wasn't passed to constructor
+                if (!this.serviceContainer) {
+                    this.serviceContainer = new ServiceContainer();
+                    await this.serviceContainer.initialize();
+                    info(' Agent Factory initialized with ServiceContainer');
+                } else {
+                    info(' Agent Factory using existing ServiceContainer');
+                }
             } catch (error) {
                 console.warn('WARN ServiceContainer initialization failed, falling back to original agents');
                 this.config.useEnhancedAgents = false;
