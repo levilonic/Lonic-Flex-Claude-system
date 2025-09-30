@@ -721,6 +721,14 @@ class WorkflowExecution {
     }
 
     /**
+     * Validate workflow success
+     */
+    validateSuccess() {
+        // Workflow succeeds if it completed without failure
+        return !this.isFailed && this.isCompleted;
+    }
+
+    /**
      * Compile final workflow result
      */
     async compileFinalResult() {
