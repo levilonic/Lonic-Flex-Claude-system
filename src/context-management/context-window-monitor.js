@@ -39,6 +39,10 @@ class ContextWindowMonitor extends EventEmitter {
         // Auto-compact prevention strategies
         this.autoCompactEnabled = options.autoCompact !== false;
         this.compactStrategies = options.compactStrategies || ['remove_resolved_errors', 'compact_old_events'];
+
+        // NEW: 40% auto-cleanup trigger (user's original requirement)
+        this.enableAutoCleanup = options.enableAutoCleanup !== false;
+        this.autoCleanupThreshold = options.autoCleanupThreshold || 40; // Trigger at 40%
         
         // Only log in development mode
         if (process.env.NODE_ENV !== 'production') {
@@ -169,13 +173,25 @@ class ContextWindowMonitor extends EventEmitter {
                 if (levelChanged) {
                     info(` WARNING: Context usage reached ${this.thresholds.warning}% threshold!`);
                     this.emit('threshold_warning', newState);
+
+                    // NEW: Auto-cleanup at 40% threshold
+                    if (this.enableAutoCleanup && newState.percentage >= this.autoCleanupThreshold) {
+                        info(`🟡 AUTO-CLEANUP TRIGGERED: ${newState.percentage.toFixed(1)}% usage reached`);
+                        this.performAutoCleanup(newState, 'standard');
+                    }
                 }
                 break;
-                
+
             case 'critical':
                 if (levelChanged) {
                     info(` CRITICAL: Context usage reached ${this.thresholds.critical}% threshold!`);
                     this.emit('threshold_critical', newState);
+
+                    // NEW: Aggressive auto-cleanup at 70% threshold
+                    if (this.enableAutoCleanup) {
+                        info(`🟠 AGGRESSIVE AUTO-CLEANUP: ${newState.percentage.toFixed(1)}% usage - critical level`);
+                        this.performAutoCleanup(newState, 'aggressive');
+                    }
                 }
                 break;
                 
@@ -183,8 +199,12 @@ class ContextWindowMonitor extends EventEmitter {
                 if (levelChanged) {
                     info(` EMERGENCY: Context usage reached ${this.thresholds.emergency}% - AUTO-COMPACT IMMINENT!`);
                     this.emit('threshold_emergency', newState);
-                    
-                    if (this.autoCompactEnabled) {
+
+                    // Emergency: Most aggressive cleanup (50% reduction)
+                    if (this.enableAutoCleanup) {
+                        info(`🔴 EMERGENCY AUTO-CLEANUP: ${newState.percentage.toFixed(1)}% usage - 50% reduction`);
+                        this.performAutoCleanup(newState, 'emergency');
+                    } else if (this.autoCompactEnabled) {
                         this.handleEmergencyCompact(newState);
                     }
                 }
@@ -279,6 +299,96 @@ class ContextWindowMonitor extends EventEmitter {
         }
         
         return `<workflow_context>\n<!-- Context truncated for emergency compact -->\n${truncated}\n</workflow_context>`;
+    }
+
+    /**
+     * NEW: Perform auto-cleanup at threshold levels (40%, 70%, 90%)
+     * Implements three-tier cleanup strategy from archived pattern
+     */
+    async performAutoCleanup(state, cleanupType = 'standard') {
+        try {
+            const contextContent = state.contextContent;
+            if (!contextContent) {
+                warn('No context content available for auto-cleanup');
+                return { success: false, reason: 'no_content' };
+            }
+
+            const originalTokens = state.tokens;
+            const originalPercentage = state.percentage;
+
+            // Determine reduction target based on cleanup type
+            const reductionTargets = {
+                standard: 0.15,   // 15% reduction at 40% threshold
+                aggressive: 0.30, // 30% reduction at 70% threshold
+                emergency: 0.50   // 50% reduction at 90% threshold
+            };
+            const targetReduction = reductionTargets[cleanupType] || 0.15;
+
+            info(`📦 Starting ${cleanupType} cleanup (target: ${(targetReduction * 100).toFixed(0)}% reduction)`);
+
+            // Try to get ContextPruner for smart cleanup
+            let cleanedContext;
+            try {
+                const { ContextPruner } = require('./context-pruner');
+                const pruner = new ContextPruner();
+
+                if (cleanupType === 'emergency') {
+                    cleanedContext = await pruner.emergencyPrune(contextContent, targetReduction);
+                } else {
+                    // Use smart cleanup for standard/aggressive
+                    cleanedContext = await pruner.pruneContext(contextContent, targetReduction);
+                }
+            } catch (error) {
+                warn(`ContextPruner not available, using basic truncation: ${error.message}`);
+                // Fallback to basic truncation
+                const keepRatio = 1 - targetReduction;
+                const keepLength = Math.floor(contextContent.length * keepRatio);
+                cleanedContext = contextContent.substring(contextContent.length - keepLength);
+            }
+
+            // Update context if source is available
+            if (this.contextSource?.updateContext) {
+                this.contextSource.updateContext(cleanedContext);
+            }
+
+            // Calculate savings
+            const cleanedTokens = await this.tokenCounter.countContextTokens(cleanedContext);
+            const savedTokens = originalTokens - cleanedTokens.total_tokens;
+            const newPercentage = cleanedTokens.usedPercentage || (cleanedTokens.total_tokens / 100000 * 100);
+
+            info(`✅ Auto-cleanup complete: Saved ${savedTokens.toLocaleString()} tokens`);
+            info(`   Before: ${originalTokens.toLocaleString()} tokens (${originalPercentage.toFixed(1)}%)`);
+            info(`   After: ${cleanedTokens.total_tokens.toLocaleString()} tokens (${newPercentage.toFixed(1)}%)`);
+
+            // Emit cleanup completed event
+            this.emit('auto_cleanup_completed', {
+                cleanupType,
+                originalTokens,
+                cleanedTokens: cleanedTokens.total_tokens,
+                savedTokens,
+                originalPercentage,
+                newPercentage,
+                success: true
+            });
+
+            // Recheck context usage after cleanup
+            setTimeout(() => {
+                this.checkContextUsage(cleanedContext);
+            }, 1000);
+
+            return {
+                success: true,
+                cleanupType,
+                savedTokens,
+                originalPercentage,
+                newPercentage
+            };
+
+        } catch (error) {
+            error(`❌ Auto-cleanup failed (${cleanupType}):`, error.message);
+            this.emit('auto_cleanup_failed', { cleanupType, error: error.message });
+            return { success: false, error: error.message };
+        }
     }
 
     /**
