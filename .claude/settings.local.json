@@ -186,7 +186,10 @@
       "Bash(sed:*)",
       "Bash(cp:*)",
       "Bash(tree:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(ls:*)",
+      "Bash(head:*)",
+      "Bash(git mv:*)"
     ],
     "deny": [],
     "ask": []

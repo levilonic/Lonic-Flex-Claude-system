@@ -97,14 +97,11 @@ class BaseAgent extends ValidatedAgent {
             { contextScope: this.config.contextScope || 'session' }
         );
 
-        // Register this agent with the partition
-        this.contextManager = this.contextPartition.registerAgent(this.agentId, {
-            agentName: this.agentName,
-            config: this.config
-        });
+        // Use the context partition directly as context manager (Factor3ContextManager)
+        this.contextManager = this.contextPartition;
 
-        // Initialize context event
-        await this.contextPartition.addEvent('agent_initialized', {
+        // Initialize context event using actual Factor3ContextManager API
+        this.contextManager.addAgentEvent(this.agentName, 'initialized', {
             agent_id: this.agentId,
             session_id: this.sessionId,
             workflow_id: this.workflowId,
@@ -359,6 +356,29 @@ class BaseAgent extends ValidatedAgent {
             workflow: this.workflowId,
             current_step: this.currentStep
         });
+    }
+
+    /**
+     * Validate success with evidence collection
+     * STUB: ValidatedAgent doesn't actually implement this method
+     * TODO: Implement proper evidence-based validation
+     */
+    async validateSuccess(options = {}) {
+        const { evidence = {}, operation = 'operation', criteria = {} } = options;
+
+        // Simple validation - check if required evidence exists
+        const success = Object.keys(evidence).length > 0;
+
+        return {
+            success,
+            evidence,
+            operation,
+            criteria,
+            validation: {
+                timestamp: Date.now(),
+                validated: success
+            }
+        };
     }
 
     /**
