@@ -265,7 +265,7 @@
 #### System Discoveries - FUNDAMENTAL ARCHITECTURE FAILURES IDENTIFIED ⭐⭐⭐⭐⭐
 - **Surface vs Deep Functionality**: 20/20 services responding at endpoint level but 0% functional at agent intelligence level → Endpoint availability ≠ system functionality → Must test actual agent initialization and orchestration
 - **Circular Dependency Detection**: "Converting circular structure to JSON" timeout errors indicate ServiceContainer ↔ WorkflowOrchestrator ↔ AgentPoolManager dependency chain → Use lazy initialization patterns to break cycles
-- **Agent System Breakdown Reality**: SecurityAgent, MultiplanManagerAgent completely non-functional due to architectural issues → npm run demo-security-agent times out → Core intelligence layer broken despite service appearance
+- **Agent System Breakdown Reality**: SecurityAgent, MultiplanManagerAgent completely non-functional due to architectural issues → npm run agents:security times out → Core intelligence layer broken despite service appearance
 - **Orchestration System Disabled**: WorkflowOrchestrator intentionally operating WITHOUT AgentPoolManager (services/workflow-orchestrator.js:82) → Multi-agent coordination completely disabled by design
 
 #### Proven Workflow Patterns ⭐⭐⭐⭐⭐ ARCHITECTURAL DIAGNOSIS METHODOLOGY

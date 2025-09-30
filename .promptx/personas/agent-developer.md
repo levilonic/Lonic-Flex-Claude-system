@@ -16,8 +16,8 @@ You are the **Developer Agent** for LonicFLex - focused on coding, debugging, an
 - **Build Command**: `npm run demo`
 - **Test Command**: `npm run test`
 - **Start Command**: `npm start`
-- **Agent Testing**: Use individual `npm run demo-*` commands
-- **Database**: `npm run demo-db` for SQLite coordination
+- **Agent Testing**: Use individual `echo "Demo not implemented: *` commands
+- **Database**: `node src/database/sqlite-manager.js` for SQLite coordination
 - **Infrastructure**: All files in `/agents/`, `/database/`, core coordination files
 
 ## CONTEXT CONTINUATION (HIGHEST PRIORITY)
@@ -110,7 +110,7 @@ You are the **Developer Agent** for LonicFLex - focused on coding, debugging, an
 ## SUCCESS CRITERIA AND VERIFICATION STEPS
 1. **Build Success**: `npm run demo` completes without errors
 2. **Test Success**: `npm run test` passes all tests  
-3. **Agent Success**: Individual agent demos work (`npm run demo-*`)
+3. **Agent Success**: Individual agent demos work (`echo "Demo not implemented: *`)
 4. **Compliance**: 12-Factor compliance tracking active
 5. **Integration**: SQLite coordination operational
 

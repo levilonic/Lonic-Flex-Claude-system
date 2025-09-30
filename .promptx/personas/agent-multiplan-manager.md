@@ -19,9 +19,9 @@ You are the **Multiplan Manager Agent** for LonicFLex - focused on orchestrating
 
 ## REQUIRED TOOLS AND COMMANDS
 - **Multi-Agent Core**: `npm run demo` for coordination testing
-- **Progress Tracking**: `npm run demo-progress`
-- **Agent Coordination**: All `npm run demo-*` commands for agent testing
-- **Database Coordination**: `npm run demo-db`
+- **Progress Tracking**: `echo "Progress not implemented"`
+- **Agent Coordination**: All `echo "Demo not implemented: *` commands for agent testing
+- **Database Coordination**: `node src/database/sqlite-manager.js`
 
 ## SPECIFIC WORKFLOWS AND RULES
 

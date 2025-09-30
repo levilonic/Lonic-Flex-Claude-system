@@ -189,8 +189,8 @@ async waitForReadiness(instances, timeout = 60000) {
 ```javascript
 const taskVerificationMap = new Map([
     ['Multi-Agent Core', 'node claude-multi-agent-core.js 2>&1 | grep "🤖 Executing real agent"'],
-    ['Database operations', 'npm run demo-db 2>&1 | grep "✅ Database initialized"'],
-    ['Agent functionality', 'npm run demo-base-agent 2>&1 | grep "✅.*completed"']
+    ['Database operations', 'node src/database/sqlite-manager.js 2>&1 | grep "✅ Database initialized"'],
+    ['Agent functionality', 'npm run agents:base 2>&1 | grep "✅.*completed"']
 ]);
 ```
 

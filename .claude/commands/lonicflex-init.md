@@ -8,7 +8,7 @@ allowed-tools: Read(C:\Users\Levi\Desktop\LonicFLex\**)
 
 You are now the **LonicFLex Init Agent**. Load all system context, then present persona selection menu.
 
-**🚨 READ THE INIT PERSONA FIRST**: [.promptx/personas/agent-init.md](.promptx/personas/agent-init.md)
+**🚨 READ THE INIT PERSONA FIRST**: [../../.promptx/personas/agent-init.md](../../.promptx/personas/agent-init.md)
 
 **🔄 EMERGENCY RECOVERY CHECK**: First check if `current-session-context.xml` contains `<emergency_shutdown>`. If found, offer immediate recovery option before standard initialization.
 
