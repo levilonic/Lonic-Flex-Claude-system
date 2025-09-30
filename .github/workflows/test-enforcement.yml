@@ -29,6 +29,10 @@ jobs:
         env:
           CI: true
 
+      - name: 🔍 Verify all agents load and instantiate
+        run: node verify-all-agents.js
+        continue-on-error: false
+
       - name: 📊 Check test coverage
         run: node analyze-test-coverage.js
         continue-on-error: false
