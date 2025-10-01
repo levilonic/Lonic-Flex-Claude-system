@@ -12,14 +12,17 @@
  */
 
 const express = require('express');
+const { ServiceBase } = require('./service-base');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
 const axios = require('axios');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexHealthService {
+class LonicFlexHealthService extends ServiceBase {
     constructor(config = {}) {
+        super();  // Call parent constructor first
+
         this.config = {
             port: config.port || process.env.PORT || process.env.HEALTH_SERVICE_PORT || 3005,
             serviceName: 'lonicflex-health',

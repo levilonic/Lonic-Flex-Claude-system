@@ -12,6 +12,7 @@
  */
 
 const express = require('express');
+const { ServiceBase } = require('./service-base');
 const { App } = require('@slack/bolt');
 const { WebClient } = require('@slack/web-api');
 const { SQLiteManager } = require('../database/sqlite-manager');
@@ -20,8 +21,10 @@ const { getAuthManager } = require('../auth/auth-manager');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexSlackService {
+class LonicFlexSlackService extends ServiceBase {
     constructor(config = {}) {
+        super();  // Call parent constructor first
+
         this.config = {
             port: config.port || process.env.SLACK_SERVICE_PORT || 3006,
             serviceName: 'lonicflex-slack',

@@ -12,6 +12,7 @@
  */
 
 const express = require('express');
+const { ServiceBase } = require('./service-base');
 const { Octokit } = require('@octokit/rest');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
@@ -19,8 +20,10 @@ const { getAuthManager } = require('../auth/auth-manager');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexGitHubService {
+class LonicFlexGitHubService extends ServiceBase {
     constructor(config = {}) {
+        super();  // Call parent constructor first
+
         this.config = {
             port: config.port || process.env.GITHUB_SERVICE_PORT || 3002,
             serviceName: 'lonicflex-github',
