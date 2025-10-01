@@ -334,12 +334,15 @@ class ContextWindowMonitor extends EventEmitter {
 
                 if (cleanupType === 'emergency') {
                     cleanedContext = await pruner.emergencyPrune(contextContent, targetReduction);
+                } else if (cleanupType === 'aggressive') {
+                    // Use smart cleanup for aggressive (30% reduction)
+                    cleanedContext = await pruner.smartPrune(contextContent, targetReduction);
                 } else {
-                    // Use smart cleanup for standard/aggressive
-                    cleanedContext = await pruner.pruneContext(contextContent, targetReduction);
+                    // Standard cleanup: use minimal pruning (15% reduction)
+                    cleanedContext = await pruner.applyMinimalPruning(contextContent, targetReduction);
                 }
             } catch (error) {
-                warn(`ContextPruner not available, using basic truncation: ${error.message}`);
+                warn(`ContextPruner failed, using basic truncation: ${error.message}`);
                 // Fallback to basic truncation
                 const keepRatio = 1 - targetReduction;
                 const keepLength = Math.floor(contextContent.length * keepRatio);
