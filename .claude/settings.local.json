@@ -191,7 +191,13 @@
       "Bash(head:*)",
       "Bash(git mv:*)",
       "Bash(/dev/null)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh api:*)",
+      "Bash(gh run view:*)",
+      "Bash(git restore:*)",
+      "Bash(while read d)",
+      "Bash(do du -sh \"$d\")"
     ],
     "deny": [],
     "ask": []

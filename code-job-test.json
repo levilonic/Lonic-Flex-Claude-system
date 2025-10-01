@@ -1,8 +1,0 @@
-{
-  "type": "code-generate",
-  "payload": {
-    "type": "function",
-    "name": "asyncJobTest",
-    "description": "Test function generated via async job queue"
-  }
-}
