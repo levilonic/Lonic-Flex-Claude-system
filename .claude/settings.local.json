@@ -180,7 +180,8 @@
       "Bash(cmd /c:*)",
       "WebFetch(domain:gist.github.com)",
       "Bash(powershell.exe:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": []
