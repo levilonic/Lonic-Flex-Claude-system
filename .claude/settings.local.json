@@ -197,7 +197,11 @@
       "Bash(gh run view:*)",
       "Bash(git restore:*)",
       "Bash(while read d)",
-      "Bash(do du -sh \"$d\")"
+      "Bash(do du -sh \"$d\")",
+      "Bash(git show-branch:*)",
+      "Bash(column:*)",
+      "Bash(git tag:*)",
+      "Bash(git merge-base:*)"
     ],
     "deny": [],
     "ask": []
