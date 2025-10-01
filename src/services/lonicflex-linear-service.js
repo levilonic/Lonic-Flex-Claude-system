@@ -624,7 +624,7 @@ class LonicFlexLinearService extends ServiceBase {
                 },
                 {
                     headers: {
-                        'Authorization': `Bearer ${this.config.apiToken}`,
+                        'Authorization': this.config.apiToken,
                         'Content-Type': 'application/json'
                     },
                     timeout: this.config.requestTimeout

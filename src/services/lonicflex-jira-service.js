@@ -724,10 +724,11 @@ class LonicFlexJiraService extends ServiceBase {
         }
     }
 
-    async makeJiraRequest(method, endpoint, data = null) {
+    async makeJiraRequest(method, endpoint, data = null, skipAuthCheck = false) {
         const startTime = Date.now();
 
-        if (!this.authenticated) {
+        // Allow skipping auth check for initial connection test
+        if (!this.authenticated && !skipAuthCheck) {
             throw new Error('Jira service not authenticated');
         }
 
@@ -942,8 +943,8 @@ class LonicFlexJiraService extends ServiceBase {
                 throw new Error('Jira email or API token not configured');
             }
 
-            // Test connection by fetching user info
-            await this.makeJiraRequest('GET', '/myself');
+            // Test connection by fetching user info (skip auth check for initial test)
+            await this.makeJiraRequest('GET', '/myself', null, true);
 
             this.authenticated = true;
 
