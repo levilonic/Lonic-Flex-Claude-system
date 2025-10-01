@@ -13,9 +13,9 @@
 **🚨 BEFORE MAKING ANY CHANGES, YOU MUST:**
 
 ### 1. MANDATORY READING CHECKLIST:
-- [ ] Read `PRODUCTION-GUIDELINES.md` - Production system rules and standards
-- [ ] Read `PROGRESS-CHECKPOINT.md` - Current working status with test commands
-- [ ] Read `COMMUNICATION-PROTOCOL.md` - 4-layer verification system
+- [ ] Read `docs/PRODUCTION-GUIDELINES.md` - Production system rules and standards
+- [ ] Read `AGENT-STATUS.md` - Current system status with verification commands
+- [ ] Read `docs/COMMUNICATION-PROTOCOL.md` - 4-layer verification system
 - [ ] Read appropriate agent persona file completely
 
 ### 2. MANDATORY TEST EXECUTION:

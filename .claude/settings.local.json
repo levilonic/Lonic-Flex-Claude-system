@@ -201,7 +201,10 @@
       "Bash(git show-branch:*)",
       "Bash(column:*)",
       "Bash(git tag:*)",
-      "Bash(git merge-base:*)"
+      "Bash(git merge-base:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh issue list:*)"
     ],
     "deny": [],
     "ask": []
