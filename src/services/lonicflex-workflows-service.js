@@ -14,12 +14,14 @@
 const express = require('express');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const { v4: uuidv4 } = require('uuid');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexWorkflowsService {
+class LonicFlexWorkflowsService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.WORKFLOWS_SERVICE_PORT || 3004,
             serviceName: 'lonicflex-workflows',

@@ -15,11 +15,13 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexMasterService {
+class LonicFlexMasterService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.PORT || process.env.MASTER_SERVICE_PORT || 3007,
             serviceName: 'lonicflex-master',
