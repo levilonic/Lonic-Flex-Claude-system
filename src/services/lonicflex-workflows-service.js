@@ -858,7 +858,7 @@ class LonicFlexWorkflowsService extends ServiceBase {
             return server;
 
         } catch (error) {
-            this.logger.error('Failed to start Workflows service', { error: error.message });
+            console.error('Failed to start Workflows service:', error.message);
             throw error;
         }
     }

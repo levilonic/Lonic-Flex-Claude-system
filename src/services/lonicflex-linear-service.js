@@ -920,9 +920,7 @@ class LonicFlexLinearService extends ServiceBase {
             return server;
 
         } catch (error) {
-            this.logger.error('Failed to start Linear Service', {
-                error: error.message
-            });
+            console.error('Failed to start Linear service:', error.message);
             throw error;
         }
     }

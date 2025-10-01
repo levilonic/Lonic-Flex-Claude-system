@@ -698,7 +698,7 @@ class LonicFlexHealthService extends ServiceBase {
             return server;
 
         } catch (error) {
-            this.logger.error('Failed to start Health service', { error: error.message });
+            console.error('Failed to start Health service:', error.message);
             throw error;
         }
     }
