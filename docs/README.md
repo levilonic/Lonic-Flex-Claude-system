@@ -1,291 +1,176 @@
 # LonicFLex Documentation
 
-## 📚 Documentation Overview
-
-Welcome to the LonicFLex Multi-Agent System documentation. This system implements the 12-Factor Agents methodology with comprehensive integration capabilities.
-
-## 📖 Available Documentation
-
-### API Reference
-- **[API Reference](./api-reference.md)** - Complete REST API documentation with endpoints, request/response formats, and examples
-
-### Architecture Guides
-- **[12-Factor Agents Methodology](./12-factor-agents.md)** - Core principles and implementation guide
-- **[Agent Architecture](./agent-architecture.md)** - Individual agent design and coordination patterns
-- **[Integration Guide](./integrations.md)** - Slack, GitHub, and external service integrations
-
-### Deployment Guides  
-- **[Production Deployment](./production-deployment.md)** - Complete production deployment guide
-- **[Docker Configuration](./docker-guide.md)** - Container orchestration and deployment strategies
-- **[CI/CD Pipeline](./cicd-guide.md)** - Automated testing and deployment workflows
-
-### Operation Guides
-- **[Monitoring Guide](./monitoring.md)** - Metrics, alerts, and dashboard configuration
-- **[Security Guide](./security.md)** - Authentication, authorization, and security best practices
-- **[Troubleshooting](./troubleshooting.md)** - Common issues and solutions
-
-### Development Guides
-- **[Getting Started](./getting-started.md)** - Quick start guide for development
-- **[Configuration Guide](./configuration.md)** - Environment variables and settings
-- **[Testing Guide](./testing.md)** - Unit, integration, and end-to-end testing
-
-## 🚀 Quick Start
-
-1. **Installation**
-   ```bash
-   npm install
-   ```
-
-2. **Configuration**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your settings
-   ```
-
-3. **Initialize Database**
-   ```bash
-   npm run demo-db
-   ```
-
-4. **Start System**
-   ```bash
-   npm start
-   ```
-
-5. **Access Dashboard**
-   ```
-   http://localhost:3001
-   ```
-
-## 📋 Available Commands
-
-### Core System
-- `npm start` - Start multi-agent core system
-- `npm run demo` - Run complete system demo
-- `npm test` - Run test suite
-
-### Individual Components
-- `npm run demo-github-agent` - GitHub integration demo
-- `npm run demo-security-agent` - Security scanning demo  
-- `npm run demo-deploy-agent` - Deployment automation demo
-- `npm run demo-slack-integration` - Slack bot demo
-- `npm run demo-monitoring` - Monitoring system demo
-- `npm run demo-dashboard` - Metrics dashboard demo
-
-### Development Tools
-- `npm run demo-testing-framework` - Run testing framework
-- `npm run demo-config-manager` - Configuration management demo
-- `npm run demo-error-handler` - Error handling demo
-
-## 🏗️ System Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    LonicFLex Multi-Agent System             │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
-│  │   Slack Bot     │  │  GitHub Webhook │  │  Dashboard   │ │
-│  │   Integration   │  │    Handler      │  │   & API      │ │
-│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│                Multi-Agent Orchestrator                     │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌────────┐ │
-│  │   GitHub    │ │  Security   │ │   Deploy    │ │  Code  │ │
-│  │   Agent     │ │   Agent     │ │   Agent     │ │ Agent  │ │
-│  └─────────────┘ └─────────────┘ └─────────────┘ └────────┘ │
-│  ┌─────────────┐ ┌─────────────┐                            │
-│  │    Comm     │ │    Base     │                            │
-│  │   Agent     │ │   Agent     │                            │
-│  └─────────────┘ └─────────────┘                            │
-├─────────────────────────────────────────────────────────────┤
-│        Infrastructure Services                              │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌────────┐ │
-│  │  Database   │ │ Monitoring  │ │    Error    │ │ Config │ │
-│  │  Manager    │ │   System    │ │   Handler   │ │Manager │ │
-│  └─────────────┘ └─────────────┘ └─────────────┘ └────────┘ │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-```env
-# Core Settings
-NODE_ENV=development
-PORT=3000
-LOG_LEVEL=info
-
-# Database
-DB_PATH=./database/agents.db
-DB_WAL_MODE=true
-
-# Slack Integration
-SLACK_CLIENT_ID=your-slack-client-id
-SLACK_CLIENT_SECRET=your-slack-client-secret
-SLACK_SIGNING_SECRET=your-slack-signing-secret
-SLACK_BOT_TOKEN=xoxb-your-bot-token
-
-# GitHub Integration  
-GITHUB_TOKEN=your-github-token
-GITHUB_WEBHOOK_SECRET=your-webhook-secret
-
-# Docker
-DOCKER_HOST=unix:///var/run/docker.sock
-DOCKER_REGISTRY=docker.io
-
-# Monitoring
-MONITORING_ENABLED=true
-METRICS_RETENTION_DAYS=7
-ALERT_WEBHOOK_URL=your-alert-webhook
-```
-
-### Agent Configuration
-Each agent can be configured via `config/agents.json`:
-
-```json
-{
-  "github": {
-    "enabled": true,
-    "timeout": 30000,
-    "retries": 3,
-    "apiUrl": "https://api.github.com"
-  },
-  "security": {
-    "enabled": true,
-    "scanners": ["npm", "docker", "snyk"],
-    "severity": "medium"
-  },
-  "deploy": {
-    "enabled": true,
-    "strategies": ["rolling", "blue-green", "canary"],
-    "healthCheckTimeout": 60000
-  }
-}
-```
-
-## 📊 Monitoring & Observability
-
-### Metrics Dashboard
-Access the real-time dashboard at `http://localhost:3001`
-
-**Key Metrics:**
-- System health (CPU, memory, uptime)
-- Agent performance (success rate, response times)
-- Integration status (Slack, GitHub)
-- Database performance
-- Error rates and alerts
-
-### Log Management
-```bash
-# View system logs
-tail -f logs/system.log
-
-# View agent logs
-tail -f logs/agents.log
-
-# View monitoring logs  
-tail -f logs/monitoring.log
-```
-
-### Alerts
-The system monitors for:
-- High memory usage (>85%)
-- Agent failures (>3 failures)
-- Slow response times (>5s)
-- High error rates (>5%)
-- Database connection issues
-
-## 🔒 Security
-
-### Authentication
-- API key authentication for REST endpoints
-- OAuth 2.0 for Slack integration
-- GitHub webhook signature verification
-
-### Authorization
-Role-based access control with levels:
-- **Viewer** - Read-only access
-- **Operator** - Execute workflows
-- **Developer** - Manage agents and configs
-- **Admin** - Full system access
-
-### Best Practices
-- All secrets stored in environment variables
-- Input validation and sanitization
-- Rate limiting on all endpoints
-- Audit logging for all actions
-- Regular security scans
-
-## 🧪 Testing
-
-### Test Types
-- **Unit Tests** - Individual component testing
-- **Integration Tests** - Service interaction testing
-- **End-to-End Tests** - Complete workflow testing
-- **Performance Tests** - Load and stress testing
-- **Security Tests** - Vulnerability scanning
-
-### Running Tests
-```bash
-# All tests
-npm test
-
-# Specific test suites
-npm run test:unit
-npm run test:integration
-npm run test:e2e
-npm run test:performance
-npm run test:security
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Database Connection Errors**
-```bash
-# Check database file permissions
-ls -la database/agents.db
-
-# Reinitialize database
-npm run demo-db
-```
-
-**Agent Startup Failures**
-```bash
-# Check system logs
-tail -f logs/system.log
-
-# Verify configuration
-npm run demo-config-manager
-```
-
-**Integration Issues**
-```bash
-# Test Slack connection
-npm run demo-slack-integration
-
-# Test GitHub webhook
-npm run demo-github-webhook
-```
-
-### Debug Mode
-```bash
-DEBUG=* npm start
-```
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/humanlayer/12-factor-agents/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/humanlayer/12-factor-agents/discussions)
-- **Documentation**: This documentation directory
-- **Email**: support@lonicflex.dev
-
-## 📜 License
-
-Apache-2.0 License. See [LICENSE](../LICENSE) file for details.
+**Last Updated**: October 1, 2025
 
 ---
 
-*Last updated: September 4, 2025*
+## 📚 Documentation Index
+
+This directory contains all documentation for the LonicFLex Multi-Agent System - a production-ready internal development platform implementing the 12-Factor Agent methodology with ServiceContainer architecture.
+
+---
+
+## 🎯 Quick Start
+
+**New to LonicFLex?** Start here:
+1. Read [../README.md](../README.md) - Project overview and quick start
+2. Read [AGENT-STATUS.md](../AGENT-STATUS.md) - Current system status
+3. Run verification: `npm run verify-all`
+4. Follow [USER-GUIDE.md](./USER-GUIDE.md) - Detailed getting started guide
+
+---
+
+## 📖 Core Documentation
+
+### User Documentation
+| Document | Purpose | Status |
+|----------|---------|--------|
+| [USER-GUIDE.md](./USER-GUIDE.md) | Getting started and user workflows | ✅ Active |
+| [TECHNICAL-DOCUMENTATION.md](./TECHNICAL-DOCUMENTATION.md) | System architecture and technical details | ✅ Active |
+| [api-reference.md](./api-reference.md) | REST API endpoints and usage | ✅ Active |
+
+### Development & Operations
+| Document | Purpose | Status |
+|----------|---------|--------|
+| [PRODUCTION-GUIDELINES.md](./PRODUCTION-GUIDELINES.md) | Production system rules and standards | ✅ Active |
+| [production-deployment.md](./production-deployment.md) | Deployment guide and procedures | ✅ Active |
+| [GITHUB-SETUP.md](./GITHUB-SETUP.md) | GitHub integration setup | ✅ Active |
+| [SECURITY-SETUP.md](./SECURITY-SETUP.md) | Security configuration | ✅ Active |
+
+### System Reference
+| Document | Purpose | Status |
+|----------|---------|--------|
+| [AGENT-REGISTRY.md](./AGENT-REGISTRY.md) | Complete agent catalog | ✅ Active |
+| [SYSTEM-STATUS.md](./SYSTEM-STATUS.md) | System health and status | ✅ Active |
+| [INFRASTRUCTURE-MAP.md](./INFRASTRUCTURE-MAP.md) | Infrastructure overview | ✅ Active |
+| [COMMUNICATION-PROTOCOL.md](./COMMUNICATION-PROTOCOL.md) | 4-layer verification system | ✅ Active |
+| [ENTERPRISE-INTEGRATION-PATTERNS.md](./ENTERPRISE-INTEGRATION-PATTERNS.md) | Integration patterns reference | ✅ Active |
+
+---
+
+## 🏗️ Architecture Documentation
+
+Located in [architecture/](./architecture/):
+- **AUTONOMOUS-AI-PROJECT-DELIVERY-VISION.md** - Vision for autonomous project delivery
+- **AUTONOMOUS-AI-SUBSYSTEM-AUDIT.md** - Subsystem architecture audit
+- **TEAM-ORCHESTRATION-VISION.md** - Multi-agent team coordination
+
+---
+
+## 📚 Historical Documentation
+
+Located in [history/](./history/):
+
+### Audits
+- System audits and analysis reports
+- Documentation verification results
+- System coherence audits
+
+### Completed Work
+- Completed feature documentation
+- Test infrastructure documentation
+- Migration completion records
+
+### Session Logs
+- Historical session logs
+- Permanent session records
+- Active session archives
+
+---
+
+## 🗄️ Archived Documentation
+
+Located in [archived/](./archived/):
+- Workshop materials (2025-05, 2025-05-17, 2025-07-16)
+- Old package documentation
+- Archived patterns and drafts
+- Previous versions of documentation
+
+---
+
+## 🔗 External Documentation
+
+### Root Level Documentation
+- **[../README.md](../README.md)** - Main project README
+- **[../CLAUDE.md](../CLAUDE.md)** - Claude Code configuration
+- **[../PROJECT.md](../PROJECT.md)** - Active project definition
+- **[../AGENT-STATUS.md](../AGENT-STATUS.md)** - Current agent status
+- **[../GIT-REPOSITORY-ANALYSIS.md](../GIT-REPOSITORY-ANALYSIS.md)** - Git cleanup documentation
+
+### Test Documentation
+- **[../tests/TESTING-GUIDE.md](../tests/TESTING-GUIDE.md)** - Comprehensive testing guide
+- **[../tests/TEST-INVENTORY.md](../tests/TEST-INVENTORY.md)** - Test suite inventory
+
+### Content Documentation
+- **[../content/](../content/)** - 12-Factor Agent methodology content
+
+---
+
+## 🔍 Finding Documentation
+
+**By Topic**:
+- **Getting Started**: USER-GUIDE.md, ../README.md
+- **Architecture**: TECHNICAL-DOCUMENTATION.md, architecture/
+- **Development**: PRODUCTION-GUIDELINES.md, ../CLAUDE.md
+- **Deployment**: production-deployment.md, GITHUB-SETUP.md
+- **API**: api-reference.md
+- **Agents**: AGENT-REGISTRY.md, ../AGENT-STATUS.md
+- **Security**: SECURITY-SETUP.md
+- **History**: history/
+
+**By Status**:
+- **Active Documentation**: Files listed in "Core Documentation" above
+- **Historical**: history/ folder
+- **Archived**: archived/ folder
+
+---
+
+## 📊 Documentation Statistics
+
+- **Total Documentation Files**: 154 markdown files
+- **Active Core Docs**: 13 files
+- **Architecture Docs**: 3 files
+- **Historical Docs**: In history/ folder
+- **Archived Docs**: 31 files in archived/
+- **Test Coverage**: 100% (110/110 source files tested)
+- **Agent Coverage**: 16/16 production agents verified
+
+---
+
+## 🔄 Documentation Maintenance
+
+**Last Major Cleanup**: October 1, 2025
+- Organized 154 markdown files into professional structure
+- Moved historical documentation to history/ folder
+- Updated all references to current file locations
+- Created comprehensive documentation index
+
+**Update Frequency**:
+- Core documentation: Updated as needed with system changes
+- Agent status: Updated with each agent change
+- API reference: Updated with API changes
+- Historical: Archived when superseded
+
+---
+
+## ⚙️ Verification Commands
+
+```bash
+# Verify system
+npm run verify-all              # Complete verification (tests + agents + coverage)
+
+# Verify agents
+npm run verify-agents           # Verify all 16 production agents
+
+# Run tests
+npm test                        # Full test suite
+npm run test:smoke              # Smoke tests only
+npm run test:core               # Core system tests
+
+# Check coverage
+npm run test:coverage           # Analyze test coverage
+```
+
+---
+
+**For questions or issues with documentation, see [COMMUNICATION-PROTOCOL.md](./COMMUNICATION-PROTOCOL.md) for proper reporting procedures.**
