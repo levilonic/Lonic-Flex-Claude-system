@@ -70,9 +70,11 @@ function startService(service) {
             startupOutput += output;
 
             // Check for successful startup indicators
-            if (output.includes('listening on') ||
-                output.includes('Server started') ||
-                output.includes('Service running') ||
+            // Services use either plain console.log or JSON logger format
+            if (output.includes('started successfully') ||
+                output.includes('listening on port') ||
+                output.includes('running on port') ||
+                output.includes(`"port":${service.port}`) ||
                 output.includes(`port ${service.port}`)) {
 
                 if (!hasStarted) {
