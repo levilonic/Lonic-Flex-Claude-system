@@ -828,7 +828,7 @@ class LonicFlexIntegrationHubService extends ServiceBase {
 if (require.main === module) {
     const service = new LonicFlexIntegrationHubService();
     service.start().catch(error => {
-        logger.error('Failed to start Integration Hub Service:', error.message);
+        this.logger.error('Failed to start Integration Hub Service:', error.message);
         process.exit(1);
     });
 }

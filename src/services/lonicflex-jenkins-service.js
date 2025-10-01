@@ -852,7 +852,7 @@ pipeline {
 if (require.main === module) {
     const service = new LonicFlexJenkinsService();
     service.start().catch(error => {
-        logger.error('Failed to start Jenkins Service:', error.message);
+        this.logger.error('Failed to start Jenkins Service:', error.message);
         process.exit(1);
     });
 }

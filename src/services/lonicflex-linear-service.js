@@ -932,7 +932,7 @@ class LonicFlexLinearService extends ServiceBase {
 if (require.main === module) {
     const service = new LonicFlexLinearService();
     service.start().catch(error => {
-        logger.error('Failed to start Linear Service:', error.message);
+        this.logger.error('Failed to start Linear Service:', error.message);
         process.exit(1);
     });
 }

@@ -709,22 +709,22 @@ if (require.main === module) {
     const service = new LonicFlexHealthService();
     service.start()
         .then(() => {
-            logger.info('LonicFLex Health Service started successfully');
+            this.logger.info('LonicFLex Health Service started successfully');
         })
         .catch((error) => {
-            logger.error('FAIL Failed to start Health service:', error.message);
+            this.logger.error('FAIL Failed to start Health service:', error.message);
             process.exit(1);
         });
 
     // Graceful shutdown
     process.on('SIGTERM', async () => {
-        logger.info('Health service shutting down...');
+        this.logger.info('Health service shutting down...');
         await service.stopMonitoring();
         process.exit(0);
     });
 
     process.on('SIGINT', async () => {
-        logger.info('Health service shutting down...');
+        this.logger.info('Health service shutting down...');
         await service.stopMonitoring();
         process.exit(0);
     });

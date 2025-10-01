@@ -859,7 +859,7 @@ class LonicFlexGitLabService extends ServiceBase {
 if (require.main === module) {
     const service = new LonicFlexGitLabService();
     service.start().catch(error => {
-        logger.error('Failed to start GitLab Service:', error.message);
+        this.logger.error('Failed to start GitLab Service:', error.message);
         process.exit(1);
     });
 }
