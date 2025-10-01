@@ -15,11 +15,13 @@ const express = require('express');
 const axios = require('axios');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexLinearService {
+class LonicFlexLinearService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.LINEAR_SERVICE_PORT || 3023,
             serviceName: 'lonicflex-linear',

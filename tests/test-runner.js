@@ -85,6 +85,16 @@ class TestRunner {
                 }
             ],
 
+            services: [
+                {
+                    name: 'All Services Validation',
+                    file: 'run-all-service-tests.js',
+                    timeout: 120000,
+                    critical: true,
+                    description: 'Validates all 13 LonicFLex services are production-ready'
+                }
+            ],
+
             integration: [
                 {
                     name: 'Universal Context System',

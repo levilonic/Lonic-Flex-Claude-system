@@ -14,12 +14,14 @@
 const express = require('express');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 const axios = require('axios');
 require('dotenv').config();
 
-class LonicFlexIntegrationHubService {
+class LonicFlexIntegrationHubService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.INTEGRATION_HUB_PORT || 3020,
             serviceName: 'lonicflex-integration-hub',
