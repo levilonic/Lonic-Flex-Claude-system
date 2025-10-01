@@ -181,8 +181,9 @@ class LonicFlexSlackService extends ServiceBase {
             this.logger.info('Slack service initialized successfully');
 
         } catch (error) {
-            this.logger.error('Slack service initialization failed', { error: error.message });
-            throw error;
+            this.logger.warn('Slack service initialization failed - running in degraded mode', { error: error.message });
+            this.isInitialized = false;
+            // Don't throw - allow service to start in degraded mode
         }
     }
 

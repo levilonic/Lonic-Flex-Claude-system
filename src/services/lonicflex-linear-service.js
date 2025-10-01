@@ -885,8 +885,8 @@ class LonicFlexLinearService extends ServiceBase {
 
         } catch (error) {
             this.authenticated = false;
-            this.logger.error('Linear API connection failed', { error: error.message });
-            throw error;
+            this.logger.warn('Linear API connection failed - running in degraded mode', { error: error.message });
+            // Don't throw - allow service to start in degraded mode
         }
     }
 
