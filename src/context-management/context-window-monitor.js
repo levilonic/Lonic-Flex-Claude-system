@@ -303,18 +303,40 @@ class ContextWindowMonitor extends EventEmitter {
 
     /**
      * NEW: Perform auto-cleanup at threshold levels (40%, 70%, 90%)
-     * Implements three-tier cleanup strategy from archived pattern
+     * PRODUCTION-SAFE: With backup, validation, and rollback
      */
     async performAutoCleanup(state, cleanupType = 'standard') {
+        const startTime = Date.now();
+        let backupContext = null;
+
         try {
             const contextContent = state.contextContent;
             if (!contextContent) {
-                warn('No context content available for auto-cleanup');
+                warn('⚠️ No context content available for auto-cleanup');
                 return { success: false, reason: 'no_content' };
+            }
+
+            // SAFETY CHECK: Minimum context size (don't cleanup if too small)
+            if (contextContent.length < 1000) {
+                warn('⚠️ Context too small for cleanup, skipping');
+                return { success: false, reason: 'context_too_small' };
             }
 
             const originalTokens = state.tokens;
             const originalPercentage = state.percentage;
+
+            // SAFETY CHECK: Prevent cleanup loops (track last cleanup ATTEMPT time)
+            if (this._lastCleanupAttempt && (Date.now() - this._lastCleanupAttempt) < 5000) {
+                warn('⚠️ Cleanup attempted too soon, preventing loop');
+                return { success: false, reason: 'too_frequent' };
+            }
+
+            // Track cleanup attempt immediately (before it runs)
+            this._lastCleanupAttempt = Date.now();
+
+            // CRITICAL: BACKUP ORIGINAL CONTEXT BEFORE ANY MODIFICATIONS
+            backupContext = contextContent;
+            info(`💾 Backed up context (${contextContent.length.toLocaleString()} chars) before cleanup`);
 
             // Determine reduction target based on cleanup type
             const reductionTargets = {
@@ -328,30 +350,52 @@ class ContextWindowMonitor extends EventEmitter {
 
             // Try to get ContextPruner for smart cleanup
             let cleanedContext;
+            let pruningMethod = 'unknown';
+
             try {
                 const { ContextPruner } = require('./context-pruner');
                 const pruner = new ContextPruner();
 
                 if (cleanupType === 'emergency') {
                     cleanedContext = await pruner.emergencyPrune(contextContent, targetReduction);
+                    pruningMethod = 'emergencyPrune';
                 } else if (cleanupType === 'aggressive') {
-                    // Use smart cleanup for aggressive (30% reduction)
                     cleanedContext = await pruner.smartPrune(contextContent, targetReduction);
+                    pruningMethod = 'smartPrune';
                 } else {
-                    // Standard cleanup: use minimal pruning (15% reduction)
                     cleanedContext = await pruner.applyMinimalPruning(contextContent, targetReduction);
+                    pruningMethod = 'applyMinimalPruning';
                 }
             } catch (error) {
-                warn(`ContextPruner failed, using basic truncation: ${error.message}`);
-                // Fallback to basic truncation
-                const keepRatio = 1 - targetReduction;
-                const keepLength = Math.floor(contextContent.length * keepRatio);
-                cleanedContext = contextContent.substring(contextContent.length - keepLength);
+                warn(`⚠️ ContextPruner failed: ${error.message}`);
+                // SAFER FALLBACK: XML-aware truncation
+                cleanedContext = this.safeXmlTruncate(contextContent, targetReduction);
+                pruningMethod = 'safeXmlTruncate (fallback)';
+            }
+
+            // CRITICAL VALIDATION: Verify cleaned context is valid
+            const validationResult = this.validateCleanedContext(cleanedContext, contextContent);
+            if (!validationResult.valid) {
+                throw new Error(`Cleanup validation failed: ${validationResult.reason}`);
+            }
+
+            // SAFETY CHECK: Ensure we actually saved space
+            if (cleanedContext.length >= contextContent.length) {
+                warn('⚠️ Cleanup did not reduce size, rolling back');
+                throw new Error('Cleanup increased or maintained size - ineffective');
+            }
+
+            // SAFETY CHECK: Ensure we didn't over-reduce
+            const reductionRatio = (contextContent.length - cleanedContext.length) / contextContent.length;
+            if (reductionRatio > targetReduction + 0.2) {
+                warn(`⚠️ Cleanup reduced too much: ${(reductionRatio * 100).toFixed(0)}% vs target ${(targetReduction * 100).toFixed(0)}%`);
+                throw new Error('Cleanup over-reduced context - data loss risk');
             }
 
             // Update context if source is available
             if (this.contextSource?.updateContext) {
                 this.contextSource.updateContext(cleanedContext);
+                info(`📝 Context updated via source`);
             }
 
             // Calculate savings
@@ -359,39 +403,134 @@ class ContextWindowMonitor extends EventEmitter {
             const savedTokens = originalTokens - cleanedTokens.total_tokens;
             const newPercentage = cleanedTokens.usedPercentage || (cleanedTokens.total_tokens / 100000 * 100);
 
-            info(`✅ Auto-cleanup complete: Saved ${savedTokens.toLocaleString()} tokens`);
+            // SAFETY CHECK: Ensure tokens actually decreased
+            if (savedTokens <= 0) {
+                warn('⚠️ No tokens saved, rolling back');
+                throw new Error('Cleanup did not save tokens - ineffective');
+            }
+
+            const duration = Date.now() - startTime;
+            info(`✅ Auto-cleanup complete: Saved ${savedTokens.toLocaleString()} tokens (${duration}ms)`);
+            info(`   Method: ${pruningMethod}`);
             info(`   Before: ${originalTokens.toLocaleString()} tokens (${originalPercentage.toFixed(1)}%)`);
             info(`   After: ${cleanedTokens.total_tokens.toLocaleString()} tokens (${newPercentage.toFixed(1)}%)`);
+            info(`   Size: ${contextContent.length.toLocaleString()} → ${cleanedContext.length.toLocaleString()} chars (${(reductionRatio * 100).toFixed(1)}% reduction)`);
 
             // Emit cleanup completed event
             this.emit('auto_cleanup_completed', {
                 cleanupType,
+                pruningMethod,
                 originalTokens,
                 cleanedTokens: cleanedTokens.total_tokens,
                 savedTokens,
                 originalPercentage,
                 newPercentage,
+                duration,
                 success: true
             });
 
-            // Recheck context usage after cleanup
+            // Recheck context usage after cleanup (with safety delay)
             setTimeout(() => {
                 this.checkContextUsage(cleanedContext);
-            }, 1000);
+            }, 3000);  // 3 seconds to ensure cleanup settled
 
             return {
                 success: true,
                 cleanupType,
+                pruningMethod,
                 savedTokens,
                 originalPercentage,
-                newPercentage
+                newPercentage,
+                duration
             };
 
-        } catch (error) {
-            error(`❌ Auto-cleanup failed (${cleanupType}):`, error.message);
-            this.emit('auto_cleanup_failed', { cleanupType, error: error.message });
-            return { success: false, error: error.message };
+        } catch (err) {
+            // CRITICAL: ROLLBACK TO BACKUP IF ANY ERROR
+            if (backupContext && this.contextSource?.updateContext) {
+                warn(`🔄 ROLLBACK: Restoring backup context due to error`);
+                this.contextSource.updateContext(backupContext);
+                info(`✅ Context restored to pre-cleanup state`);
+            }
+
+            error(`❌ Auto-cleanup failed (${cleanupType}): ${err.message}`);
+            this.emit('auto_cleanup_failed', {
+                cleanupType,
+                error: err.message,
+                rolledBack: !!backupContext
+            });
+
+            return {
+                success: false,
+                error: err.message,
+                rolledBack: !!backupContext
+            };
         }
+    }
+
+    /**
+     * SAFETY: Validate cleaned context is structurally sound
+     */
+    validateCleanedContext(cleanedContext, originalContext) {
+        // Check 1: Not empty
+        if (!cleanedContext || cleanedContext.length === 0) {
+            return { valid: false, reason: 'cleaned_context_empty' };
+        }
+
+        // Check 2: Has SOME XML structure (opening tags at minimum)
+        const hasOpeningTag = cleanedContext.includes('<workflow_context>') ||
+                              cleanedContext.includes('<session_context>') ||
+                              cleanedContext.includes('<event_');
+
+        if (!hasOpeningTag) {
+            return { valid: false, reason: 'no_xml_structure_found' };
+        }
+
+        // Check 3: Not obviously broken (balanced angle brackets)
+        const openBrackets = (cleanedContext.match(/</g) || []).length;
+        const closeBrackets = (cleanedContext.match(/>/g) || []).length;
+        if (Math.abs(openBrackets - closeBrackets) > 5) {  // Allow small mismatch
+            return { valid: false, reason: 'xml_brackets_unbalanced' };
+        }
+
+        // Check 4: Minimum viable size (at least 10% of original)
+        if (cleanedContext.length < originalContext.length * 0.1) {
+            return { valid: false, reason: 'too_much_reduction' };
+        }
+
+        // Check 5: No obvious corruption markers
+        const corruptionMarkers = ['undefined', 'null', '[object Object]', 'NaN'];
+        for (const marker of corruptionMarkers) {
+            if (cleanedContext.includes(marker)) {
+                return { valid: false, reason: `corruption_detected: ${marker}` };
+            }
+        }
+
+        return { valid: true };
+    }
+
+    /**
+     * SAFETY: XML-aware truncation fallback (safer than dumb substring)
+     */
+    safeXmlTruncate(contextContent, targetReduction) {
+        const keepRatio = 1 - targetReduction;
+        const targetLength = Math.floor(contextContent.length * keepRatio);
+
+        // Try to find a clean event boundary near target length
+        const searchStart = Math.max(0, targetLength - 500);
+        const searchEnd = Math.min(contextContent.length, targetLength + 500);
+        const searchRegion = contextContent.substring(searchStart, searchEnd);
+
+        // Look for event boundaries
+        const eventEndMatch = searchRegion.match(/<\/event_\d+>/);
+        if (eventEndMatch) {
+            const cutPoint = searchStart + eventEndMatch.index + eventEndMatch[0].length;
+            const truncated = contextContent.substring(cutPoint);
+            return `<workflow_context>\n<!-- Context truncated at clean event boundary -->\n${truncated}`;
+        }
+
+        // Fallback: Just keep last portion
+        const truncated = contextContent.substring(contextContent.length - targetLength);
+        return `<workflow_context>\n<!-- Context truncated (no clean boundary found) -->\n${truncated}`;
     }
 
     /**
