@@ -683,7 +683,7 @@ ${runState.brief || 'No brief provided'}
 if (require.main === module) {
     const service = new LonicFlexMasterService();
     service.start().catch(error => {
-        this.logger.error('Failed to start LonicFLex Master Service:', error);
+        console.error('Failed to start LonicFLex Master Service:', error);
         process.exit(1);
     });
 }

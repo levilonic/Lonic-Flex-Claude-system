@@ -992,7 +992,7 @@ class LonicFlexWebhookService extends ServiceBase {
 if (require.main === module) {
     const service = new LonicFlexWebhookService();
     service.start().catch(error => {
-        this.logger.error('Failed to start LonicFLex Webhook Service:', error);
+        console.error('Failed to start LonicFLex Webhook Service:', error);
         process.exit(1);
     });
 }

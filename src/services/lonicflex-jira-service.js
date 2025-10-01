@@ -1055,7 +1055,7 @@ class LonicFlexJiraService extends ServiceBase {
 if (require.main === module) {
     const service = new LonicFlexJiraService();
     service.start().catch(error => {
-        this.logger.error('Failed to start Jira Service:', error.message);
+        console.error('Failed to start Jira Service:', error.message);
         process.exit(1);
     });
 }
