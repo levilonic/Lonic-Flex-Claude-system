@@ -1,3 +1,4 @@
+const { info, warn, error } = require('./logger');
 const { Octokit } = require('@octokit/rest');
 const { getAuthManager } = require('../auth/auth-manager');
 const { SQLiteManager } = require('../database/sqlite-manager');
@@ -49,7 +50,7 @@ class IssueManagementService {
 
         // Test authentication
         const { data: user } = await this.octokit.rest.users.getAuthenticated();
-        console.log(`✅ Issue Management Service authenticated as: ${user.login}`);
+        info(`Issue Management Service authenticated as: ${user.login}`);
 
         // Initialize database
         if (!this.dbManager.isInitialized) {
@@ -175,12 +176,12 @@ class IssueManagementService {
                         this.labelsCache.set(existingLabel.name, existingLabel);
                     }
                 } else {
-                    console.error(`❌ Failed to create label ${labelConfig.name}: ${error.message}`);
+                    error(`FAIL Failed to create label ${labelConfig.name}: ${error.message}`);
                 }
             }
         }
 
-        console.log(`✅ Created/verified ${createdLabels.length} workflow labels`);
+        info(`Created/verified ${createdLabels.length} workflow labels`);
         return createdLabels;
     }
 
@@ -203,11 +204,11 @@ class IssueManagementService {
             this.milestonesCache.set(milestone.id, milestone);
             await this.storeMilestoneInDatabase(milestone, sessionId, workflowType);
 
-            console.log(`✅ Created workflow milestone: ${milestone.title}`);
+            info(`Created workflow milestone: ${milestone.title}`);
             return milestone;
 
         } catch (error) {
-            console.error(`❌ Failed to create milestone: ${error.message}`);
+            error(`FAIL Failed to create milestone: ${error.message}`);
             return null;
         }
     }
@@ -223,7 +224,7 @@ class IssueManagementService {
 **Workflow Type**: ${workflowType}
 **Branch**: ${branchName || 'main'}
 **Session ID**: ${sessionId}
-**Status**: 🔄 In Progress
+**Status**: CYCLE In Progress
 
 ### Task Description:
 This issue tracks the execution of the **${agentType}** agent in the multi-agent workflow.
@@ -277,7 +278,7 @@ ${this.getAgentResponsibilities(agentType)}
             // Send Slack notification if communication agent is available
             if (this.commAgent) {
                 await this.commAgent.sendMessage(`
-🎯 **New Agent Task Created**
+ **New Agent Task Created**
 
 **Issue**: #${issue.number} - ${issue.title}
 **Agent**: ${agentType}
@@ -288,11 +289,11 @@ ${this.getAgentResponsibilities(agentType)}
                 `);
             }
 
-            console.log(`✅ Created agent issue #${issue.number} for ${agentType}`);
+            info(`Created agent issue #${issue.number} for ${agentType}`);
             return issue;
 
         } catch (error) {
-            console.error(`❌ Failed to create agent issue: ${error.message}`);
+            error(`FAIL Failed to create agent issue: ${error.message}`);
             return null;
         }
     }
@@ -302,7 +303,7 @@ ${this.getAgentResponsibilities(agentType)}
      */
     async updateAgentProgress(issueNumber, owner, repo, agentType, status, results = {}) {
         const comment = `
-## 🔄 Agent Progress Update
+## CYCLE Agent Progress Update
 
 **Agent**: ${agentType}
 **Status**: ${this.getStatusEmoji(status)} ${status}
@@ -347,10 +348,10 @@ ${this.getStatusDetails(status, results)}
                 });
             }
 
-            console.log(`✅ Updated issue #${issueNumber} with ${status} status`);
+            info(`Updated issue #${issueNumber} with ${status} status`);
 
         } catch (error) {
-            console.error(`❌ Failed to update issue: ${error.message}`);
+            error(`FAIL Failed to update issue: ${error.message}`);
         }
     }
 
@@ -384,7 +385,7 @@ ${this.getStatusDetails(status, results)}
         // Send workflow creation notification
         if (this.commAgent) {
             await this.commAgent.sendMessage(`
-🚀 **Multi-Agent Workflow Initialized**
+ **Multi-Agent Workflow Initialized**
 
 **Workflow**: ${workflowType}
 **Session**: ${sessionId}
@@ -395,11 +396,11 @@ ${this.getStatusDetails(status, results)}
 **Milestone**: ${milestone ? milestone.title : 'None'}
 
 **Issues Created**:
-${issues.map(issue => `• #${issue.number} - ${issue.title}`).join('\n')}
+${issues.map(issue => `- #${issue.number} - ${issue.title}`).join('\n')}
             `);
         }
 
-        console.log(`✅ Created workflow with ${issues.length} agent issues`);
+        info(`Created workflow with ${issues.length} agent issues`);
         return { issues, milestone };
     }
 
@@ -409,32 +410,32 @@ ${issues.map(issue => `• #${issue.number} - ${issue.title}`).join('\n')}
     getAgentResponsibilities(agentType) {
         const responsibilities = {
             github: `
-• Repository analysis and validation
-• PR and issue management
-• Branch operations and Git workflows
-• GitHub API integration and rate limiting`,
+- Repository analysis and validation
+- PR and issue management
+- Branch operations and Git workflows
+- GitHub API integration and rate limiting`,
             security: `
-• Vulnerability scanning and assessment
-• Security best practice validation
-• Code analysis for security issues
-• Compliance verification`,
+- Vulnerability scanning and assessment
+- Security best practice validation
+- Code analysis for security issues
+- Compliance verification`,
             code: `
-• Code generation and analysis
-• Claude Code SDK integration
-• Development workflow automation
-• Code quality assessment`,
+- Code generation and analysis
+- Claude Code SDK integration
+- Development workflow automation
+- Code quality assessment`,
             deploy: `
-• Docker container management
-• Deployment strategy execution
-• Infrastructure provisioning
-• Health checks and monitoring`,
+- Docker container management
+- Deployment strategy execution
+- Infrastructure provisioning
+- Health checks and monitoring`,
             comm: `
-• Slack integration and notifications
-• Multi-agent communication coordination
-• Status updates and reporting
-• Alert management`
+- Slack integration and notifications
+- Multi-agent communication coordination
+- Status updates and reporting
+- Alert management`
         };
-        return responsibilities[agentType] || `• ${agentType} agent specific tasks`;
+        return responsibilities[agentType] || `- ${agentType} agent specific tasks`;
     }
 
     /**
@@ -470,14 +471,14 @@ ${issues.map(issue => `• #${issue.number} - ${issue.title}`).join('\n')}
      */
     getStatusEmoji(status) {
         const emojis = {
-            'initialized': '🟡',
-            'in_progress': '🔄',
-            'completed': '✅',
-            'failed': '❌',
-            'blocked': '🚫',
-            'skipped': '⏭️'
+            'initialized': '',
+            'in_progress': 'CYCLE',
+            'completed': 'PASS',
+            'failed': 'FAIL',
+            'blocked': '',
+            'skipped': ''
         };
-        return emojis[status] || '❓';
+        return emojis[status] || '';
     }
 
     /**
@@ -486,13 +487,13 @@ ${issues.map(issue => `• #${issue.number} - ${issue.title}`).join('\n')}
     getStatusDetails(status, results) {
         switch (status) {
             case 'completed':
-                return `✅ Agent completed successfully with ${Object.keys(results).length} result properties`;
+                return `PASS Agent completed successfully with ${Object.keys(results).length} result properties`;
             case 'failed':
-                return `❌ Agent failed: ${results.error || 'Unknown error'}`;
+                return `FAIL Agent failed: ${results.error || 'Unknown error'}`;
             case 'blocked':
-                return `🚫 Agent blocked: ${results.blockReason || 'Unknown blocker'}`;
+                return ` Agent blocked: ${results.blockReason || 'Unknown blocker'}`;
             case 'in_progress':
-                return `🔄 Agent executing step ${results.currentStep || 'unknown'}`;
+                return `CYCLE Agent executing step ${results.currentStep || 'unknown'}`;
             default:
                 return `Status: ${status}`;
         }
@@ -601,7 +602,7 @@ module.exports = { IssueManagementService };
 
 // Demo/testing function
 async function demoIssueManagement() {
-    console.log('🎯 Issue Management Service Demo');
+    info('Issue Management Service Demo');
     
     const issueService = new IssueManagementService();
     
@@ -618,10 +619,10 @@ async function demoIssueManagement() {
             'feature_development'
         );
         
-        console.log(`✅ Created ${result.issues.length} issues with milestone: ${result.milestone?.title}`);
+        info(`Created ${result.issues.length} issues with milestone: ${result.milestone?.title}`);
         
     } catch (error) {
-        console.error(`❌ Error: ${error.message}`);
+        error(`FAIL Error: ${error.message}`);
     }
 }
 

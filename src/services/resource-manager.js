@@ -1,3 +1,4 @@
+const { info, warn, error } = require('./logger');
 /**
  * Resource Manager - Phase 3C Implementation
  * Comprehensive resource management with circuit breakers and health monitoring
@@ -79,7 +80,7 @@ class ResourceManager extends EventEmitter {
         this.alertHistory = [];
         this.lastAlerts = new Map();
 
-        console.log('🎛️ ResourceManager created with intelligent resource management');
+        info(' ResourceManager created with intelligent resource management');
     }
 
     /**
@@ -101,11 +102,11 @@ class ResourceManager extends EventEmitter {
             // Start monitoring
             this.startMonitoring();
 
-            console.log('✅ ResourceManager initialized with monitoring and circuit breakers');
+            info('ResourceManager initialized with monitoring and circuit breakers');
             return this;
 
         } catch (error) {
-            console.error('❌ ResourceManager initialization failed:', error.message);
+            error('FAIL ResourceManager initialization failed:', error.message);
             throw error;
         }
     }
@@ -202,7 +203,7 @@ class ResourceManager extends EventEmitter {
      */
     async releaseResources(allocation) {
         if (!allocation || !allocation.id) {
-            console.warn('⚠️ Invalid resource allocation for release');
+            console.warn('WARN Invalid resource allocation for release');
             return false;
         }
 
@@ -245,7 +246,7 @@ class ResourceManager extends EventEmitter {
 
             if (breaker.isOpen()) {
                 if (fallback) {
-                    console.log(`🔄 Circuit breaker open for ${serviceName}, using fallback`);
+                    info(`CYCLE Circuit breaker open for ${serviceName}, using fallback`);
                     return await fallback();
                 } else {
                     throw new Error(`Circuit breaker open for ${serviceName}`);
@@ -268,10 +269,10 @@ class ResourceManager extends EventEmitter {
             breaker.recordFailure();
             this.metrics.failedRequests++;
 
-            console.error(`❌ Operation failed for ${serviceName}:`, error.message);
+            error(`FAIL Operation failed for ${serviceName}:`, error.message);
 
             if (fallback && breaker.isOpen()) {
-                console.log(`🔄 Using fallback for ${serviceName}`);
+                info(`CYCLE Using fallback for ${serviceName}`);
                 return await fallback();
             }
 
@@ -360,7 +361,7 @@ class ResourceManager extends EventEmitter {
 
         if (usage.memory.percentage > this.config.gcThreshold) {
             if (global.gc) {
-                console.log(`🧹 Performing garbage collection (memory: ${(usage.memory.percentage * 100).toFixed(1)}%)`);
+                info(`CLEANUP Performing garbage collection (memory: ${(usage.memory.percentage * 100).toFixed(1)}%)`);
                 global.gc();
 
                 // Emit GC event
@@ -371,7 +372,7 @@ class ResourceManager extends EventEmitter {
 
                 return true;
             } else {
-                console.warn('⚠️ Garbage collection not available (use --expose-gc flag)');
+                console.warn('WARN Garbage collection not available (use --expose-gc flag)');
             }
         }
 
@@ -395,7 +396,7 @@ class ResourceManager extends EventEmitter {
             this.circuitBreakers.set(service, breaker);
         }
 
-        console.log(`🔒 Initialized ${criticalServices.length} circuit breakers`);
+        info(` Initialized ${criticalServices.length} circuit breakers`);
     }
 
     /**
@@ -420,7 +421,7 @@ class ResourceManager extends EventEmitter {
             totalRequests: 0
         });
 
-        console.log('🏊 Initialized connection pools');
+        info('POOL Initialized connection pools');
     }
 
     /**
@@ -434,7 +435,7 @@ class ResourceManager extends EventEmitter {
             try {
                 await this.performMonitoringCycle();
             } catch (error) {
-                console.error('❌ Monitoring cycle error:', error.message);
+                error('FAIL Monitoring cycle error:', error.message);
             }
         }, this.config.monitoringInterval);
 
@@ -448,12 +449,12 @@ class ResourceManager extends EventEmitter {
                     await this.sendAlert('critical', 'System health critical', health);
                 }
             } catch (error) {
-                console.error('❌ Health check error:', error.message);
+                error('FAIL Health check error:', error.message);
             }
         }, this.config.healthCheckInterval);
 
         this.isMonitoring = true;
-        console.log('👁️ Resource monitoring started');
+        info('EYE Resource monitoring started');
     }
 
     /**
@@ -528,7 +529,7 @@ class ResourceManager extends EventEmitter {
         }
 
         this.emit('alert', alert);
-        console.log(`🚨 Resource Alert [${level.toUpperCase()}]: ${message}`, data);
+        info(`ALERT Resource Alert [${level.toUpperCase()}]: ${message}`, data);
     }
 
     /**
@@ -636,7 +637,7 @@ class ResourceManager extends EventEmitter {
      * Shutdown resource manager
      */
     async shutdown() {
-        console.log('🛑 Shutting down ResourceManager...');
+        info('STOP Shutting down ResourceManager...');
 
         // Stop monitoring
         if (this.monitoringTimer) {
@@ -656,7 +657,7 @@ class ResourceManager extends EventEmitter {
         this.connectionPools.clear();
 
         this.emit('shutdown');
-        console.log('✅ ResourceManager shutdown complete');
+        info('ResourceManager shutdown complete');
     }
 }
 
@@ -683,7 +684,7 @@ class CircuitBreaker {
         if (this.state === 'OPEN') {
             if (Date.now() > this.nextAttemptTime) {
                 this.state = 'HALF_OPEN';
-                console.log(`🔄 Circuit breaker ${this.serviceName} moving to HALF_OPEN`);
+                info(`CYCLE Circuit breaker ${this.serviceName} moving to HALF_OPEN`);
                 return false;
             }
             return true;
@@ -698,7 +699,7 @@ class CircuitBreaker {
         if (this.state === 'HALF_OPEN') {
             this.state = 'CLOSED';
             this.failureCount = 0;
-            console.log(`✅ Circuit breaker ${this.serviceName} reset to CLOSED`);
+            info(`Circuit breaker ${this.serviceName} reset to CLOSED`);
         }
     }
 
@@ -712,7 +713,7 @@ class CircuitBreaker {
         if (this.failureCount >= this.failureThreshold) {
             this.state = 'OPEN';
             this.nextAttemptTime = Date.now() + this.resetTimeout;
-            console.log(`🔒 Circuit breaker ${this.serviceName} opened after ${this.failureCount} failures`);
+            info(` Circuit breaker ${this.serviceName} opened after ${this.failureCount} failures`);
         }
     }
 

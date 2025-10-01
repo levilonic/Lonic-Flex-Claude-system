@@ -867,21 +867,21 @@ if (require.main === module) {
     const service = new LonicFlexWorkflowsService();
     service.start()
         .then(() => {
-            console.log('✅ LonicFLex Workflows Service started successfully');
+            logger.info('LonicFLex Workflows Service started successfully');
         })
         .catch((error) => {
-            console.error('❌ Failed to start Workflows service:', error.message);
+            logger.error('FAIL Failed to start Workflows service:', error.message);
             process.exit(1);
         });
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        console.log('Workflows service shutting down...');
+        logger.info('Workflows service shutting down...');
         process.exit(0);
     });
 
     process.on('SIGINT', () => {
-        console.log('Workflows service shutting down...');
+        logger.info('Workflows service shutting down...');
         process.exit(0);
     });
 }

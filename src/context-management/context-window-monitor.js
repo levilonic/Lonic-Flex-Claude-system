@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * ContextWindowMonitor - Real-time monitoring for 40% threshold prevention
  * Prevents auto-compact by tracking token usage and triggering warnings
@@ -38,10 +39,14 @@ class ContextWindowMonitor extends EventEmitter {
         // Auto-compact prevention strategies
         this.autoCompactEnabled = options.autoCompact !== false;
         this.compactStrategies = options.compactStrategies || ['remove_resolved_errors', 'compact_old_events'];
+
+        // NEW: 40% auto-cleanup trigger (user's original requirement)
+        this.enableAutoCleanup = options.enableAutoCleanup !== false;
+        this.autoCleanupThreshold = options.autoCleanupThreshold || 40; // Trigger at 40%
         
         // Only log in development mode
         if (process.env.NODE_ENV !== 'production') {
-            console.log(`✅ ContextWindowMonitor initialized with ${this.thresholds.warning}% threshold`);
+            info(`ContextWindowMonitor initialized with ${this.thresholds.warning}% threshold`);
         }
     }
 
@@ -50,7 +55,7 @@ class ContextWindowMonitor extends EventEmitter {
      */
     startMonitoring(contextSource = null) {
         if (this.monitoring) {
-            console.log('⚠️ Monitor already running');
+            logger.warn('Monitor already running');
             return;
         }
 
@@ -59,7 +64,7 @@ class ContextWindowMonitor extends EventEmitter {
         
         // Only log in development mode
         if (process.env.NODE_ENV !== 'production') {
-            console.log(`🎯 Started context monitoring (${this.thresholds.warning}% threshold)`);
+            info(`Started context monitoring (${this.thresholds.warning}% threshold)`);
         }
         
         // Immediate check
@@ -85,7 +90,7 @@ class ContextWindowMonitor extends EventEmitter {
             this.intervalId = null;
         }
         
-        console.log('🛑 Context monitoring stopped');
+        info('STOP Context monitoring stopped');
         this.emit('monitoring_stopped');
     }
 
@@ -134,7 +139,7 @@ class ContextWindowMonitor extends EventEmitter {
             return newState;
             
         } catch (error) {
-            console.error('Context usage check failed:', error);
+            logger.error('Context usage check failed:', error);
             this.emit('monitor_error', error);
             return this.currentState;
         }
@@ -159,31 +164,47 @@ class ContextWindowMonitor extends EventEmitter {
         
         // Only log context stats in development mode or for critical issues
         if (process.env.NODE_ENV !== 'production' || newState.level === 'critical' || newState.level === 'emergency') {
-            console.log(`📊 Context: ${newState.tokens} tokens (${newState.percentage.toFixed(1)}%) - ${newState.level.toUpperCase()}`);
+            info(`METRICS Context: ${newState.tokens} tokens (${newState.percentage.toFixed(1)}%) - ${newState.level.toUpperCase()}`);
         }
         
         // Emit specific threshold events
         switch (newState.level) {
             case 'warning':
                 if (levelChanged) {
-                    console.log(`🟡 WARNING: Context usage reached ${this.thresholds.warning}% threshold!`);
+                    info(` WARNING: Context usage reached ${this.thresholds.warning}% threshold!`);
                     this.emit('threshold_warning', newState);
+
+                    // NEW: Auto-cleanup at 40% threshold
+                    if (this.enableAutoCleanup && newState.percentage >= this.autoCleanupThreshold) {
+                        info(`🟡 AUTO-CLEANUP TRIGGERED: ${newState.percentage.toFixed(1)}% usage reached`);
+                        this.performAutoCleanup(newState, 'standard');
+                    }
                 }
                 break;
-                
+
             case 'critical':
                 if (levelChanged) {
-                    console.log(`🟠 CRITICAL: Context usage reached ${this.thresholds.critical}% threshold!`);
+                    info(` CRITICAL: Context usage reached ${this.thresholds.critical}% threshold!`);
                     this.emit('threshold_critical', newState);
+
+                    // NEW: Aggressive auto-cleanup at 70% threshold
+                    if (this.enableAutoCleanup) {
+                        info(`🟠 AGGRESSIVE AUTO-CLEANUP: ${newState.percentage.toFixed(1)}% usage - critical level`);
+                        this.performAutoCleanup(newState, 'aggressive');
+                    }
                 }
                 break;
                 
             case 'emergency':
                 if (levelChanged) {
-                    console.log(`🔴 EMERGENCY: Context usage reached ${this.thresholds.emergency}% - AUTO-COMPACT IMMINENT!`);
+                    info(` EMERGENCY: Context usage reached ${this.thresholds.emergency}% - AUTO-COMPACT IMMINENT!`);
                     this.emit('threshold_emergency', newState);
-                    
-                    if (this.autoCompactEnabled) {
+
+                    // Emergency: Most aggressive cleanup (50% reduction)
+                    if (this.enableAutoCleanup) {
+                        info(`🔴 EMERGENCY AUTO-CLEANUP: ${newState.percentage.toFixed(1)}% usage - 50% reduction`);
+                        this.performAutoCleanup(newState, 'emergency');
+                    } else if (this.autoCompactEnabled) {
                         this.handleEmergencyCompact(newState);
                     }
                 }
@@ -191,7 +212,7 @@ class ContextWindowMonitor extends EventEmitter {
                 
             case 'safe':
                 if (oldState.level !== 'safe') {
-                    console.log(`🟢 Context usage back to safe levels (${newState.percentage.toFixed(1)}%)`);
+                    info(` Context usage back to safe levels (${newState.percentage.toFixed(1)}%)`);
                     this.emit('threshold_safe', newState);
                 }
                 break;
@@ -200,7 +221,7 @@ class ContextWindowMonitor extends EventEmitter {
         // Trend analysis - only log rapid growth in critical situations or development
         if (percentageChange > 10) {
             if (process.env.NODE_ENV !== 'production' || percentageChange > 25) {
-                console.log(`⚡ Rapid context growth: +${percentageChange.toFixed(1)}% in ${this.monitoringInterval/1000}s`);
+                info(`FAST Rapid context growth: +${percentageChange.toFixed(1)}% in ${this.monitoringInterval/1000}s`);
             }
             this.emit('rapid_growth', { change: percentageChange, duration: this.monitoringInterval });
         }
@@ -210,7 +231,7 @@ class ContextWindowMonitor extends EventEmitter {
      * Handle emergency auto-compact prevention
      */
     async handleEmergencyCompact(state) {
-        console.log('🚨 EMERGENCY COMPACT PREVENTION ACTIVATED');
+        info('ALERT EMERGENCY COMPACT PREVENTION ACTIVATED');
         
         try {
             // Emit emergency event first
@@ -222,24 +243,24 @@ class ContextWindowMonitor extends EventEmitter {
                 const { ContextPruner } = require('./context-pruner');
                 pruner = new ContextPruner();
             } catch (error) {
-                console.log('⚠️ ContextPruner not available, basic compact only');
+                logger.warn('ContextPruner not available, basic compact only');
             }
             
             if (pruner && this.contextSource) {
                 // Smart pruning
-                console.log('🔧 Attempting smart context pruning...');
+                logger.debug('Attempting smart context pruning...');
                 const prunedContext = await pruner.emergencyPrune(state.contextContent);
                 
                 // Update context source if possible
                 if (this.contextSource.updateContext) {
                     this.contextSource.updateContext(prunedContext);
-                    console.log('✅ Context pruned successfully');
+                    info('Context pruned successfully');
                 } else {
-                    console.log('⚠️ Cannot update context - manual intervention required');
+                    logger.warn('Cannot update context - manual intervention required');
                 }
             } else {
                 // Basic truncation fallback
-                console.log('🔧 Performing basic context truncation...');
+                logger.debug('Performing basic context truncation...');
                 const truncatedContent = this.basicTruncate(state.contextContent);
                 
                 if (this.contextSource?.updateContext) {
@@ -253,7 +274,7 @@ class ContextWindowMonitor extends EventEmitter {
             }, 1000);
             
         } catch (error) {
-            console.error('🚨 Emergency compact failed:', error);
+            logger.error('ALERT Emergency compact failed:', error);
             this.emit('emergency_compact_failed', { state, error });
         }
     }
@@ -278,6 +299,238 @@ class ContextWindowMonitor extends EventEmitter {
         }
         
         return `<workflow_context>\n<!-- Context truncated for emergency compact -->\n${truncated}\n</workflow_context>`;
+    }
+
+    /**
+     * NEW: Perform auto-cleanup at threshold levels (40%, 70%, 90%)
+     * PRODUCTION-SAFE: With backup, validation, and rollback
+     */
+    async performAutoCleanup(state, cleanupType = 'standard') {
+        const startTime = Date.now();
+        let backupContext = null;
+
+        try {
+            const contextContent = state.contextContent;
+            if (!contextContent) {
+                warn('⚠️ No context content available for auto-cleanup');
+                return { success: false, reason: 'no_content' };
+            }
+
+            // SAFETY CHECK: Minimum context size (don't cleanup if too small)
+            if (contextContent.length < 1000) {
+                warn('⚠️ Context too small for cleanup, skipping');
+                return { success: false, reason: 'context_too_small' };
+            }
+
+            const originalTokens = state.tokens;
+            const originalPercentage = state.percentage;
+
+            // SAFETY CHECK: Prevent cleanup loops (track last cleanup ATTEMPT time)
+            if (this._lastCleanupAttempt && (Date.now() - this._lastCleanupAttempt) < 5000) {
+                warn('⚠️ Cleanup attempted too soon, preventing loop');
+                return { success: false, reason: 'too_frequent' };
+            }
+
+            // Track cleanup attempt immediately (before it runs)
+            this._lastCleanupAttempt = Date.now();
+
+            // CRITICAL: BACKUP ORIGINAL CONTEXT BEFORE ANY MODIFICATIONS
+            backupContext = contextContent;
+            info(`💾 Backed up context (${contextContent.length.toLocaleString()} chars) before cleanup`);
+
+            // Determine reduction target based on cleanup type
+            const reductionTargets = {
+                standard: 0.15,   // 15% reduction at 40% threshold
+                aggressive: 0.30, // 30% reduction at 70% threshold
+                emergency: 0.50   // 50% reduction at 90% threshold
+            };
+            const targetReduction = reductionTargets[cleanupType] || 0.15;
+
+            info(`📦 Starting ${cleanupType} cleanup (target: ${(targetReduction * 100).toFixed(0)}% reduction)`);
+
+            // Try to get ContextPruner for smart cleanup
+            let cleanedContext;
+            let pruningMethod = 'unknown';
+
+            try {
+                const { ContextPruner } = require('./context-pruner');
+                const pruner = new ContextPruner();
+
+                if (cleanupType === 'emergency') {
+                    cleanedContext = await pruner.emergencyPrune(contextContent, targetReduction);
+                    pruningMethod = 'emergencyPrune';
+                } else if (cleanupType === 'aggressive') {
+                    cleanedContext = await pruner.smartPrune(contextContent, targetReduction);
+                    pruningMethod = 'smartPrune';
+                } else {
+                    cleanedContext = await pruner.applyMinimalPruning(contextContent, targetReduction);
+                    pruningMethod = 'applyMinimalPruning';
+                }
+            } catch (error) {
+                warn(`⚠️ ContextPruner failed: ${error.message}`);
+                // SAFER FALLBACK: XML-aware truncation
+                cleanedContext = this.safeXmlTruncate(contextContent, targetReduction);
+                pruningMethod = 'safeXmlTruncate (fallback)';
+            }
+
+            // CRITICAL VALIDATION: Verify cleaned context is valid
+            const validationResult = this.validateCleanedContext(cleanedContext, contextContent);
+            if (!validationResult.valid) {
+                throw new Error(`Cleanup validation failed: ${validationResult.reason}`);
+            }
+
+            // SAFETY CHECK: Ensure we actually saved space
+            if (cleanedContext.length >= contextContent.length) {
+                warn('⚠️ Cleanup did not reduce size, rolling back');
+                throw new Error('Cleanup increased or maintained size - ineffective');
+            }
+
+            // SAFETY CHECK: Ensure we didn't over-reduce
+            const reductionRatio = (contextContent.length - cleanedContext.length) / contextContent.length;
+            if (reductionRatio > targetReduction + 0.2) {
+                warn(`⚠️ Cleanup reduced too much: ${(reductionRatio * 100).toFixed(0)}% vs target ${(targetReduction * 100).toFixed(0)}%`);
+                throw new Error('Cleanup over-reduced context - data loss risk');
+            }
+
+            // Update context if source is available
+            if (this.contextSource?.updateContext) {
+                this.contextSource.updateContext(cleanedContext);
+                info(`📝 Context updated via source`);
+            }
+
+            // Calculate savings
+            const cleanedTokens = await this.tokenCounter.countContextTokens(cleanedContext);
+            const savedTokens = originalTokens - cleanedTokens.total_tokens;
+            const newPercentage = cleanedTokens.usedPercentage || (cleanedTokens.total_tokens / 100000 * 100);
+
+            // SAFETY CHECK: Ensure tokens actually decreased
+            if (savedTokens <= 0) {
+                warn('⚠️ No tokens saved, rolling back');
+                throw new Error('Cleanup did not save tokens - ineffective');
+            }
+
+            const duration = Date.now() - startTime;
+            info(`✅ Auto-cleanup complete: Saved ${savedTokens.toLocaleString()} tokens (${duration}ms)`);
+            info(`   Method: ${pruningMethod}`);
+            info(`   Before: ${originalTokens.toLocaleString()} tokens (${originalPercentage.toFixed(1)}%)`);
+            info(`   After: ${cleanedTokens.total_tokens.toLocaleString()} tokens (${newPercentage.toFixed(1)}%)`);
+            info(`   Size: ${contextContent.length.toLocaleString()} → ${cleanedContext.length.toLocaleString()} chars (${(reductionRatio * 100).toFixed(1)}% reduction)`);
+
+            // Emit cleanup completed event
+            this.emit('auto_cleanup_completed', {
+                cleanupType,
+                pruningMethod,
+                originalTokens,
+                cleanedTokens: cleanedTokens.total_tokens,
+                savedTokens,
+                originalPercentage,
+                newPercentage,
+                duration,
+                success: true
+            });
+
+            // Recheck context usage after cleanup (with safety delay)
+            setTimeout(() => {
+                this.checkContextUsage(cleanedContext);
+            }, 3000);  // 3 seconds to ensure cleanup settled
+
+            return {
+                success: true,
+                cleanupType,
+                pruningMethod,
+                savedTokens,
+                originalPercentage,
+                newPercentage,
+                duration
+            };
+
+        } catch (err) {
+            // CRITICAL: ROLLBACK TO BACKUP IF ANY ERROR
+            if (backupContext && this.contextSource?.updateContext) {
+                warn(`🔄 ROLLBACK: Restoring backup context due to error`);
+                this.contextSource.updateContext(backupContext);
+                info(`✅ Context restored to pre-cleanup state`);
+            }
+
+            error(`❌ Auto-cleanup failed (${cleanupType}): ${err.message}`);
+            this.emit('auto_cleanup_failed', {
+                cleanupType,
+                error: err.message,
+                rolledBack: !!backupContext
+            });
+
+            return {
+                success: false,
+                error: err.message,
+                rolledBack: !!backupContext
+            };
+        }
+    }
+
+    /**
+     * SAFETY: Validate cleaned context is structurally sound
+     */
+    validateCleanedContext(cleanedContext, originalContext) {
+        // Check 1: Not empty
+        if (!cleanedContext || cleanedContext.length === 0) {
+            return { valid: false, reason: 'cleaned_context_empty' };
+        }
+
+        // Check 2: Has SOME XML structure (opening tags at minimum)
+        const hasOpeningTag = cleanedContext.includes('<workflow_context>') ||
+                              cleanedContext.includes('<session_context>') ||
+                              cleanedContext.includes('<event_');
+
+        if (!hasOpeningTag) {
+            return { valid: false, reason: 'no_xml_structure_found' };
+        }
+
+        // Check 3: Not obviously broken (balanced angle brackets)
+        const openBrackets = (cleanedContext.match(/</g) || []).length;
+        const closeBrackets = (cleanedContext.match(/>/g) || []).length;
+        if (Math.abs(openBrackets - closeBrackets) > 5) {  // Allow small mismatch
+            return { valid: false, reason: 'xml_brackets_unbalanced' };
+        }
+
+        // Check 4: Minimum viable size (at least 10% of original)
+        if (cleanedContext.length < originalContext.length * 0.1) {
+            return { valid: false, reason: 'too_much_reduction' };
+        }
+
+        // Check 5: No obvious corruption markers
+        const corruptionMarkers = ['undefined', 'null', '[object Object]', 'NaN'];
+        for (const marker of corruptionMarkers) {
+            if (cleanedContext.includes(marker)) {
+                return { valid: false, reason: `corruption_detected: ${marker}` };
+            }
+        }
+
+        return { valid: true };
+    }
+
+    /**
+     * SAFETY: XML-aware truncation fallback (safer than dumb substring)
+     */
+    safeXmlTruncate(contextContent, targetReduction) {
+        const keepRatio = 1 - targetReduction;
+        const targetLength = Math.floor(contextContent.length * keepRatio);
+
+        // Try to find a clean event boundary near target length
+        const searchStart = Math.max(0, targetLength - 500);
+        const searchEnd = Math.min(contextContent.length, targetLength + 500);
+        const searchRegion = contextContent.substring(searchStart, searchEnd);
+
+        // Look for event boundaries
+        const eventEndMatch = searchRegion.match(/<\/event_\d+>/);
+        if (eventEndMatch) {
+            const cutPoint = searchStart + eventEndMatch.index + eventEndMatch[0].length;
+            const truncated = contextContent.substring(cutPoint);
+            return `<workflow_context>\n<!-- Context truncated at clean event boundary -->\n${truncated}`;
+        }
+
+        // Fallback: Just keep last portion
+        const truncated = contextContent.substring(contextContent.length - targetLength);
+        return `<workflow_context>\n<!-- Context truncated (no clean boundary found) -->\n${truncated}`;
     }
 
     /**
@@ -362,7 +615,7 @@ class ContextWindowMonitor extends EventEmitter {
      */
     updateThresholds(newThresholds) {
         this.thresholds = { ...this.thresholds, ...newThresholds };
-        console.log(`📊 Thresholds updated:`, this.thresholds);
+        info(`METRICS Thresholds updated:`, this.thresholds);
         this.emit('thresholds_updated', this.thresholds);
     }
 
@@ -370,7 +623,7 @@ class ContextWindowMonitor extends EventEmitter {
      * Force immediate context check
      */
     async forceCheck(contextContent = null) {
-        console.log('🔍 Force checking context usage...');
+        info(' Force checking context usage...');
         return await this.checkContextUsage(contextContent);
     }
 
@@ -378,31 +631,31 @@ class ContextWindowMonitor extends EventEmitter {
      * Demo function showing threshold monitoring
      */
     async demo() {
-        console.log('📊 ContextWindowMonitor Demo - 40% Threshold Protection\n');
+        info('METRICS ContextWindowMonitor Demo - 40% Threshold Protection\n');
         
         // Mock context content that grows over time
         let mockContext = '<workflow_context>\n';
         
         // Set up event listeners
         this.on('threshold_warning', (state) => {
-            console.log(`🚨 THRESHOLD ALERT: ${state.percentage.toFixed(1)}% usage detected!`);
+            info(`ALERT THRESHOLD ALERT: ${state.percentage.toFixed(1)}% usage detected!`);
         });
         
         this.on('context_updated', (state) => {
             const emoji = {
-                safe: '🟢',
-                warning: '🟡', 
-                critical: '🟠',
-                emergency: '🔴'
+                safe: '',
+                warning: '', 
+                critical: '',
+                emergency: ''
             }[state.level];
             
-            console.log(`${emoji} Context: ${state.tokens} tokens (${state.percentage.toFixed(1)}%) - Level: ${state.level}`);
+            info(`${emoji} Context: ${state.tokens} tokens (${state.percentage.toFixed(1)}%) - Level: ${state.level}`);
         });
         
         // Start monitoring
         this.startMonitoring();
         
-        console.log('📈 Simulating context growth...\n');
+        info(' Simulating context growth...\n');
         
         // Simulate growing context
         for (let i = 0; i < 10; i++) {
@@ -428,30 +681,30 @@ class ContextWindowMonitor extends EventEmitter {
             
             // Break if we hit warning threshold
             if (this.currentState.level !== 'safe') {
-                console.log(`\n🎯 Demo reached ${this.currentState.level} level - stopping simulation`);
+                info(`\n Demo reached ${this.currentState.level} level - stopping simulation`);
                 break;
             }
         }
         
         // Show trends
-        console.log('\n📈 Context Growth Trends:');
+        info('\n Context Growth Trends:');
         const trends = this.getTrends(5);
-        console.log(`Trend: ${trends.trend}`);
-        console.log(`Growth rate: ${(trends.slope * 60).toFixed(2)}% per minute`);
+        info(`Trend: ${trends.trend}`);
+        info(`Growth rate: ${(trends.slope * 60).toFixed(2)}% per minute`);
         
         if (trends.predictions.length > 0) {
-            console.log('\n⏰ Threshold Predictions:');
+            info('\nCLOCK Threshold Predictions:');
             trends.predictions.forEach(pred => {
                 const minutes = Math.ceil(pred.eta / 60);
-                console.log(`${pred.threshold}: ${minutes} minutes`);
+                info(`${pred.threshold}: ${minutes} minutes`);
             });
         }
         
         this.stopMonitoring();
         mockContext += '\n</workflow_context>';
         
-        console.log('\n✅ ContextWindowMonitor demo completed!');
-        console.log(`Final context size: ${mockContext.length} characters`);
+        info('\nPASS ContextWindowMonitor demo completed!');
+        info(`Final context size: ${mockContext.length} characters`);
     }
 }
 

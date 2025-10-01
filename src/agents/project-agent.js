@@ -9,7 +9,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 class ProjectAgent extends ValidatedAgent {
-    constructor(sessionId, config = {}) {
+    constructor(sessionId, serviceContainer, config = {}) {
         super('project', sessionId, {
             maxSteps: 8,
             timeout: 30000,

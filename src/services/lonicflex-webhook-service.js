@@ -667,15 +667,15 @@ class LonicFlexWebhookService {
             const [owner, repo] = repository.full_name.split('/');
 
             // Create response message
-            let responseMessage = `🤖 **LonicFLex Response**\n\n`;
+            let responseMessage = `AGENT **LonicFLex Response**\n\n`;
 
             if (result.runId) {
-                responseMessage += `✅ **Run initiated**: \`${result.runId}\`\n`;
-                responseMessage += `🌿 **Branch**: \`${result.branchName || `run/${result.runId}`}\`\n`;
-                responseMessage += `⏱️ **Estimated Duration**: ${Math.round((result.estimatedDuration || 300000) / 1000)}s\n\n`;
+                responseMessage += `PASS **Run initiated**: \`${result.runId}\`\n`;
+                responseMessage += ` **Branch**: \`${result.branchName || `run/${result.runId}`}\`\n`;
+                responseMessage += ` **Estimated Duration**: ${Math.round((result.estimatedDuration || 300000) / 1000)}s\n\n`;
                 responseMessage += `You can track the progress by checking the branch or PR that will be created.\n\n`;
             } else {
-                responseMessage += `❌ **Failed to initiate run**\n`;
+                responseMessage += `FAIL **Failed to initiate run**\n`;
                 responseMessage += `Error: ${result.error || 'Unknown error'}\n\n`;
             }
 
@@ -958,10 +958,10 @@ class LonicFlexWebhookService {
         await this.initialize();
 
         this.server = this.app.listen(this.config.port, () => {
-            console.log(`🔗 LonicFLex Webhook Service running on port ${this.config.port}`);
-            console.log(`📡 GitHub webhooks: http://localhost:${this.config.port}/webhook/github`);
-            console.log(`💬 Slack webhooks: http://localhost:${this.config.port}/webhook/slack`);
-            console.log(`🏥 Health check: http://localhost:${this.config.port}/health`);
+            logger.info(` LonicFLex Webhook Service running on port ${this.config.port}`);
+            logger.info(` GitHub webhooks: http://localhost:${this.config.port}/webhook/github`);
+            logger.info(` Slack webhooks: http://localhost:${this.config.port}/webhook/slack`);
+            logger.info(`HEALTH Health check: http://localhost:${this.config.port}/health`);
 
             this.logger.info('Webhook service started', { port: this.config.port });
         });
@@ -990,7 +990,7 @@ class LonicFlexWebhookService {
 if (require.main === module) {
     const service = new LonicFlexWebhookService();
     service.start().catch(error => {
-        console.error('Failed to start LonicFLex Webhook Service:', error);
+        logger.error('Failed to start LonicFLex Webhook Service:', error);
         process.exit(1);
     });
 }

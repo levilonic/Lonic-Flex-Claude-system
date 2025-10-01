@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * CLI Context Display - Always-visible context percentage for Claude Code UI
  * Shows "77% until auto-compact" below chat box as requested
@@ -21,7 +22,7 @@ class CLIContextDisplay {
         this.position = options.position || 'below_chat'; // below_chat, status_line, overlay
         this.alwaysVisible = options.alwaysVisible !== false;
         
-        console.log('✅ CLIContextDisplay initialized');
+        info('CLIContextDisplay initialized');
     }
 
     /**
@@ -29,14 +30,14 @@ class CLIContextDisplay {
      */
     startDisplay(contextSource = null) {
         if (this.isRunning) {
-            console.log('⚠️ Context display already running');
+            warn('Context display already running');
             return;
         }
 
         this.contextSource = contextSource;
         this.isRunning = true;
         
-        console.log('🖥️  Starting persistent context display...');
+        info('DISPLAY  Starting persistent context display...');
         
         // Create initial display state
         this.updateDisplayState();
@@ -49,7 +50,7 @@ class CLIContextDisplay {
             this.updateDisplayState();
         }, this.updateInterval);
         
-        console.log(`📊 Context display active - updating every ${this.updateInterval/1000}s`);
+        info(`METRICS Context display active - updating every ${this.updateInterval/1000}s`);
     }
 
     /**
@@ -68,7 +69,7 @@ class CLIContextDisplay {
         // Mark display as inactive
         this.updateDisplayState({ isActive: false });
         
-        console.log('🛑 Context display stopped');
+        info('STOP Context display stopped');
     }
 
     /**
@@ -108,7 +109,7 @@ class CLIContextDisplay {
             
             fs.writeFileSync(this.displayFile, JSON.stringify(displayState, null, 2));
         } catch (error) {
-            console.error('Failed to update display state:', error);
+            error('Failed to update display state:', error);
         }
     }
 
@@ -125,14 +126,14 @@ class CLIContextDisplay {
         const detailText = `${tokens.toLocaleString()} tokens (${percentage.toFixed(1)}% used)`;
         
         // Status indicator
-        let statusIcon = '🟢';
+        let statusIcon = '';
         let statusText = 'SAFE';
         
         if (isCritical) {
-            statusIcon = '🔴';
+            statusIcon = '';
             statusText = 'CRITICAL';
         } else if (isWarning) {
-            statusIcon = '🟡';
+            statusIcon = '';
             statusText = 'WARNING';
         }
         
@@ -203,9 +204,9 @@ class CLIContextDisplay {
                 });
             }
             
-            console.log('🚀 Context display process launched');
+            info('Context display process launched');
         } catch (error) {
-            console.error('Failed to launch display process:', error);
+            error('Failed to launch display process:', error);
         }
     }
 
@@ -268,15 +269,15 @@ class ContextDisplayProcess {
         if (this.displayActive) {
             process.stdout.write('\\033[1A\\033[2K'); // Move up and clear line
         } else {
-            console.log('\\n🎯 Context Monitor Active - Real-time token usage:');
+            info('\\n Context Monitor Active - Real-time token usage:');
             this.displayActive = true;
         }
         
-        console.log(line);
+        info(line);
         
         // Add instructions on first display
         if (!this.displayActive) {
-            console.log('\\033[2m   Updates every 5 seconds | Ctrl+C to exit\\033[0m');
+            info('\\033[2m   Updates every 5 seconds | Ctrl+C to exit\\033[0m');
         }
     }
 
@@ -287,7 +288,7 @@ class ContextDisplayProcess {
                 const state = JSON.parse(data);
                 
                 if (!state.isActive) {
-                    console.log('\\n🛑 Context monitoring stopped by main process');
+                    info('\\nSTOP Context monitoring stopped by main process');
                     process.exit(0);
                 }
                 
@@ -304,13 +305,13 @@ class ContextDisplayProcess {
     }
 
     start() {
-        console.log('📊 Context Display Process Started');
-        console.log('Monitoring context usage in real-time...');
+        info('METRICS Context Display Process Started');
+        info('Monitoring context usage in real-time...');
         this.checkForUpdates();
         
         // Handle graceful shutdown
         process.on('SIGINT', () => {
-            console.log('\\n🛑 Context display process stopped');
+            info('\\nSTOP Context display process stopped');
             process.exit(0);
         });
     }
@@ -347,7 +348,7 @@ display.start();
             
             return statusData;
         } catch (error) {
-            console.error('Failed to create status line display:', error);
+            error('Failed to create status line display:', error);
             return null;
         }
     }
@@ -356,7 +357,7 @@ display.start();
      * Demo function
      */
     async demo() {
-        console.log('🖥️  CLI Context Display Demo\\n');
+        info('DISPLAY  CLI Context Display Demo\\n');
         
         // Mock context source for demo
         const mockContextSource = {
@@ -373,18 +374,18 @@ display.start();
             }
         };
         
-        console.log('📊 Starting context display with mock data...');
+        info('METRICS Starting context display with mock data...');
         this.startDisplay(mockContextSource);
         
-        console.log('✅ Context display is now running!');
-        console.log('📱 Check for:');
-        console.log('  - Separate window showing context percentage');
-        console.log('  - Updates every 5 seconds');
-        console.log('  - Color coding: Green (safe), Yellow (warning), Red (critical)');
+        info('Context display is now running!');
+        info(' Check for:');
+        info('  - Separate window showing context percentage');
+        info('  - Updates every 5 seconds');
+        info('  - Color coding: Green (safe), Yellow (warning), Red (critical)');
         
         // Run for demo duration
         setTimeout(() => {
-            console.log('\\n🛑 Demo completed - stopping context display');
+            info('\\nSTOP Demo completed - stopping context display');
             this.stopDisplay();
         }, 15000);
         

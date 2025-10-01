@@ -1,3 +1,4 @@
+const { info, warn, error } = require('./logger');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { EventEmitter } = require('events');
 
@@ -44,7 +45,7 @@ class CrossBranchCoordinator extends EventEmitter {
         await this.createCoordinationTables();
         
         this.initialized = true;
-        console.log('✅ Cross-Branch Coordinator initialized');
+        info('Cross-Branch Coordinator initialized');
     }
 
     /**
@@ -132,7 +133,7 @@ class CrossBranchCoordinator extends EventEmitter {
         // Store in database
         await this.storeBranchContext(branchName, 'registration', initialContext);
         
-        console.log(`🌿 Registered branch: ${branchName}`);
+        info(` Registered branch: ${branchName}`);
         this.emit('branchRegistered', { branchName, initialContext });
         
         return true;
@@ -217,7 +218,7 @@ class CrossBranchCoordinator extends EventEmitter {
         }
         
         if (conflicts.length > 0) {
-            console.log(`⚠️  Detected ${conflicts.length} conflict(s) for branch ${branchName}`);
+            warn(`Detected ${conflicts.length} conflict(s) for branch ${branchName}`);
             this.emit('conflictsDetected', { branchName, conflicts });
         }
         
@@ -295,7 +296,7 @@ class CrossBranchCoordinator extends EventEmitter {
 
         const coordinationId = `coord_${Date.now()}`;
         
-        console.log(`🔄 Coordinating ${actionType} across branches: ${targetBranches.join(', ')}`);
+        info(`CYCLE Coordinating ${actionType} across branches: ${targetBranches.join(', ')}`);
         
         // Store coordination action
         await this.storeCoordinationAction(coordinationId, actionType, targetBranches, actionData);
@@ -623,7 +624,7 @@ class CrossBranchCoordinator extends EventEmitter {
         this.pendingConflicts.clear();
         this.removeAllListeners();
         
-        console.log('🧹 Cross-Branch Coordinator cleaned up');
+        info('CLEANUP Cross-Branch Coordinator cleaned up');
     }
 }
 

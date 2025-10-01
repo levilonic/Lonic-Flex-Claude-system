@@ -6,7 +6,7 @@
  * Features:
  * - Manager approval workflows via Slack integration
  * - Timeout handling and escalation paths
- * - Multi-level approval chains (Manager → Security → Budget → Compliance)
+ * - Multi-level approval chains (Manager -> Security -> Budget -> Compliance)
  * - Real-time approval tracking and notifications
  * - Integration with conditional workflow engine
  */

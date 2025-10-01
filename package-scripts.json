@@ -1,0 +1,26 @@
+{
+  "test": {
+    "description": "Run all tests",
+    "script": "node tests/test-runner.js --category=all"
+  },
+  "test:smoke": {
+    "description": "Run smoke tests only (fast)",
+    "script": "node tests/test-runner.js --category=smoke"
+  },
+  "test:unit": {
+    "description": "Run unit tests",
+    "script": "node tests/test-runner.js --category=unit"
+  },
+  "test:coverage": {
+    "description": "Analyze test coverage",
+    "script": "node analyze-test-coverage.js"
+  },
+  "test:enforce": {
+    "description": "Enforce 100% coverage (blocks on failure)",
+    "script": "node enforce-test-coverage.js"
+  },
+  "verify": {
+    "description": "Run all verification checks",
+    "script": "npm run test && npm run test:coverage && npm run test:enforce"
+  }
+}

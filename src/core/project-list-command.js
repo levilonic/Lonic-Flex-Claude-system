@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 
 /**
  * Project List Command - LonicFLex Implementation
@@ -101,7 +102,7 @@ class ProjectListCommand {
             // Format and display results
             const displayResult = await this.formatProjectList(enhancedProjects, options);
             
-            console.log(displayResult);
+            info(displayResult);
 
             const validation = { success: this.validateSuccess() };return {
 
@@ -112,7 +113,7 @@ class ProjectListCommand {
             };
 
         } catch (error) {
-            console.error('❌ Project list command failed:', error.message);
+            error('FAIL Project list command failed:', error.message);
             return {
                 success: false,
                 error: error.message
@@ -166,7 +167,7 @@ class ProjectListCommand {
                 });
 
             } catch (error) {
-                console.warn(`⚠️ Could not enhance project ${project.name}:`, error.message);
+                warn(`WARN Could not enhance project ${project.name}:`, error.message);
                 // Add basic enhancement even if detailed info fails
                 enhanced.push({
                     ...project,
@@ -216,13 +217,13 @@ class ProjectListCommand {
      */
     formatCompactView(projects, options) {
         const statusCounts = this.getStatusCounts(projects);
-        const header = `🏗️  Project Windows (${statusCounts.active} active, ${statusCounts.paused} paused, ${statusCounts.completed} completed)`;
+        const header = `BUILD  Project Windows (${statusCounts.active} active, ${statusCounts.paused} paused, ${statusCounts.completed} completed)`;
         
         // Table headers
         const table = [
-            '┌──────────────────┬──────────┬─────────────┬───────────────┐',
-            '│ Project Name     │ Status   │ Last Active │ Sessions      │',
-            '├──────────────────┼──────────┼─────────────┼───────────────┤'
+            '',
+            ' Project Name      Status    Last Active  Sessions      ',
+            ''
         ];
 
         // Table rows
@@ -233,17 +234,17 @@ class ProjectListCommand {
             const sessions = `${project.session_count} sessions`;
 
             table.push(
-                `│ ${this.pad(name, 16)} │ ${this.pad(status, 8)} │ ${this.pad(lastActive, 11)} │ ${this.pad(sessions, 13)} │`
+                ` ${this.pad(name, 16)}  ${this.pad(status, 8)}  ${this.pad(lastActive, 11)}  ${this.pad(sessions, 13)} `
             );
         }
 
-        table.push('└──────────────────┴──────────┴─────────────┴───────────────┘');
+        table.push('');
 
         // Quick actions
         const quickActions = [
             '',
-            '💡 Resume: /project-start <name> --resume',
-            '💾 Quick Actions: /project-save, /project-pause',
+            ' Resume: /project-start <name> --resume',
+            ' Quick Actions: /project-save, /project-pause',
             ''
         ];
 
@@ -260,24 +261,24 @@ class ProjectListCommand {
         const lines = [];
         const statusCounts = this.getStatusCounts(projects);
         
-        lines.push(`🏗️  Project Windows (${projects.length} total: ${statusCounts.active} active, ${statusCounts.paused} paused, ${statusCounts.completed} completed)`);
+        lines.push(`BUILD  Project Windows (${projects.length} total: ${statusCounts.active} active, ${statusCounts.paused} paused, ${statusCounts.completed} completed)`);
         lines.push('');
 
         for (const project of projects) {
             lines.push(`${project.status_icon}  ${project.name} (${this.capitalize(project.status)})`);
-            lines.push(`    🎯 Goal: ${project.goal || 'No goal specified'}`);
+            lines.push(`     Goal: ${project.goal || 'No goal specified'}`);
             
             const createdDate = new Date(project.created_at).toLocaleDateString();
-            lines.push(`    📅 Created: ${createdDate} • Last Active: ${project.time_since_active}`);
+            lines.push(`     Created: ${createdDate} - Last Active: ${project.time_since_active}`);
             
             const contextHealth = `${project.context_health.preserved} items (${project.context_health.percentage}% preserved)`;
-            lines.push(`    📊 Progress: ${project.session_count} sessions • ${contextHealth}`);
+            lines.push(`    METRICS Progress: ${project.session_count} sessions - ${contextHealth}`);
             
             if (project.recent_activity) {
-                lines.push(`    🔑 Recent: "${project.recent_activity}"`);
+                lines.push(`     Recent: "${project.recent_activity}"`);
             }
             
-            lines.push(`    ▶️  Resume: /project-start ${project.name} --resume`);
+            lines.push(`      Resume: /project-start ${project.name} --resume`);
             lines.push('');
         }
 
@@ -293,12 +294,12 @@ class ProjectListCommand {
      */
     formatEmptyState() {
         return [
-            '📭 No projects found',
+            ' No projects found',
             '',
-            '💡 Create your first project with:',
+            ' Create your first project with:',
             '   /project-start <name> --project --goal="Your project goal"',
             '',
-            '📖 Learn more: /help project-system'
+            ' Learn more: /help project-system'
         ].join('\n');
     }
 
@@ -307,13 +308,13 @@ class ProjectListCommand {
      */
     getStatusIcon(status) {
         const icons = {
-            'active': '⚡',
-            'paused': '⏸️',
-            'completed': '✅',
-            'archived': '📦',
-            'blocked': '⚠️'
+            'active': 'FAST',
+            'paused': '',
+            'completed': 'PASS',
+            'archived': '',
+            'blocked': 'WARN'
         };
-        return icons[status] || '❓';
+        return icons[status] || '';
     }
 
     /**
@@ -388,9 +389,9 @@ class ProjectListCommand {
         // Stale projects (>30 days)
         const staleProjects = projects.filter(p => p.days_since_active > 30 && p.status === 'active');
         if (staleProjects.length > 0) {
-            warnings.push('⚠️  Stale Projects (>30 days inactive):');
+            warnings.push('WARN  Stale Projects (>30 days inactive):');
             staleProjects.forEach(p => {
-                warnings.push(`   • ${p.name} (${p.days_since_active} days) - Consider archiving`);
+                warnings.push(`   - ${p.name} (${p.days_since_active} days) - Consider archiving`);
             });
             warnings.push('');
         }
@@ -398,9 +399,9 @@ class ProjectListCommand {
         // Context health issues
         const healthIssues = projects.filter(p => p.context_health.percentage < 80 && p.context_health.total > 0);
         if (healthIssues.length > 0) {
-            warnings.push('⚠️  Context Health Issues:');
+            warnings.push('WARN  Context Health Issues:');
             healthIssues.forEach(p => {
-                warnings.push(`   • ${p.name}: ${p.context_health.percentage}% preserved - Review important milestones`);
+                warnings.push(`   - ${p.name}: ${p.context_health.percentage}% preserved - Review important milestones`);
             });
             warnings.push('');
         }
@@ -416,13 +417,13 @@ class ProjectListCommand {
         const totalSessions = projects.reduce((sum, p) => sum + p.session_count, 0);
         const totalContextItems = projects.reduce((sum, p) => sum + p.context_health.total, 0);
         
-        summary.push('📊 System Health Summary:');
-        summary.push(`   📁 ${projects.length} projects • 🔄 ${totalSessions} sessions • 💾 ${totalContextItems} context items`);
+        summary.push('METRICS System Health Summary:');
+        summary.push(`    ${projects.length} projects - CYCLE ${totalSessions} sessions -  ${totalContextItems} context items`);
         
         const avgHealth = projects.length > 0 
             ? Math.round(projects.reduce((sum, p) => sum + p.context_health.percentage, 0) / projects.length)
             : 0;
-        summary.push(`   🏥 Average context health: ${avgHealth}%`);
+        summary.push(`   HEALTH Average context health: ${avgHealth}%`);
         
         return summary;
     }
@@ -461,7 +462,7 @@ async function main() {
     const args = process.argv.slice(2);
     
     if (args.includes('--help') || args.includes('-h')) {
-        console.log(`
+        info(`
 Project List Command - LonicFLex
 
 USAGE:
@@ -494,7 +495,7 @@ module.exports = { ProjectListCommand };
 
 if (require.main === module) {
     main().catch(error => {
-        console.error('❌ Command failed:', error.message);
+        error('FAIL Command failed:', error.message);
         process.exit(1);
     });
 }

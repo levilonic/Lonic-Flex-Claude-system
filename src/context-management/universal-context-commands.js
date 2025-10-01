@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 
 /**
  * Universal Context Command System - Phase 3B
@@ -8,7 +9,8 @@
 
 const { Factor3ContextManager, CONTEXT_SCOPES } = require('../context-management/factor3-context-manager');
 const { ContextScopeManager, SCOPE_TYPES } = require('./context-scope-manager');
-const { MultiAgentCore } = require('../../integrations/claude/claude-multi-agent-core');
+// NOTE: MultiAgentCore archived - using simplified coordinator directly
+// const { MultiAgentCore } = require('../../integrations/claude/claude-multi-agent-core');
 const { SimplifiedExternalCoordinator } = require('../../integrations/simplified-external-coordinator');
 const { LongTermPersistence } = require('./long-term-persistence');
 const { ContextHealthMonitor } = require('./context-health-monitor');
@@ -129,9 +131,9 @@ class UniversalContextCommands {
             scopeType = detection.suggested_scope;
             
             if (detection.confidence !== 'high') {
-                console.log(`🤖 Auto-detected scope: ${scopeType} (confidence: ${detection.confidence})`);
-                console.log(`💡 Reasons: ${detection.reasons.join(', ')}`);
-                console.log(`⚡ Use --session or --project to override`);
+                info(`AGENT Auto-detected scope: ${scopeType} (confidence: ${detection.confidence})`);
+                info(` Reasons: ${detection.reasons.join(', ')}`);
+                info(`FAST Use --session or --project to override`);
             }
         }
 
@@ -143,22 +145,22 @@ class UniversalContextCommands {
      * Create new context (session or project)
      */
     async createNewContext(contextName, scopeType, flags) {
-        // Initialize multi-agent system if needed
-        if (!this.multiAgentCore) {
-            this.multiAgentCore = new MultiAgentCore();
-            await this.multiAgentCore.initialize();
-        }
+        // NOTE: MultiAgentCore archived - external coordinator handles agent coordination
+        // if (!this.multiAgentCore) {
+        //     this.multiAgentCore = new MultiAgentCore();
+        //     await this.multiAgentCore.initialize();
+        // }
 
         // Phase 3A: Initialize external system coordination
         if (!this.externalCoordinator) {
-            console.log('🚀 Initializing external system integration...');
+            info('Initializing external system integration...');
             this.externalCoordinator = new SimplifiedExternalCoordinator(this.externalIntegrationConfig);
             await this.externalCoordinator.initialize();
         }
 
         // Phase 3B: Initialize long-term persistence system
         if (!this.longTermPersistence && this.persistenceConfig.enableLongTerm) {
-            console.log('📦 Initializing long-term persistence system...');
+            info(' Initializing long-term persistence system...');
             this.longTermPersistence = new LongTermPersistence({
                 archiveDir: path.join(this.baseDir, 'contexts', 'long-term')
             });
@@ -166,7 +168,7 @@ class UniversalContextCommands {
 
         // Phase 3B: Initialize health monitoring system
         if (!this.healthMonitor && this.persistenceConfig.enableHealthMonitoring) {
-            console.log('🏥 Initializing context health monitoring...');
+            info('HEALTH Initializing context health monitoring...');
             this.healthMonitor = new ContextHealthMonitor({
                 backgroundMaintenance: this.persistenceConfig.backgroundMaintenance,
                 persistence: { archiveDir: path.join(this.baseDir, 'contexts', 'long-term') }
@@ -208,24 +210,24 @@ class UniversalContextCommands {
         };
 
         try {
-            console.log('🔧 Setting up external systems...');
+            logger.debug('Setting up external systems...');
             const externalResult = await this.externalCoordinator.onContextCreated(contextData);
             
             // Log external system setup results
             if (externalResult.github?.githubResources?.length > 0) {
-                console.log(`✅ GitHub resources created: ${externalResult.github.githubResources.length}`);
+                info(`GitHub resources created: ${externalResult.github.githubResources.length}`);
                 externalResult.github.githubResources.forEach(resource => {
-                    console.log(`   ${resource.type}: ${resource.name || resource.number} - ${resource.url}`);
+                    info(`   ${resource.type}: ${resource.name || resource.number} - ${resource.url}`);
                 });
             }
             
             if (externalResult.slack?.notifications?.length > 0) {
-                console.log(`📢 Slack notifications sent: ${externalResult.slack.notifications.length}`);
+                info(` Slack notifications sent: ${externalResult.slack.notifications.length}`);
             }
             
             if (externalResult.summary.errors.length > 0) {
-                console.log(`⚠️ External system errors: ${externalResult.summary.errors.length}`);
-                externalResult.summary.errors.forEach(error => console.log(`   ${error}`));
+                warn(`External system errors: ${externalResult.summary.errors.length}`);
+                externalResult.summary.errors.forEach(error => info(`   ${error}`));
             }
             
             // Store external resources in context
@@ -236,11 +238,11 @@ class UniversalContextCommands {
                 errors: externalResult.summary.errors
             });
             
-        } catch (error) {
-            console.error('❌ External system setup failed:', error.message);
+        } catch (err) {
+            error('FAIL External system setup failed:', err.message);
             // Continue without external systems - not a blocking error
             context.addEvent('external_systems_error', {
-                error: error.message,
+                error: err.message,
                 timestamp: new Date().toISOString()
             });
         }
@@ -291,7 +293,7 @@ class UniversalContextCommands {
         }
 
         // If not in active registry, try to load from disk
-        console.log('🔍 Context not in active registry, scanning disk...');
+        info(' Context not in active registry, scanning disk...');
         context = await this.loadContextFromDisk(contextName);
         if (context) {
             // Context loaded from disk, proceed with resumption
@@ -314,7 +316,7 @@ class UniversalContextCommands {
 
         // Phase 3B: Check long-term archives if context not active
         if (this.longTermPersistence) {
-            console.log('🔍 Context not active, checking long-term archives...');
+            info(' Context not active, checking long-term archives...');
             
             // Try both session and project scopes
             for (const scope of ['session', 'project']) {
@@ -322,9 +324,9 @@ class UniversalContextCommands {
                     const restoreResult = await this.longTermPersistence.restoreContext(contextName, scope);
                     
                     if (restoreResult.success) {
-                        console.log(`✅ Context restored from long-term archive (${scope})`);
-                        console.log(`⚡ Time gap: ${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`);
-                        console.log(`🚀 Restore time: ${restoreResult.restoreTime}ms`);
+                        info(`Context restored from long-term archive (${scope})`);
+                        info(`FAST Time gap: ${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`);
+                        info(`Restore time: ${restoreResult.restoreTime}ms`);
                         
                         // Recreate active context from restored data
                         const restoredContext = Factor3ContextManager.createContext({
@@ -336,7 +338,7 @@ class UniversalContextCommands {
                         await this.rebuildContextFromArchive(restoredContext, restoreResult.context);
                         
                         return {
-                            message: `🔄 Restored from archive: ${scope} ${contextName}`,
+                            message: `CYCLE Restored from archive: ${scope} ${contextName}`,
                             context_id: contextName,
                             scope: scope,
                             time_gap: `${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`,
@@ -376,7 +378,7 @@ class UniversalContextCommands {
         let context = Factor3ContextManager.getContextById(targetContextId);
         if (!context) {
             // If not in active registry, try to load from disk
-            console.log('🔍 Context not in active registry, loading from disk...');
+            info(' Context not in active registry, loading from disk...');
             context = await this.loadContextFromDisk(targetContextId);
             if (!context) {
                 throw new Error(`Context '${targetContextId}' not found`);
@@ -417,7 +419,7 @@ class UniversalContextCommands {
 
         if (allContexts.length === 0) {
             return {
-                message: '📭 No active contexts found',
+                message: ' No active contexts found',
                 suggestion: 'Use /start <context-name> to create your first context'
             };
         }
@@ -427,7 +429,7 @@ class UniversalContextCommands {
         const projects = allContexts.filter(c => c.scope === 'project');
 
         const response = {
-            message: `📋 Active Contexts (${allContexts.length} total)`,
+            message: ` Active Contexts (${allContexts.length} total)`,
             sessions: sessions.map(this.formatContextSummary),
             projects: projects.map(this.formatContextSummary),
             commands: {
@@ -471,7 +473,7 @@ class UniversalContextCommands {
         });
 
         return {
-            message: `🔄 Switched to ${context.contextScope}: ${contextName}`,
+            message: `CYCLE Switched to ${context.contextScope}: ${contextName}`,
             context: switchContext,
             current_task: context.currentTask,
             scope: context.contextScope,
@@ -491,7 +493,7 @@ class UniversalContextCommands {
         }
 
         if (!flags['to-project']) {
-            throw new Error('Only session → project upgrades supported. Use --to-project flag');
+            throw new Error('Only session -> project upgrades supported. Use --to-project flag');
         }
 
         const context = Factor3ContextManager.getContextById(contextName);
@@ -524,7 +526,7 @@ class UniversalContextCommands {
         await this.createProjectIdentity(contextName, flags);
 
         return {
-            message: `⬆️ Upgraded ${contextName} from session to project`,
+            message: ` Upgraded ${contextName} from session to project`,
             upgrade_result: upgradeResult,
             benefits: validation.upgrade_benefits,
             project_created: true
@@ -538,7 +540,7 @@ class UniversalContextCommands {
         const allContexts = Factor3ContextManager.getAllActiveContexts();
         
         if (allContexts.length === 0) {
-            return { message: '📭 No active contexts' };
+            return { message: ' No active contexts' };
         }
 
         const stats = {
@@ -567,7 +569,7 @@ class UniversalContextCommands {
         }
 
         return {
-            message: '📊 Universal Context System Status',
+            message: 'METRICS Universal Context System Status',
             statistics: stats,
             contexts: contextDetails,
             system_health: 'operational'
@@ -693,11 +695,11 @@ class UniversalContextCommands {
                 }
                 global.LONICFLEX_CONTEXT_REGISTRY.set(contextName, context);
                 
-                console.log(`✅ Context '${contextName}' loaded from disk (${scopeType} scope)`);
+                info(`PASS Context '${contextName}' loaded from disk (${scopeType} scope)`);
                 return context;
                 
             } catch (error) {
-                console.log(`⚠️ Could not load context '${contextName}' from ${scopeType} scope: ${error.message}`);
+                info(`WARN Could not load context '${contextName}' from ${scopeType} scope: ${error.message}`);
                 continue;
             }
         }
@@ -725,7 +727,7 @@ class UniversalContextCommands {
      */
     formatStartResponse(contextName, scopeType, isNew, details) {
         const response = {
-            message: `${isNew ? '🚀' : '🔄'} ${isNew ? 'Started' : 'Resumed'} ${scopeType}: ${contextName}`,
+            message: `${isNew ? '' : 'CYCLE'} ${isNew ? 'Started' : 'Resumed'} ${scopeType}: ${contextName}`,
             context_id: contextName,
             scope: scopeType,
             is_new: isNew
@@ -740,7 +742,7 @@ class UniversalContextCommands {
 
     formatResumeResponse(contextName, scopeType, summary, resumptionContext) {
         return {
-            message: `🔄 Resumed ${scopeType}: ${contextName}`,
+            message: `CYCLE Resumed ${scopeType}: ${contextName}`,
             context_id: contextName,
             scope: scopeType,
             current_task: resumptionContext.current_task,
@@ -793,7 +795,7 @@ class UniversalContextCommands {
         }
 
         return {
-            message: `📦 Archived ${context.contextScope}: ${contextName}`,
+            message: ` Archived ${context.contextScope}: ${contextName}`,
             archive_level: archiveResult.archiveLevel,
             compression_ratio: `${(archiveResult.compressionRatio * 100).toFixed(1)}%`,
             archive_time: `${archiveResult.archiveTime}ms`,
@@ -830,7 +832,7 @@ class UniversalContextCommands {
             await this.rebuildContextFromArchive(restoredContext, restoreResult.context);
 
             return {
-                message: `🔄 Restored ${scope}: ${contextName}`,
+                message: `CYCLE Restored ${scope}: ${contextName}`,
                 time_gap: `${Math.floor(restoreResult.timeGap / (24 * 60 * 60 * 1000))} days`,
                 restore_time: `${restoreResult.restoreTime}ms`,
                 performance_met: restoreResult.performanceMet,
@@ -856,7 +858,7 @@ class UniversalContextCommands {
             // Return system health summary
             const healthSummary = await this.healthMonitor.getHealthSummary();
             return {
-                message: '🏥 System Health Summary',
+                message: 'HEALTH System Health Summary',
                 ...healthSummary,
                 background_maintenance: this.healthMonitor.maintenanceInterval !== null
             };
@@ -884,7 +886,7 @@ class UniversalContextCommands {
         }
 
         return {
-            message: `🏥 Health check for ${contextName}`,
+            message: `HEALTH Health check for ${contextName}`,
             ...healthMetrics,
             maintenance_available: !flags.maintenance
         };
@@ -909,7 +911,7 @@ class UniversalContextCommands {
         const stats = await this.longTermPersistence.getArchiveStatistics();
 
         return {
-            message: '🗑️ Archive cleanup completed',
+            message: 'DELETE Archive cleanup completed',
             cleaned: cleanupResult.count,
             freed_bytes: cleanupResult.freedBytes,
             errors: cleanupResult.errors,
@@ -956,7 +958,7 @@ class UniversalContextCommands {
 
     formatSaveResponse(contextName, scopeType, saveResult, flags) {
         const response = {
-            message: `💾 Saved ${scopeType}: ${contextName}`,
+            message: ` Saved ${scopeType}: ${contextName}`,
             context_id: contextName,
             scope: scopeType,
             events_preserved: saveResult.events_preserved,
@@ -1029,10 +1031,10 @@ class UniversalContextCommands {
             phase3b_info: {
                 description: 'Phase 3B adds long-term persistence for 3+ month context survival',
                 features: [
-                    '📦 Progressive archival with compression levels',
-                    '🚀 Sub-second restore performance (<1000ms)',
-                    '🏥 Health monitoring with proactive maintenance',
-                    '🗑️ Automatic cleanup and retention management'
+                    ' Progressive archival with compression levels',
+                    ' Sub-second restore performance (<1000ms)',
+                    'HEALTH Health monitoring with proactive maintenance',
+                    'DELETE Automatic cleanup and retention management'
                 ]
             }
         };
@@ -1047,19 +1049,19 @@ if (require.main === module) {
     const args = process.argv.slice(2);
     
     if (args.length === 0) {
-        console.log('Universal Context Command System');
-        console.log('Usage: node universal-context-commands.js <command> [args...]');
-        console.log(JSON.stringify(commands.getUsageHelp(), null, 2));
+        info('Universal Context Command System');
+        info('Usage: node universal-context-commands.js <command> [args...]');
+        info(JSON.stringify(commands.getUsageHelp(), null, 2));
         process.exit(0);
     }
 
     commands.executeCommand(args)
         .then(result => {
-            console.log(JSON.stringify(result, null, 2));
+            info(JSON.stringify(result, null, 2));
             process.exit(result.error ? 1 : 0);
         })
         .catch(error => {
-            console.error('Command execution failed:', error.message);
+            error('Command execution failed:', error.message);
             process.exit(1);
         });
 }

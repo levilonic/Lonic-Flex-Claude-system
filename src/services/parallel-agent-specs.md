@@ -6,7 +6,7 @@
 
 ---
 
-## 🏗️ CORE SERVICE SPECIFICATIONS
+## BUILD CORE SERVICE SPECIFICATIONS
 
 ### **1. WorktreeManager Service**
 **File**: `services/lonicflex-worktree-manager.js`
@@ -271,7 +271,7 @@ async unsubscribe(agentId, channel, eventTypes = ['all'])
 
 ---
 
-## 🔧 ENHANCED MULTI-AGENT CORE MODIFICATIONS
+##  ENHANCED MULTI-AGENT CORE MODIFICATIONS
 
 ### **Enhanced MultiAgentCore Class**
 **File**: `claude-multi-agent-core.js` (modifications)
@@ -312,14 +312,14 @@ async executeAgentFeedbackLoop(agentConfig) {
 
     while (attempts < maxAttempts) {
         try {
-            console.log(`🤖 Agent ${agentConfig.id} - Attempt ${attempts + 1}`);
+            console.log(` Agent ${agentConfig.id} - Attempt ${attempts + 1}`);
 
             // 1. Implement changes
             const implementation = await this.executeAgentImplementation(agentConfig);
 
             // 2. Run tests
             const testResults = await this.runAgentTests(agentConfig);
-            console.log(`✅ Tests: ${testResults.passed}/${testResults.total}`);
+            console.log(`PASS Tests: ${testResults.passed}/${testResults.total}`);
 
             if (!testResults.success) {
                 await this.analyzeTestFailures(agentConfig, testResults);
@@ -359,7 +359,7 @@ async executeAgentFeedbackLoop(agentConfig) {
             };
 
         } catch (error) {
-            console.error(`❌ Agent ${agentConfig.id} error:`, error);
+            console.error(`FAIL Agent ${agentConfig.id} error:`, error);
             await this.handleAgentError(agentConfig, error);
             attempts++;
         }
@@ -378,7 +378,7 @@ async executeAgentFeedbackLoop(agentConfig) {
 
 ---
 
-## 🔌 PM2 SERVICE INTEGRATION
+##  PM2 SERVICE INTEGRATION
 
 ### **PM2 Ecosystem Enhancement**
 **File**: `ecosystem.config.js` (modifications)
@@ -441,7 +441,7 @@ const serviceDistribution = {
 
 ---
 
-## 📊 PERFORMANCE SPECIFICATIONS
+##  PERFORMANCE SPECIFICATIONS
 
 ### **Resource Requirements**
 ```javascript
@@ -452,8 +452,8 @@ const resourceSpecs = {
         disk: '1GB'
     },
     totalSystem: {
-        memory: '8GB',        // 11 agents × 512MB + overhead
-        cpu: '8 cores',       // 11 agents × 0.5 + coordination overhead
+        memory: '8GB',        // 11 agents x 512MB + overhead
+        cpu: '8 cores',       // 11 agents x 0.5 + coordination overhead
         disk: '20GB'          // 11 worktrees + shared resources
     },
     network: {
@@ -477,7 +477,7 @@ const performanceTargets = {
 
 ---
 
-## 🧪 TESTING SPECIFICATIONS
+##  TESTING SPECIFICATIONS
 
 ### **Unit Tests**
 ```javascript
@@ -528,7 +528,7 @@ describe('Parallel Load Tests', () => {
 
 ---
 
-## 🔒 SECURITY SPECIFICATIONS
+##  SECURITY SPECIFICATIONS
 
 ### **Agent Isolation**
 - **Filesystem Isolation**: Each agent restricted to its worktree
@@ -550,7 +550,7 @@ describe('Parallel Load Tests', () => {
 
 ---
 
-## 📈 MONITORING AND OBSERVABILITY
+##  MONITORING AND OBSERVABILITY
 
 ### **Agent Health Monitoring**
 ```javascript

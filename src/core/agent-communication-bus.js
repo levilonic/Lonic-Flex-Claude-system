@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Agent Communication Bus
  * Phase 2 Implementation: Week 1, Days 2-3
@@ -44,7 +45,7 @@ class AgentCommunicationBus extends EventEmitter {
         // Communication patterns
         this.communicationPatterns = new CommunicationPatterns(this);
 
-        console.log(`📡 Agent Communication Bus initialized: ${this.busId}`);
+        info(` Agent Communication Bus initialized: ${this.busId}`);
     }
 
     /**
@@ -53,7 +54,7 @@ class AgentCommunicationBus extends EventEmitter {
     async registerAgent(agent, capabilities = {}) {
         const agentId = agent.agentId || agent.sessionId;
 
-        console.log(`📝 Registering agent on communication bus: ${agentId}`);
+        info(` Registering agent on communication bus: ${agentId}`);
 
         const registration = {
             agentId: agentId,
@@ -87,7 +88,7 @@ class AgentCommunicationBus extends EventEmitter {
             channels: registration.channels.length
         });
 
-        console.log(`✅ Agent registered with ${registration.channels.length} default channels`);
+        info(`Agent registered with ${registration.channels.length} default channels`);
         return registration;
     }
 
@@ -98,7 +99,7 @@ class AgentCommunicationBus extends EventEmitter {
         try {
             const messageId = `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-            console.log(`📤 Sending message: ${fromAgentId} → ${toAgentId} (${message.type})`);
+            info(` Sending message: ${fromAgentId} -> ${toAgentId} (${message.type})`);
 
             // Validate sender and recipient
             const sender = this.registeredAgents.get(fromAgentId);
@@ -144,11 +145,11 @@ class AgentCommunicationBus extends EventEmitter {
                 });
             }
 
-            console.log(`${routingResult.success ? '✅' : '❌'} Message ${routingResult.success ? 'delivered' : 'failed'}: ${messageId}`);
+            info(`${routingResult.success ? 'PASS' : 'FAIL'} Message ${routingResult.success ? 'delivered' : 'failed'}: ${messageId}`);
             return routingResult;
 
         } catch (error) {
-            console.error('❌ Message sending failed:', error);
+            error('FAIL Message sending failed:', error);
             this.messageMetrics.recordError(fromAgentId, 'send_failed', error.message);
             throw error;
         }
@@ -160,7 +161,7 @@ class AgentCommunicationBus extends EventEmitter {
     async broadcastMessage(fromAgentId, recipients, message) {
         const broadcastId = `broadcast-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        console.log(`📢 Broadcasting message from ${fromAgentId} to ${recipients.length} recipients`);
+        info(` Broadcasting message from ${fromAgentId} to ${recipients.length} recipients`);
 
         const results = [];
 
@@ -187,7 +188,7 @@ class AgentCommunicationBus extends EventEmitter {
             failed: recipients.length - successCount
         });
 
-        console.log(`✅ Broadcast completed: ${successCount}/${recipients.length} successful`);
+        info(`Broadcast completed: ${successCount}/${recipients.length} successful`);
         return { broadcastId: broadcastId, results: results };
     }
 
@@ -195,7 +196,7 @@ class AgentCommunicationBus extends EventEmitter {
      * Create and manage communication channels
      */
     async createChannel(channelName, options = {}) {
-        console.log(`📺 Creating communication channel: ${channelName}`);
+        info(` Creating communication channel: ${channelName}`);
 
         const channel = {
             name: channelName,
@@ -220,7 +221,7 @@ class AgentCommunicationBus extends EventEmitter {
             createdBy: channel.createdBy
         });
 
-        console.log(`✅ Channel created: ${channelName} (${channel.type})`);
+        info(`Channel created: ${channelName} (${channel.type})`);
         return channel;
     }
 
@@ -239,7 +240,7 @@ class AgentCommunicationBus extends EventEmitter {
         }
 
         if (channel.members.includes(agentId)) {
-            console.log(`⚠️ Agent ${agentId} already in channel: ${channelName}`);
+            warn(`Agent ${agentId} already in channel: ${channelName}`);
             return;
         }
 
@@ -247,7 +248,7 @@ class AgentCommunicationBus extends EventEmitter {
             throw new Error(`Channel is full: ${channelName} (${channel.maxMembers} max)`);
         }
 
-        console.log(`🔗 Agent ${agentId} joining channel: ${channelName}`);
+        info(` Agent ${agentId} joining channel: ${channelName}`);
 
         channel.members.push(agentId);
         agent.channels.push(channelName);
@@ -259,7 +260,7 @@ class AgentCommunicationBus extends EventEmitter {
             memberCount: channel.members.length
         });
 
-        console.log(`✅ Agent joined channel (${channel.members.length} members): ${channelName}`);
+        info(`Agent joined channel (${channel.members.length} members): ${channelName}`);
     }
 
     /**
@@ -277,7 +278,7 @@ class AgentCommunicationBus extends EventEmitter {
 
         const messageId = `ch-msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        console.log(`📺 Sending channel message: ${fromAgentId} → #${channelName}`);
+        info(` Sending channel message: ${fromAgentId} -> #${channelName}`);
 
         const channelMessage = {
             id: messageId,
@@ -309,7 +310,7 @@ class AgentCommunicationBus extends EventEmitter {
             type: message.type
         });
 
-        console.log(`✅ Channel message sent to ${channel.members.length - 1} members`);
+        info(`Channel message sent to ${channel.members.length - 1} members`);
         return channelMessage;
     }
 
@@ -322,7 +323,7 @@ class AgentCommunicationBus extends EventEmitter {
             throw new Error(`Agent not registered: ${agentId}`);
         }
 
-        console.log(`🔔 Agent ${agentId} subscribing to events: ${eventTypes.join(', ')}`);
+        info(` Agent ${agentId} subscribing to events: ${eventTypes.join(', ')}`);
 
         for (const eventType of eventTypes) {
             if (!this.subscriptions.has(eventType)) {
@@ -342,7 +343,7 @@ class AgentCommunicationBus extends EventEmitter {
             totalSubscriptions: agent.subscriptions.length
         });
 
-        console.log(`✅ Agent subscribed to ${eventTypes.length} event types`);
+        info(`Agent subscribed to ${eventTypes.length} event types`);
     }
 
     /**
@@ -351,7 +352,7 @@ class AgentCommunicationBus extends EventEmitter {
     async publishEvent(publisherAgentId, eventType, eventData) {
         const subscribers = this.subscriptions.get(eventType) || [];
 
-        console.log(`📡 Publishing event: ${eventType} to ${subscribers.length} subscribers`);
+        info(` Publishing event: ${eventType} to ${subscribers.length} subscribers`);
 
         const eventId = `event-${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const event = {
@@ -378,7 +379,7 @@ class AgentCommunicationBus extends EventEmitter {
             delivered: successfulDeliveries
         });
 
-        console.log(`✅ Event published: ${successfulDeliveries}/${subscribers.length} deliveries successful`);
+        info(`Event published: ${successfulDeliveries}/${subscribers.length} deliveries successful`);
         return { eventId: eventId, delivered: successfulDeliveries, total: subscribers.length };
     }
 
@@ -388,7 +389,7 @@ class AgentCommunicationBus extends EventEmitter {
     async sendRequest(fromAgentId, toAgentId, request, timeout = 30000) {
         const requestId = `req-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        console.log(`🔄 Sending request: ${fromAgentId} → ${toAgentId} (${request.type})`);
+        info(`CYCLE Sending request: ${fromAgentId} -> ${toAgentId} (${request.type})`);
 
         const requestMessage = {
             type: 'request',
@@ -423,7 +424,7 @@ class AgentCommunicationBus extends EventEmitter {
      * Send response to request
      */
     async sendResponse(fromAgentId, requestId, response) {
-        console.log(`↩️ Sending response for request: ${requestId}`);
+        info(` Sending response for request: ${requestId}`);
 
         const responseMessage = {
             type: 'response',
@@ -435,7 +436,7 @@ class AgentCommunicationBus extends EventEmitter {
         // Emit response event
         this.emit(`response:${requestId}`, responseMessage);
 
-        console.log(`✅ Response sent for request: ${requestId}`);
+        info(`Response sent for request: ${requestId}`);
         return responseMessage;
     }
 
@@ -579,7 +580,7 @@ class AgentCommunicationBus extends EventEmitter {
             recipient.lastActivity = new Date();
 
         } catch (error) {
-            console.warn(`⚠️ Failed to notify agent ${recipientId} of channel message:`, error.message);
+            console.warn(`WARN Failed to notify agent ${recipientId} of channel message:`, error.message);
             recipient.metrics.errors++;
         }
     }
@@ -600,7 +601,7 @@ class AgentCommunicationBus extends EventEmitter {
             subscriber.lastActivity = new Date();
 
         } catch (error) {
-            console.warn(`⚠️ Failed to deliver event ${event.type} to ${subscriberId}:`, error.message);
+            console.warn(`WARN Failed to deliver event ${event.type} to ${subscriberId}:`, error.message);
             subscriber.metrics.errors++;
         }
     }
@@ -660,7 +661,7 @@ class MessageRouter {
     }
 
     async routeMessage(envelope) {
-        console.log(`🔀 Routing message: ${envelope.id} (${envelope.from} → ${envelope.to})`);
+        info(` Routing message: ${envelope.id} (${envelope.from} -> ${envelope.to})`);
 
         try {
             // Apply routing strategy
@@ -946,7 +947,7 @@ class PersistentMessageQueue {
             attempts: 0
         });
 
-        console.log(`📥 Message queued for ${agentId} (${priority} priority)`);
+        info(` Message queued for ${agentId} (${priority} priority)`);
     }
 
     async dequeueNextMessage(agentId) {
@@ -972,7 +973,7 @@ class PersistentMessageQueue {
     }
 
     async handleFailedMessage(messageId, agentId, error) {
-        console.log(`⚠️ Message delivery failed: ${messageId} to ${agentId}`);
+        warn(`Message delivery failed: ${messageId} to ${agentId}`);
 
         if (!this.failedMessages.has(messageId)) {
             this.failedMessages.set(messageId, {
@@ -994,7 +995,7 @@ class PersistentMessageQueue {
                 this.retryMessage(messageId);
             }, this.retryDelay * failedMessage.attempts);
         } else {
-            console.error(`❌ Message permanently failed after ${this.maxRetries} attempts: ${messageId}`);
+            error(`FAIL Message permanently failed after ${this.maxRetries} attempts: ${messageId}`);
             this.failedMessages.delete(messageId);
         }
     }
@@ -1003,13 +1004,13 @@ class PersistentMessageQueue {
         const failedMessage = this.failedMessages.get(messageId);
         if (!failedMessage) return;
 
-        console.log(`🔄 Retrying message delivery: ${messageId} (attempt ${failedMessage.attempts})`);
+        info(`CYCLE Retrying message delivery: ${messageId} (attempt ${failedMessage.attempts})`);
 
         try {
             // Attempt redelivery
             // Implementation would depend on message type and delivery method
             this.failedMessages.delete(messageId);
-            console.log(`✅ Message retry successful: ${messageId}`);
+            info(`Message retry successful: ${messageId}`);
         } catch (error) {
             await this.handleFailedMessage(messageId, failedMessage.agentId, error);
         }
@@ -1029,7 +1030,7 @@ class FaultToleranceManager {
     }
 
     async handleCommunicationFailure(agentId, failure) {
-        console.log(`⚠️ Communication failure detected for agent: ${agentId}`);
+        warn(`Communication failure detected for agent: ${agentId}`);
 
         if (!this.failures.has(agentId)) {
             this.failures.set(agentId, []);
@@ -1056,7 +1057,7 @@ class FaultToleranceManager {
         const circuitBreakerDuration = 300000; // 5 minutes
 
         if (recentFailures.length >= failureThreshold) {
-            console.log(`🚨 Circuit breaker triggered for agent: ${agentId}`);
+            info(`ALERT Circuit breaker triggered for agent: ${agentId}`);
 
             this.circuitBreakers.set(agentId, {
                 triggeredAt: new Date(),
@@ -1078,7 +1079,7 @@ class FaultToleranceManager {
     }
 
     resetCircuitBreaker(agentId) {
-        console.log(`🔄 Resetting circuit breaker for agent: ${agentId}`);
+        info(`CYCLE Resetting circuit breaker for agent: ${agentId}`);
 
         this.circuitBreakers.delete(agentId);
 
@@ -1109,7 +1110,7 @@ class CommunicationPatterns {
      * Implement publish-subscribe pattern
      */
     async publishSubscribe(publisherId, topic, message, filters = {}) {
-        console.log(`📢 Pub-Sub: Publishing to topic ${topic}`);
+        info(` Pub-Sub: Publishing to topic ${topic}`);
 
         const subscribers = this.getTopicSubscribers(topic, filters);
         const results = [];
@@ -1135,7 +1136,7 @@ class CommunicationPatterns {
      * Implement request-response pattern with multiple responders
      */
     async multicastRequest(requesterId, responderIds, request, timeout = 30000) {
-        console.log(`🔄 Multicast request to ${responderIds.length} responders`);
+        info(`CYCLE Multicast request to ${responderIds.length} responders`);
 
         const requestPromises = responderIds.map(responderId =>
             this.bus.sendRequest(requesterId, responderId, request, timeout)
@@ -1156,7 +1157,7 @@ class CommunicationPatterns {
      * Implement workflow coordination pattern
      */
     async coordinateWorkflow(coordinatorId, participants, workflow) {
-        console.log(`🔄 Coordinating workflow with ${participants.length} participants`);
+        info(`CYCLE Coordinating workflow with ${participants.length} participants`);
 
         const workflowId = `workflow-${Date.now()}`;
         const results = [];

@@ -16,7 +16,7 @@ allowed-tools: Bash(npm run:*), Read(C:\Users\Levi\Desktop\LonicFLex\**)
 
 **Diagnosis**:
 ```bash
-npm run demo-deploy-agent
+node src/agents/deploy-agent.js
 # Expected: Docker connection error
 ```
 
@@ -29,7 +29,7 @@ npm run demo-deploy-agent
    docker ps
    ```
 3. **Verify Docker Daemon**: Ensure Docker service is started
-4. **Test Fix**: `npm run demo-deploy-agent` should work after Docker starts
+4. **Test Fix**: `node src/agents/deploy-agent.js` should work after Docker starts
 
 ### 2. Unverified Agent Status  
 **Issue**: 5/6 agents not tested  
@@ -37,10 +37,10 @@ npm run demo-deploy-agent
 
 **Quick Test All Agents**:
 ```bash
-npm run demo-github-agent   # Test GitHub integration
-npm run demo-security-agent # Test security scanning  
-npm run demo-code-agent     # Test Claude Code integration
-npm run demo-comm-agent     # Test Slack integration
+npm run agents:github   # Test GitHub integration
+npm run agents:security # Test security scanning  
+npm run agents:code     # Test Claude Code integration
+node src/agents/comm-agent.js     # Test Slack integration
 ```
 
 **If Agent Fails**:
@@ -54,10 +54,10 @@ npm run demo-comm-agent     # Test Slack integration
 ### Agent Execution Debugging
 ```bash
 # Test individual agent
-npm run demo-[agent-name]-agent
+echo "Demo not implemented: [agent-name]-agent
 
 # Test with verbose output
-DEBUG=* npm run demo-base-agent
+DEBUG=* npm run agents:base
 
 # Check database state after agent run
 sqlite3 database/claude-agents.db "SELECT * FROM agents ORDER BY created_at DESC LIMIT 5;"
@@ -78,7 +78,7 @@ npm run demo 2>&1 | grep "Created real agent"
 ### Database Issues
 ```bash
 # Test database connectivity  
-npm run demo-db
+node src/database/sqlite-manager.js
 
 # Check database file exists
 ls -la database/claude-agents.db
@@ -91,7 +91,7 @@ sqlite3 database/claude-agents.db ".schema sessions"
 ### Memory System Issues
 ```bash
 # Test memory system
-npm run demo-memory
+node src/memory/memory-manager.js
 
 # Run verification system
 npm run verify-all
@@ -171,9 +171,9 @@ rm -f database/claude-agents.db-*
 npm run verify-all
 
 # Check all major systems
-npm run demo-db && echo "✅ Database OK"
-npm run demo-base-agent && echo "✅ Base Agent OK" 
-npm run demo-memory && echo "✅ Memory System OK"
+node src/database/sqlite-manager.js && echo "✅ Database OK"
+npm run agents:base && echo "✅ Base Agent OK" 
+node src/memory/memory-manager.js && echo "✅ Memory System OK"
 node factor3-context-manager.js && echo "✅ Context Manager OK"
 ```
 
@@ -182,7 +182,7 @@ node factor3-context-manager.js && echo "✅ Context Manager OK"
 # Test each agent individually
 for agent in base github security code deploy comm; do
   echo "Testing $agent agent..."
-  npm run demo-$agent-agent && echo "✅ $agent OK" || echo "❌ $agent FAILED"
+  echo "Demo not implemented: $agent-agent && echo "✅ $agent OK" || echo "❌ $agent FAILED"
 done
 ```
 
@@ -208,8 +208,8 @@ ls -la database/ && echo "✅ Database files exist"
 
 2. **Verify Core Systems**:
    ```bash
-   npm run demo-db
-   npm run demo-base-agent
+   node src/database/sqlite-manager.js
+   npm run agents:base
    npm run verify-all
    ```
 
@@ -222,11 +222,11 @@ ls -la database/ && echo "✅ Database files exist"
 
 4. **Test All Agents**:
    ```bash
-   npm run demo-github-agent
-   npm run demo-security-agent  
-   npm run demo-code-agent
-   npm run demo-comm-agent
-   npm run demo-deploy-agent  # Should work after Docker fix
+   npm run agents:github
+   npm run agents:security  
+   npm run agents:code
+   node src/agents/comm-agent.js
+   node src/agents/deploy-agent.js  # Should work after Docker fix
    ```
 
 5. **Full Workflow Test**:
@@ -242,7 +242,7 @@ ls -la database/ && echo "✅ Database files exist"
 **Diagnosis**:
 ```bash
 # Time agent execution
-time npm run demo-base-agent
+time npm run agents:base
 
 # Check database performance
 sqlite3 database/claude-agents.db "EXPLAIN QUERY PLAN SELECT * FROM agents;"
@@ -290,7 +290,7 @@ rm -rf node_modules package-lock.json
 npm install
 
 # Test basic functionality
-npm run demo-base-agent
+npm run agents:base
 ```
 
 ### Backup Current State

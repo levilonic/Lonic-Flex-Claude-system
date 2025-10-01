@@ -1,0 +1,25 @@
+# 🔒 PRE-COMMIT HOOK - TEST ENFORCEMENT
+echo "🛡️  Pre-commit: Enforcing test requirements..."
+
+# Run quick smoke tests first
+echo "🧪 Running smoke tests..."
+npm run test:smoke || {
+    echo "❌ COMMIT BLOCKED: Smoke tests failed!"
+    echo "Fix the tests before committing."
+    exit 1
+}
+
+# Enforce 100% test coverage - BLOCKING
+if [ -f "enforce-test-coverage.js" ]; then
+    echo "📊 Enforcing 100% test coverage requirement..."
+
+    node enforce-test-coverage.js || {
+        echo ""
+        echo "❌ COMMIT BLOCKED: Coverage requirements not met!"
+        echo "Fix coverage issues before committing."
+        exit 1
+    }
+fi
+
+echo "✅ Pre-commit checks passed!"
+exit 0

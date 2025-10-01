@@ -4,7 +4,7 @@
  * Just test if the database actually works
  */
 
-const { SQLiteManager } = require('./database/sqlite-manager');
+const { SQLiteManager } = require('../../src/database/sqlite-manager');
 
 async function testDatabaseIsolation() {
     console.log('🧪 Testing SQLiteManager in isolation...');

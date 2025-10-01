@@ -1,0 +1,658 @@
+
+> lonicflex-12-factor-agents@1.0.0 test
+> node tests/test-runner.js --category=all
+
+
+🧪 LonicFLex Test Runner
+════════════════════════════════════════════════════════════
+
+
+════════════════════════════════════════════════════════════
+  SMOKE TESTS
+════════════════════════════════════════════════════════════
+Running 2 test suites...
+
+
+▶️  Running: Core System Smoke
+   Validates core command execution works
+🧪 Testing LonicFLex Core System
+
+━━━ System Initialization ━━━
+2025-09-30 19:55:50 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:50 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:50 [[32MINFO[39M]: CommandExecutor: Database initialized
+ GitHub token not provided - using mock mode
+2025-09-30 19:55:50 [[32MINFO[39M]: CommandExecutor: GitHub initialized
+✓ System initialized
+
+━━━ System Commands ━━━
+2025-09-30 19:55:50 [[32MINFO[39M]: Executing command: system:info
+2025-09-30 19:55:50 [[32MINFO[39M]: Command completed: system:info
+✓ system:info - LonicFLex Core v1.0.0
+2025-09-30 19:55:50 [[32MINFO[39M]: Executing command: system:health
+2025-09-30 19:55:50 [[32MINFO[39M]: Command completed: system:health
+✓ system:health - healthy
+
+━━━ Database Commands ━━━
+2025-09-30 19:55:50 [[32MINFO[39M]: Executing command: db:status
+2025-09-30 19:55:50 [[32MINFO[39M]: Command completed: db:status
+✓ db:status - 0 active sessions
+
+━━━ GitHub Commands ━━━
+2025-09-30 19:55:50 [[32MINFO[39M]: Executing command: gh:list-prs
+2025-09-30 19:55:50 [[32MINFO[39M]: Command completed: gh:list-prs
+✓ gh:list-prs - 1 PRs found
+2025-09-30 19:55:50 [[32MINFO[39M]: Executing command: gh:get-files
+2025-09-30 19:55:50 [[32MINFO[39M]: Command completed: gh:get-files
+✓ gh:get-files - 3 files found
+2025-09-30 19:55:50 [[32MINFO[39M]: Executing command: gh:review-pr
+ GitHub token not provided - using mock mode
+ Starting PR review for #123...
+ Reviewing: Mock PR 123
+PASS Review completed with score: 91/100
+2025-09-30 19:55:50 [[32MINFO[39M]: Command completed: gh:review-pr
+✓ gh:review-pr - Score: 91/100
+
+━━━ Workflow Commands ━━━
+2025-09-30 19:55:50 [[32MINFO[39M]: Executing command: workflow:list
+2025-09-30 19:55:50 [[32MINFO[39M]: Command completed: workflow:list
+✓ workflow:list - 1 workflows available
+2025-09-30 19:55:50 [[32MINFO[39M]: Executing command: workflow:run
+ GitHub token not provided - using mock mode
+ Starting PR review for #123...
+ Reviewing: Mock PR 123
+PASS Review completed with score: 91/100
+2025-09-30 19:55:50 [[32MINFO[39M]: Command completed: workflow:run
+✓ workflow:run - PR review workflow executed
+
+━━━ Command Registry ━━━
+✓ Command registry - 9 commands available
+  Categories: gh, db, workflow, system
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Results: 10 passed, 0 failed
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ All core system tests passed!
+🚀 LonicFLex Core is fully operational
+
+✅ PASS: Core System Smoke (219ms)
+
+▶️  Running: Basic Module Loading
+   Verifies essential modules load without errors
+✅ PASS: Basic Module Loading (376ms)
+
+════════════════════════════════════════════════════════════
+  UNIT TESTS
+════════════════════════════════════════════════════════════
+Running 5 test suites...
+
+
+▶️  Running: Service Container
+   Tests dependency injection foundation
+🧪 Testing ServiceContainer Architecture - Phase 1.1
+
+🔧 Test 1: ServiceContainer Instantiation...
+✅ ServiceContainer instantiation
+
+🔧 Test 2: Singleton Pattern...
+✅ Singleton pattern working
+
+🔧 Test 3: Service Initialization...
+2025-09-30 19:55:51 [[32MINFO[39M]: Service registered: logger (1 total services)
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: ServiceContainer initialization started | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: database | component="ServiceContainer", totalServices=2
+2025-09-30 19:55:51 [[32MINFO[39M]: Loaded 97 lessons into cache
+2025-09-30 19:55:51 [[32MINFO[39M]: Memory Manager initialized - learning system active
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: memory | component="ServiceContainer", totalServices=3
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: tokenCounter | component="ServiceContainer", totalServices=4
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: ContextWindowMonitor initialized with 40% threshold
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: contextMonitor | component="ServiceContainer", totalServices=5
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: compliance | component="ServiceContainer", totalServices=6
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: documentation | component="ServiceContainer", totalServices=7
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: contextManager | component="ServiceContainer", totalServices=8
+2025-09-30 19:55:51 [[32MINFO[39M]: AgentPoolManager created with intelligent pooling
+2025-09-30 19:55:51 [[33MWARN[39M]: Skipping pre-initialization of agent pools to prevent circular dependency during bootstrap
+2025-09-30 19:55:51 [[32MINFO[39M]:    Pools will be created on-demand when agents are requested
+2025-09-30 19:55:51 [[32MINFO[39M]: AgentPoolManager initialized with 0 pools
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: agentPoolManager | component="ServiceContainer", totalServices=9
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: AgentPoolManager initialized successfully | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M]:  WorkflowOrchestrator created with intelligent coordination
+2025-09-30 19:55:51 [[32MINFO[39M]: AgentPoolManager connected to WorkflowOrchestrator
+2025-09-30 19:55:51 [[32MINFO[39M]: Registered workflow template: multi-agent
+2025-09-30 19:55:51 [[32MINFO[39M]: Registered workflow template: security-scan
+2025-09-30 19:55:51 [[32MINFO[39M]: Registered workflow template: deployment
+2025-09-30 19:55:51 [[32MINFO[39M]: Registered workflow template: code-review
+2025-09-30 19:55:51 [[32MINFO[39M]: WorkflowOrchestrator initialized with AgentPoolManager
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: workflowOrchestrator | component="ServiceContainer", totalServices=10
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: WorkflowOrchestrator initialized successfully | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M]: HealthMonitor created with production-grade monitoring
+2025-09-30 19:55:51 [[32MINFO[39M]: Loaded 5 historical metrics
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: healthMonitor | component="ServiceContainer", totalServices=11
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: ServiceContainer initialized with Phase 3 infrastructure management services | component="ServiceContainer", totalServices=11, phase="Phase 3"
+✅ ServiceContainer initialization
+
+🔧 Test 4: Service Dependency Injection...
+✅ Database service injection
+✅ Memory service injection
+✅ PartitionedContextManager injection
+
+🔧 Test 5: Workflow Partition Creation...
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:test-workflow-123]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+✅ Workflow partition creation
+✅ Workflow partition retrieval
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:test-workflow-123]: Cleaned up workflow context | component="ServiceContainer"
+✅ Workflow partition cleanup
+
+🔧 Test 6: System Health Check...
+✅ System health check (11 services)
+
+🔧 Test 7: Service Statistics...
+✅ Service statistics (11 services)
+
+📊 ServiceContainer Test Results:
+✅ Passed: 11
+❌ Failed: 0
+📈 Success Rate: 100.0%
+
+🎯 ServiceContainer Architecture Phase 1.1: ✅ READY
+✅ PASS: Service Container (170ms)
+
+▶️  Running: Base Agent
+   Tests agent foundation and lifecycle
+🧪 BaseAgent Unit Tests - Phase 7
+==================================================
+⚙️ Setting up test environment...
+2025-09-30 19:55:51 [[32MINFO[39M]: Service registered: logger (1 total services)
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: ServiceContainer initialization started | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: database | component="ServiceContainer", totalServices=2
+2025-09-30 19:55:51 [[32MINFO[39M]: Loaded 97 lessons into cache
+2025-09-30 19:55:51 [[32MINFO[39M]: Memory Manager initialized - learning system active
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: memory | component="ServiceContainer", totalServices=3
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: tokenCounter | component="ServiceContainer", totalServices=4
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: ContextWindowMonitor initialized with 40% threshold
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: contextMonitor | component="ServiceContainer", totalServices=5
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: compliance | component="ServiceContainer", totalServices=6
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: documentation | component="ServiceContainer", totalServices=7
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: contextManager | component="ServiceContainer", totalServices=8
+2025-09-30 19:55:51 [[32MINFO[39M]: AgentPoolManager created with intelligent pooling
+2025-09-30 19:55:51 [[33MWARN[39M]: Skipping pre-initialization of agent pools to prevent circular dependency during bootstrap
+2025-09-30 19:55:51 [[32MINFO[39M]:    Pools will be created on-demand when agents are requested
+2025-09-30 19:55:51 [[32MINFO[39M]: AgentPoolManager initialized with 0 pools
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: agentPoolManager | component="ServiceContainer", totalServices=9
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: AgentPoolManager initialized successfully | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M]:  WorkflowOrchestrator created with intelligent coordination
+2025-09-30 19:55:51 [[32MINFO[39M]: AgentPoolManager connected to WorkflowOrchestrator
+2025-09-30 19:55:51 [[32MINFO[39M]: Registered workflow template: multi-agent
+2025-09-30 19:55:51 [[32MINFO[39M]: Registered workflow template: security-scan
+2025-09-30 19:55:51 [[32MINFO[39M]: Registered workflow template: deployment
+2025-09-30 19:55:51 [[32MINFO[39M]: Registered workflow template: code-review
+2025-09-30 19:55:51 [[32MINFO[39M]: WorkflowOrchestrator initialized with AgentPoolManager
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: workflowOrchestrator | component="ServiceContainer", totalServices=10
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: WorkflowOrchestrator initialized successfully | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M]: HealthMonitor created with production-grade monitoring
+2025-09-30 19:55:51 [[32MINFO[39M]: Loaded 5 historical metrics
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: Service registered: healthMonitor | component="ServiceContainer", totalServices=11
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: ServiceContainer initialized with Phase 3 infrastructure management services | component="ServiceContainer", totalServices=11, phase="Phase 3"
+✅ ServiceContainer initialized for testing
+✅ Database service obtained from ServiceContainer
+
+📋 Testing BaseAgent Constructor...
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551531_1_test-agent] [Session:test_session_1759258551531_1] [Workflow:workflow_test_session_1759258551531_1_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+  ✅ Constructor creates agent with correct properties
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551532_2_test-agent] [Session:test_session_1759258551532_2] [Workflow:workflow_test_session_1759258551532_2_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+  ✅ Constructor initializes services from ServiceContainer
+
+📋 Testing Agent Initialization...
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551533_3_test-agent] [Session:test_session_1759258551533_3] [Workflow:workflow_test_session_1759258551533_3_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551533_0.005293962468797764]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551533_3_test-agent] [Session:test_session_1759258551533_3] [Workflow:workflow_1759258551533_0.005293962468797764]: Agent initialized with isolated partition | partitionId=undefined
+  ✅ Initialize method connects to database
+
+📋 Testing State Transitions...
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551538_4_test-agent] [Session:test_session_1759258551538_4] [Workflow:workflow_test_session_1759258551538_4_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551538_0.8705314152317327]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551538_4_test-agent] [Session:test_session_1759258551538_4] [Workflow:workflow_1759258551538_0.8705314152317327]: Agent initialized with isolated partition | partitionId=undefined
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+  ✅ State transitions follow correct flow
+
+📋 Testing Execution Workflow...
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551541_5_test-agent] [Session:test_session_1759258551541_5] [Workflow:workflow_test_session_1759258551541_5_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551541_0.37662181254554317]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551541_5_test-agent] [Session:test_session_1759258551541_5] [Workflow:workflow_1759258551541_0.37662181254554317]: Agent initialized with isolated partition | partitionId=undefined
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 10: Small, Focused Agents - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: Pattern recorded: success - workflow_execution -> completed_successfully
+  ✅ Execute workflow completes successfully
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551551_6_test-agent] [Session:test_session_1759258551551_6] [Workflow:workflow_test_session_1759258551551_6_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551552_0.1714425782312965]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551551_6_test-agent] [Session:test_session_1759258551551_6] [Workflow:workflow_1759258551552_0.1714425782312965]: Agent initialized with isolated partition | partitionId=undefined
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 10: Small, Focused Agents - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: Pattern recorded: success - workflow_execution -> completed_successfully
+  ✅ Execution steps are tracked correctly
+
+📋 Testing 12-Factor Compliance...
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551559_7_test-agent] [Session:test_session_1759258551559_7] [Workflow:workflow_test_session_1759258551559_7_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551560_0.30850589529287875]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551559_7_test-agent] [Session:test_session_1759258551559_7] [Workflow:workflow_1759258551560_0.30850589529287875]: Agent initialized with isolated partition | partitionId=undefined
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 10: Small, Focused Agents - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: Pattern recorded: success - workflow_execution -> completed_successfully
+  ✅ Factor 10: Agent enforces max steps limit
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551567_8_test-agent] [Session:test_session_1759258551567_8] [Workflow:workflow_test_session_1759258551567_8_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551568_0.2130496891109679]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551567_8_test-agent] [Session:test_session_1759258551567_8] [Workflow:workflow_1759258551568_0.2130496891109679]: Agent initialized with isolated partition | partitionId=undefined
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+  ✅ Factor 12: Stateless reducer pattern
+
+📋 Testing Memory Integration...
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551570_9_test-agent] [Session:test_session_1759258551570_9] [Workflow:workflow_test_session_1759258551570_9_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551571_0.6889300086438157]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551570_9_test-agent] [Session:test_session_1759258551570_9] [Workflow:workflow_1759258551571_0.6889300086438157]: Agent initialized with isolated partition | partitionId=undefined
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 10: Small, Focused Agents - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: Pattern recorded: success - workflow_execution -> completed_successfully
+  ✅ Memory manager records patterns
+
+📋 Testing Error Handling...
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: failing-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551582_10_failing-agent] [Session:test_session_1759258551582_10] [Workflow:workflow_test_session_1759258551582_10_failing-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551583_0.857126398818272]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551582_10_failing-agent] [Session:test_session_1759258551582_10] [Workflow:workflow_1759258551583_0.857126398818272]: Agent initialized with isolated partition | partitionId=undefined
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 10: Small, Focused Agents - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 9: Compact Errors - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: Lesson recorded: mistake for failing-agent
+  ✅ Agent handles execution errors gracefully
+
+📋 Testing Cleanup Operations...
+2025-09-30 19:55:51 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:51 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:51 [[32MINFO[39M]:  ValidatedAgent created: test-agent (No more bullshit code!)
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551591_11_test-agent] [Session:test_session_1759258551591_11] [Workflow:workflow_test_session_1759258551591_11_test-agent]: Enhanced BaseAgent created | serviceContainer="injected"
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551591_0.3088258673635009]: Created isolated context for workflow | component="ServiceContainer", contextType="workflow"
+2025-09-30 19:55:51 [[32MINFO[39M] [agent] [Agent:test_session_1759258551591_11_test-agent] [Session:test_session_1759258551591_11] [Workflow:workflow_1759258551591_0.3088258673635009]: Agent initialized with isolated partition | partitionId=undefined
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 10: Small, Focused Agents - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: OK Factor 12: Stateless Reducer - Applied
+2025-09-30 19:55:51 [[32MINFO[39M]: Pattern recorded: success - workflow_execution -> completed_successfully
+  ✅ Agent cleans up resources properly
+🧹 Cleaning up test environment...
+2025-09-30 19:55:51 [[32MINFO[39M] [system]: ServiceContainer shutting down | component="ServiceContainer", workflowPartitions=9, services=11
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551533_0.005293962468797764]: Cleaned up workflow context | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551538_0.8705314152317327]: Cleaned up workflow context | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551541_0.37662181254554317]: Cleaned up workflow context | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551552_0.1714425782312965]: Cleaned up workflow context | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551560_0.30850589529287875]: Cleaned up workflow context | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551568_0.2130496891109679]: Cleaned up workflow context | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551571_0.6889300086438157]: Cleaned up workflow context | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551583_0.857126398818272]: Cleaned up workflow context | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M] [system] [Workflow:workflow_1759258551591_0.3088258673635009]: Cleaned up workflow context | component="ServiceContainer"
+2025-09-30 19:55:51 [[32MINFO[39M]: ServiceContainer shutdown complete
+✅ Test cleanup completed
+
+==================================================
+📊 BaseAgent Unit Test Results
+==================================================
+✅ Passed: 11
+❌ Failed: 0
+📈 Coverage: 100.0%
+
+🎯 BaseAgent Unit Tests: ✅ ALL PASSED
+✅ PASS: Base Agent (247ms)
+
+▶️  Running: Database Isolation
+   Tests database concurrent access safety
+🧪 Testing SQLiteManager in isolation...
+
+📝 Test 1: Create SQLiteManager instance
+2025-09-30 19:55:51 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:51 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+✅ SQLiteManager instance created
+
+📝 Test 2: Initialize database
+✅ Database initialized
+
+📝 Test 3: Create test table
+✅ Test table created
+
+📝 Test 4: Insert test data
+✅ Data inserted
+
+📝 Test 5: Query test data
+✅ Data queried successfully: {
+  id: 1,
+  name: 'database_isolation_test',
+  created_at: '2025-09-30 18:55:51'
+}
+
+📝 Test 6: Clean up test data
+✅ Test data cleaned up
+
+🎉 Database isolation test: ALL PASSED
+🧹 Database connection closed
+✅ PASS: Database Isolation (155ms)
+
+▶️  Running: Agent Null Safety
+   Tests agent error handling
+✅ PASS: Agent Null Safety (309ms)
+
+════════════════════════════════════════════════════════════
+  INTEGRATION TESTS
+════════════════════════════════════════════════════════════
+Running 5 test suites...
+
+
+▶️  Running: Universal Context System
+   Tests context preservation across sessions
+🧪 Testing Universal Context System - Phase 2A
+
+🔧 Test 1: Context Scope Types Loading...
+✅ CONTEXT_SCOPES loaded - Session compression: 0.7, Project: 0.5
+✅ SCOPE_TYPES loaded - Session cleanup: 30 days, Project: 365 days
+
+🏗️  Test 2: Session Context Creation...
+2025-09-30 19:55:52 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+✅ Session context created - ID: test-session-fix-auth-bug
+✅ Session scope configured - Compression ratio: 0.7
+✅ Session task tracking
+✅ Session event logging
+
+🎯 Test 3: Project Context Creation...
+2025-09-30 19:55:52 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+✅ Project context created - ID: test-project-new-auth-system
+✅ Project scope configured - Compression ratio: 0.5
+✅ Project task tracking
+✅ Project important events
+
+🔄 Test 4: Tangent Handling (Universal)...
+✅ Context push successful
+✅ Current task updated for tangent
+✅ Context pop successful
+✅ Returned to original task
+
+📊 Test 5: Smart Compression Testing...
+✅ Generated sufficient events - 52 events
+✅ Compression ratio configured - Ratio: 0.7
+✅ Smart compression working - 71.2% compression achieved
+✅ Context summary generated - 15 events compressed
+✅ Compression statistics included - 70% target ratio
+
+🔧 Test 6: Scope Upgrade (Session → Project)...
+✅ Scope upgrade successful
+✅ Events preserved during upgrade - 53 events preserved
+✅ Upgrade event recorded
+
+🌐 Test 7: Multi-Context Registry...
+✅ Multiple contexts tracked - 2 contexts found
+✅ Session contexts tracked - 0 sessions
+✅ Project contexts tracked - 2 projects
+✅ Context isolation maintained - Different context IDs
+
+🔧 Test 8: ContextScopeManager Integration...
+✅ Scope detection working - Confidence: high, Score: 15
+✅ Upgrade validation working - Requirements met: true
+
+📊 Test Results Summary:
+✅ Passed: 28
+❌ Failed: 0
+📈 Success Rate: 100.0%
+
+🧹 Cleaning up test data...
+✅ Test contexts removed
+
+🎯 Universal Context System Phase 2A: ✅ READY
+✅ PASS: Universal Context System (167ms)
+
+▶️  Running: Database Integration
+   Tests database operations end-to-end
+🧪 Testing Database Integration
+
+⚙️ Setting up test database...
+2025-09-30 19:55:52 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+✅ Test database initialized (in-memory)
+
+📋 Testing Session Management...
+
+  ✅ Session created and retrieved: test-session-1759258552383-001
+  ✅ Session status updated: test-session-1759258552385-002
+
+📋 Testing Agent Management...
+
+  ✅ Agent created and tracked: test-agent-1759258552386-001
+  ✅ Multiple agents tracked: 3 agents
+
+🧹 Cleaning up test database...
+✅ Cleanup complete
+
+==================================================
+📊 Database Integration Test Results
+==================================================
+✅ Passed: 4
+❌ Failed: 0
+📈 Coverage: 100.0%
+
+🎯 Database Integration Tests: ✅ ALL PASSED
+
+🎉 Database Integration Test Suite: SUCCESS
+✅ PASS: Database Integration (154ms)
+
+▶️  Running: Service Container Integration
+   Tests service initialization and coordination
+🧪 Testing ServiceContainer Integration - Phase 2
+   Verifying: Heavy Agent Anti-Pattern + Context Explosion solutions
+
+🔧 Test 1: ServiceContainer Initialization...
+2025-09-30 19:55:52 [[32MINFO[39M]: Service registered: logger (1 total services)
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: ServiceContainer initialization started | component="ServiceContainer"
+2025-09-30 19:55:52 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: database | component="ServiceContainer", totalServices=2
+2025-09-30 19:55:52 [[32MINFO[39M]: Loaded 98 lessons into cache
+2025-09-30 19:55:52 [[32MINFO[39M]: Memory Manager initialized - learning system active
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: memory | component="ServiceContainer", totalServices=3
+2025-09-30 19:55:52 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: tokenCounter | component="ServiceContainer", totalServices=4
+2025-09-30 19:55:52 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:52 [[32MINFO[39M]: ContextWindowMonitor initialized with 40% threshold
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: contextMonitor | component="ServiceContainer", totalServices=5
+2025-09-30 19:55:52 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: compliance | component="ServiceContainer", totalServices=6
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: documentation | component="ServiceContainer", totalServices=7
+2025-09-30 19:55:52 [[32MINFO[39M]:  TokenCounter: Using optimized estimation (API disabled)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced Factor3ContextManager with token counting & monitoring
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: contextManager | component="ServiceContainer", totalServices=8
+2025-09-30 19:55:52 [[32MINFO[39M]: AgentPoolManager created with intelligent pooling
+2025-09-30 19:55:52 [[33MWARN[39M]: Skipping pre-initialization of agent pools to prevent circular dependency during bootstrap
+2025-09-30 19:55:52 [[32MINFO[39M]:    Pools will be created on-demand when agents are requested
+2025-09-30 19:55:52 [[32MINFO[39M]: AgentPoolManager initialized with 0 pools
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: agentPoolManager | component="ServiceContainer", totalServices=9
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: AgentPoolManager initialized successfully | component="ServiceContainer"
+2025-09-30 19:55:52 [[32MINFO[39M]:  WorkflowOrchestrator created with intelligent coordination
+2025-09-30 19:55:52 [[32MINFO[39M]: AgentPoolManager connected to WorkflowOrchestrator
+2025-09-30 19:55:52 [[32MINFO[39M]: Registered workflow template: multi-agent
+2025-09-30 19:55:52 [[32MINFO[39M]: Registered workflow template: security-scan
+2025-09-30 19:55:52 [[32MINFO[39M]: Registered workflow template: deployment
+2025-09-30 19:55:52 [[32MINFO[39M]: Registered workflow template: code-review
+2025-09-30 19:55:52 [[32MINFO[39M]: WorkflowOrchestrator initialized with AgentPoolManager
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: workflowOrchestrator | component="ServiceContainer", totalServices=10
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: WorkflowOrchestrator initialized successfully | component="ServiceContainer"
+2025-09-30 19:55:52 [[32MINFO[39M]: HealthMonitor created with production-grade monitoring
+2025-09-30 19:55:52 [[32MINFO[39M]: Loaded 5 historical metrics
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: Service registered: healthMonitor | component="ServiceContainer", totalServices=11
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: ServiceContainer initialized with Phase 3 infrastructure management services | component="ServiceContainer", totalServices=11, phase="Phase 3"
+✅ ServiceContainer initializes successfully
+🔧 Test 2: ServiceContainer Health Check...
+✅ ServiceContainer health is acceptable
+🔧 Test 3: Enhanced Agent Creation...
+2025-09-30 19:55:52 [[32MINFO[39M]:  Enhanced Agent Factory created (Enhanced: true)
+2025-09-30 19:55:52 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:52 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:52 [[32MINFO[39M]:  ValidatedAgent created: code (No more bullshit code!)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced CodeAgent created with ServiceContainer
+2025-09-30 19:55:52 [[32MINFO[39M]:  CodeAgent created (already enhanced)
+✅ Enhanced agent creates successfully with ServiceContainer injection
+🔧 Test 4: Agent has Context Partition...
+✅ Agent has ServiceContainer and agentName
+🔧 Test 5: Agent Configuration...
+✅ Agent has proper configuration
+🔧 Test 6: Agent Execution with ServiceContainer...
+   Progress: 50% - Initializing
+✅ Agent executes successfully with ServiceContainer services
+🔧 Test 7: Shared Service Usage...
+✅ Agent uses shared services from container (eliminates duplication)
+🔧 Test 8: Multi-Agent Context Isolation...
+2025-09-30 19:55:52 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:52 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:52 [[32MINFO[39M]:  ValidatedAgent created: code (No more bullshit code!)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced CodeAgent created with ServiceContainer
+2025-09-30 19:55:52 [[32MINFO[39M]:  CodeAgent created (already enhanced)
+✅ Multiple agents have isolated sessions
+🔧 Test 9: Factory Status...
+✅ Factory tracks created agents
+🔧 Test 10: Shared ServiceContainer Verification...
+✅ Multiple agents share the same ServiceContainer instance
+🔧 Test 11: Performance Impact Analysis...
+2025-09-30 19:55:52 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:52 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:52 [[32MINFO[39M]:  ValidatedAgent created: code (No more bullshit code!)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced CodeAgent created with ServiceContainer
+2025-09-30 19:55:52 [[32MINFO[39M]:  CodeAgent created (already enhanced)
+2025-09-30 19:55:52 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:52 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:52 [[32MINFO[39M]:  ValidatedAgent created: code (No more bullshit code!)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced CodeAgent created with ServiceContainer
+2025-09-30 19:55:52 [[32MINFO[39M]:  CodeAgent created (already enhanced)
+2025-09-30 19:55:52 [[32MINFO[39M]:  Sandbox initialized at: C:\Users\Levi\Desktop\LonicFLex\sandbox-execution
+2025-09-30 19:55:52 [[32MINFO[39M]: CYCLE ReAct Self-Correction Engine initialized
+2025-09-30 19:55:52 [[32MINFO[39M]:  ValidatedAgent created: code (No more bullshit code!)
+2025-09-30 19:55:52 [[32MINFO[39M]: Enhanced CodeAgent created with ServiceContainer
+2025-09-30 19:55:52 [[32MINFO[39M]:  CodeAgent created (already enhanced)
+2025-09-30 19:55:52 [[32MINFO[39M]:  Backup directory initialized: generated\.code-backups
+2025-09-30 19:55:52 [[32MINFO[39M]:  Backup directory initialized: generated\.code-backups
+2025-09-30 19:55:52 [[32MINFO[39M]:  Backup directory initialized: generated\.code-backups
+2025-09-30 19:55:52 [[32MINFO[39M]:  Backup directory initialized: generated\.code-backups
+2025-09-30 19:55:52 [[32MINFO[39M]:  Backup directory initialized: generated\.code-backups
+✅ Multiple agents create quickly with shared infrastructure
+🧹 Cleaning up ServiceContainer...
+2025-09-30 19:55:52 [[32MINFO[39M] [system]: ServiceContainer shutting down | component="ServiceContainer", workflowPartitions=0, services=11
+2025-09-30 19:55:52 [[32MINFO[39M]: ServiceContainer shutdown complete
+
+📊 ServiceContainer Integration Test Results:
+✅ Tests Passed: 11
+❌ Tests Failed: 0
+📈 Success Rate: 100.0%
+
+🎉 ServiceContainer Integration: ✅ READY
+   ✓ Heavy Agent Anti-Pattern SOLVED - Shared infrastructure services
+   ✓ Context Explosion Anti-Pattern SOLVED - Isolated partitions per workflow
+   ✓ Resource Duplication ELIMINATED - Single service instances
+   ✓ Agent Performance IMPROVED - Lightweight agent creation
+   ✓ Context Isolation ACHIEVED - Zero context bleeding between workflows
+
+🎯 Phase 2 ServiceContainer implementation is working correctly!
+✅ PASS: Service Container Integration (186ms)
+
+▶️  Running: Phase 3A External Integration
+   Tests GitHub and Slack integration framework
+✅ PASS: Phase 3A External Integration (314ms)
+
+════════════════════════════════════════════════════════════
+  TEST RESULTS
+════════════════════════════════════════════════════════════
+
+✅ Passed:  10
+❌ Failed:  0
+⏭️  Skipped: 2
+⏱️  Duration: 2.30s
+
+════════════════════════════════════════════════════════════
+🎉 ALL TESTS PASSED (100.0%)
+════════════════════════════════════════════════════════════
+

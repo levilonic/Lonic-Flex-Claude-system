@@ -10,7 +10,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 class PragmaticCodeReviewerAgent extends ValidatedAgent {
-    constructor(sessionId, config = {}) {
+    constructor(sessionId, serviceContainer, config = {}) {
         super('pragmatic-code-reviewer', sessionId, {
             maxSteps: 8,
             timeout: 120000,
@@ -60,11 +60,8 @@ class PragmaticCodeReviewerAgent extends ValidatedAgent {
         this.reviewFramework = this.initializeReviewFramework();
 
         // Initialize review context
-        this.contextManager.addAgentEvent(this.agentName, 'review_config_loaded', {
-            methodology: this.reviewConfig.methodology,
-            framework: this.reviewConfig.framework,
-            categories: Object.keys(this.reviewFramework).length
-        });
+        // Workflow configuration
+        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
     }
 
     /**
@@ -1033,7 +1030,7 @@ class PragmaticCodeReviewerAgent extends ValidatedAgent {
  * Demo function for Pragmatic Code Reviewer Agent
  */
 async function demoPragmaticCodeReviewerAgent() {
-    console.log('🔍 Pragmatic Code Reviewer Agent Demo - OneRedOak Methodology\n');
+    logger.info(' Pragmatic Code Reviewer Agent Demo - OneRedOak Methodology\n');
 
     const { SQLiteManager } = require('../database/sqlite-manager');
     const dbManager = new SQLiteManager(':memory:');
@@ -1054,20 +1051,20 @@ async function demoPragmaticCodeReviewerAgent() {
 
         await agent.initialize(dbManager);
 
-        console.log(`✅ Created Pragmatic Code Reviewer: ${agent.agentName}`);
-        console.log(`   Methodology: ${agent.reviewConfig.methodology}`);
-        console.log(`   Framework: ${agent.reviewConfig.framework}`);
-        console.log(`   Steps: ${agent.executionSteps.length} (Factor 10 compliant)`);
-        console.log(`   Categories: ${Object.keys(agent.reviewFramework).length}`);
+        logger.info(`Created Pragmatic Code Reviewer: ${agent.agentName}`);
+        logger.info(`   Methodology: ${agent.reviewConfig.methodology}`);
+        logger.info(`   Framework: ${agent.reviewConfig.framework}`);
+        logger.info(`   Steps: ${agent.executionSteps.length} (Factor 10 compliant)`);
+        logger.info(`   Categories: ${Object.keys(agent.reviewFramework).length}`);
 
         // Test review framework
-        console.log('\n📊 Testing 7-category framework...');
+        logger.info('\nMETRICS Testing 7-category framework...');
         for (const [category, framework] of Object.entries(agent.reviewFramework)) {
-            console.log(`   ${category}: ${(framework.weight * 100).toFixed(0)}% weight, ${framework.threshold} threshold`);
+            logger.info(`   ${category}: ${(framework.weight * 100).toFixed(0)}% weight, ${framework.threshold} threshold`);
         }
 
         // Test pattern detection
-        console.log('\n🔍 Testing pattern detection...');
+        logger.info('\n Testing pattern detection...');
 
         const testCode = `
             // Architecture patterns
@@ -1107,35 +1104,35 @@ async function demoPragmaticCodeReviewerAgent() {
                 const matches = testCode.match(pattern.pattern) || [];
                 if (matches.length > 0) {
                     categoryPatterns += matches.length;
-                    console.log(`   ${category}: Found ${pattern.type} (${matches.length} matches)`);
+                    logger.info(`   ${category}: Found ${pattern.type} (${matches.length} matches)`);
                 }
                 pattern.pattern.lastIndex = 0;
             }
             totalPatterns += categoryPatterns;
         }
 
-        console.log(`   Total patterns detected: ${totalPatterns}`);
+        logger.info(`   Total patterns detected: ${totalPatterns}`);
 
         // Show status
         const status = agent.getStatus();
-        console.log(`\n📊 Agent Status:`);
-        console.log(`   State: ${status.state}`);
-        console.log(`   Methodology: ${agent.reviewConfig.methodology}`);
-        console.log(`   Framework: ${agent.reviewConfig.framework}`);
+        logger.info(`\nMETRICS Agent Status:`);
+        logger.info(`   State: ${status.state}`);
+        logger.info(`   Methodology: ${agent.reviewConfig.methodology}`);
+        logger.info(`   Framework: ${agent.reviewConfig.framework}`);
 
-        console.log('\n✅ Pragmatic Code Reviewer demo completed successfully!');
-        console.log('   ✓ Factor 10: 8 execution steps (≤8 max)');
-        console.log('   ✓ OneRedOak methodology: "Net Positive > Perfection"');
-        console.log('   ✓ 7-category assessment framework');
-        console.log('   ✓ Weighted scoring and severity classification');
-        console.log('   ✓ Comprehensive pattern detection');
-        console.log('   ✓ Pragmatic merge recommendations');
+        logger.info('\nPASS Pragmatic Code Reviewer demo completed successfully!');
+        logger.info('   OK Factor 10: 8 execution steps (<=8 max)');
+        logger.info('   OK OneRedOak methodology: "Net Positive > Perfection"');
+        logger.info('   OK 7-category assessment framework');
+        logger.info('   OK Weighted scoring and severity classification');
+        logger.info('   OK Comprehensive pattern detection');
+        logger.info('   OK Pragmatic merge recommendations');
 
-        console.log('\n📝 Note: Full code review requires git repository and source files');
-        console.log('   Usage: agent.executeWorkflow({ files: ["src/file1.js", "src/file2.js"] })');
+        logger.info('\n Note: Full code review requires git repository and source files');
+        logger.info('   Usage: agent.executeWorkflow({ files: ["src/file1.js", "src/file2.js"] })');
 
     } catch (error) {
-        console.error('❌ Demo failed:', error.message);
+        logger.error('FAIL Demo failed:', error.message);
     } finally {
         await dbManager.close();
     }

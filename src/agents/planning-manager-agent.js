@@ -1,6 +1,7 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Planning Manager Agent - Phase 1 Coordinator
- * Following 12-Factor Agents methodology and Factor 10 principles (≤8 execution steps)
+ * Following 12-Factor Agents methodology and Factor 10 principles (<=8 execution steps)
  * Coordinates research and strategic planning through specialized agent delegation
  */
 
@@ -11,7 +12,7 @@ const { ArchitectureDesignAgent } = require('./architecture-design-agent');
 const { DocumentationAgent } = require('./documentation-agent');
 
 class PlanningManagerAgent extends ValidatedAgent {
-    constructor(sessionId, config = {}) {
+    constructor(sessionId, serviceContainer, config = {}) {
         super('planning-manager', sessionId, {
             maxSteps: 8,
             timeout: 60000,
@@ -25,7 +26,7 @@ class PlanningManagerAgent extends ValidatedAgent {
         this.executionPlan = null;
         this.delegatedAgents = new Map();
         
-        // Planning workflow steps (Factor 10: ≤8 steps)
+        // Planning workflow steps (Factor 10: <=8 steps)
         this.executionSteps = [
             'initialize_planning_session',
             'delegate_research_analysis',
@@ -36,12 +37,8 @@ class PlanningManagerAgent extends ValidatedAgent {
             'validate_execution_plan',
             'prepare_phase2_handoff'
         ];
-
-        this.contextManager.addAgentEvent(this.agentName, 'planning_manager_initialized', {
-            session_id: sessionId,
-            planning_phase: this.config.planningPhase,
-            max_steps: this.config.maxSteps
-        });
+        // Workflow configuration
+        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
     }
 
     /**
@@ -302,9 +299,9 @@ class PlanningManagerAgent extends ValidatedAgent {
      */
     async validateExecutionPlan() {
         // Debug logging
-        console.log(`DEBUG: Validating execution plan. Plan exists: ${!!this.executionPlan}`);
+        info(`DEBUG: Validating execution plan. Plan exists: ${!!this.executionPlan}`);
         if (this.executionPlan) {
-            console.log(`DEBUG: Plan sections: ${Object.keys(this.executionPlan).join(', ')}`);
+            info(`DEBUG: Plan sections: ${Object.keys(this.executionPlan).join(', ')}`);
         }
         
         const validation = {
@@ -314,7 +311,7 @@ class PlanningManagerAgent extends ValidatedAgent {
             resourceAvailability: this.validateResourceAvailability()
         };
 
-        console.log(`DEBUG: Validation results:`, validation);
+        info(`DEBUG: Validation results:`, validation);
 
         if (validation.completeness < 0.5 || validation.feasibility < 0.5) {
             throw new Error(`Execution plan validation failed: Completeness ${validation.completeness}, Feasibility ${validation.feasibility}`);
@@ -427,7 +424,7 @@ class PlanningManagerAgent extends ValidatedAgent {
     defineSuccessCriteria() {
         return [
             'All execution steps complete successfully',
-            'Factor 10 compliance maintained (≤8 steps)',
+            'Factor 10 compliance maintained (<=8 steps)',
             '12-Factor agents principles followed',
             'Integration tests pass',
             'Performance within acceptable bounds'

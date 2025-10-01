@@ -266,7 +266,7 @@ class LonicFlexSlackService {
             } else if (text.includes('help')) {
                 response = this.generateHelpResponse();
             } else if (text.includes('/lx run')) {
-                response = '🚀 Detected `/lx run` command! Coordinating with Master service...';
+                response = ' Detected `/lx run` command! Coordinating with Master service...';
                 // Coordinate with master service
                 await this.coordinateWithServices({
                     event: 'lx_command_detected',
@@ -275,7 +275,7 @@ class LonicFlexSlackService {
                     user: message.user
                 });
             } else {
-                response = '👋 Hello! I\'m LonicFLex bot. Try `/lx help` for available commands.';
+                response = ' Hello! I\'m LonicFLex bot. Try `/lx help` for available commands.';
             }
 
             await say({
@@ -324,7 +324,7 @@ class LonicFlexSlackService {
                         user: command.user_name,
                         channel: command.channel_name
                     });
-                    response = '🚀 LonicFLex run initiated! Check status in thread.';
+                    response = ' LonicFLex run initiated! Check status in thread.';
                     break;
 
                 default:
@@ -340,7 +340,7 @@ class LonicFlexSlackService {
             this.logger.error('Failed to handle /lx command', { error: error.message });
             await respond({
                 response_type: 'ephemeral',
-                text: '❌ Command failed. Please try again.'
+                text: 'FAIL Command failed. Please try again.'
             });
         }
     }
@@ -375,16 +375,16 @@ class LonicFlexSlackService {
     }
 
     generateHelpResponse() {
-        return `🤖 *LonicFLex Commands*
+        return `AGENT *LonicFLex Commands*
 
 \`/lx help\` - Show this help message
 \`/lx status\` - Show system status
 \`/lx run <workflow>\` - Execute a LonicFLex workflow
 
 *Examples:*
-• \`/lx run deploy-feature\` - Deploy a feature
-• \`/lx run create-branch feature-xyz\` - Create a new branch
-• \`@claude implement authentication\` - Trigger AI assistance
+- \`/lx run deploy-feature\` - Deploy a feature
+- \`/lx run create-branch feature-xyz\` - Create a new branch
+- \`@claude implement authentication\` - Trigger AI assistance
 
 *Need help?* Mention @claude or use the commands above!`;
     }
@@ -393,29 +393,29 @@ class LonicFlexSlackService {
         try {
             // Get system status from other services
             const status = {
-                slack: this.isConnected ? '✅ Connected' : '❌ Disconnected',
-                github: '⏳ Checking...',
-                webhooks: '⏳ Checking...',
-                agents: '⏳ Checking...'
+                slack: this.isConnected ? 'PASS Connected' : 'FAIL Disconnected',
+                github: 'HOURGLASS Checking...',
+                webhooks: 'HOURGLASS Checking...',
+                agents: 'HOURGLASS Checking...'
             };
 
-            return `🏗️ *LonicFLex System Status*
+            return `BUILD *LonicFLex System Status*
 
 **Services:**
-• Slack: ${status.slack}
-• GitHub: ${status.github}
-• Webhooks: ${status.webhooks}
-• Agents: ${status.agents}
+- Slack: ${status.slack}
+- GitHub: ${status.github}
+- Webhooks: ${status.webhooks}
+- Agents: ${status.agents}
 
 **Stats:**
-• Messages: ${this.stats.messagesSent} sent, ${this.stats.messagesReceived} received
-• Commands: ${this.stats.commandsProcessed} processed
-• Uptime: ${Math.floor((Date.now() - this.startTime.getTime()) / 1000 / 60)} minutes
+- Messages: ${this.stats.messagesSent} sent, ${this.stats.messagesReceived} received
+- Commands: ${this.stats.commandsProcessed} processed
+- Uptime: ${Math.floor((Date.now() - this.startTime.getTime()) / 1000 / 60)} minutes
 
 *Last updated: ${new Date().toLocaleTimeString()}*`;
 
         } catch (error) {
-            return '❌ Failed to get system status. Please try again.';
+            return 'FAIL Failed to get system status. Please try again.';
         }
     }
 
@@ -541,11 +541,11 @@ class LonicFlexSlackService {
 
             switch (event) {
                 case 'branch_created':
-                    message = `🌿 New branch created: \`${branch}\` in ${repository}`;
+                    message = ` New branch created: \`${branch}\` in ${repository}`;
                     break;
 
                 case 'pr_created':
-                    message = `🔄 Pull request created: #${pr.number} in ${repository}`;
+                    message = `CYCLE Pull request created: #${pr.number} in ${repository}`;
                     blocks = [{
                         type: 'section',
                         text: {
@@ -571,7 +571,7 @@ class LonicFlexSlackService {
 
     async sendDeploymentNotification({ status, environment, version, user }) {
         try {
-            const emoji = status === 'success' ? '✅' : status === 'failed' ? '❌' : '⏳';
+            const emoji = status === 'success' ? 'PASS' : status === 'failed' ? 'FAIL' : 'HOURGLASS';
             const message = `${emoji} Deployment ${status}: ${environment} (${version})`;
 
             const blocks = [{
@@ -650,21 +650,21 @@ if (require.main === module) {
     const service = new LonicFlexSlackService();
     service.start()
         .then(() => {
-            console.log('✅ LonicFLex Slack Service started successfully');
+            logger.info('LonicFLex Slack Service started successfully');
         })
         .catch((error) => {
-            console.error('❌ Failed to start Slack service:', error.message);
+            logger.error('FAIL Failed to start Slack service:', error.message);
             process.exit(1);
         });
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        console.log('Slack service shutting down...');
+        logger.info('Slack service shutting down...');
         process.exit(0);
     });
 
     process.on('SIGINT', () => {
-        console.log('Slack service shutting down...');
+        logger.info('Slack service shutting down...');
         process.exit(0);
     });
 }

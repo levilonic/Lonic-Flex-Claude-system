@@ -3,7 +3,7 @@
  * Window 3 Integration Test - Validate full system integration
  */
 
-const { createGovernanceMiddleware } = require('./middleware/governance-middleware');
+const { createGovernanceMiddleware } = require('../../middleware/governance-middleware');
 const axios = require('axios');
 
 class Window3IntegrationTest {

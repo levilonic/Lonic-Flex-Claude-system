@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Autonomous Organization Schema Manager
  * Phase 2 Implementation: Week 1, Day 1
@@ -22,7 +23,7 @@ class AutonomousSchemaManager {
      */
     async applySchemaExtensions() {
         try {
-            console.log('🔧 Applying autonomous organization schema extensions...');
+            logger.debug('Applying autonomous organization schema extensions...');
 
             // Read the schema file
             const schemaSQL = await fs.readFile(this.schemaFile, 'utf8');
@@ -49,17 +50,17 @@ class AutonomousSchemaManager {
                 } catch (error) {
                     // Log but don't fail for already existing objects
                     if (!error.message.includes('already exists')) {
-                        console.warn(`⚠️ Warning executing statement: ${error.message}`);
+                        console.warn(`WARN Warning executing statement: ${error.message}`);
                     }
                 }
             }
 
             this.isExtended = true;
 
-            console.log(`✅ Autonomous organization schema applied:`);
-            console.log(`   📊 Tables: ${tablesCreated}`);
-            console.log(`   🔍 Indexes: ${indexesCreated}`);
-            console.log(`   👁️ Views: ${viewsCreated}`);
+            info(`Autonomous organization schema applied:`);
+            info(`   METRICS Tables: ${tablesCreated}`);
+            info(`    Indexes: ${indexesCreated}`);
+            info(`   EYE Views: ${viewsCreated}`);
 
             // Verify schema with evidence-based validation
             const schemaValidation = await this.verifySchema();
@@ -83,7 +84,7 @@ class AutonomousSchemaManager {
             };
 
         } catch (error) {
-            console.error('❌ Failed to apply autonomous organization schema:', error);
+            error('FAIL Failed to apply autonomous organization schema:', error);
             throw error;
         }
     }
@@ -164,7 +165,7 @@ class AutonomousSchemaManager {
             }
         }
 
-        console.log(`✅ Schema verification passed - all ${expectedTables.length} tables exist`);
+        info(`Schema verification passed - all ${expectedTables.length} tables exist`);
     }
 
     /**

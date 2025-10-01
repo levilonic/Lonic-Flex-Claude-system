@@ -753,22 +753,53 @@ class LonicFlexGovernanceService {
         process.exit(0);
     }
 
-    // Placeholder methods to be implemented
-    async getCachedPermissions(userId) { return null; }
-    async cacheUserPermissions(userId, permissions) { }
-    checkPermissionRules(permissions, resource, action, context) { return true; }
-    async loadDefaultPolicies() { }
-    async loadRoleHierarchy() { }
-    async getAllPolicies() { return []; }
-    async createPolicy(policy) { return { success: this.validateSuccess() }; }
-    async getAuditTrail(filters) { return []; }
-    async getDashboardData() { return {}; }
-    async createEmergencyOverride(userId, justification, duration) { return { success: this.validateSuccess() }; }
-    async getComplianceAuditData(framework) { return []; }
-    async checkSOC2Compliance(data) { return []; }
-    async checkGDPRCompliance(data) { return []; }
-    startComplianceMonitoring() { }
-    startServiceHealthMonitoring() { }
+    // STUB METHODS - NOT IMPLEMENTED
+    // These methods are placeholders for future implementation
+    async getCachedPermissions(userId) {
+        throw new Error('NOT_IMPLEMENTED: getCachedPermissions - Permission caching not implemented');
+    }
+    async cacheUserPermissions(userId, permissions) {
+        throw new Error('NOT_IMPLEMENTED: cacheUserPermissions - Permission caching not implemented');
+    }
+    checkPermissionRules(permissions, resource, action, context) {
+        throw new Error('NOT_IMPLEMENTED: checkPermissionRules - Permission rule checking not implemented');
+    }
+    async loadDefaultPolicies() {
+        throw new Error('NOT_IMPLEMENTED: loadDefaultPolicies - Policy loading not implemented');
+    }
+    async loadRoleHierarchy() {
+        throw new Error('NOT_IMPLEMENTED: loadRoleHierarchy - Role hierarchy not implemented');
+    }
+    async getAllPolicies() {
+        throw new Error('NOT_IMPLEMENTED: getAllPolicies - Policy retrieval not implemented');
+    }
+    async createPolicy(policy) {
+        throw new Error('NOT_IMPLEMENTED: createPolicy - Policy creation not implemented');
+    }
+    async getAuditTrail(filters) {
+        throw new Error('NOT_IMPLEMENTED: getAuditTrail - Audit trail not implemented');
+    }
+    async getDashboardData() {
+        throw new Error('NOT_IMPLEMENTED: getDashboardData - Dashboard data not implemented');
+    }
+    async createEmergencyOverride(userId, justification, duration) {
+        throw new Error('NOT_IMPLEMENTED: createEmergencyOverride - Emergency overrides not implemented');
+    }
+    async getComplianceAuditData(framework) {
+        throw new Error('NOT_IMPLEMENTED: getComplianceAuditData - Compliance auditing not implemented');
+    }
+    async checkSOC2Compliance(data) {
+        throw new Error('NOT_IMPLEMENTED: checkSOC2Compliance - SOC2 compliance checks not implemented');
+    }
+    async checkGDPRCompliance(data) {
+        throw new Error('NOT_IMPLEMENTED: checkGDPRCompliance - GDPR compliance checks not implemented');
+    }
+    startComplianceMonitoring() {
+        throw new Error('NOT_IMPLEMENTED: startComplianceMonitoring - Compliance monitoring not implemented');
+    }
+    startServiceHealthMonitoring() {
+        throw new Error('NOT_IMPLEMENTED: startServiceHealthMonitoring - Service health monitoring not implemented');
+    }
 }
 
 // Start service if run directly

@@ -1,13 +1,13 @@
 /**
  * Architecture Design Agent - Specialized Planning Phase Agent  
  * Designs system architecture and creates detailed execution plans
- * Following Factor 10 principles (≤8 execution steps)
+ * Following Factor 10 principles (<=8 execution steps)
  */
 
 const { ValidatedAgent } = require('../core/validated-agent-base');
 
 class ArchitectureDesignAgent extends ValidatedAgent {
-    constructor(sessionId, config = {}) {
+    constructor(sessionId, serviceContainer, config = {}) {
         super('architecture-design', sessionId, {
             maxSteps: 8,
             timeout: 60000,
@@ -22,7 +22,7 @@ class ArchitectureDesignAgent extends ValidatedAgent {
         this.executionPlan = {};
         this.designDecisions = [];
         
-        // Architecture workflow steps (Factor 10: ≤8 steps)
+        // Architecture workflow steps (Factor 10: <=8 steps)
         this.executionSteps = [
             'analyze_requirements_and_constraints',
             'design_system_architecture',
@@ -33,11 +33,8 @@ class ArchitectureDesignAgent extends ValidatedAgent {
             'validate_design_feasibility', 
             'finalize_architecture_plan'
         ];
-
-        this.contextManager.addAgentEvent(this.agentName, 'architecture_design_initialized', {
-            session_id: sessionId,
-            design_approach: this.config.designApproach
-        });
+        // Workflow configuration
+        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
     }
 
     /**
@@ -210,7 +207,7 @@ class ArchitectureDesignAgent extends ValidatedAgent {
                     delegation: 'ResearchAnalysisAgent, ProtocolResearchAgent, ArchitectureDesignAgent'
                 },
                 dependencies: ['BaseAgent', 'SQLiteManager', 'Factor3ContextManager'],
-                compliance: ['Factor 10 (≤8 steps)', '12-Factor Agents', 'Factor 3 context']
+                compliance: ['Factor 10 (<=8 steps)', '12-Factor Agents', 'Factor 3 context']
             },
 
             // Phase 2 Manager Component
@@ -230,7 +227,7 @@ class ArchitectureDesignAgent extends ValidatedAgent {
                     delegation: 'CodeAgent, TestingAgent, IntegrationAgent, DeployAgent'
                 },
                 dependencies: ['BaseAgent', 'SQLiteManager', 'Factor3ContextManager'],
-                compliance: ['Factor 10 (≤8 steps)', '12-Factor Agents', 'Factor 3 context']
+                compliance: ['Factor 10 (<=8 steps)', '12-Factor Agents', 'Factor 3 context']
             },
 
             // Research Specialist Components
@@ -248,7 +245,7 @@ class ArchitectureDesignAgent extends ValidatedAgent {
                     output: 'CodebaseAnalysisReport with patterns and risks'
                 },
                 dependencies: ['BaseAgent'],
-                compliance: ['Factor 10 (≤8 steps)']
+                compliance: ['Factor 10 (<=8 steps)']
             },
 
             // Execution Specialist Components
@@ -266,7 +263,7 @@ class ArchitectureDesignAgent extends ValidatedAgent {
                     output: 'TestingReport with pass/fail status'
                 },
                 dependencies: ['BaseAgent'],
-                compliance: ['Factor 10 (≤8 steps)']
+                compliance: ['Factor 10 (<=8 steps)']
             },
 
             {
@@ -283,7 +280,7 @@ class ArchitectureDesignAgent extends ValidatedAgent {
                     output: 'IntegrationReport with status and recommendations'
                 },
                 dependencies: ['BaseAgent'],
-                compliance: ['Factor 10 (≤8 steps)']
+                compliance: ['Factor 10 (<=8 steps)']
             }
         ];
 
@@ -571,7 +568,7 @@ class ArchitectureDesignAgent extends ValidatedAgent {
             'Implement two-phase management system (Planning + Execution)',
             'Create supervisor agents for each phase',
             'Implement specialist agent delegation',
-            'Maintain Factor 10 compliance (≤8 execution steps)',
+            'Maintain Factor 10 compliance (<=8 execution steps)',
             'Preserve existing BaseAgent patterns',
             'Integrate with SQLite coordination system',
             'Support quality gate validation',
@@ -680,16 +677,16 @@ class ArchitectureDesignAgent extends ValidatedAgent {
     designDataFlow() {
         return {
             phase1Flow: [
-                'TaskContext → PlanningManagerAgent',
-                'PlanningManagerAgent → Research Specialist Agents', 
-                'Research Results → PlanningManagerAgent',
-                'Synthesized Plan → Database Storage'
+                'TaskContext -> PlanningManagerAgent',
+                'PlanningManagerAgent -> Research Specialist Agents', 
+                'Research Results -> PlanningManagerAgent',
+                'Synthesized Plan -> Database Storage'
             ],
             phase2Flow: [
-                'Database → ExecutionManagerAgent (Plan Loading)',
-                'ExecutionManagerAgent → Implementation Specialist Agents',
-                'Implementation Results → ExecutionManagerAgent',
-                'Final Delivery → User + Database'
+                'Database -> ExecutionManagerAgent (Plan Loading)',
+                'ExecutionManagerAgent -> Implementation Specialist Agents',
+                'Implementation Results -> ExecutionManagerAgent',
+                'Final Delivery -> User + Database'
             ],
             stateManagement: 'Database-backed with Factor3 context XML'
         };
@@ -759,7 +756,7 @@ class ArchitectureDesignAgent extends ValidatedAgent {
 
     defineComplianceChecks() {
         return [
-            'Factor 10 compliance: Verify ≤8 execution steps per agent',
+            'Factor 10 compliance: Verify <=8 execution steps per agent',
             'Factor 3 compliance: Confirm XML context format usage', 
             '12-Factor compliance: Validate against established principles',
             'BaseAgent compliance: Ensure proper inheritance and patterns',
@@ -800,7 +797,7 @@ class ArchitectureDesignAgent extends ValidatedAgent {
             phase2Development: '1-2 sessions - Specialist agents and integration',
             phase3Integration: '1 session - Persona updates and system testing',
             totalEstimate: '3-4 development sessions',
-            criticalPath: 'Manager agent development → Database schema → Specialist agents → Persona integration'
+            criticalPath: 'Manager agent development -> Database schema -> Specialist agents -> Persona integration'
         };
     }
 

@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * 12-Factor Agent Compliance Tracker
  * Ensures all applicable factors are followed during development
@@ -285,7 +286,7 @@ class TwelveFactorCompliance {
         this.complianceLog.push(entry);
         this.activeFactors.add(factorNumber);
         
-        console.log(`✓ Factor ${factorNumber}: ${factorName} - Applied`);
+        info(`OK Factor ${factorNumber}: ${factorName} - Applied`);
     }
 
     getComplianceReport() {
@@ -342,7 +343,7 @@ module.exports = { TwelveFactorCompliance };
 // Demo showing all factors in action
 if (require.main === module) {
     async function demo12FactorCompliance() {
-        console.log('🎯 12-Factor Agent Compliance Demo\n');
+        info('12-Factor Agent Compliance Demo\n');
         
         const compliance = new TwelveFactorCompliance();
         
@@ -352,11 +353,11 @@ if (require.main === module) {
         compliance.validateAgentScope("integration_fixer", 3, 8);
         compliance.registerTrigger("slack", "slash_command", () => {});
         
-        console.log('\n📊 Compliance Report:');
-        console.log(compliance.getComplianceReport());
+        info('\nMETRICS Compliance Report:');
+        info(compliance.getComplianceReport());
         
-        console.log('\n📄 Current Context (Factor 3):');
-        console.log(compliance.getContextWindow());
+        info('\n Current Context (Factor 3):');
+        info(compliance.getContextWindow());
     }
     
     demo12FactorCompliance().catch(console.error);

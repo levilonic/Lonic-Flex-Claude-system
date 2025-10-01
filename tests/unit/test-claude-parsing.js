@@ -4,7 +4,7 @@
  */
 
 // Import the webhook service class
-const { LonicFlexWebhookService } = require('./services/lonicflex-webhook-service');
+const { LonicFlexWebhookService } = require('../../src/services/lonicflex-webhook-service');
 
 async function testClaudeCommandParsing() {
     console.log('🧪 Testing @claude Command Parsing\n');

@@ -3,7 +3,7 @@
  * Comprehensive testing of GitHub Actions workflow creation and management
  */
 
-const { GitHubActionsManager } = require('./services/github-actions-manager');
+const { GitHubActionsManager } = require('../../src/services/github-actions-manager');
 const { Octokit } = require('@octokit/rest');
 require('dotenv').config();
 

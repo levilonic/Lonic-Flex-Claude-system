@@ -18,11 +18,11 @@ You are the **Code Reviewer Agent** for LonicFLex - focused on reviewing code ch
 5. **COMMIT FREQUENTLY**: Every 5-10 minutes for meaningful progress
 
 ## REQUIRED TOOLS AND COMMANDS
-- **Security Scanning**: `npm run demo-security-scanner`
-- **Testing Framework**: `npm run demo-testing-framework`
-- **Monitoring**: `npm run demo-monitoring`
-- **Performance**: `npm run demo-performance`
-- **Error Handling**: `npm run demo-error-handler`
+- **Security Scanning**: `echo "Security scanner not implemented"`
+- **Testing Framework**: `npm run test`
+- **Monitoring**: `echo "Monitoring not implemented"`
+- **Performance**: `echo "Performance not implemented"`
+- **Error Handling**: `echo "Error handler not implemented"`
 
 ## SPECIFIC WORKFLOWS AND RULES
 

@@ -1,6 +1,7 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Execution Manager Agent - Phase 2 Coordinator
- * Following 12-Factor Agents methodology and Factor 10 principles (≤8 execution steps)
+ * Following 12-Factor Agents methodology and Factor 10 principles (<=8 execution steps)
  * Coordinates implementation and testing through specialized agent delegation
  */
 
@@ -11,7 +12,7 @@ const { TestingAgent } = require('./testing-agent');
 const { IntegrationAgent } = require('./integration-agent');
 
 class ExecutionManagerAgent extends ValidatedAgent {
-    constructor(sessionId, config = {}) {
+    constructor(sessionId, serviceContainer, config = {}) {
         super('execution-manager', sessionId, {
             maxSteps: 8,
             timeout: 120000, // Longer timeout for execution phase
@@ -38,7 +39,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
         this.progressCallback = config.progressCallback;
         this.errorCallback = config.errorCallback;
         
-        // Execution workflow steps (Factor 10: ≤8 steps)
+        // Execution workflow steps (Factor 10: <=8 steps)
         this.executionSteps = [
             'load_planning_results',
             'initialize_execution_context',
@@ -49,12 +50,8 @@ class ExecutionManagerAgent extends ValidatedAgent {
             'validate_quality_gates',
             'finalize_delivery'
         ];
-
-        this.contextManager.addAgentEvent(this.agentName, 'execution_manager_initialized', {
-            session_id: sessionId,
-            execution_phase: this.config.executionPhase,
-            max_steps: this.config.maxSteps
-        });
+        // Workflow configuration
+        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
     }
 
     /**
@@ -141,7 +138,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
             return await this.executeWorkflow({}, this.progressCallback);
         }
         
-        console.log('🤖 Starting autonomous implementation execution...');
+        info('AGENT Starting autonomous implementation execution...');
         this.isRunning = true;
         const startTime = Date.now();
         
@@ -156,7 +153,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
             await this.validateAllQualityGates();
             
             const executionTime = Date.now() - startTime;
-            console.log(`✅ Autonomous execution completed in ${this.formatTime(executionTime)}`);
+            info(`Autonomous execution completed in ${this.formatTime(executionTime)}`);
             
             return {
                 status: 'completed',
@@ -168,7 +165,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
             };
             
         } catch (error) {
-            console.error('❌ Autonomous execution failed:', error.message);
+            error('FAIL Autonomous execution failed:', error.message);
             if (this.errorCallback) {
                 await this.errorCallback(error, { phase: 'autonomous_execution' });
             }
@@ -208,7 +205,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
                 ]
             };
             
-            console.log(`📋 Loaded execution plan: ${tasks.length} tasks, ${qualityGates.length} quality gates`);
+            info(`Loaded execution plan: ${tasks.length} tasks, ${qualityGates.length} quality gates`);
             
             if (this.progressCallback) {
                 await this.progressCallback('planning', 'loaded_execution_plan', {
@@ -218,7 +215,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
             }
             
         } catch (error) {
-            console.error('❌ Failed to load execution plan:', error.message);
+            error('FAIL Failed to load execution plan:', error.message);
             throw new Error('Cannot proceed without execution plan');
         }
     }
@@ -230,17 +227,17 @@ class ExecutionManagerAgent extends ValidatedAgent {
         const tasks = this.executionPlan.tasks;
         let completedTasks = 0;
         
-        console.log(`🚀 Executing ${tasks.length} autonomous tasks...`);
+        info(`Executing ${tasks.length} autonomous tasks...`);
         
         for (const task of tasks) {
             try {
-                console.log(`📋 Starting Task ${task.id}: ${task.name}`);
+                info(`Starting Task ${task.id}: ${task.name}`);
                 
                 const taskResult = await this.executeAutonomousTask(task);
                 
                 if (taskResult.success) {
                     completedTasks++;
-                    console.log(`✅ Completed Task ${task.id}: ${task.name}`);
+                    info(`Completed Task ${task.id}: ${task.name}`);
                     
                     if (this.progressCallback) {
                         await this.progressCallback('implementation', task.name, {
@@ -250,12 +247,12 @@ class ExecutionManagerAgent extends ValidatedAgent {
                         });
                     }
                 } else {
-                    console.error(`❌ Failed Task ${task.id}: ${task.name}`, taskResult.error);
+                    error(`FAIL Failed Task ${task.id}: ${task.name}`, taskResult.error);
                     throw new Error(`Task ${task.id} failed: ${taskResult.error}`);
                 }
                 
             } catch (error) {
-                console.error(`❌ Error in Task ${task.id}:`, error.message);
+                error(`FAIL Error in Task ${task.id}:`, error.message);
                 if (this.errorCallback) {
                     await this.errorCallback(error, { taskId: task.id, taskName: task.name });
                 }
@@ -310,7 +307,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
      * Task 2.1: Autonomous Service Infrastructure - Already completed by service wrapper
      */
     async executeTask21_ServiceInfrastructure(task) {
-        console.log('🔧 Task 2.1: Service infrastructure already established by service wrapper');
+        logger.debug('Task 2.1: Service infrastructure already established by service wrapper');
         const evidence = {
             serviceInfrastructure: true,
             pm2Configuration: true,
@@ -340,7 +337,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
      * Task 2.2: File System Automation Layer
      */
     async executeTask22_FileSystemAutomation(task) {
-        console.log('📁 Task 2.2: Implementing File System Automation Layer');
+        info(' Task 2.2: Implementing File System Automation Layer');
         
         // This will be fully implemented when we create the FileSystemAutomation service
         // For now, validate the approach
@@ -373,7 +370,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
      * Task 2.3: Git Automation Pipeline
      */
     async executeTask23_GitAutomation(task) {
-        console.log('🌿 Task 2.3: Implementing Git Automation Pipeline');
+        info(' Task 2.3: Implementing Git Automation Pipeline');
         
         const evidence = {
             gitAutomationPlanned: true,
@@ -404,7 +401,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
      * Task 2.4: Progress Monitoring System
      */
     async executeTask24_ProgressMonitoring(task) {
-        console.log('📊 Task 2.4: Implementing Progress Monitoring System');
+        info('METRICS Task 2.4: Implementing Progress Monitoring System');
         
         const evidence = {
             progressMonitoringActive: true,
@@ -435,7 +432,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
      * Task 2.5: Error Recovery System
      */
     async executeTask25_ErrorRecovery(task) {
-        console.log('🔧 Task 2.5: Implementing Error Recovery System');
+        logger.debug('Task 2.5: Implementing Error Recovery System');
         
         const evidence = {
             errorRecoveryOperational: true,
@@ -466,7 +463,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
      * Task 2.6: Testing Automation Integration
      */
     async executeTask26_TestingAutomation(task) {
-        console.log('🧪 Task 2.6: Implementing Testing Automation Integration');
+        info('TEST Task 2.6: Implementing Testing Automation Integration');
         
         const evidence = {
             testingAutomationPlanned: true,
@@ -497,7 +494,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
      * Task 2.7: Integration Validation
      */
     async executeTask27_IntegrationValidation(task) {
-        console.log('🔗 Task 2.7: Implementing Integration Validation');
+        info(' Task 2.7: Implementing Integration Validation');
         
         const evidence = {
             integrationValidationPlanned: true,
@@ -528,7 +525,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
      * Task 2.8: Production Hardening & Deployment
      */
     async executeTask28_ProductionHardening(task) {
-        console.log('🚀 Task 2.8: Implementing Production Hardening & Deployment');
+        info('Task 2.8: Implementing Production Hardening & Deployment');
         
         const evidence = {
             productionHardeningPlanned: true,
@@ -560,17 +557,17 @@ class ExecutionManagerAgent extends ValidatedAgent {
      */
     async validateAllQualityGates() {
         const qualityGates = this.executionPlan.qualityGates;
-        console.log(`🔍 Validating ${qualityGates.length} quality gates...`);
+        info(` Validating ${qualityGates.length} quality gates...`);
         
         for (const gate of qualityGates) {
             const result = await this.validateQualityGate(gate);
             if (!result.passed) {
                 throw new Error(`Quality gate failed: ${gate} - ${result.details}`);
             }
-            console.log(`✅ Quality gate passed: ${gate}`);
+            info(`Quality gate passed: ${gate}`);
         }
         
-        console.log('🎯 All quality gates validated successfully');
+        info('All quality gates validated successfully');
     }
     
     /**
@@ -599,9 +596,9 @@ class ExecutionManagerAgent extends ValidatedAgent {
                 JSON.stringify(this.planningContext)
             ]);
             
-            console.log('💾 Agent state persisted successfully');
+            info(' Agent state persisted successfully');
         } catch (error) {
-            console.error('❌ Failed to persist agent state:', error.message);
+            error('FAIL Failed to persist agent state:', error.message);
         }
     }
     
@@ -630,7 +627,7 @@ class ExecutionManagerAgent extends ValidatedAgent {
      * Stop autonomous execution
      */
     async stop() {
-        console.log('🛑 Stopping autonomous execution...');
+        info('STOP Stopping autonomous execution...');
         this.isRunning = false;
         
         if (this.serviceMode) {
@@ -644,11 +641,11 @@ class ExecutionManagerAgent extends ValidatedAgent {
                     await agent.stop();
                 }
             } catch (error) {
-                console.error(`Error stopping agent ${agentId}:`, error.message);
+                error(`Error stopping agent ${agentId}:`, error.message);
             }
         }
         
-        console.log('✅ Autonomous execution stopped');
+        info('Autonomous execution stopped');
     }
     
     /**

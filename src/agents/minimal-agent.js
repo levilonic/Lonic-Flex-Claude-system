@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Minimal Working Agent - Clean Architecture Implementation
  *
@@ -38,7 +39,7 @@ class MinimalAgent {
         }
 
         this.status = 'initialized';
-        console.log(`✅ MinimalAgent ${this.sessionId} initialized`);
+        info(`MinimalAgent ${this.sessionId} initialized`);
     }
 
     /**
@@ -51,7 +52,7 @@ class MinimalAgent {
         }
 
         this.status = 'executing';
-        console.log(`🔄 MinimalAgent ${this.sessionId} executing task...`);
+        info(`CYCLE MinimalAgent ${this.sessionId} executing task...`);
 
         try {
             // Real operation: Insert agent record
@@ -70,7 +71,7 @@ class MinimalAgent {
                 throw new Error('Failed to insert agent record');
             }
 
-            console.log(`✅ Agent record created with ID: ${insertResult.lastID}`);
+            info(`Agent record created with ID: ${insertResult.lastID}`);
 
             // Verify the insert actually worked
             const verifyResult = await this.database.getAllSQL(
@@ -82,7 +83,7 @@ class MinimalAgent {
                 throw new Error('Failed to verify agent record creation');
             }
 
-            console.log(`✅ Verified agent record:`, verifyResult[0]);
+            info(`Verified agent record:`, verifyResult[0]);
 
             this.status = 'completed';
 
@@ -96,7 +97,7 @@ class MinimalAgent {
 
         } catch (error) {
             this.status = 'failed';
-            console.error(`❌ MinimalAgent ${this.sessionId} failed:`, error.message);
+            error(`FAIL MinimalAgent ${this.sessionId} failed:`, error.message);
 
             // Return actual failure, don't hide it
             return {
@@ -121,9 +122,9 @@ class MinimalAgent {
                 'DELETE FROM agents WHERE id = ?',
                 [`agent-${this.sessionId}`]
             );
-            console.log(`🧹 Cleaned up agent record for ${this.sessionId}`);
+            info(`CLEANUP Cleaned up agent record for ${this.sessionId}`);
         } catch (error) {
-            console.log(`⚠️ Cleanup error: ${error.message}`);
+            warn(`Cleanup error: ${error.message}`);
         }
     }
 
@@ -149,7 +150,7 @@ if (require.main === module) {
     const { systemStartup } = require('../system-startup');
 
     async function testMinimalAgent() {
-        console.log('🧪 Testing MinimalAgent...');
+        info('TEST Testing MinimalAgent...');
 
         let agent = null;
 
@@ -161,19 +162,19 @@ if (require.main === module) {
             // Create and test agent
             agent = new MinimalAgent('test-minimal-agent', serviceContainer);
 
-            console.log('📝 Agent status before init:', agent.getStatus());
+            info(' Agent status before init:', agent.getStatus());
 
             await agent.initialize();
-            console.log('📝 Agent status after init:', agent.getStatus());
+            info(' Agent status after init:', agent.getStatus());
 
             const result = await agent.executeTask();
-            console.log('📝 Task result:', result);
+            info(' Task result:', result);
 
             if (result.success) {
-                console.log('🎉 MinimalAgent test: SUCCESS');
+                info(' MinimalAgent test: SUCCESS');
             } else {
-                console.log('❌ MinimalAgent test: FAILED');
-                console.log('Error:', result.error);
+                error('ALERT MinimalAgent test: FAILED');
+                info('Error:', result.error);
             }
 
             // Clean up
@@ -181,8 +182,8 @@ if (require.main === module) {
             await systemStartup.shutdown();
 
         } catch (error) {
-            console.error('❌ Test failed:', error.message);
-            console.error('Stack:', error.stack);
+            error('FAIL Test failed:', error.message);
+            error('Stack:', error.stack);
 
             if (agent) {
                 await agent.cleanup();

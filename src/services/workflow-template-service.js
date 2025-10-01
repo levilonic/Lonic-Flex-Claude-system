@@ -1,3 +1,4 @@
+const { info, warn, error } = require('./logger');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { MilestoneIntegrationService } = require('./milestone-integration-service');
 const { IssueManagementService } = require('./issue-management-service');
@@ -43,7 +44,7 @@ class WorkflowTemplateService {
         // Load built-in templates
         await this.loadBuiltInTemplates();
 
-        console.log(`✅ Workflow Template Service initialized with ${this.templateRegistry.size} templates`);
+        info(`Workflow Template Service initialized with ${this.templateRegistry.size} templates`);
         this.initialized = true;
     }
 
@@ -351,7 +352,7 @@ class WorkflowTemplateService {
             requirements
         });
 
-        console.log(`✅ Registered template: ${name} (${templateId})`);
+        info(`Registered template: ${name} (${templateId})`);
         return templateId;
     }
 
@@ -433,7 +434,7 @@ class WorkflowTemplateService {
                 }
             }
 
-            console.log(`✅ Template execution completed: ${templateId} (${executionId})`);
+            info(`Template execution completed: ${templateId} (${executionId})`);
             return {
                 executionId,
                 sessionId,
@@ -444,7 +445,7 @@ class WorkflowTemplateService {
         } catch (error) {
             // Update execution record with error
             await this.completeExecutionRecord(executionId, 'failed', null, error.message);
-            console.error(`❌ Template execution failed: ${error.message}`);
+            error(`FAIL Template execution failed: ${error.message}`);
             throw error;
         }
     }
@@ -455,7 +456,7 @@ class WorkflowTemplateService {
     async executeSequentialWorkflow(template, executionId, sessionId, branchName, customConfig) {
         const results = {};
         
-        console.log(`🔄 Executing sequential workflow: ${template.name}`);
+        info(`CYCLE Executing sequential workflow: ${template.name}`);
         
         for (let i = 0; i < template.agentTypes.length; i++) {
             const agentType = template.agentTypes[i];
@@ -464,7 +465,7 @@ class WorkflowTemplateService {
                 ...customConfig[agentType] 
             };
 
-            console.log(`  🤖 Step ${i + 1}/${template.agentTypes.length}: ${agentType} agent`);
+            info(`  AGENT Step ${i + 1}/${template.agentTypes.length}: ${agentType} agent`);
 
             try {
                 // Simulate agent execution (in real implementation, would call actual agents)
@@ -493,7 +494,7 @@ class WorkflowTemplateService {
      * Execute parallel workflow
      */
     async executeParallelWorkflow(template, executionId, sessionId, branchName, customConfig) {
-        console.log(`🔄 Executing parallel workflow: ${template.name}`);
+        info(`CYCLE Executing parallel workflow: ${template.name}`);
         
         const agentPromises = template.agentTypes.map(async (agentType, index) => {
             const agentConfig = { 
@@ -501,7 +502,7 @@ class WorkflowTemplateService {
                 ...customConfig[agentType] 
             };
 
-            console.log(`  🤖 Starting parallel: ${agentType} agent`);
+            info(`  AGENT Starting parallel: ${agentType} agent`);
 
             try {
                 const agentResult = await this.executeAgent(agentType, agentConfig, {
@@ -574,7 +575,7 @@ class WorkflowTemplateService {
             
             // Execute real agent workflow
             const agentResult = await agent.executeWorkflow(context, (progress, message) => {
-                console.log(`    📊 ${agentType}: ${progress}% - ${message}`);
+                info(`    METRICS ${agentType}: ${progress}% - ${message}`);
             });
             
             const executionTime = Date.now() - startTime;
@@ -590,7 +591,7 @@ class WorkflowTemplateService {
         } catch (error) {
             const executionTime = Date.now() - startTime;
             
-            console.error(`❌ Real agent execution failed for ${agentType}: ${error.message}`);
+            error(`FAIL Real agent execution failed for ${agentType}: ${error.message}`);
             
             // Return error result instead of throwing to allow other agents to continue
             return {
@@ -682,7 +683,7 @@ class WorkflowTemplateService {
      */
     async logExecutionProgress(executionId, agentType, status, results) {
         // In real implementation, would update milestone and send notifications
-        console.log(`    ✅ ${agentType}: ${status} (${JSON.stringify(results).substring(0, 100)}...)`);
+        info(`    PASS ${agentType}: ${status} (${JSON.stringify(results).substring(0, 100)}...)`);
     }
 
     /**
@@ -713,7 +714,7 @@ module.exports = { WorkflowTemplateService };
 
 // Demo/testing function
 async function demoWorkflowTemplates() {
-    console.log('🎯 Workflow Template Service Demo');
+    info('Workflow Template Service Demo');
     
     const templateService = new WorkflowTemplateService();
     
@@ -722,25 +723,25 @@ async function demoWorkflowTemplates() {
         
         // Show available templates
         const templates = templateService.getAvailableTemplates();
-        console.log(`📋 Available templates: ${templates.length}`);
+        info(`Available templates: ${templates.length}`);
         
         for (const template of templates) {
-            console.log(`  • ${template.name} (${template.id}) - ${template.estimatedDuration}min`);
+            info(`  - ${template.name} (${template.id}) - ${template.estimatedDuration}min`);
         }
 
         // Execute a template
-        console.log('\n🚀 Executing feature-development template...');
+        info('\n Executing feature-development template...');
         const result = await templateService.executeTemplate('feature-development', {
             branchName: 'feature/template-demo',
             owner: 'levilonic',
             repo: 'Lonic-Flex-Claude-system'
         });
 
-        console.log(`✅ Template execution completed: ${result.executionId}`);
-        console.log(`📊 Results: ${Object.keys(result.results).length} agents completed`);
+        info(`Template execution completed: ${result.executionId}`);
+        info(`METRICS Results: ${Object.keys(result.results).length} agents completed`);
         
     } catch (error) {
-        console.error(`❌ Error: ${error.message}`);
+        error(`FAIL Error: ${error.message}`);
     }
 }
 

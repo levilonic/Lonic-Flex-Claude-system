@@ -1,3 +1,4 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * Multiplan Manager Agent - Phase 5 Final Integration
  * Orchestrates parallel work and manages multiple workflow plans
@@ -13,7 +14,7 @@ const { BranchAwareAgentManager } = require('../services/branch-aware-agent-mana
 const { CrossBranchCoordinator } = require('../services/cross-branch-coordinator');
 
 class MultiplanManagerAgent extends ValidatedAgent {
-    constructor(sessionId, config = {}) {
+    constructor(sessionId, serviceContainer, config = {}) {
         super('multiplan-manager', sessionId, {
             maxSteps: 8,
             timeout: 300000, // 5 minutes for complex orchestration
@@ -73,7 +74,7 @@ class MultiplanManagerAgent extends ValidatedAgent {
             branchManager: this.branchManager
         });
 
-        console.log('✅ Multiplan Manager Agent initialized with all orchestration services');
+        info('Multiplan Manager Agent initialized with all orchestration services');
         return this;
     }
 
@@ -99,7 +100,7 @@ class MultiplanManagerAgent extends ValidatedAgent {
                 try {
                     await this.projectsManager.initialize();
                 } catch (error) {
-                    console.warn('⚠️ Projects Manager initialization failed (permissions), using fallback services');
+                    console.warn('WARN Projects Manager initialization failed (permissions), using fallback services');
                 }
                 
                 const evidence = {
@@ -125,11 +126,11 @@ class MultiplanManagerAgent extends ValidatedAgent {
                     servicesInitialized: [
                         'issueService',
                         'milestoneService',
-                    validation: validation, 
                         'templateService',
                         'branchManager',
                         'crossBranchCoordinator'
-                    ]
+                    ],
+                    validation: validation
                 };
             } catch (error) {
                 throw new Error(`Service initialization failed: ${error.message}`);
@@ -333,7 +334,7 @@ class MultiplanManagerAgent extends ValidatedAgent {
     async executeMultiplePlans(strategy, context) {
         const executionPromises = strategy.plans.map(async (plan) => {
             try {
-                console.log(`🚀 Starting plan: ${plan.planId} (${plan.templateId})`);
+                info(`Starting plan: ${plan.planId} (${plan.templateId})`);
                 
                 const result = await this.templateService.executeTemplate(plan.templateId, {
                     sessionId: plan.planId,
@@ -357,7 +358,7 @@ class MultiplanManagerAgent extends ValidatedAgent {
                 };
 
             } catch (error) {
-                console.error(`❌ Plan failed: ${plan.planId} - ${error.message}`);
+                error(`FAIL Plan failed: ${plan.planId} - ${error.message}`);
                 
                 this.activePlans.set(plan.planId, {
                     ...plan,
@@ -568,11 +569,11 @@ class MultiplanManagerAgent extends ValidatedAgent {
 - **Success Rate**: ${results.consolidation?.successRate || 0}%
 
 ## Service Integration Status
-- Issue Management: ✅ Operational
-- Milestone Tracking: ✅ Active  
-- Template System: ✅ Functional
-- Branch Coordination: ✅ Enabled
-- GitHub Projects: ⚠️ Limited (permissions needed)
+- Issue Management: PASS Operational
+- Milestone Tracking: PASS Active  
+- Template System: PASS Functional
+- Branch Coordination: PASS Enabled
+- GitHub Projects: WARN Limited (permissions needed)
 
 ## Performance Metrics
 - Total Agent Executions: ${results.execution?.totalAgentExecutions || 0}
@@ -598,7 +599,7 @@ module.exports = { MultiplanManagerAgent };
 
 // Demo/testing function
 async function demoMultiplanManager() {
-    console.log('🎯 Multiplan Manager Agent Demo');
+    info('Multiplan Manager Agent Demo');
 
     // Initialize ServiceContainer for proper dependency injection
     const { initializeGlobalServiceContainer } = require('../services/service-container');
@@ -619,17 +620,17 @@ async function demoMultiplanManager() {
             repo: 'Lonic-Flex-Claude-system'
         };
 
-        console.log('🚀 Starting multiplan orchestration...');
+        info('Starting multiplan orchestration...');
         const result = await multiplanAgent.executeWorkflow(context, (progress, message) => {
-            console.log(`  📊 ${progress}% - ${message}`);
+            info(`  METRICS ${progress}% - ${message}`);
         });
 
-        console.log('✅ Orchestration completed successfully!');
-        console.log(`📊 Final report: ${result.finalReport.summary}`);
-        console.log(`🔍 Recommendations: ${result.recommendations.length}`);
+        info('Orchestration completed successfully!');
+        info(`METRICS Final report: ${result.finalReport.summary}`);
+        info(` Recommendations: ${result.recommendations.length}`);
         
     } catch (error) {
-        console.error(`❌ Error: ${error.message}`);
+        error(`FAIL Error: ${error.message}`);
     } finally {
         // Cleanup ServiceContainer resources
         await serviceContainer.shutdown();

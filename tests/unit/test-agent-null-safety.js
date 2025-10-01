@@ -1,80 +1,127 @@
 /**
- * Test Individual Agent Creation with Null Safety
- * Validates that agents can handle null context managers gracefully
+ * Test Individual Agent Creation with ServiceContainer
+ * Validates that agents properly initialize with dependency injection
  */
 
-const { BaseAgent } = require('./agents/base-agent');
-const { GitHubAgent } = require('./agents/github-agent');
+const { BaseAgent } = require('../../src/agents/base-agent');
+const { GitHubAgent } = require('../../src/agents/github-agent');
+const { ServiceContainer } = require('../../src/services/service-container');
 
-console.log('🧪 Testing Individual Agent Creation with Null Safety');
+console.log('🧪 Testing Agent Creation with ServiceContainer\n');
 
-async function testIndividualAgentCreation() {
+async function testAgentCreationWithServiceContainer() {
+    let serviceContainer = null;
+
     try {
-        console.log('\n📋 Test 1: BaseAgent Creation and Initialization...');
-        const baseAgent = new BaseAgent('test-base', 'test-session-123');
+        // Initialize ServiceContainer
+        console.log('📋 Setup: Initializing ServiceContainer...');
+        serviceContainer = new ServiceContainer();
+        await serviceContainer.initialize();
+        console.log('✅ ServiceContainer initialized\n');
 
-        // Test that agent can be created
+        // Test 1: BaseAgent Creation and Initialization
+        console.log('📋 Test 1: BaseAgent Creation with ServiceContainer...');
+        const uniqueSessionId = `test-session-${Date.now()}`;
+        const baseAgent = new BaseAgent('test-base', uniqueSessionId, serviceContainer);
         console.log(`✅ BaseAgent created: ${baseAgent.agentName}`);
 
-        // Test initialization (this should handle null context manager gracefully)
-        await baseAgent.initialize();
+        // Test initialization with unique workflow ID
+        await baseAgent.initialize(`workflow_${Date.now()}_${Math.random()}_base`);
         console.log(`✅ BaseAgent initialized successfully`);
 
-        // Test context manager state
-        if (baseAgent.contextManager) {
-            console.log(`✅ Context manager available: ${typeof baseAgent.contextManager.addAgentEvent}`);
+        // Verify context manager is available
+        if (baseAgent.contextManager && typeof baseAgent.contextManager.addAgentEvent === 'function') {
+            console.log(`✅ Context manager available with correct API`);
         } else {
-            console.log(`⚠️ Context manager null (should have fallback)`);
+            throw new Error('Context manager not properly initialized');
         }
 
-        console.log('\n📋 Test 2: GitHubAgent Creation...');
-        const githubAgent = new GitHubAgent('test-session-456');
-        console.log(`✅ GitHubAgent created: ${githubAgent.agentName}`);
+        // Test 2: Agent Method Calls
+        console.log('\n📋 Test 2: Agent Method Calls...');
 
-        await githubAgent.initialize();
-        console.log(`✅ GitHubAgent initialized successfully`);
-
-        console.log('\n📋 Test 3: Agent Method Calls with Context Manager...');
-
-        // Test logging event (should not crash even with null context)
+        // Test logging event
         await baseAgent.logEvent('test_event', { message: 'test' });
         console.log(`✅ logEvent call completed without error`);
 
         // Test progress update
-        await baseAgent.updateProgress(50, 'test step');
+        await baseAgent.updateProgress(50, 'test step', 'in_progress');
         console.log(`✅ updateProgress call completed without error`);
 
         // Test status retrieval
         const status = baseAgent.getStatus();
         console.log(`✅ getStatus call completed: ${status.state}`);
 
-        // Test cleanup
-        await baseAgent.cleanup();
-        console.log(`✅ cleanup call completed without error`);
+        // Test 3: Service Container Dependency Injection
+        console.log('\n📋 Test 3: Verify Dependency Injection...');
+
+        if (baseAgent.services === serviceContainer) {
+            console.log(`✅ ServiceContainer properly injected`);
+        } else {
+            throw new Error('ServiceContainer not properly injected');
+        }
+
+        if (baseAgent.memoryManager) {
+            console.log(`✅ Memory manager service available`);
+        } else {
+            throw new Error('Memory manager not available');
+        }
+
+        if (baseAgent.compliance) {
+            console.log(`✅ Compliance service available`);
+        } else {
+            throw new Error('Compliance service not available');
+        }
+
+        if (baseAgent.docs) {
+            console.log(`✅ Documentation service available`);
+        } else {
+            throw new Error('Documentation service not available');
+        }
+
+        // Test 4: GitHubAgent Creation (different constructor pattern)
+        console.log('\n📋 Test 4: GitHubAgent Creation...');
+        const githubAgent = new GitHubAgent('test-session-456');
+        console.log(`✅ GitHubAgent created: ${githubAgent.agentName}`);
+
+        // Note: GitHubAgent extends ValidatedAgent, not BaseAgent
+        // So it doesn't require ServiceContainer in constructor
+        console.log(`ℹ️  GitHubAgent uses ValidatedAgent pattern (no ServiceContainer required)`);
 
         console.log('\n📊 Test Results Summary:');
-        console.log('✅ Agent Creation: PASS');
+        console.log('✅ BaseAgent Creation with ServiceContainer: PASS');
         console.log('✅ Agent Initialization: PASS');
-        console.log('✅ Context Manager Null Safety: PASS');
+        console.log('✅ Dependency Injection: PASS');
+        console.log('✅ Context Manager Integration: PASS');
         console.log('✅ Method Calls: PASS');
+        console.log('✅ GitHubAgent Creation: PASS');
 
         return true;
+
     } catch (error) {
-        console.error('❌ Test failed:', error.message);
+        console.error('\n❌ Test failed:', error.message);
         console.error('Stack trace:', error.stack);
         return false;
+
+    } finally {
+        // Cleanup
+        if (serviceContainer) {
+            console.log('\n🧹 Cleaning up ServiceContainer...');
+            await serviceContainer.shutdown();
+            console.log('✅ Cleanup complete');
+        }
     }
 }
 
 // Run the test
-testIndividualAgentCreation()
+testAgentCreationWithServiceContainer()
     .then(success => {
         if (success) {
-            console.log('\n🎉 Individual Agent Creation Test: SUCCESS');
-            console.log('✅ Null safety implemented correctly');
-            console.log('✅ Agents handle missing context managers gracefully');
+            console.log('\n🎉 Agent Creation with ServiceContainer Test: SUCCESS');
+            console.log('✅ Dependency injection working correctly');
+            console.log('✅ Agents properly initialized with services');
+            process.exit(0);
         } else {
-            console.log('\n❌ Individual Agent Creation Test: FAILED');
+            console.log('\n❌ Agent Creation with ServiceContainer Test: FAILED');
             process.exit(1);
         }
     })

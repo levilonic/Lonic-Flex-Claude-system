@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Real Natural Language Processor
  *
@@ -22,7 +23,7 @@ class RealNaturalLanguageProcessor {
      * Enhanced requirement analysis using intelligent pattern recognition
      */
     async analyzeRequirements(input) {
-        console.log(`🧠 Real NL Processor: Analyzing "${input.substring(0, 50)}..."`);
+        info(` Real NL Processor: Analyzing "${input.substring(0, 50)}..."`);
 
         // Step 1: Extract project type with confidence scoring
         const projectAnalysis = this.analyzeProjectType(input);
@@ -75,7 +76,7 @@ class RealNaturalLanguageProcessor {
      * Intelligent project decomposition based on analysis
      */
     async decomposeProject(requirementAnalysis) {
-        console.log(`🔄 Real NL Processor: Decomposing ${requirementAnalysis.projectType} project`);
+        info(`CYCLE Real NL Processor: Decomposing ${requirementAnalysis.projectType} project`);
 
         const decomposition = {
             projectId: `real_${Date.now()}_${randomBytes(4).toString('hex')}`,
@@ -105,7 +106,7 @@ class RealNaturalLanguageProcessor {
      * Generate actual code structure and implementation plan
      */
     async generateCodeImplementationPlan(decomposition) {
-        console.log(`💻 Real NL Processor: Planning code implementation for ${decomposition.projectType}`);
+        info(` Real NL Processor: Planning code implementation for ${decomposition.projectType}`);
 
         const implementationPlan = {
             projectStructure: this.generateProjectStructure(decomposition),
@@ -611,7 +612,7 @@ class RealNaturalLanguageProcessor {
         // This would generate actual code templates
         // For now, return basic templates
         const templates = {
-            'js': '// Auto-generated JavaScript file\nconsole.log("Hello from ' + fileName + '");',
+            'js': '// Auto-generated JavaScript file\ninfo("Hello from ' + fileName + '");',
             'html': '<!DOCTYPE html><html><head><title>Generated App</title></head><body><h1>Welcome</h1></body></html>',
             'css': '/* Auto-generated styles */\nbody { font-family: Arial, sans-serif; }',
             'json': JSON.stringify({ name: decomposition.projectId, version: "1.0.0" }, null, 2),

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { info, warn, error } = require('../services/logger');
 /**
  * Natural Language Execution Engine
  * ADaPT + DART-LLM + CoC + LILO Integration
@@ -23,7 +24,7 @@ class NaturalLanguageExecutionEngine extends EventEmitter {
     }
 
     async transformToExecution(naturalLanguage, context = {}) {
-        console.log(`🧠 NL Engine: Processing "${naturalLanguage.substring(0, 50)}..."`);
+        info(` NL Engine: Processing "${naturalLanguage.substring(0, 50)}..."`);
 
         // Stage 1: ADaPT - Recursive decomposition
         const adaptResult = await this.adaptProcessor.decomposeAsNeeded(naturalLanguage, context);
@@ -88,7 +89,7 @@ class ADaPTProcessor {
     }
 
     async decomposeAsNeeded(input, context = {}, depth = 0) {
-        console.log(`🔄 ADaPT: Decomposing (depth ${depth})`);
+        info(`CYCLE ADaPT: Decomposing (depth ${depth})`);
 
         const complexity = this.assessComplexity(input);
         const executable = this.isDirectlyExecutable(input, complexity);
@@ -284,7 +285,7 @@ class DARTProcessor {
     }
 
     async analyzeDependencies(adaptResult) {
-        console.log(`📊 DART: Analyzing dependencies`);
+        info(`METRICS DART: Analyzing dependencies`);
 
         const tasks = this.extractAllTasks(adaptResult);
         const dependencies = await this.identifyDependencies(tasks);
@@ -649,13 +650,13 @@ app.use(express.json());
 
 // Error handling
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    error(err.stack);
     res.status(500).send('Something broke!');
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(\`Server running on port \${PORT}\`);
+    info(\`Server running on port \${PORT}\`);
 });
 `,
             complexity: 'medium'
@@ -705,7 +706,7 @@ export default {{componentName}};
     }
 
     async generateCodePlan(dartResult) {
-        console.log(`💻 CoC: Generating code execution plan`);
+        info(` CoC: Generating code execution plan`);
 
         const tasks = dartResult.executionSequence.map(item => item.task);
         const codeComponents = [];
@@ -967,7 +968,7 @@ class LILOProcessor {
     }
 
     async optimizeWithPatterns(cocResult) {
-        console.log(`🔍 LILO: Optimizing with pattern recognition`);
+        info(` LILO: Optimizing with pattern recognition`);
 
         const identifiedPatterns = await this.identifyPatterns(cocResult);
         const optimizedTemplates = await this.optimizeTemplates(cocResult.generatedTemplates, identifiedPatterns);

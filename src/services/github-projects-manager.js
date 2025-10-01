@@ -1,4 +1,5 @@
-const { graphql } = require('@octokit/graphql');
+const { info, warn, error } = require('./logger');
+// NOTE: @octokit/graphql is an ESM module - imported dynamically in initialize()
 const { Octokit } = require('@octokit/rest');
 const { getAuthManager } = require('../auth/auth-manager');
 const { SQLiteManager } = require('../database/sqlite-manager');
@@ -34,10 +35,13 @@ class GitHubProjectsManager {
         // Initialize auth manager
         await this.authManager.initialize();
         this.githubConfig = this.authManager.getGitHubConfig();
-        
+
         if (!this.githubConfig.token) {
             throw new Error('GitHub token required for Projects API operations');
         }
+
+        // Dynamically import @octokit/graphql (ESM module)
+        const { graphql } = await import('@octokit/graphql');
 
         // Initialize GraphQL client with authentication
         this.graphqlWithAuth = graphql.defaults({
@@ -54,7 +58,7 @@ class GitHubProjectsManager {
 
         // Test authentication
         const { data: user } = await this.octokit.rest.users.getAuthenticated();
-        console.log(`✅ GitHub Projects Manager authenticated as: ${user.login}`);
+        info(`GitHub Projects Manager authenticated as: ${user.login}`);
 
         // Initialize database
         if (!this.dbManager.isInitialized) {
@@ -531,10 +535,10 @@ This issue tracks the progress of the ${agentType} agent in the multi-agent work
                 [`agent:${agentType}`, `workflow:${sessionId}`, `branch:${branchName}`]
             );
 
-            console.log(`✅ Created issue #${issue.number} for ${agentType} agent`);
+            info(`Created issue #${issue.number} for ${agentType} agent`);
         }
 
-        console.log(`✅ Created workflow project: ${project.title}`);
+        info(`Created workflow project: ${project.title}`);
         return project;
     }
 
@@ -581,7 +585,7 @@ module.exports = { GitHubProjectsManager };
 
 // Demo/testing function
 async function demoGitHubProjects() {
-    console.log('🎯 GitHub Projects Manager Demo');
+    info('GitHub Projects Manager Demo');
     
     const projectsManager = new GitHubProjectsManager();
     
@@ -590,19 +594,19 @@ async function demoGitHubProjects() {
         
         // Get existing projects
         const projects = await projectsManager.getProjects('levilonic', 'user');
-        console.log(`✅ Found ${projects.length} projects`);
+        info(`Found ${projects.length} projects`);
         
         if (projects.length > 0) {
             const project = projects[0];
-            console.log(`📋 Project: ${project.title} (${project.url})`);
+            info(`Project: ${project.title} (${project.url})`);
             
             // Get project items
             const items = await projectsManager.getProjectItems(project.id);
-            console.log(`📝 Project has ${items.length} items`);
+            info(` Project has ${items.length} items`);
         }
         
     } catch (error) {
-        console.error(`❌ Error: ${error.message}`);
+        error(`FAIL Error: ${error.message}`);
     }
 }
 

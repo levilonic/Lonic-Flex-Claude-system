@@ -1,3 +1,4 @@
+const { info, warn, error: logError } = require('./logger');
 /**
  * Agent Pool Manager - Phase 3A Implementation
  * Provides stateless, reusable agent instances for better performance
@@ -53,7 +54,7 @@ class AgentPoolManager extends EventEmitter {
         this.isInitialized = false;
         this.isShuttingDown = false;
 
-        console.log('🏊 AgentPoolManager created with intelligent pooling');
+        info('AgentPoolManager created with intelligent pooling');
     }
 
     /**
@@ -74,17 +75,17 @@ class AgentPoolManager extends EventEmitter {
 
             // Skip pre-initialization of pools during ServiceContainer bootstrap
             // Pools will be created on-demand to prevent circular initialization issues
-            console.log('⚠️ Skipping pre-initialization of agent pools to prevent circular dependency during bootstrap');
-            console.log('   Pools will be created on-demand when agents are requested');
+            warn('Skipping pre-initialization of agent pools to prevent circular dependency during bootstrap');
+            info('   Pools will be created on-demand when agents are requested');
 
             this.isInitialized = true;
             this.emit('initialized', { pools: this.pools.size });
 
-            console.log(`✅ AgentPoolManager initialized with ${this.pools.size} pools`);
+            info(`AgentPoolManager initialized with ${this.pools.size} pools`);
             return this;
 
         } catch (error) {
-            console.error('❌ AgentPoolManager initialization failed:', error.message);
+            logError('AgentPoolManager initialization failed:', error.message);
             throw error;
         }
     }
@@ -117,7 +118,7 @@ class AgentPoolManager extends EventEmitter {
         });
 
         this.emit('poolInitialized', { agentType, pool });
-        console.log(`🏊 Initialized pool for ${agentType} agents`);
+        info(`Initialized pool for ${agentType} agents`);
 
         return pool;
     }
@@ -168,7 +169,7 @@ class AgentPoolManager extends EventEmitter {
             workflowId
         });
 
-        console.log(`🔄 Agent acquired from pool: ${agentType} (${stats.activeCount} active)`);
+        info(`Agent acquired from pool: ${agentType} (${stats.activeCount} active)`);
         return agent;
     }
 
@@ -178,7 +179,7 @@ class AgentPoolManager extends EventEmitter {
     async returnAgent(agentId) {
         const agentInfo = this.activeAgents.get(agentId);
         if (!agentInfo) {
-            console.warn(`⚠️ Attempted to return unknown agent: ${agentId}`);
+            console.warn(`Attempted to return unknown agent: ${agentId}`);
             return false;
         }
 
@@ -204,11 +205,11 @@ class AgentPoolManager extends EventEmitter {
                 lifetime
             });
 
-            console.log(`🔄 Agent returned to pool: ${agentInfo.agentType} (${stats.activeCount} active)`);
+            info(`Agent returned to pool: ${agentInfo.agentType} (${stats.activeCount} active)`);
             return true;
 
         } catch (error) {
-            console.error(`❌ Error returning agent ${agentId}:`, error.message);
+            logError(`Error returning agent ${agentId}:`, error.message);
             return false;
         }
     }
@@ -239,11 +240,11 @@ class AgentPoolManager extends EventEmitter {
                 agentId
             });
 
-            console.log(`🗑️ Agent released permanently: ${agentInfo.agentType}`);
+            info(`Agent released permanently: ${agentInfo.agentType}`);
             return true;
 
         } catch (error) {
-            console.error(`❌ Error releasing agent ${agentId}:`, error.message);
+            logError(`Error releasing agent ${agentId}:`, error.message);
             return false;
         }
     }
@@ -350,7 +351,7 @@ class AgentPoolManager extends EventEmitter {
             try {
                 await this.performCleanup();
             } catch (error) {
-                console.error('❌ Pool cleanup error:', error.message);
+                logError('Pool cleanup error:', error.message);
             }
         }, this.config.cleanupInterval);
     }
@@ -367,10 +368,10 @@ class AgentPoolManager extends EventEmitter {
                 this.emit('healthCheck', health);
 
                 if (health.status !== 'healthy') {
-                    console.warn('⚠️ Pool system health degraded:', health);
+                    console.warn('Pool system health degraded:', health);
                 }
             } catch (error) {
-                console.error('❌ Health check error:', error.message);
+                logError('Health check error:', error.message);
             }
         }, this.config.healthCheckInterval);
     }
@@ -386,13 +387,13 @@ class AgentPoolManager extends EventEmitter {
                 const cleaned = await pool.cleanup();
                 cleanedUp += cleaned;
             } catch (error) {
-                console.error(`❌ Pool cleanup error for ${agentType}:`, error.message);
+                logError(`Pool cleanup error for ${agentType}:`, error.message);
             }
         }
 
         if (cleanedUp > 0) {
             this.emit('cleanup', { cleanedAgents: cleanedUp });
-            console.log(`🧹 Pool cleanup completed: ${cleanedUp} agents cleaned`);
+            info(`Pool cleanup completed: ${cleanedUp} agents cleaned`);
         }
     }
 
@@ -400,7 +401,7 @@ class AgentPoolManager extends EventEmitter {
      * Shutdown pool manager
      */
     async shutdown() {
-        console.log('🛑 Shutting down AgentPoolManager...');
+        info('Shutting down AgentPoolManager...');
         this.isShuttingDown = true;
 
         // Clear timers
@@ -420,7 +421,7 @@ class AgentPoolManager extends EventEmitter {
             try {
                 await this.returnAgent(agentId);
             } catch (error) {
-                console.warn(`⚠️ Error returning agent during shutdown: ${agentId}`);
+                console.warn(`Error returning agent during shutdown: ${agentId}`);
             }
         }
 
@@ -428,9 +429,9 @@ class AgentPoolManager extends EventEmitter {
         for (const [agentType, pool] of this.pools) {
             try {
                 await pool.shutdown();
-                console.log(`✅ Pool ${agentType} shutdown complete`);
+                info(`Pool ${agentType} shutdown complete`);
             } catch (error) {
-                console.error(`❌ Error shutting down pool ${agentType}:`, error.message);
+                logError(`Error shutting down pool ${agentType}:`, error.message);
             }
         }
 
@@ -440,7 +441,7 @@ class AgentPoolManager extends EventEmitter {
         this.isInitialized = false;
 
         this.emit('shutdown');
-        console.log('✅ AgentPoolManager shutdown complete');
+        info('AgentPoolManager shutdown complete');
     }
 }
 
@@ -480,12 +481,12 @@ class AgentPool {
                     lastUsed: Date.now()
                 });
             } catch (error) {
-                console.error(`❌ Error pre-creating ${this.agentType} agent:`, error.message);
+                logError(`Error pre-creating ${this.agentType} agent:`, error.message);
             }
         }
 
         this.isInitialized = true;
-        console.log(`✅ Pool initialized for ${this.agentType}: ${this.availableAgents.length} agents ready`);
+        info(`Pool initialized for ${this.agentType}: ${this.availableAgents.length} agents ready`);
     }
 
     /**
@@ -530,7 +531,7 @@ class AgentPool {
     async returnAgent(agent) {
         const agentInfo = this.inUseAgents.get(agent.agentId);
         if (!agentInfo) {
-            console.warn(`⚠️ Attempted to return unknown agent to ${this.agentType} pool`);
+            console.warn(`Attempted to return unknown agent to ${this.agentType} pool`);
             return false;
         }
 
@@ -549,7 +550,7 @@ class AgentPool {
             return true;
 
         } catch (error) {
-            console.error(`❌ Error returning ${this.agentType} agent:`, error.message);
+            logError(`Error returning ${this.agentType} agent:`, error.message);
             // If reset fails, destroy the agent
             await this.destroyAgent(agent);
             this.inUseAgents.delete(agent.agentId);
@@ -562,7 +563,7 @@ class AgentPool {
      */
     async createAgent() {
         // Import the enhanced agent factory
-        const { EnhancedAgentFactory } = require('../enhanced-agent-factory');
+        const { EnhancedAgentFactory } = require('../core/enhanced-agent-factory');
 
         const factory = new EnhancedAgentFactory();
         await factory.initialize();
@@ -637,7 +638,7 @@ class AgentPool {
             }
             this.totalCreated = Math.max(0, this.totalCreated - 1);
         } catch (error) {
-            console.error(`❌ Error destroying ${this.agentType} agent:`, error.message);
+            logError(`Error destroying ${this.agentType} agent:`, error.message);
         }
     }
 

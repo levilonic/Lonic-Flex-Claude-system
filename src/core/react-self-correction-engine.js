@@ -1,7 +1,8 @@
+const { info, warn, error } = require('../services/logger');
 /**
  * ReAct Framework Self-Correction Engine
  * SOLVES: "Bullshit Code" problem - AI systems claiming success without validation
- * IMPLEMENTS: Generate → Execute → Evaluate → Reflect → Regenerate cycle
+ * IMPLEMENTS: Generate -> Execute -> Evaluate -> Reflect -> Regenerate cycle
  *
  * Based on research from:
  * - LangGraph and smolagents for iterative multi-step systems
@@ -49,7 +50,7 @@ class ReactSelfCorrectionEngine extends EventEmitter {
         // Initialize sandbox directory
         this.initializeSandbox();
 
-        console.log('🔄 ReAct Self-Correction Engine initialized');
+        info('CYCLE ReAct Self-Correction Engine initialized');
     }
 
     /**
@@ -70,9 +71,9 @@ class ReactSelfCorrectionEngine extends EventEmitter {
                 }
             });
 
-            console.log(`📦 Sandbox initialized at: ${this.sandbox.workingDir}`);
+            info(` Sandbox initialized at: ${this.sandbox.workingDir}`);
         } catch (error) {
-            console.error('❌ Failed to initialize sandbox:', error.message);
+            error('FAIL Failed to initialize sandbox:', error.message);
             throw error;
         }
     }
@@ -86,7 +87,7 @@ class ReactSelfCorrectionEngine extends EventEmitter {
      * @returns {Object} Verified execution result
      */
     async executeWithSelfCorrection(task, context = {}) {
-        this.log(`🔄 Starting ReAct self-correction loop for task: ${task}`);
+        this.log(`CYCLE Starting ReAct self-correction loop for task: ${task}`);
         this.correctionAttempts = 0;
         this.executionHistory = [];
 
@@ -97,26 +98,26 @@ class ReactSelfCorrectionEngine extends EventEmitter {
             try {
                 // GENERATE: Reason about the task and formulate a plan
                 this.currentThought = await this.generateThought(task, context, lastError);
-                this.log(`💭 Thought: ${this.currentThought.reasoning}`);
+                this.log(` Thought: ${this.currentThought.reasoning}`);
 
                 // ACT: Execute the planned action
                 this.currentAction = await this.executeAction(this.currentThought.action, context);
-                this.log(`⚡ Action executed: ${this.currentAction.type}`);
+                this.log(`FAST Action executed: ${this.currentAction.type}`);
 
                 // OBSERVE: Evaluate the results in sandboxed environment
                 this.currentObservation = await this.observeAndValidate(this.currentAction, context);
-                this.log(`👁️ Observation: ${this.currentObservation.status} (${this.currentObservation.confidence}% confident)`);
+                this.log(`EYE Observation: ${this.currentObservation.status} (${this.currentObservation.confidence}% confident)`);
 
                 // Check if we achieved success with high confidence
                 if (this.currentObservation.status === 'success' && this.currentObservation.confidence >= 80) {
                     result = this.currentObservation.result;
-                    this.log(`✅ Task completed successfully after ${this.correctionAttempts + 1} attempts`);
+                    this.log(`PASS Task completed successfully after ${this.correctionAttempts + 1} attempts`);
                     break;
                 }
 
                 // REFLECT: Analyze what went wrong and plan correction
                 const reflection = await this.reflect(this.currentThought, this.currentAction, this.currentObservation);
-                this.log(`🤔 Reflection: ${reflection.analysis}`);
+                this.log(` Reflection: ${reflection.analysis}`);
 
                 lastError = reflection.identifiedError;
                 this.correctionAttempts++;
@@ -134,7 +135,7 @@ class ReactSelfCorrectionEngine extends EventEmitter {
             } catch (error) {
                 lastError = error;
                 this.correctionAttempts++;
-                this.log(`❌ Attempt ${this.correctionAttempts} failed: ${error.message}`);
+                this.log(`FAIL Attempt ${this.correctionAttempts} failed: ${error.message}`);
             }
         }
 
@@ -689,7 +690,7 @@ class ReactSelfCorrectionEngine extends EventEmitter {
         // Simple example code generation - in real implementation, this would use LLM
         return `// Generated code - ${new Date().toISOString()}
 function exampleFunction() {
-    console.log('This is generated code that actually executes');
+    info('This is generated code that actually executes');
 
     const validation = { success: this.validateSuccess() };return {
 
@@ -702,7 +703,7 @@ module.exports = { exampleFunction };
 // Execute if run directly
 if (require.main === module) {
     const result = exampleFunction();
-    console.log('Result:', result);
+    info('Result:', result);
     process.exit(result.success ? 0 : 1);
 }`;
     }
@@ -717,10 +718,10 @@ function runTest() {
         assert.strictEqual(typeof Date.now(), 'number');
         assert(Date.now() > 0);
 
-        console.log('✅ Test passed: Basic functionality verified');
+        info('Test passed: Basic functionality verified');
         return true;
     } catch (error) {
-        console.error('❌ Test failed:', error.message);
+        error('FAIL Test failed:', error.message);
         return false;
     }
 }
@@ -741,7 +742,7 @@ process.exit(testPassed ? 0 : 1);`;
         return `// Corrected code - ${new Date().toISOString()}
 // Applied corrections: ${correctionPlan.changes.join(', ')}
 function correctedFunction() {
-    console.log('This code has been corrected based on previous errors');
+    info('This code has been corrected based on previous errors');
     return {
         corrected: true,
         timestamp: Date.now(),
@@ -753,7 +754,7 @@ module.exports = { correctedFunction };
 
 if (require.main === module) {
     const result = correctedFunction();
-    console.log('Corrected result:', result);
+    info('Corrected result:', result);
     process.exit(0);
 }`;
     }
@@ -768,7 +769,7 @@ if (require.main === module) {
 
     log(message) {
         if (this.config.logLevel === 'debug' || this.config.logLevel === 'info') {
-            console.log(`[ReAct] ${message}`);
+            info(`[ReAct] ${message}`);
         }
     }
 
@@ -799,9 +800,9 @@ if (require.main === module) {
             }
             this.sandbox.tempFiles.clear();
 
-            console.log('🧹 ReAct sandbox cleaned up');
+            info('CLEANUP ReAct sandbox cleaned up');
         } catch (error) {
-            console.error('❌ Error during sandbox cleanup:', error.message);
+            error('FAIL Error during sandbox cleanup:', error.message);
         }
     }
 }
@@ -810,7 +811,7 @@ module.exports = { ReactSelfCorrectionEngine };
 
 // Demo execution
 async function demoReActSelfCorrection() {
-    console.log('🔄 ReAct Self-Correction Engine Demo\n');
+    info('CYCLE ReAct Self-Correction Engine Demo\n');
 
     const engine = new ReactSelfCorrectionEngine({
         maxCorrectionAttempts: 3,
@@ -819,7 +820,7 @@ async function demoReActSelfCorrection() {
 
     try {
         // Test 1: Code generation with validation
-        console.log('📝 Test 1: Code Generation with Self-Correction');
+        info(' Test 1: Code Generation with Self-Correction');
         const result1 = await engine.executeWithSelfCorrection(
             'Generate a simple function that calculates factorial',
             {
@@ -828,14 +829,14 @@ async function demoReActSelfCorrection() {
             }
         );
 
-        console.log('✅ Result 1:', {
+        info('PASS Result 1:', {
             attempts: result1.attempts,
             confidence: result1.confidence,
             verificationCommand: result1.verificationCommand
         });
 
         // Test 2: Validation script
-        console.log('\n🧪 Test 2: Validation Script Generation');
+        info('\nTEST Test 2: Validation Script Generation');
         const result2 = await engine.executeWithSelfCorrection(
             'Create a test script that validates the generated function',
             {
@@ -843,23 +844,23 @@ async function demoReActSelfCorrection() {
             }
         );
 
-        console.log('✅ Result 2:', {
+        info('PASS Result 2:', {
             attempts: result2.attempts,
             confidence: result2.confidence,
             verificationCommand: result2.verificationCommand
         });
 
-        console.log('\n🎉 ReAct Self-Correction Demo Complete!');
-        console.log('Key improvements over "bullshit code":');
-        console.log('  ✓ Real validation loops instead of hardcoded success');
-        console.log('  ✓ Sandboxed execution with actual error detection');
-        console.log('  ✓ Self-correction cycles that improve on failures');
-        console.log('  ✓ Confidence scoring based on actual test results');
+        info('\n ReAct Self-Correction Demo Complete!');
+        info('Key improvements over "bullshit code":');
+        info('  OK Real validation loops instead of hardcoded success');
+        info('  OK Sandboxed execution with actual error detection');
+        info('  OK Self-correction cycles that improve on failures');
+        info('  OK Confidence scoring based on actual test results');
 
     } catch (error) {
-        console.error('❌ Demo failed:', error.message);
+        error('FAIL Demo failed:', error.message);
         if (error.executionHistory) {
-            console.log('📊 Execution history:', error.executionHistory.length, 'attempts');
+            info('METRICS Execution history:', error.executionHistory.length, 'attempts');
         }
     } finally {
         await engine.cleanup();

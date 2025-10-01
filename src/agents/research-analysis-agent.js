@@ -1,7 +1,7 @@
 /**
  * Research Analysis Agent - Specialized Planning Phase Agent
  * Analyzes existing codebase patterns, dependencies, and provides implementation insights
- * Following Factor 10 principles (≤8 execution steps)
+ * Following Factor 10 principles (<=8 execution steps)
  */
 
 const { ValidatedAgent } = require('../core/validated-agent-base');
@@ -9,7 +9,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 class ResearchAnalysisAgent extends ValidatedAgent {
-    constructor(sessionId, config = {}) {
+    constructor(sessionId, serviceContainer, config = {}) {
         super('research-analysis', sessionId, {
             maxSteps: 8,
             timeout: 45000,
@@ -23,7 +23,7 @@ class ResearchAnalysisAgent extends ValidatedAgent {
         this.riskFactors = [];
         this.insights = {};
         
-        // Research workflow steps (Factor 10: ≤8 steps)
+        // Research workflow steps (Factor 10: <=8 steps)
         this.executionSteps = [
             'initialize_codebase_scan',
             'analyze_existing_patterns',
@@ -34,11 +34,8 @@ class ResearchAnalysisAgent extends ValidatedAgent {
             'generate_insights',
             'compile_analysis_report'
         ];
-
-        this.contextManager.addAgentEvent(this.agentName, 'research_analysis_initialized', {
-            session_id: sessionId,
-            analysis_scope: this.config.analysisScope
-        });
+        // Workflow configuration
+        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
     }
 
     /**
@@ -388,10 +385,10 @@ class ResearchAnalysisAgent extends ValidatedAgent {
 
     async mapInternalDependencies() {
         return [
-            'BaseAgent → Factor3ContextManager',
-            'BaseAgent → SQLiteManager',
-            'MultiAgentCore → All specialized agents',
-            'All agents → MemoryManager'
+            'BaseAgent -> Factor3ContextManager',
+            'BaseAgent -> SQLiteManager',
+            'MultiAgentCore -> All specialized agents',
+            'All agents -> MemoryManager'
         ];
     }
 
@@ -441,7 +438,7 @@ class ResearchAnalysisAgent extends ValidatedAgent {
             'Follow existing BaseAgent extension pattern',
             'Use Factor 3 context management for state',
             'Integrate with SQLiteManager for persistence',
-            'Maintain Factor 10 compliance (≤8 steps)',
+            'Maintain Factor 10 compliance (<=8 steps)',
             'Implement proper error handling and logging'
         ];
     }
@@ -465,7 +462,7 @@ class ResearchAnalysisAgent extends ValidatedAgent {
 
     generateComplianceGuidance() {
         return {
-            factor10: 'Ensure workflow has ≤8 execution steps',
+            factor10: 'Ensure workflow has <=8 execution steps',
             factor3: 'Use Factor3ContextManager for context ownership',
             twelveFactorAgents: 'Follow established 12-factor patterns',
             memoryIntegration: 'Record lessons and patterns for learning'

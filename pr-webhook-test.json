@@ -1,0 +1,10 @@
+{
+  "action": "opened",
+  "pull_request": {
+    "number": 10,
+    "title": "Add Slack notification integration",
+    "user": {
+      "login": "developer"
+    }
+  }
+}

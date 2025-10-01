@@ -1,13 +1,13 @@
 /**
  * Testing Agent - Specialized Execution Phase Agent
  * Validates implementation completeness and runs comprehensive test suites
- * Following Factor 10 principles (≤8 execution steps)
+ * Following Factor 10 principles (<=8 execution steps)
  */
 
 const { ValidatedAgent } = require('../core/validated-agent-base');
 
 class TestingAgent extends ValidatedAgent {
-    constructor(sessionId, config = {}) {
+    constructor(sessionId, serviceContainer, config = {}) {
         super('testing', sessionId, {
             maxSteps: 8,
             timeout: 90000,
@@ -22,7 +22,7 @@ class TestingAgent extends ValidatedAgent {
         this.qualityMetrics = {};
         this.validationResults = {};
         
-        // Testing workflow steps (Factor 10: ≤8 steps)
+        // Testing workflow steps (Factor 10: <=8 steps)
         this.executionSteps = [
             'analyze_implementation_results',
             'initialize_test_suites',
@@ -33,11 +33,8 @@ class TestingAgent extends ValidatedAgent {
             'assess_quality_metrics',
             'compile_testing_report'
         ];
-
-        this.contextManager.addAgentEvent(this.agentName, 'testing_agent_initialized', {
-            session_id: sessionId,
-            test_suite: this.config.testSuite
-        });
+        // Workflow configuration
+        this.workflowId = config.workflowId || `workflow_${this.agentId}`;
     }
 
     /**
@@ -474,7 +471,7 @@ class TestingAgent extends ValidatedAgent {
             {
                 name: 'factor10_compliance_tests',
                 type: 'quality',
-                target: 'Factor 10 compliance (≤8 steps)',
+                target: 'Factor 10 compliance (<=8 steps)',
                 tests: this.generateFactor10Tests()
             },
             {
@@ -576,7 +573,7 @@ class TestingAgent extends ValidatedAgent {
             }),
             'Factor 10 compliance verified': () => ({
                 passed: true, // Assume compliance since we're following the pattern
-                details: 'All agents maintain ≤8 execution steps',
+                details: 'All agents maintain <=8 execution steps',
                 metrics: { factor10_compliance: 1.0 }
             })
         };

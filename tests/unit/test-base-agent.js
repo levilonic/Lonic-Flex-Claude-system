@@ -4,14 +4,15 @@
  * Tests core agent functionality and Factor compliance
  */
 
-const { BaseAgent } = require('./agents/base-agent');
-const { SQLiteManager } = require('./database/sqlite-manager');
+const { BaseAgent } = require('../../src/agents/base-agent');
+const { SQLiteManager } = require('../../src/database/sqlite-manager');
+const { ServiceContainer } = require('../../src/services/service-container');
 const fs = require('fs').promises;
 const path = require('path');
 
 class TestBaseAgent extends BaseAgent {
-    constructor(sessionId, config = {}) {
-        super('test-agent', sessionId, config);
+    constructor(sessionId, serviceContainer, config = {}) {
+        super('test-agent', sessionId, serviceContainer, config);
     }
 
     async executeWorkflow(context, progressCallback) {
@@ -19,11 +20,11 @@ class TestBaseAgent extends BaseAgent {
         await this.executeStep('step_1', async () => {
             return { step: 1, completed: true };
         });
-        
+
         await this.executeStep('step_2', async () => {
             return { step: 2, completed: true };
         });
-        
+
         return { workflow_completed: true, steps: 2 };
     }
 }
@@ -32,6 +33,7 @@ class BaseAgentUnitTests {
     constructor() {
         this.testResults = [];
         this.dbManager = null;
+        this.serviceContainer = null;
         this.testCounter = 0;
     }
     
@@ -68,43 +70,49 @@ class BaseAgentUnitTests {
 
     async setup() {
         console.log('⚙️ Setting up test environment...');
-        this.dbManager = new SQLiteManager();
-        await this.dbManager.initialize();
-        console.log('✅ Database initialized for testing');
+
+        // Initialize ServiceContainer (required for BaseAgent)
+        this.serviceContainer = new ServiceContainer();
+        await this.serviceContainer.initialize();
+        console.log('✅ ServiceContainer initialized for testing');
+
+        // Get database from ServiceContainer
+        this.dbManager = this.serviceContainer.getService('database');
+        console.log('✅ Database service obtained from ServiceContainer');
     }
 
     async teardown() {
         console.log('🧹 Cleaning up test environment...');
-        if (this.dbManager) {
-            await this.dbManager.close();
+        if (this.serviceContainer) {
+            await this.serviceContainer.shutdown();
         }
         console.log('✅ Test cleanup completed');
     }
 
     async testConstructor() {
         console.log('\n📋 Testing BaseAgent Constructor...');
-        
+
         await this.test('Constructor creates agent with correct properties', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId);
-            
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer);
+
             this.assert(agent.agentName === 'test-agent', 'Agent name set correctly');
             this.assert(agent.sessionId === sessionId, 'Session ID set correctly');
             this.assert(agent.state === 'idle', 'Initial state is idle');
             this.assert(agent.progress === 0, 'Initial progress is 0');
             this.assert(agent.config.maxSteps === 8, 'Factor 10: Max steps is 8');
-            
+
             return true;
         });
 
-        await this.test('Constructor initializes Factor 3 context manager', async () => {
+        await this.test('Constructor initializes services from ServiceContainer', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId);
-            
-            this.assert(agent.contextManager !== null, 'Context manager initialized');
-            this.assert(agent.compliance !== null, 'Compliance tracker initialized');
-            this.assert(agent.memoryManager !== null, 'Memory manager initialized');
-            
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer);
+
+            this.assert(agent.services !== null, 'ServiceContainer injected');
+            this.assert(agent.compliance !== null, 'Compliance service available');
+            this.assert(agent.memoryManager !== null, 'Memory manager service available');
+
             return true;
         });
     }
@@ -114,8 +122,8 @@ class BaseAgentUnitTests {
         
         await this.test('Initialize method connects to database', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId);
-            await agent.initialize(this.dbManager);
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer);
+            await agent.initialize(`workflow_${Date.now()}_${Math.random()}`);
             
             this.assert(agent.dbManager !== null, 'Database manager connected');
             // The state machine doesn't define 'initialize' transition, so it stays 'idle'
@@ -130,8 +138,8 @@ class BaseAgentUnitTests {
         
         await this.test('State transitions follow correct flow', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId);
-            await agent.initialize(this.dbManager);
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer);
+            await agent.initialize(`workflow_${Date.now()}_${Math.random()}`);
             
             // Test transition sequence based on actual state machine
             this.assert(agent.state === 'idle', 'Starts idle');
@@ -151,8 +159,8 @@ class BaseAgentUnitTests {
         
         await this.test('Execute workflow completes successfully', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId);
-            await agent.initialize(this.dbManager);
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer);
+            await agent.initialize(`workflow_${Date.now()}_${Math.random()}`);
             
             const result = await agent.execute({ test: true });
             
@@ -166,8 +174,8 @@ class BaseAgentUnitTests {
 
         await this.test('Execution steps are tracked correctly', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId);
-            await agent.initialize(this.dbManager);
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer);
+            await agent.initialize(`workflow_${Date.now()}_${Math.random()}`);
             
             const result = await agent.execute({ test: true });
             
@@ -184,8 +192,8 @@ class BaseAgentUnitTests {
         
         await this.test('Factor 10: Agent enforces max steps limit', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId, { maxSteps: 2 });
-            await agent.initialize(this.dbManager);
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer, { maxSteps: 2 });
+            await agent.initialize(`workflow_${Date.now()}_${Math.random()}`);
             
             this.assert(agent.config.maxSteps === 2, 'Max steps configured correctly');
             
@@ -198,8 +206,8 @@ class BaseAgentUnitTests {
 
         await this.test('Factor 12: Stateless reducer pattern', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId);
-            await agent.initialize(this.dbManager);
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer);
+            await agent.initialize(`workflow_${Date.now()}_${Math.random()}`);
             
             // Each state transition should be deterministic
             const state1 = agent.applyStateTransition('idle', 'start');
@@ -217,8 +225,8 @@ class BaseAgentUnitTests {
         
         await this.test('Memory manager records patterns', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId);
-            await agent.initialize(this.dbManager);
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer);
+            await agent.initialize(`workflow_${Date.now()}_${Math.random()}`);
             
             await agent.execute({ test: true });
             
@@ -234,18 +242,18 @@ class BaseAgentUnitTests {
         
         await this.test('Agent handles execution errors gracefully', async () => {
             class FailingAgent extends BaseAgent {
-                constructor(sessionId) {
-                    super('failing-agent', sessionId);
+                constructor(sessionId, serviceContainer) {
+                    super('failing-agent', sessionId, serviceContainer);
                 }
-                
+
                 async executeWorkflow() {
                     throw new Error('Test error');
                 }
             }
-            
+
             const sessionId = this.generateUniqueSessionId();
-            const agent = new FailingAgent(sessionId);
-            await agent.initialize(this.dbManager);
+            const agent = new FailingAgent(sessionId, this.serviceContainer);
+            await agent.initialize(`workflow_${Date.now()}_${Math.random()}`);
             
             try {
                 await agent.execute({ test: true });
@@ -264,8 +272,8 @@ class BaseAgentUnitTests {
         
         await this.test('Agent cleans up resources properly', async () => {
             const sessionId = this.generateUniqueSessionId();
-            const agent = new TestBaseAgent(sessionId);
-            await agent.initialize(this.dbManager);
+            const agent = new TestBaseAgent(sessionId, this.serviceContainer);
+            await agent.initialize(`workflow_${Date.now()}_${Math.random()}`);
             
             await agent.execute({ test: true });
             
@@ -303,22 +311,27 @@ class BaseAgentUnitTests {
         const passed = this.testResults.filter(r => r.passed).length;
         const total = this.testResults.length;
         const failed = total - passed;
-        
+
         console.log('\n' + '='.repeat(50));
         console.log('📊 BaseAgent Unit Test Results');
         console.log('='.repeat(50));
         console.log(`✅ Passed: ${passed}`);
         console.log(`❌ Failed: ${failed}`);
         console.log(`📈 Coverage: ${((passed / total) * 100).toFixed(1)}%`);
-        
+
         if (failed > 0) {
             console.log('\n❌ Failed Tests:');
             this.testResults.filter(r => !r.passed).forEach(test => {
                 console.log(`  • ${test.description}${test.error ? ': ' + test.error : ''}`);
             });
         }
-        
+
         console.log('\n🎯 BaseAgent Unit Tests: ' + (failed === 0 ? '✅ ALL PASSED' : `❌ ${failed} FAILED`));
+
+        // CRITICAL FIX: Exit with failure code if any tests failed
+        if (failed > 0) {
+            throw new Error(`${failed} test(s) failed`);
+        }
     }
 }
 
