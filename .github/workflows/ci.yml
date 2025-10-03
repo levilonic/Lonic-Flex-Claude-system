@@ -87,7 +87,8 @@ jobs:
     name: External Service Smoke Check
     runs-on: ubuntu-latest
     needs: unit-and-smoke
-    if: ${{ vars.ENABLE_SERVICE_SMOKE == 'true' }}
+    # Run only when both service smoke feature flag and readiness gate are enabled
+    if: ${{ vars.ENABLE_SERVICE_SMOKE == 'true' && vars.LFX_SERVICE_SMOKE_READY == 'true' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -112,4 +113,5 @@ jobs:
           LFX_SLACK_HEALTH_URL: ${{ vars.LFX_SLACK_HEALTH_URL }}
           LFX_OPTIONAL_SERVICES: ${{ vars.LFX_OPTIONAL_SERVICES }}
           LFX_ADDITIONAL_SERVICES: ${{ vars.LFX_ADDITIONAL_SERVICES }}
+
 
