@@ -2,34 +2,111 @@ name: LonicFLex CI/CD Pipeline
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, foundation-v0 ]
   pull_request:
-    branches: [ master, main ]
+    branches: [ master, main, foundation-v0 ]
 
 jobs:
-  test:
+  unit-and-smoke:
+    name: Unit and Smoke Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [18.x, 20.x]
-
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run LonicFLex Universal Context Tests
-      run: node test-universal-context.js || echo "Universal Context test completed"
+      - name: Run full test suite
+        run: npm test
+        env:
+          CI: true
 
-    - name: Run LonicFLex Phase3A Integration Tests
-      run: node test-phase3a-integration.js || echo "Phase3A test completed"
+  phase-integrations:
+    name: Phase Integration Suites
+    runs-on: ubuntu-latest
+    needs: unit-and-smoke
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Run Multi-Agent System Tests
-      run: timeout 120s node test-phase3-orchestration.js || echo "Multi-agent test completed"
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run universal context integration tests
+        run: node tests/integration/test-universal-context.js
+
+      - name: Run Phase 3A integration tests
+        run: node tests/phase-tests/test-phase3a-integration.js
+
+      - name: Run Phase 3 orchestration tests
+        run: timeout 180s node tests/phase-tests/test-phase3-orchestration.js
+
+  coverage-and-agents:
+    name: Coverage and Agent Enforcement
+    runs-on: ubuntu-latest
+    needs: unit-and-smoke
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify all agents can initialize
+        run: npm run verify-agents
+
+      - name: Analyze test coverage
+        run: npm run test:coverage
+
+      - name: Enforce coverage threshold
+        run: npm run test:enforce
+
+  service-smoke:
+    name: External Service Smoke Check
+    runs-on: ubuntu-latest
+    needs: unit-and-smoke
+    if: ${{ vars.ENABLE_SERVICE_SMOKE == 'true' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Launch mock health services
+        run: |
+          node scripts/mock-health-services.js &
+          sleep 2
+
+      - name: Run external service smoke check
+        run: npm run smoke:services
+        env:
+          LFX_REQUIRE_SERVICES: '1'

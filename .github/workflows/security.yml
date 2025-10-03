@@ -2,9 +2,9 @@ name: LonicFLex Security Scan
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, foundation-v0 ]
   pull_request:
-    branches: [ master, main ]
+    branches: [ master, main, foundation-v0 ]
   schedule:
     - cron: '0 2 * * 1'  # Weekly on Monday 2 AM
 
@@ -27,7 +27,8 @@ jobs:
       run: npm audit --audit-level=moderate
 
     - name: Run LonicFLex SecurityAgent
-      run: timeout 60s npm run demo-security-agent || echo "SecurityAgent completed"
+      run: node tests/unit/test-security-agent.js
 
     - name: Verify secrets cleanup
-      run: node security-cleanup.js --verify || echo "Security cleanup verified"
+      run: node security-cleanup.js --verify
+
