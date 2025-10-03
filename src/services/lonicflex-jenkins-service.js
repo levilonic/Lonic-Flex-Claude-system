@@ -121,8 +121,12 @@ class LonicFlexJenkinsService extends ServiceBase {
                 jenkinsHealth = 'disconnected';
             }
 
+            const operationalMode = (this.authenticated && jenkinsHealth === 'connected') ? 'full' : 'degraded';
+            const status = operationalMode === 'full' ? 'healthy' : 'degraded';
+
             res.json({
-                status: 'healthy',
+                status,
+                operationalMode,
                 service: this.config.serviceName,
                 uptime,
                 initialized: true,

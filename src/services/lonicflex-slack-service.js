@@ -109,14 +109,19 @@ class LonicFlexSlackService extends ServiceBase {
     setupRoutes() {
         // Health check endpoint
         this.app.get('/health', (req, res) => {
+            const operationalMode = (this.isInitialized && this.isConnected) ? 'full' : 'degraded';
+            const status = operationalMode === 'full' ? 'healthy' : 'degraded';
+
             res.json({
-                status: 'healthy',
+                status,
+                operationalMode,
                 service: this.config.serviceName,
                 uptime: Date.now() - this.startTime.getTime(),
                 initialized: this.isInitialized,
                 connected: this.isConnected,
                 stats: this.stats,
-                bot: this.botInfo ? this.botInfo.user : null
+                bot: this.botInfo ? this.botInfo.user : null,
+                timestamp: new Date().toISOString()
             });
         });
 

@@ -105,14 +105,19 @@ class LonicFlexGitHubService extends ServiceBase {
     setupRoutes() {
         // Health check endpoint
         this.app.get('/health', (req, res) => {
+            const operationalMode = (this.isInitialized && this.octokit) ? 'full' : 'degraded';
+            const status = operationalMode === 'full' ? 'healthy' : 'degraded';
+
             res.json({
-                status: 'healthy',
+                status,
+                operationalMode,
                 service: this.config.serviceName,
                 uptime: Date.now() - this.startTime.getTime(),
                 initialized: this.isInitialized,
                 authenticated: !!this.octokit,
+                repository: `${this.config.owner}/${this.config.repo}`,
                 stats: this.stats,
-                repository: `${this.config.owner}/${this.config.repo}`
+                timestamp: new Date().toISOString()
             });
         });
 

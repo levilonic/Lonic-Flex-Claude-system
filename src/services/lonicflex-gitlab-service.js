@@ -140,8 +140,12 @@ class LonicFlexGitLabService extends ServiceBase {
                 gitlabHealth = 'disconnected';
             }
 
+            const operationalMode = (this.authenticated && gitlabHealth === 'connected') ? 'full' : 'degraded';
+            const status = operationalMode === 'full' ? 'healthy' : 'degraded';
+
             res.json({
-                status: 'healthy',
+                status,
+                operationalMode,
                 service: this.config.serviceName,
                 uptime,
                 initialized: true,
