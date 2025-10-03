@@ -1,97 +1,117 @@
-/**
- * Security Cleanup Script
- * Comprehensive scanning and remediation of GitHub secrets and sensitive data
- */
+#!/usr/bin/env node
+
+'use strict';
 
 const fs = require('fs').promises;
 const path = require('path');
 const { execSync } = require('child_process');
 
+const MODES = {
+    VERIFY: 'verify',
+    CLEAN: 'clean',
+    FULL: 'full'
+};
+
+function parseArgs() {
+    const args = process.argv.slice(2);
+    const options = {
+        mode: MODES.VERIFY,
+        push: false
+    };
+
+    for (const arg of args) {
+        switch (arg) {
+            case '--verify':
+                options.mode = MODES.VERIFY;
+                break;
+            case '--clean':
+                options.mode = MODES.CLEAN;
+                break;
+            case '--full':
+                options.mode = MODES.FULL;
+                break;
+            case '--push':
+                options.push = true;
+                break;
+            case '--help':
+            case '-h':
+                options.help = true;
+                break;
+            default:
+                console.warn(`Unknown option: ${arg}`);
+                options.help = true;
+                break;
+        }
+    }
+
+    return options;
+}
+
+function printUsage() {
+    console.log(`\nLonicFLex Security Cleanup Tool\n--------------------------------`);
+    console.log(`Usage: node scripts/security-cleanup.js [options]\n`);
+    console.log('Options:');
+    console.log('  --verify        Scan repository for secrets (default, safe for CI)');
+    console.log('  --clean         Create a clean history branch with secrets removed');
+    console.log('  --full          Verify, clean, and optionally push (interactive)');
+    console.log('  --push          Push the clean branch (only with --clean/--full)');
+    console.log('  --help, -h      Show this help message');
+}
+
 class SecurityCleanup {
     constructor() {
         this.secretPatterns = [
-            // GitHub Personal Access Tokens
-            /ghp_[a-zA-Z0-9]{36}/g,
+            /gh[pousr]_[a-zA-Z0-9]{36}/g,
             /github_pat_[a-zA-Z0-9_]{82}/g,
-            /gho_[a-zA-Z0-9]{36}/g,
-            /ghu_[a-zA-Z0-9]{36}/g,
-            /ghs_[a-zA-Z0-9]{36}/g,
-            /ghr_[a-zA-Z0-9]{36}/g,
-
-            // Slack tokens
-            /xoxb-[0-9]+-[0-9]+-[a-zA-Z0-9]+/g,
-            /xoxa-[0-9]+-[0-9]+-[a-zA-Z0-9]+/g,
-            /xoxp-[0-9]+-[0-9]+-[a-zA-Z0-9]+/g,
-            /xoxr-[a-zA-Z0-9]+/g,
-
-            // AWS keys
+            /xox[baprs]-[0-9]+-[0-9]+-[a-zA-Z0-9]+/g,
             /AKIA[0-9A-Z]{16}/g,
-            /[0-9a-zA-Z/+]{40}/g,
-
-            // Other common secrets
-            /sk_live_[a-zA-Z0-9]{24}/g, // Stripe
-            /pk_live_[a-zA-Z0-9]{24}/g, // Stripe
-            /AIza[0-9A-Za-z\\-_]{35}/g, // Google API
+            /sk_live_[a-zA-Z0-9]{24}/g,
+            /pk_live_[a-zA-Z0-9]{24}/g,
+            /AIza[0-9A-Za-z\-_]{35}/g
         ];
 
         this.excludePatterns = [
             /node_modules/,
-            /\.git\/objects/,
-            /\.git\/refs/,
-            /\.git\/logs/,
+            /\.git\/(objects|refs|logs)/,
             /package-lock\.json/,
             /yarn\.lock/,
             /\.db$/,
             /\.db-wal$/,
             /\.db-shm$/,
-            /\.png$/,
-            /\.jpg$/,
-            /\.jpeg$/,
-            /\.gif$/,
-            /\.ico$/,
-            /\.woff$/,
-            /\.woff2$/,
-            /\.ttf$/,
-            /\.eot$/,
-            /\.svg$/
+            /\.(png|jpg|jpeg|gif|ico|woff2?|ttf|eot|svg)$/
         ];
 
         this.foundSecrets = [];
         this.cleanedFiles = [];
+        this.scannedFiles = 0;
     }
 
-    /**
-     * Scan all files for secrets
-     */
     async scanDirectory(dirPath = '.') {
-        console.log('🔍 Starting comprehensive security scan...');
+        this.foundSecrets = [];
+        this.cleanedFiles = [];
+        this.scannedFiles = 0;
 
-        try {
-            await this.scanDirectoryRecursive(dirPath);
+        console.log('dY"? Starting comprehensive security scan...');
+        await this.scanDirectoryRecursive(dirPath);
 
-            console.log(`\n📊 Scan Results:`);
-            console.log(`   Files scanned: ${this.scannedFiles || 0}`);
-            console.log(`   Secrets found: ${this.foundSecrets.length}`);
-            console.log(`   Files cleaned: ${this.cleanedFiles.length}`);
+        console.log(`\ndY"S Scan Results:`);
+        console.log(`   Files scanned: ${this.scannedFiles}`);
+        console.log(`   Secrets found: ${this.foundSecrets.length}`);
+        console.log(`   Files cleaned: ${this.cleanedFiles.length}`);
 
-            if (this.foundSecrets.length > 0) {
-                console.log(`\n⚠️  Secrets found in:`);
-                this.foundSecrets.forEach(secret => {
-                    console.log(`   ${secret.file}:${secret.line} - ${secret.type}`);
-                });
-            }
-
-            return {
-                secretsFound: this.foundSecrets.length,
-                filesScanned: this.scannedFiles || 0,
-                filesCleaned: this.cleanedFiles.length,
-                secrets: this.foundSecrets
-            };
-
-        } catch (error) {
-            console.error('❌ Scan failed:', error.message);
-            throw error;
+        if (this.foundSecrets.length > 0) {
+            console.log(`\n�s��,?  Secrets found in:`);
+            this.foundSecrets.forEach(secret => {
+                console.log(`   ${secret.file}:${secret.line} - ${secret.type}`);
+            });
         }
+
+        return {
+            secretsFound: this.foundSecrets.length,
+            filesScanned: this.scannedFiles,
+            filesCleaned: this.cleanedFiles.length,
+            secrets: this.foundSecrets
+        };
     }
 
     async scanDirectoryRecursive(dirPath) {
@@ -101,7 +121,6 @@ class SecurityCleanup {
             const fullPath = path.join(dirPath, entry.name);
             const relativePath = path.relative('.', fullPath);
 
-            // Skip excluded patterns
             if (this.excludePatterns.some(pattern => pattern.test(relativePath))) {
                 continue;
             }
@@ -110,202 +129,172 @@ class SecurityCleanup {
                 await this.scanDirectoryRecursive(fullPath);
             } else if (entry.isFile()) {
                 await this.scanFile(fullPath, relativePath);
-                this.scannedFiles = (this.scannedFiles || 0) + 1;
+                this.scannedFiles += 1;
             }
         }
     }
 
     async scanFile(filePath, relativePath) {
-        try {
-            const content = await fs.readFile(filePath, 'utf8');
-            const lines = content.split('\n');
-            let fileModified = false;
-            let cleanedContent = content;
+        const content = await fs.readFile(filePath, 'utf8');
+        const lines = content.split('\n');
+        let fileModified = false;
+        let cleanedContent = content;
 
-            lines.forEach((line, lineIndex) => {
-                this.secretPatterns.forEach(pattern => {
-                    const matches = line.match(pattern);
-                    if (matches) {
-                        matches.forEach(match => {
-                            this.foundSecrets.push({
-                                file: relativePath,
-                                line: lineIndex + 1,
-                                type: this.getSecretType(match),
-                                secret: match.substring(0, 8) + '...',
-                                fullMatch: match
-                            });
-
-                            // Clean the secret
-                            cleanedContent = cleanedContent.replace(match, this.getReplacementValue(match));
-                            fileModified = true;
+        lines.forEach((line, lineIndex) => {
+            this.secretPatterns.forEach(pattern => {
+                const matches = line.match(pattern);
+                if (matches) {
+                    matches.forEach(match => {
+                        this.foundSecrets.push({
+                            file: relativePath,
+                            line: lineIndex + 1,
+                            type: this.identifySecretType(match),
+                            value: match
                         });
-                    }
-                });
+                    });
+
+                    const replacement = '[REDACTED_SECRET]';
+                    cleanedContent = cleanedContent.replace(pattern, replacement);
+                    fileModified = true;
+                }
             });
+        });
 
-            // Write cleaned content back if modified
-            if (fileModified) {
-                await fs.writeFile(filePath, cleanedContent, 'utf8');
-                this.cleanedFiles.push(relativePath);
-                console.log(`🧹 Cleaned secrets from: ${relativePath}`);
-            }
-
-        } catch (error) {
-            // Skip files that can't be read as text
-            if (error.code !== 'EISDIR') {
-                console.warn(`⚠️  Could not scan ${relativePath}: ${error.message}`);
-            }
+        if (fileModified) {
+            await fs.writeFile(filePath, cleanedContent, 'utf8');
+            this.cleanedFiles.push(relativePath);
         }
     }
 
-    getSecretType(secret) {
-        if (secret.startsWith('ghp_')) return 'GitHub Personal Access Token';
-        if (secret.startsWith('github_pat_')) return 'GitHub PAT';
-        if (secret.startsWith('gho_')) return 'GitHub OAuth';
-        if (secret.startsWith('ghu_')) return 'GitHub User Token';
-        if (secret.startsWith('ghs_')) return 'GitHub Server Token';
-        if (secret.startsWith('ghr_')) return 'GitHub Refresh Token';
-        if (secret.startsWith('xoxb-')) return 'Slack Bot Token';
-        if (secret.startsWith('xoxa-')) return 'Slack App Token';
-        if (secret.startsWith('xoxp-')) return 'Slack User Token';
-        if (secret.startsWith('xoxr-')) return 'Slack Refresh Token';
-        if (secret.startsWith('AKIA')) return 'AWS Access Key';
-        if (secret.startsWith('sk_live_')) return 'Stripe Secret Key';
-        if (secret.startsWith('pk_live_')) return 'Stripe Public Key';
-        if (secret.startsWith('AIza')) return 'Google API Key';
+    identifySecretType(secret) {
+        if (secret.startsWith('gh')) {
+            return 'GitHub Token';
+        }
+        if (secret.startsWith('xox')) {
+            return 'Slack Token';
+        }
+        if (secret.startsWith('AKIA')) {
+            return 'AWS Access Key';
+        }
+        if (secret.startsWith('sk_live_') || secret.startsWith('pk_live_')) {
+            return 'Stripe Key';
+        }
+        if (secret.startsWith('AIza')) {
+            return 'Google API Key';
+        }
         return 'Unknown Secret';
     }
 
-    getReplacementValue(secret) {
-        const type = this.getSecretType(secret);
+    async cleanGitHistory({ push = false, scanResult } = {}) {
+        console.log('dY"5 Cleaning git history to remove secrets...');
 
-        if (type.includes('GitHub')) {
-            return 'YOUR_GITHUB_TOKEN_HERE';
-        } else if (type.includes('Slack')) {
-            return 'YOUR_SLACK_TOKEN_HERE';
-        } else if (type.includes('AWS')) {
-            return 'YOUR_AWS_KEY_HERE';
-        } else if (type.includes('Stripe')) {
-            return 'YOUR_STRIPE_KEY_HERE';
-        } else if (type.includes('Google')) {
-            return 'YOUR_GOOGLE_API_KEY_HERE';
+        const result = scanResult || await this.scanDirectory('.');
+        if (result.secretsFound > 0) {
+            console.log(`�s��,?  Found ${result.secretsFound} secrets, cleaned ${result.filesCleaned} files`);
         }
 
-        return '[REDACTED_SECRET]';
-    }
+        const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
+        console.log(`dY"? Current branch: ${currentBranch}`);
 
-    /**
-     * Clean git history by creating a new orphan branch
-     */
-    async cleanGitHistory() {
-        console.log('🧹 Cleaning git history to remove secrets...');
+        const cleanBranch = 'clean-export-' + Date.now();
+        console.log(`dYO� Creating clean branch: ${cleanBranch}`);
 
-        try {
-            // Check if we have any secrets in current files
-            const scanResult = await this.scanDirectory('.');
+        execSync(`git checkout --orphan ${cleanBranch}`, { stdio: 'inherit' });
+        execSync('git add -A', { stdio: 'inherit' });
 
-            if (scanResult.secretsFound > 0) {
-                console.log(`⚠️  Found ${scanResult.secretsFound} secrets, cleaned ${scanResult.filesCleaned} files`);
-            }
+        const commitMessage = [
+            'Clean repository export - secrets removed',
+            '',
+            `Security scan: ${result.secretsFound} secret(s) redacted`,
+            `Files scanned: ${result.filesScanned}`,
+            `Timestamp: ${new Date().toISOString()}`
+        ].join('\n');
 
-            // Get current branch
-            const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
-            console.log(`📍 Current branch: ${currentBranch}`);
+        execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
 
-            // Create orphan branch (no history)
-            const cleanBranch = 'clean-export-' + Date.now();
-            console.log(`🌿 Creating clean branch: ${cleanBranch}`);
+        console.log(`�o. Clean branch created: ${cleanBranch}`);
+        console.log('dYs? Ready to push clean branch to GitHub');
 
-            execSync(`git checkout --orphan ${cleanBranch}`, { stdio: 'inherit' });
-
-            // Add all current files
-            execSync('git add -A', { stdio: 'inherit' });
-
-            // Create initial commit without history
-            execSync(`git commit -m "Clean repository export - all secrets removed
-
-✅ Security scan completed - ${scanResult.secretsFound} secrets cleaned
-✅ Complete LonicFLex system implementation
-✅ GitHub automation system ready
-✅ Multi-agent architecture operational
-
-🔒 All sensitive data sanitized for public repository
-🤖 Generated by LonicFLex Security Cleanup System"`, { stdio: 'inherit' });
-
-            console.log(`✅ Clean branch created: ${cleanBranch}`);
-            console.log('🚀 Ready to push clean branch to GitHub');
-
-            return {
-                originalBranch: currentBranch,
-                cleanBranch: cleanBranch,
-                secretsRemoved: scanResult.secretsFound,
-                filesScanned: scanResult.filesScanned
-            };
-
-        } catch (error) {
-            console.error('❌ Git history cleanup failed:', error.message);
-            throw error;
+        let pushed = false;
+        if (push) {
+            pushed = this.pushCleanBranch(cleanBranch);
         }
+
+        return {
+            originalBranch: currentBranch,
+            cleanBranch,
+            secretsRemoved: result.secretsFound,
+            filesScanned: result.filesScanned,
+            pushed
+        };
     }
 
-    /**
-     * Push clean branch to GitHub
-     */
-    async pushCleanBranch(branchName) {
-        console.log(`🚀 Pushing clean branch: ${branchName}`);
-
+    pushCleanBranch(branchName) {
+        console.log(`dYs? Pushing clean branch: ${branchName}`);
         try {
             execSync(`git push -u origin ${branchName}`, { stdio: 'inherit' });
-            console.log(`✅ Successfully pushed clean branch: ${branchName}`);
-
-            const repoUrl = execSync('git remote get-url origin', { encoding: 'utf8' }).trim();
-            console.log(`🌐 Repository URL: ${repoUrl}`);
-            console.log(`🌿 Clean branch: ${repoUrl.replace('.git', '')}/tree/${branchName}`);
-
+            console.log(`�o. Successfully pushed clean branch: ${branchName}`);
             return true;
         } catch (error) {
-            console.error('❌ Push failed:', error.message);
+            console.error('�?O Push failed:', error.message);
             return false;
         }
     }
 }
 
-// Run if called directly
+async function runVerify(cleanup) {
+    const result = await cleanup.scanDirectory('.');
+
+    if (result.secretsFound > 0) {
+        console.error(`\n?s��,?  ${result.secretsFound} potential secret(s) detected. See log for details.`);
+        process.exit(1);
+    }
+
+    console.log('\n�o. No secrets detected.');
+}
+
+async function runClean(cleanup, { push }) {
+    const result = await cleanup.cleanGitHistory({ push });
+
+    console.log('\ndY"< Cleanup Summary:');
+    console.log(`   Original branch: ${result.originalBranch}`);
+    console.log(`   Clean branch: ${result.cleanBranch}`);
+    console.log(`   Secrets removed: ${result.secretsRemoved}`);
+    console.log(`   Files scanned: ${result.filesScanned}`);
+    if (push) {
+        console.log(result.pushed ? '�o. Clean branch pushed to origin.' : '�?O Failed to push clean branch. Please push manually.');
+    }
+}
+
+async function runFull(cleanup, options) {
+    await runVerify(cleanup);
+    await runClean(cleanup, options);
+}
+
+async function main() {
+    const options = parseArgs();
+
+    if (options.help) {
+        printUsage();
+        return;
+    }
+
+    const cleanup = new SecurityCleanup();
+
+    if (options.mode === MODES.VERIFY) {
+        await runVerify(cleanup);
+    } else if (options.mode === MODES.CLEAN) {
+        await runClean(cleanup, options);
+    } else {
+        await runFull(cleanup, options);
+    }
+}
+
 if (require.main === module) {
-    (async () => {
-        console.log('🛡️  LonicFLex Security Cleanup System');
-
-        const cleanup = new SecurityCleanup();
-
-        try {
-            // Comprehensive scan and cleanup
-            const result = await cleanup.cleanGitHistory();
-
-            console.log('\n📋 Cleanup Summary:');
-            console.log(`   Original branch: ${result.originalBranch}`);
-            console.log(`   Clean branch: ${result.cleanBranch}`);
-            console.log(`   Secrets removed: ${result.secretsRemoved}`);
-            console.log(`   Files scanned: ${result.filesScanned}`);
-
-            // Attempt to push
-            const pushSuccess = await cleanup.pushCleanBranch(result.cleanBranch);
-
-            if (pushSuccess) {
-                console.log('\n🎉 SUCCESS: Clean repository exported to GitHub!');
-                console.log('   ✅ All secrets removed');
-                console.log('   ✅ Clean git history');
-                console.log('   ✅ Public repository ready');
-            } else {
-                console.log('\n⚠️  Repository cleaned but push failed');
-                console.log('   You can manually push with:');
-                console.log(`   git push -u origin ${result.cleanBranch}`);
-            }
-
-        } catch (error) {
-            console.error('\n❌ Security cleanup failed:', error.message);
-            process.exit(1);
-        }
-    })();
+    main().catch(error => {
+        console.error('\n�?O Security cleanup failed:', error.message);
+        process.exit(1);
+    });
 }
 
 module.exports = { SecurityCleanup };
