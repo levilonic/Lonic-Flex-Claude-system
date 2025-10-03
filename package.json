@@ -45,6 +45,7 @@
     "verify:docs": "node verify-docs.js",
     "verify": "npm run test && npm run test:coverage && npm run test:enforce",
     "smoke": "node src/smoke.js",
+    "smoke:services": "node scripts/check-services-health.js",
     "smoke:full": "node test-smoke-comprehensive.js",
     "prepare": "husky"
   },

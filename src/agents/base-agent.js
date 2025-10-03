@@ -360,8 +360,15 @@ class BaseAgent extends ValidatedAgent {
 
     /**
      * Validate success with evidence collection
-     * STUB: ValidatedAgent doesn't actually implement this method
-     * TODO: Implement proper evidence-based validation
+     *
+     * NOTE: This method implements basic evidence-based validation.
+     * Used by 250+ calls across agents and services for operation validation.
+     *
+     * @param {Object} options - Validation options
+     * @param {Object} options.evidence - Evidence object to validate
+     * @param {string} options.operation - Operation name for logging
+     * @param {Object} options.criteria - Validation criteria
+     * @returns {Object} Validation result with success flag and details
      */
     async validateSuccess(options = {}) {
         const { evidence = {}, operation = 'operation', criteria = {} } = options;

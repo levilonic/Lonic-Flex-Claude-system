@@ -14,12 +14,14 @@
 const express = require('express');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const { v4: uuidv4 } = require('uuid');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexWorkflowsService {
+class LonicFlexWorkflowsService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.WORKFLOWS_SERVICE_PORT || 3004,
             serviceName: 'lonicflex-workflows',
@@ -856,7 +858,7 @@ class LonicFlexWorkflowsService {
             return server;
 
         } catch (error) {
-            this.logger.error('Failed to start Workflows service', { error: error.message });
+            console.error('Failed to start Workflows service:', error.message);
             throw error;
         }
     }
@@ -867,21 +869,21 @@ if (require.main === module) {
     const service = new LonicFlexWorkflowsService();
     service.start()
         .then(() => {
-            logger.info('LonicFLex Workflows Service started successfully');
+            console.log('LonicFLex Workflows Service started successfully');
         })
         .catch((error) => {
-            logger.error('FAIL Failed to start Workflows service:', error.message);
+            console.error('FAIL Failed to start Workflows service:', error.message);
             process.exit(1);
         });
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        logger.info('Workflows service shutting down...');
+        console.log('Workflows service shutting down...');
         process.exit(0);
     });
 
     process.on('SIGINT', () => {
-        logger.info('Workflows service shutting down...');
+        console.log('Workflows service shutting down...');
         process.exit(0);
     });
 }

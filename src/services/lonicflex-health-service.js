@@ -12,14 +12,17 @@
  */
 
 const express = require('express');
+const { ServiceBase } = require('./service-base');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
 const axios = require('axios');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexHealthService {
+class LonicFlexHealthService extends ServiceBase {
     constructor(config = {}) {
+        super();  // Call parent constructor first
+
         this.config = {
             port: config.port || process.env.PORT || process.env.HEALTH_SERVICE_PORT || 3005,
             serviceName: 'lonicflex-health',
@@ -695,7 +698,7 @@ class LonicFlexHealthService {
             return server;
 
         } catch (error) {
-            this.logger.error('Failed to start Health service', { error: error.message });
+            console.error('Failed to start Health service:', error.message);
             throw error;
         }
     }
@@ -706,22 +709,22 @@ if (require.main === module) {
     const service = new LonicFlexHealthService();
     service.start()
         .then(() => {
-            logger.info('LonicFLex Health Service started successfully');
+            console.log('LonicFLex Health Service started successfully');
         })
         .catch((error) => {
-            logger.error('FAIL Failed to start Health service:', error.message);
+            console.error('FAIL Failed to start Health service:', error.message);
             process.exit(1);
         });
 
     // Graceful shutdown
     process.on('SIGTERM', async () => {
-        logger.info('Health service shutting down...');
+        console.log('Health service shutting down...');
         await service.stopMonitoring();
         process.exit(0);
     });
 
     process.on('SIGINT', async () => {
-        logger.info('Health service shutting down...');
+        console.log('Health service shutting down...');
         await service.stopMonitoring();
         process.exit(0);
     });

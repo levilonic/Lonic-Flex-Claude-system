@@ -15,11 +15,13 @@ const express = require('express');
 const crypto = require('crypto');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexWebhookService {
+class LonicFlexWebhookService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.PORT || 3008,
             serviceName: 'lonicflex-webhooks',
@@ -958,10 +960,10 @@ class LonicFlexWebhookService {
         await this.initialize();
 
         this.server = this.app.listen(this.config.port, () => {
-            logger.info(` LonicFLex Webhook Service running on port ${this.config.port}`);
-            logger.info(` GitHub webhooks: http://localhost:${this.config.port}/webhook/github`);
-            logger.info(` Slack webhooks: http://localhost:${this.config.port}/webhook/slack`);
-            logger.info(`HEALTH Health check: http://localhost:${this.config.port}/health`);
+            this.logger.info(` LonicFLex Webhook Service running on port ${this.config.port}`);
+            this.logger.info(` GitHub webhooks: http://localhost:${this.config.port}/webhook/github`);
+            this.logger.info(` Slack webhooks: http://localhost:${this.config.port}/webhook/slack`);
+            this.logger.info(`HEALTH Health check: http://localhost:${this.config.port}/health`);
 
             this.logger.info('Webhook service started', { port: this.config.port });
         });
@@ -990,7 +992,7 @@ class LonicFlexWebhookService {
 if (require.main === module) {
     const service = new LonicFlexWebhookService();
     service.start().catch(error => {
-        logger.error('Failed to start LonicFLex Webhook Service:', error);
+        console.error('Failed to start LonicFLex Webhook Service:', error);
         process.exit(1);
     });
 }

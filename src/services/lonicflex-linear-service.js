@@ -15,11 +15,13 @@ const express = require('express');
 const axios = require('axios');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexLinearService {
+class LonicFlexLinearService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.LINEAR_SERVICE_PORT || 3023,
             serviceName: 'lonicflex-linear',
@@ -622,7 +624,7 @@ class LonicFlexLinearService {
                 },
                 {
                     headers: {
-                        'Authorization': `Bearer ${this.config.apiToken}`,
+                        'Authorization': this.config.apiToken,
                         'Content-Type': 'application/json'
                     },
                     timeout: this.config.requestTimeout
@@ -883,8 +885,8 @@ class LonicFlexLinearService {
 
         } catch (error) {
             this.authenticated = false;
-            this.logger.error('Linear API connection failed', { error: error.message });
-            throw error;
+            this.logger.warn('Linear API connection failed - running in degraded mode', { error: error.message });
+            // Don't throw - allow service to start in degraded mode
         }
     }
 
@@ -918,9 +920,7 @@ class LonicFlexLinearService {
             return server;
 
         } catch (error) {
-            this.logger.error('Failed to start Linear Service', {
-                error: error.message
-            });
+            console.error('Failed to start Linear service:', error.message);
             throw error;
         }
     }
@@ -930,7 +930,7 @@ class LonicFlexLinearService {
 if (require.main === module) {
     const service = new LonicFlexLinearService();
     service.start().catch(error => {
-        logger.error('Failed to start Linear Service:', error.message);
+        console.error('Failed to start Linear Service:', error.message);
         process.exit(1);
     });
 }

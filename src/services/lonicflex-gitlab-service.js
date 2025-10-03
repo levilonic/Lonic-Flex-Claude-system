@@ -15,11 +15,13 @@ const express = require('express');
 const axios = require('axios');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexGitLabService {
+class LonicFlexGitLabService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.GITLAB_SERVICE_PORT || 3025,
             serviceName: 'lonicflex-gitlab',
@@ -857,7 +859,7 @@ class LonicFlexGitLabService {
 if (require.main === module) {
     const service = new LonicFlexGitLabService();
     service.start().catch(error => {
-        logger.error('Failed to start GitLab Service:', error.message);
+        console.error('Failed to start GitLab Service:', error.message);
         process.exit(1);
     });
 }

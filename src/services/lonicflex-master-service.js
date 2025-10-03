@@ -15,11 +15,13 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexMasterService {
+class LonicFlexMasterService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.PORT || process.env.MASTER_SERVICE_PORT || 3007,
             serviceName: 'lonicflex-master',
@@ -647,9 +649,9 @@ ${runState.brief || 'No brief provided'}
         await this.initialize();
 
         this.server = this.app.listen(this.config.port, () => {
-            logger.info(`LonicFLex Master Service running on port ${this.config.port}`);
-            logger.info(`METRICS Health check: http://localhost:${this.config.port}/health`);
-            logger.info(`FAST Ready to process /lx run commands`);
+            this.logger.info(`LonicFLex Master Service running on port ${this.config.port}`);
+            this.logger.info(`METRICS Health check: http://localhost:${this.config.port}/health`);
+            this.logger.info(`FAST Ready to process /lx run commands`);
 
             this.logger.info('Master service started', {
                 port: this.config.port,
@@ -681,7 +683,7 @@ ${runState.brief || 'No brief provided'}
 if (require.main === module) {
     const service = new LonicFlexMasterService();
     service.start().catch(error => {
-        logger.error('Failed to start LonicFLex Master Service:', error);
+        console.error('Failed to start LonicFLex Master Service:', error);
         process.exit(1);
     });
 }

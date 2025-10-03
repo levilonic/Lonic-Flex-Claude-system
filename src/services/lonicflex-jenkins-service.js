@@ -15,11 +15,13 @@ const express = require('express');
 const axios = require('axios');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexJenkinsService {
+class LonicFlexJenkinsService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.JENKINS_SERVICE_PORT || 3024,
             serviceName: 'lonicflex-jenkins',
@@ -850,7 +852,7 @@ pipeline {
 if (require.main === module) {
     const service = new LonicFlexJenkinsService();
     service.start().catch(error => {
-        logger.error('Failed to start Jenkins Service:', error.message);
+        console.error('Failed to start Jenkins Service:', error.message);
         process.exit(1);
     });
 }
