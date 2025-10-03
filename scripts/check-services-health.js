@@ -2,39 +2,85 @@
 
 'use strict';
 
-const DEFAULT_SERVICES = [
-  { name: 'github', url: process.env.LFX_GITHUB_HEALTH_URL || 'http://localhost:3002/health' },
-  { name: 'gitlab', url: process.env.LFX_GITLAB_HEALTH_URL || 'http://localhost:3025/health' },
-  { name: 'jenkins', url: process.env.LFX_JENKINS_HEALTH_URL || 'http://localhost:3024/health' },
-  { name: 'slack', url: process.env.LFX_SLACK_HEALTH_URL || 'http://localhost:3006/health', optional: true }
+const SERVICE_CATALOG = [
+  { name: 'github', env: 'LFX_GITHUB_HEALTH_URL' },
+  { name: 'gitlab', env: 'LFX_GITLAB_HEALTH_URL' },
+  { name: 'jenkins', env: 'LFX_JENKINS_HEALTH_URL' },
+  { name: 'slack', env: 'LFX_SLACK_HEALTH_URL', optional: true }
 ];
 
 const STRICT_MODE = process.env.LFX_REQUIRE_SERVICES === '1';
 const REQUEST_TIMEOUT_MS = Number(process.env.LFX_SERVICE_TIMEOUT_MS || 5000);
 
-function resolveServices() {
-  const services = DEFAULT_SERVICES.filter((service) => {
-    if (!service.optional) return true;
-    const hasSlackAuth = process.env.SLACK_BOT_TOKEN || process.env.SLACK_TOKEN;
-    return Boolean(hasSlackAuth);
-  });
+function color(text, code) {
+  return process.stdout.isTTY ? `\u001b[${code}m${text}\u001b[0m` : text;
+}
 
-  if (process.env.LFX_ADDITIONAL_SERVICE) {
+function normaliseList(value) {
+  if (!value) return [];
+  return value
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function resolveServices() {
+  const optionalServices = new Set(normaliseList(process.env.LFX_OPTIONAL_SERVICES));
+  const services = [];
+
+  for (const service of SERVICE_CATALOG) {
+    const url = process.env[service.env];
+    const isOptional = service.optional || optionalServices.has(service.name);
+
+    if (!url) {
+      if (isOptional) {
+        console.warn(color(`Skipping optional service ${service.name} (missing ${service.env}).`, '33'));
+        continue;
+      }
+
+      const message = `Required environment variable ${service.env} is not set`;
+      if (STRICT_MODE) {
+        throw new Error(message);
+      }
+
+      console.warn(color(`${message}. Service will be skipped.`, '33'));
+      continue;
+    }
+
+    services.push({ name: service.name, url });
+  }
+
+  if (process.env.LFX_ADDITIONAL_SERVICES) {
     try {
-      const extra = JSON.parse(process.env.LFX_ADDITIONAL_SERVICE);
+      const extra = JSON.parse(process.env.LFX_ADDITIONAL_SERVICES);
       if (Array.isArray(extra)) {
-        services.push(...extra);
+        for (const entry of extra) {
+          if (!entry || typeof entry !== 'object') continue;
+          const { name, url, optional } = entry;
+          if (!name || !url) {
+            if (STRICT_MODE) {
+              throw new Error('Additional service entries must include both name and url');
+            }
+            console.warn(color('Ignoring additional service without name/url.', '33'));
+            continue;
+          }
+          services.push({ name, url, optional: Boolean(optional) });
+        }
       }
     } catch (error) {
-      console.warn(color('Failed to parse LFX_ADDITIONAL_SERVICE; ignoring.', '33'));
+      const message = `Failed to parse LFX_ADDITIONAL_SERVICES: ${error.message}`;
+      if (STRICT_MODE) {
+        throw new Error(message);
+      }
+      console.warn(color(message, '33'));
     }
   }
 
-  return services;
-}
+  if (!services.length && STRICT_MODE) {
+    throw new Error('No services configured. Provide at least one health endpoint.');
+  }
 
-function color(text, code) {
-  return process.stdout.isTTY ? `\u001b[${code}m${text}\u001b[0m` : text;
+  return services;
 }
 
 async function fetchJson(url, timeoutMs) {

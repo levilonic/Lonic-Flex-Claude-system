@@ -101,12 +101,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Launch mock health services
-        run: |
-          node scripts/mock-health-services.js &
-          sleep 2
 
       - name: Run external service smoke check
         run: npm run smoke:services
         env:
           LFX_REQUIRE_SERVICES: '1'
+          LFX_GITHUB_HEALTH_URL: ${{ vars.LFX_GITHUB_HEALTH_URL }}
+          LFX_GITLAB_HEALTH_URL: ${{ vars.LFX_GITLAB_HEALTH_URL }}
+          LFX_JENKINS_HEALTH_URL: ${{ vars.LFX_JENKINS_HEALTH_URL }}
+          LFX_SLACK_HEALTH_URL: ${{ vars.LFX_SLACK_HEALTH_URL }}
+          LFX_OPTIONAL_SERVICES: ${{ vars.LFX_OPTIONAL_SERVICES }}
+          LFX_ADDITIONAL_SERVICES: ${{ vars.LFX_ADDITIONAL_SERVICES }}
+
