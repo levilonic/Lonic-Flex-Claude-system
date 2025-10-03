@@ -12,6 +12,7 @@
  */
 
 const express = require('express');
+const { ServiceBase } = require('./service-base');
 const { App } = require('@slack/bolt');
 const { WebClient } = require('@slack/web-api');
 const { SQLiteManager } = require('../database/sqlite-manager');
@@ -20,8 +21,10 @@ const { getAuthManager } = require('../auth/auth-manager');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexSlackService {
+class LonicFlexSlackService extends ServiceBase {
     constructor(config = {}) {
+        super();  // Call parent constructor first
+
         this.config = {
             port: config.port || process.env.SLACK_SERVICE_PORT || 3006,
             serviceName: 'lonicflex-slack',
@@ -106,14 +109,19 @@ class LonicFlexSlackService {
     setupRoutes() {
         // Health check endpoint
         this.app.get('/health', (req, res) => {
+            const operationalMode = (this.isInitialized && this.isConnected) ? 'full' : 'degraded';
+            const status = operationalMode === 'full' ? 'healthy' : 'degraded';
+
             res.json({
-                status: 'healthy',
+                status,
+                operationalMode,
                 service: this.config.serviceName,
                 uptime: Date.now() - this.startTime.getTime(),
                 initialized: this.isInitialized,
                 connected: this.isConnected,
                 stats: this.stats,
-                bot: this.botInfo ? this.botInfo.user : null
+                bot: this.botInfo ? this.botInfo.user : null,
+                timestamp: new Date().toISOString()
             });
         });
 
@@ -178,8 +186,9 @@ class LonicFlexSlackService {
             this.logger.info('Slack service initialized successfully');
 
         } catch (error) {
-            this.logger.error('Slack service initialization failed', { error: error.message });
-            throw error;
+            this.logger.warn('Slack service initialization failed - running in degraded mode', { error: error.message });
+            this.isInitialized = false;
+            // Don't throw - allow service to start in degraded mode
         }
     }
 
@@ -639,7 +648,7 @@ class LonicFlexSlackService {
             return server;
 
         } catch (error) {
-            this.logger.error('Failed to start Slack service', { error: error.message });
+            console.error('Failed to start Slack service:', error.message);
             throw error;
         }
     }
@@ -650,21 +659,21 @@ if (require.main === module) {
     const service = new LonicFlexSlackService();
     service.start()
         .then(() => {
-            logger.info('LonicFLex Slack Service started successfully');
+            console.log('LonicFLex Slack Service started successfully');
         })
         .catch((error) => {
-            logger.error('FAIL Failed to start Slack service:', error.message);
+            console.error('FAIL Failed to start Slack service:', error.message);
             process.exit(1);
         });
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        logger.info('Slack service shutting down...');
+        console.log('Slack service shutting down...');
         process.exit(0);
     });
 
     process.on('SIGINT', () => {
-        logger.info('Slack service shutting down...');
+        console.log('Slack service shutting down...');
         process.exit(0);
     });
 }

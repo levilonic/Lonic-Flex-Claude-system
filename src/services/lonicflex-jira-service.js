@@ -15,11 +15,13 @@ const express = require('express');
 const axios = require('axios');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 require('dotenv').config();
 
-class LonicFlexJiraService {
+class LonicFlexJiraService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.JIRA_SERVICE_PORT || 3021,
             serviceName: 'lonicflex-jira',
@@ -722,10 +724,11 @@ class LonicFlexJiraService {
         }
     }
 
-    async makeJiraRequest(method, endpoint, data = null) {
+    async makeJiraRequest(method, endpoint, data = null, skipAuthCheck = false) {
         const startTime = Date.now();
 
-        if (!this.authenticated) {
+        // Allow skipping auth check for initial connection test
+        if (!this.authenticated && !skipAuthCheck) {
             throw new Error('Jira service not authenticated');
         }
 
@@ -940,8 +943,8 @@ class LonicFlexJiraService {
                 throw new Error('Jira email or API token not configured');
             }
 
-            // Test connection by fetching user info
-            await this.makeJiraRequest('GET', '/myself');
+            // Test connection by fetching user info (skip auth check for initial test)
+            await this.makeJiraRequest('GET', '/myself', null, true);
 
             this.authenticated = true;
 
@@ -1053,7 +1056,7 @@ class LonicFlexJiraService {
 if (require.main === module) {
     const service = new LonicFlexJiraService();
     service.start().catch(error => {
-        logger.error('Failed to start Jira Service:', error.message);
+        console.error('Failed to start Jira Service:', error.message);
         process.exit(1);
     });
 }

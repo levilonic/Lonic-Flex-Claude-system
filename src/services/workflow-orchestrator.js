@@ -515,11 +515,10 @@ class WorkflowExecution {
                 // Add result to context for next steps
                 this.context.set(`${this.currentStep}_result`, stepResult);
             }
+            this.isCompleted = true;
 
             // Compile final results
             const finalResult = await this.compileFinalResult();
-
-            this.isCompleted = true;
             return finalResult;
 
         } catch (error) {

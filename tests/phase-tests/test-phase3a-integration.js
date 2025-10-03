@@ -181,7 +181,7 @@ async function testPhase3AIntegration() {
         const { execSync } = require('child_process');
         
         try {
-            const testOutput = execSync('node test-universal-context.js', { 
+            const testOutput = execSync('node ../integration/test-universal-context.js', { 
                 encoding: 'utf8',
                 cwd: __dirname,
                 timeout: 30000 

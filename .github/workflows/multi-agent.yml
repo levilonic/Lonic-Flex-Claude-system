@@ -31,7 +31,7 @@ jobs:
       run: npm ci
 
     - name: Run Multi-Agent System
-      run: timeout 120s npm run demo || echo "Multi-agent demo completed"
+      run: timeout 120s npm run demo
       env:
         AGENT_TYPE: ${{ github.event.inputs.agent-type }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

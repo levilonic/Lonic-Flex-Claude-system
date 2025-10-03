@@ -1,0 +1,418 @@
+{
+  "github": {
+    "category": "External Integration",
+    "port": 3002,
+    "purpose": "LonicFLex GitHub Service - Foundation v0 GitHub integration service for API coordination, repository",
+    "handles": [
+      "GitHub API integration and authentication",
+      "Repository management and branch operations",
+      "PR/Issue management and automation",
+      "Cross-service GitHub coordination",
+      "Automated branch creation and management"
+    ],
+    "lines": 698,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 8,
+    "methods": 11,
+    "apiCalls": 11,
+    "envVars": [
+      "GITHUB_OWNER",
+      "GITHUB_REPO"
+    ],
+    "dependencies": {
+      "github": true,
+      "slack": false,
+      "http": true,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 1,
+    "status": "READY"
+  },
+  "gitlab": {
+    "category": "External Integration",
+    "port": 3010,
+    "purpose": "LonicFLex GitLab Integration Service - Window 2 Real GitLab REST API v4 integration for CI/CD workfl",
+    "handles": [
+      "GitLab REST API v4 integration with OAuth/token authentication",
+      "Pipeline management and monitoring",
+      "Environment and deployment tracking",
+      "Merge request automation",
+      "Cross-system workflow coordination"
+    ],
+    "lines": 865,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 11,
+    "methods": 20,
+    "apiCalls": 2,
+    "envVars": [
+      "GITLAB_URL",
+      "GITLAB_ACCESS_TOKEN",
+      "GITLAB_WEBHOOK_SECRET",
+      "GITLAB_DEFAULT_PROJECT"
+    ],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": true,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "slack": {
+    "category": "External Integration",
+    "port": 3001,
+    "purpose": "LonicFLex Slack Service - Foundation v0 Slack Socket Mode service for team communication, notificati",
+    "handles": [
+      "Slack Socket Mode connection and event handling",
+      "Team notifications and rich message formatting",
+      "Bot commands and interactive responses",
+      "Cross-service Slack integration",
+      "Real-time communication coordination"
+    ],
+    "lines": 675,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 4,
+    "methods": 13,
+    "apiCalls": 4,
+    "envVars": [
+      "SLACK_BOT_TOKEN",
+      "SLACK_SIGNING_SECRET",
+      "SLACK_APP_TOKEN"
+    ],
+    "dependencies": {
+      "github": false,
+      "slack": true,
+      "http": false,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 1,
+    "status": "READY"
+  },
+  "jira": {
+    "category": "External Integration",
+    "port": 3021,
+    "purpose": "LonicFLex Jira Integration Service - Window 2 Real Jira API integration for ITSM workflow automation",
+    "handles": [
+      "Jira REST API v3 integration with OAuth/token authentication",
+      "Issue management (create, update, transition, comment)",
+      "Project and sprint management",
+      "Webhook handling for real-time updates",
+      "Cross-system workflow coordination"
+    ],
+    "lines": 1063,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 13,
+    "methods": 15,
+    "apiCalls": 1,
+    "envVars": [
+      "JIRA_URL",
+      "JIRA_EMAIL",
+      "JIRA_API_TOKEN",
+      "JIRA_WEBHOOK_SECRET",
+      "JIRA_DEFAULT_PROJECT",
+      "JIRA_DEMO_MODE"
+    ],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": true,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "servicenow": {
+    "category": "External Integration",
+    "port": 3022,
+    "purpose": "LonicFLex ServiceNow Integration Service - Window 2 Real ServiceNow API integration for ITSM workflo",
+    "handles": [
+      "ServiceNow Table API integration with OAuth/basic authentication",
+      "Incident, change, and request management",
+      "Approval workflow integration",
+      "SLA and priority handling",
+      "Cross-system workflow coordination"
+    ],
+    "lines": 1084,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 12,
+    "methods": 17,
+    "apiCalls": 2,
+    "envVars": [
+      "SERVICENOW_INSTANCE_URL",
+      "SERVICENOW_USERNAME",
+      "SERVICENOW_PASSWORD",
+      "SERVICENOW_CLIENT_ID",
+      "SERVICENOW_CLIENT_SECRET",
+      "SERVICENOW_DEMO_MODE"
+    ],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": true,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "linear": {
+    "category": "External Integration",
+    "port": 3023,
+    "purpose": "LonicFLex Linear Integration Service - Window 2 Real Linear GraphQL API integration for ITSM workflo",
+    "handles": [
+      "Linear GraphQL API integration with OAuth authentication",
+      "Issue, project, and team management",
+      "Timeline and milestone tracking",
+      "Real-time subscription handling",
+      "Cross-system workflow coordination"
+    ],
+    "lines": 938,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 10,
+    "methods": 17,
+    "apiCalls": 2,
+    "envVars": [
+      "LINEAR_API_TOKEN",
+      "LINEAR_WEBHOOK_SECRET",
+      "LINEAR_DEFAULT_TEAM"
+    ],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": true,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "jenkins": {
+    "category": "External Integration",
+    "port": 3024,
+    "purpose": "LonicFLex Jenkins Integration Service - Window 2 Real Jenkins REST API integration for CI/CD workflo",
+    "handles": [
+      "Jenkins REST API integration with API token authentication",
+      "Job management (create, trigger, monitor)",
+      "Build artifact handling",
+      "Pipeline orchestration and monitoring",
+      "Cross-system workflow coordination"
+    ],
+    "lines": 860,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 10,
+    "methods": 17,
+    "apiCalls": 1,
+    "envVars": [
+      "JENKINS_URL",
+      "JENKINS_USERNAME",
+      "JENKINS_API_TOKEN"
+    ],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": true,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "health": {
+    "category": "Infrastructure",
+    "port": 3003,
+    "purpose": "LonicFLex Health Service - Foundation v0 System health monitoring, diagnostics, and service coordina",
+    "handles": [
+      "Real-time system health monitoring and reporting",
+      "Service status checking and dependency validation",
+      "Performance metrics collection and analysis",
+      "Health alerts and automated recovery triggers",
+      "Cross-service health coordination and dashboards"
+    ],
+    "lines": 733,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 9,
+    "methods": 12,
+    "apiCalls": 1,
+    "envVars": [],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": true,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "integration-hub": {
+    "category": "Infrastructure",
+    "port": 3009,
+    "purpose": "LonicFLex Central Integration Hub Service - Window 2 Foundation Cross-system integration orchestrati",
+    "handles": [
+      "Integration registry for all external systems",
+      "Cross-system workflow orchestration",
+      "Event routing and transformation between systems",
+      "Unified configuration management",
+      "Health monitoring for all integrations"
+    ],
+    "lines": 834,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 9,
+    "methods": 10,
+    "apiCalls": 4,
+    "envVars": [],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": true,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "master": {
+    "category": "Infrastructure",
+    "port": 3007,
+    "purpose": "LonicFLex Master Service - Foundation v0 /lx run command processor with run ID management and pipeli",
+    "handles": [
+      "/lx run command processing",
+      "Run ID generation and management",
+      "Automated branch/PR creation coordination",
+      "Cross-service communication and coordination",
+      "Health monitoring endpoint"
+    ],
+    "lines": 691,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 6,
+    "methods": 8,
+    "apiCalls": 0,
+    "envVars": [],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": false,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "webhook": {
+    "category": "Infrastructure",
+    "port": 3008,
+    "purpose": "LonicFLex Webhook Service - Foundation v0 Webhook domino effect coordination and step isolation syst",
+    "handles": [
+      "GitHub webhook events (push, PR, issues, comments)",
+      "Webhook domino effect chains (step-by-step progression)",
+      "Step isolation and checkpoint validation",
+      "Cross-service webhook coordination",
+      "@claude mention detection and workflow triggering"
+    ],
+    "lines": 1000,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 6,
+    "methods": 14,
+    "apiCalls": 0,
+    "envVars": [
+      "GITHUB_WEBHOOK_SECRET",
+      "SLACK_SIGNING_SECRET",
+      "GITHUB_TOKEN"
+    ],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": false,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "workflows": {
+    "category": "Infrastructure",
+    "port": 3004,
+    "purpose": "LonicFLex Workflows Service - Foundation v0 Workflow orchestration and automation pipeline managemen",
+    "handles": [
+      "Workflow definition and template management",
+      "Pipeline orchestration and step coordination",
+      "Workflow execution tracking and monitoring",
+      "Cross-service workflow integration",
+      "Automated workflow triggers and scheduling"
+    ],
+    "lines": 891,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 7,
+    "methods": 19,
+    "apiCalls": 0,
+    "envVars": [],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": false,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  },
+  "permissions": {
+    "category": "Infrastructure",
+    "port": 3031,
+    "purpose": "LonicFLex Advanced Permissions Service - Window 3 RBAC System Role-based access control, permission ",
+    "handles": [
+      "Advanced role-based access control (RBAC)",
+      "Permission inheritance and role hierarchies",
+      "Dynamic permission evaluation",
+      "Team-based access controls",
+      "Resource-specific permissions",
+      "Permission caching and optimization"
+    ],
+    "lines": 960,
+    "hasStart": true,
+    "hasInitialize": true,
+    "routes": 11,
+    "methods": 16,
+    "apiCalls": 0,
+    "envVars": [],
+    "dependencies": {
+      "github": false,
+      "slack": false,
+      "http": false,
+      "database": true,
+      "context": true
+    },
+    "issues": [],
+    "commentedTODOs": 0,
+    "status": "READY"
+  }
+}

@@ -15,13 +15,15 @@
 const express = require('express');
 const { SQLiteManager } = require('../database/sqlite-manager');
 const { Factor3ContextManager } = require('../context-management/factor3-context-manager');
+const { ServiceBase } = require('./service-base');
 const winston = require('winston');
 const crypto = require('crypto');
 const LRU = require('lru-cache');
 require('dotenv').config();
 
-class LonicFlexPermissionsService {
+class LonicFlexPermissionsService extends ServiceBase {
     constructor(config = {}) {
+        super();
         this.config = {
             port: config.port || process.env.PERMISSIONS_PORT || 3031,
             serviceName: 'lonicflex-permissions',

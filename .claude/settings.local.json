@@ -204,7 +204,11 @@
       "Bash(git merge-base:*)",
       "Bash(gh pr create:*)",
       "Bash(gh pr view:*)",
-      "Bash(gh issue list:*)"
+      "Bash(gh issue list:*)",
+      "Bash(gh pr list:*)",
+      "Bash(then echo \"  ❌ BROKEN IMPORTS\" node -e \"require(''''./$service'''')\")",
+      "Bash(do)",
+      "Bash(tail:*)"
     ],
     "deny": [],
     "ask": []
