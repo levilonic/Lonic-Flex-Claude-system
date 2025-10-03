@@ -30,4 +30,4 @@ jobs:
       run: node tests/unit/test-security-agent.js
 
     - name: Verify secrets cleanup
-      run: node security-cleanup.js --verify
+      run: node scripts/security-cleanup.js --verify
